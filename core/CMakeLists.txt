@@ -11,7 +11,7 @@ endif()
 # Unreal builds with exceptions and RTTI disabled; the core must too (CLAUDE.md).
 if(MSVC)
   # MSVC build (CI job 'msvc'): warnings as errors, no RTTI, exceptions disabled for our own code.
-  set(IV_FLAGS /W4 /WX /GR- /EHs-c- /D_HAS_EXCEPTIONS=0 /permissive-)
+  set(IV_FLAGS /W4 /WX /GR- /EHs-c- /D_HAS_EXCEPTIONS=0 /permissive- /D_CRT_SECURE_NO_WARNINGS)   # the sim tool uses fopen
 else()
   set(IV_FLAGS -Wall -Wextra -Werror -fno-exceptions -fno-rtti)
 endif()
