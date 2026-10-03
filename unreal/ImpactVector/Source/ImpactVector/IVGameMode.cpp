@@ -82,6 +82,14 @@ void AIVGameMode::StartPlay()
 	FParse::Value(FCommandLine::Get(), TEXT("-IVBlast="), BlastAt);
 	{ int32 N = 1; FParse::Value(FCommandLine::Get(), TEXT("-IVBlastN="), N); BlastsLeft = (BlastAt >= 0.f) ? N : 0; }
 	FParse::Value(FCommandLine::Get(), TEXT("-IVCollapse="), CollapseAt);
+	{
+		FString A;
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVAction="), A, false))
+		{
+			FString N, T;
+			if (A.Split(TEXT("@"), &N, &T)) { ActionName = FName(*N); ActionAt = FCString::Atof(*T); }
+		}
+	}
 	float Q = -1.f;
 	if (FParse::Value(FCommandLine::Get(), TEXT("-IVQuit="), Q)) QuitAt = Q;
 }
@@ -119,6 +127,11 @@ void AIVGameMode::Tick(float Dt)
 				const int32 N = Env->CollapseNearestAhead(P->GetActorLocation(), P->GetActorForwardVector());
 				UE_LOG(LogTemp, Display, TEXT("IV: collapse test destroyed %d cells"), N);
 			}
+	}
+	if (ActionAt >= 0.f && Elapsed >= ActionAt)
+	{
+		ActionAt = -1.f;
+		if (AIVMechPawn* M = Cast<AIVMechPawn>(UGameplayStatics::GetPlayerPawn(this, 0))) M->PlayAction(ActionName);
 	}
 	if (QuitAt > 0.f && Elapsed >= QuitAt)
 	{

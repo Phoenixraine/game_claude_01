@@ -144,10 +144,10 @@ float puddle = smoothstep(0.52 - 0.25 * Wet, 0.62 - 0.2 * Wet, field);
     col = custom(m, common + """
 float3 dry = Base * (0.8 + 0.5 * n2);
 float3 wetc = Base * 0.45;
-float3 c = lerp(dry, wetc, puddle);
+float3 cc = lerp(dry, wetc, puddle);
 float sand = VCa * UseVC;
 float3 sandc = VC * (0.75 + 0.5 * n2);
-return lerp(c, sandc, sand);
+return lerp(cc, sandc, sand);
 """, unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["WP", "Base", "Wet", "Sc", "VC", "VCa", "UseVC"], -700, 0, "ground_base")
     wire_custom(col, [(wp, ""), (base_col, ""), (wet, ""), (scale, ""), (vc, ""), (vc, "A"), (use_vc, "")])
     MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_BASE_COLOR)

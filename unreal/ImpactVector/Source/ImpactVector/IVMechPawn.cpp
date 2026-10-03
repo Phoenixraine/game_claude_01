@@ -10,11 +10,18 @@
 #include "UObject/ConstructorHelpers.h"
 #include "HAL/IConsoleManager.h"
 #include "EngineUtils.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "IVRigAnimInstance.h"
+#include "Engine/SkeletalMesh.h"
+#include "Misc/Paths.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "IVEnvironment.h"
 #include "IVFXManager.h"
 
 static TAutoConsoleVariable<int32> CVarIVCam(TEXT("iv.Cam"), 0,
 	TEXT("0 = cockpit, 1 = chase, 2 = side, 3 = front orbit, 4 = both mechs from the side"), ECVF_Default);
+static TAutoConsoleVariable<int32> CVarRigApply(TEXT("iv.RigApply"), 1, TEXT("0 = leave the rig in its rest pose"), ECVF_Default);
 static TAutoConsoleVariable<float> CVarIVCamDist(TEXT("iv.CamDist"), 16000.f, TEXT("Debug camera distance (cm)"), ECVF_Default);
 
 int32 GetIVCam() { return CVarIVCam.GetValueOnGameThread(); }
@@ -43,6 +50,14 @@ AIVMechPawn::AIVMechPawn()
 	Capsule->InitCapsuleSize(1300.f, 4100.f);
 	Capsule->SetCollisionProfileName(TEXT("Pawn"));
 	RootComponent = Capsule;
+
+	RigMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RigMesh"));
+	RigMesh->SetupAttachment(RootComponent);
+	RigMesh->SetRelativeLocation(FVector(0, 0, -4100.f));
+	RigMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));    // imported mech faces +Y: turn it to +X
+	RigMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RigMesh->SetVisibility(false);
+	RigMesh->bUpdateJointsFromAnimation = true;
 
 	BuildBody();
 	BuildCockpit();
@@ -162,6 +177,8 @@ void AIVMechPawn::BeginPlay()
 	}
 	for (UStaticMeshComponent* M : CockpitMeshes) MakeMID(M, FLinearColor(0.02f, 0.022f, 0.026f));
 
+	SetupRig();
+
 	AimYaw = GetActorRotation().Yaw;
 	CamPos = GetEyeLocation();
 	CamRot = FRotator(0, AimYaw, 0);
@@ -206,7 +223,7 @@ void AIVMechPawn::Tick(float Dt)
 	Dt = FMath::Min(Dt, 0.05f);
 	if (bAIControlled) UpdateAI(Dt);
 	UpdateLocomotion(Dt);
-	UpdateGait(Dt);
+	if (bRigActive) UpdateRig(Dt); else UpdateGait(Dt);
 	if (IsLocallyControlled() || GetIVCam() != 0) UpdateCockpitCamera(Dt);
 }
 
@@ -386,6 +403,12 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 		Look = (Mid - From).Rotation();
 	}
 	Camera->SetWorldLocationAndRotation(From, Look);
+	static float DbgT = 0.f; DbgT += Dt;
+	if (DbgT > 1.5f && !bAIControlled)
+	{
+		DbgT = 0.f;
+		UE_LOG(LogTemp, Display, TEXT("IV cam debug: mode=%d D=%.0f actor=%s cam=%s rigvis=%d rigloc=%s rigb=%s"), Mode, D, *GetActorLocation().ToString(), *From.ToString(), RigMesh ? RigMesh->IsVisible() : -1, RigMesh ? *RigMesh->GetComponentLocation().ToString() : TEXT("-"), RigMesh ? *RigMesh->Bounds.GetBox().ToString() : TEXT("-"));
+	}
 }
 
 void AIVMechPawn::DebugBlast(float Radius, float Impulse)
@@ -405,4 +428,152 @@ void AIVMechPawn::DebugBlast(float Radius, float Impulse)
 			FX->SpawnDust(P, Radius, 14, 0.8f);
 		}
 	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+void AIVMechPawn::SetupRig()
+{
+	USkeletalMesh* SM = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Mechs/Bastion/BASTION_01.BASTION_01"));
+	if (!SM) return;
+	static TSharedPtr<FIVRigData> Shared;
+	if (!Shared.IsValid())
+	{
+		Shared = MakeShared<FIVRigData>();
+		const FString D = FPaths::ProjectContentDir() / TEXT("Data/");
+		if (!Shared->Load(D + TEXT("poses.json"), D + TEXT("locomotion.json")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("IV rig: anim data missing in Content/Data"));
+			Shared.Reset();
+			return;
+		}
+	}
+	RigData = Shared;
+	if (!RigDriver.Init(SM)) return;
+	RigMesh->SetSkeletalMesh(SM);
+	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoAnim")))
+	{
+		RigMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		RigMesh->SetAnimInstanceClass(UIVRigAnimInstance::StaticClass());
+		RigMesh->InitAnim(true);
+		RigAnim = Cast<UIVRigAnimInstance>(RigMesh->GetAnimInstance());
+		if (!RigAnim) { UE_LOG(LogTemp, Warning, TEXT("IV rig: anim instance missing")); return; }
+	}
+	RigMesh->SetVisibility(true);
+	RigMesh->SetBoundsScale(1.6f);
+	for (UStaticMeshComponent* M : AllMeshes) M->SetVisibility(false);
+	bRigActive = true;
+	if (RigAnim)
+	if (const FIVPoseAngles* G = RigData->FindPose(FName(TEXT("guard_neutral"))))
+	{
+		RigDriver.Compute(*G, RigAnim->PoseLocal);
+	}
+	if (RigAnim)
+	{
+		int32 Bad = 0;
+		for (const FTransform& T : RigAnim->PoseLocal) if (T.ContainsNaN()) ++Bad;
+		UE_LOG(LogTemp, Display, TEXT("IV rig pose check: %d transforms, %d NaN"), RigAnim->PoseLocal.Num(), Bad);
+		for (int32 i = 0; i < FMath::Min(4, RigAnim->PoseLocal.Num()); ++i)
+			UE_LOG(LogTemp, Display, TEXT("IV rig local[%d]: %s"), i, *RigAnim->PoseLocal[i].ToHumanReadableString());
+	}
+	UE_LOG(LogTemp, Display, TEXT("IV rig active: %d poses, %d clips, %d bones"), RigData->Poses.Num(), RigData->Clips.Num(), RigDriver.NumBones());
+}
+
+void AIVMechPawn::PlayAction(FName Action, float Speed)
+{
+	if (!bRigActive || !RigData.IsValid()) return;
+	ActionSteps.Reset();
+	const float S = FMath::Max(Speed, 0.2f);
+	auto Step = [&](const FString& Suffix, float Dur) {
+		const FName N(*(Action.ToString() + Suffix));
+		if (RigData->FindPose(N)) ActionSteps.Add({ N, Dur / S });
+	};
+	if (RigData->FindPose(FName(*(Action.ToString() + TEXT("_windup")))))
+	{
+		Step(TEXT("_windup"), 0.9f); Step(TEXT("_commit"), 0.18f); Step(TEXT("_strike_end"), 0.32f); Step(TEXT("_recovery"), 0.9f);
+	}
+	else if (RigData->FindPose(FName(*(Action.ToString() + TEXT("_shift")))))
+	{
+		Step(TEXT("_shift"), 0.6f); Step(TEXT("_lift"), 0.5f); Step(TEXT("_plant"), 0.7f);
+	}
+	else if (RigData->FindPose(Action))
+	{
+		ActionSteps.Add({ Action, 1.4f / S });
+	}
+	if (ActionSteps.Num() == 0) return;
+	ActionSteps.Add({ FName(TEXT("guard_neutral")), 0.8f / S });
+	ActionIndex = 0;
+	ActionTimer = 0.f;
+	ActionFrom = FIVPoseAngles();      // blended from the current locomotion pose on the first tick
+}
+
+void AIVMechPawn::UpdateRig(float Dt)
+{
+	const FIVRigData& D = *RigData;
+	const float Speed = Velocity.Size2D();
+
+	// ---- locomotion layer: pick the clip whose speed is closest, scale playback so that feet do not slide
+	struct FGait { const TCHAR* Clip; float Speed; };
+	static const FGait Gaits[] = { { TEXT("walk_slow_cycle"), 400.f }, { TEXT("walk_cycle"), 580.f }, { TEXT("walk_fast_cycle"), 870.f }, { TEXT("run_cycle"), 1080.f } };
+	int32 Best = 0;
+	for (int32 i = 0; i < 4; ++i) if (FMath::Abs(Gaits[i].Speed - Speed) < FMath::Abs(Gaits[Best].Speed - Speed)) Best = i;
+	const FIVClip* Clip = D.FindClip(FName(Gaits[Best].Clip));
+	const FIVPoseAngles* Guard = D.FindPose(FName(TEXT("guard_neutral")));
+	FIVPoseAngles Pose = Guard ? *Guard : FIVPoseAngles();
+	static float Breath = 0.f;
+	Breath += Dt;
+	if (Clip && Speed > 20.f)
+	{
+		const float Rate = FMath::Clamp(Speed / Gaits[Best].Speed, 0.35f, 1.5f);
+		RigClipTime += Dt * Rate * (FVector::DotProduct(Velocity.GetSafeNormal2D(), GetActorForwardVector()) >= -0.2f ? 1.f : -1.f);
+		const FIVPoseAngles Walk = D.SampleClip(*Clip, RigClipTime, true);
+		Pose = FIVPoseAngles::Lerp(Pose, Walk, FMath::Clamp(Speed / 220.f, 0.f, 1.f));
+
+		// footfalls from the clip contact flags
+		const int32 N = Clip->Frames.Num();
+		float F = FMath::Fmod(RigClipTime * Clip->Fps, float(N));
+		if (F < 0.f) F += N;
+		const FIVClipFrame& Fr = Clip->Frames[FMath::FloorToInt(F) % N];
+		if (Fr.bContactL && !bPrevContactL) OnFootfall.Broadcast(-1, FMath::Clamp(Speed / 650.f, 0.3f, 1.f));
+		if (Fr.bContactR && !bPrevContactR) OnFootfall.Broadcast(1, FMath::Clamp(Speed / 650.f, 0.3f, 1.f));
+		bPrevContactL = Fr.bContactL; bPrevContactR = Fr.bContactR;
+	}
+	else
+	{
+		// idle: slow breathing on the torso
+		if (FVector* T = Pose.Joint.Find(FName(TEXT("torso")))) T->X += 0.6f * FMath::Sin(Breath * 0.9f);
+	}
+
+	// ---- action layer (upper body): sequence of named poses with heavy easing
+	if (ActionIndex >= 0 && ActionSteps.IsValidIndex(ActionIndex))
+	{
+		if (ActionTimer == 0.f && ActionIndex == 0) ActionFrom = Pose;
+		ActionTimer += Dt;
+		const FActionStep& St = ActionSteps[ActionIndex];
+		const float U = FMath::Clamp(ActionTimer / FMath::Max(St.Duration, 0.01f), 0.f, 1.f);
+		const float E = 1.f - FMath::Pow(1.f - U, 2.6f);          // fast start, slow finish ("ease_heavy")
+		const FIVPoseAngles* Target = D.FindPose(St.Pose);
+		if (Target)
+		{
+			static const TCHAR* Upper[] = { TEXT("torso"), TEXT("head"), TEXT("reactor"), TEXT("shoulder_l"), TEXT("upperarm_l"), TEXT("forearm_l"), TEXT("hand_l"),
+				TEXT("shoulder_r"), TEXT("upperarm_r"), TEXT("forearm_r"), TEXT("hand_r"), TEXT("pelvis"), TEXT("thigh_l"), TEXT("shin_l"), TEXT("foot_l"), TEXT("thigh_r"), TEXT("shin_r"), TEXT("foot_r") };
+			const bool bLegsToo = St.Pose.ToString().Contains(TEXT("dodge")) || St.Pose.ToString().Contains(TEXT("hard")) || St.Pose.ToString().Contains(TEXT("kneel")) || St.Pose.ToString().Contains(TEXT("knockdown"));
+			const int32 NUpper = bLegsToo ? UE_ARRAY_COUNT(Upper) : 11;
+			FIVPoseAngles Prev = (ActionIndex == 0) ? ActionFrom : *D.FindPose(ActionSteps[ActionIndex - 1].Pose);
+			for (int32 i = 0; i < NUpper; ++i)
+			{
+				const FName B(Upper[i]);
+				const FVector* A = Prev.Joint.Find(B);
+				const FVector* T2 = Target->Joint.Find(B);
+				if (A && T2) Pose.Joint.Add(B, FMath::Lerp(*A, *T2, E));
+			}
+			ActionWeight = 1.f;
+		}
+		if (ActionTimer >= St.Duration) { ActionTimer = 0.f; ++ActionIndex; }
+	}
+	else
+	{
+		ActionIndex = -1;
+		ActionWeight = FMath::FInterpTo(ActionWeight, 0.f, Dt, 4.f);
+	}
+	if (CVarRigApply.GetValueOnGameThread() != 0 && RigAnim) RigDriver.Compute(Pose, RigAnim->PoseLocal);
 }

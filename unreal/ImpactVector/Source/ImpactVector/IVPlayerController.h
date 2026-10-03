@@ -35,6 +35,13 @@ private:
 	void OnLook(const FInputActionValue& V);
 	void OnSprint(const FInputActionValue& V) { bSprint = V.Get<bool>(); }
 	void OnFire(const FInputActionValue&);
+	void DoAction(FName N);
+	void OnAct1() { DoAction(TEXT("swing_up_r")); }
+	void OnAct2() { DoAction(TEXT("swing_right_r")); }
+	void OnAct3() { DoAction(TEXT("swing_left_l")); }
+	void OnAct4() { DoAction(TEXT("block_up")); }
+	void OnAct5() { DoAction(TEXT("dodge_left")); }
+	void OnAct6() { DoAction(TEXT("quick_piston_r")); }
 
 	AIVMechPawn* Mech() const;
 

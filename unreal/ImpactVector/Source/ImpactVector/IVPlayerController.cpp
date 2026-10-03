@@ -71,6 +71,12 @@ void AIVPlayerController::SetupInputComponent()
 		EIC->BindAction(MoveAction, ETriggerEvent::Completed, this, &AIVPlayerController::OnMoveEnd);
 		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnLook);
 		EIC->BindAction(FireAction, ETriggerEvent::Started, this, &AIVPlayerController::OnFire);
+		InputComponent->BindKey(EKeys::One, IE_Pressed, this, &AIVPlayerController::OnAct1);
+		InputComponent->BindKey(EKeys::Two, IE_Pressed, this, &AIVPlayerController::OnAct2);
+		InputComponent->BindKey(EKeys::Three, IE_Pressed, this, &AIVPlayerController::OnAct3);
+		InputComponent->BindKey(EKeys::Four, IE_Pressed, this, &AIVPlayerController::OnAct4);
+		InputComponent->BindKey(EKeys::Five, IE_Pressed, this, &AIVPlayerController::OnAct5);
+		InputComponent->BindKey(EKeys::Six, IE_Pressed, this, &AIVPlayerController::OnAct6);
 		EIC->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnSprint);
 		EIC->BindAction(SprintAction, ETriggerEvent::Completed, this, &AIVPlayerController::OnSprint);
 	}
@@ -121,4 +127,9 @@ void AIVPlayerController::PlayerTick(float Dt)
 void AIVPlayerController::OnFire(const FInputActionValue&)
 {
 	if (AIVMechPawn* M = Mech()) M->DebugBlast();
+}
+
+void AIVPlayerController::DoAction(FName N)
+{
+	if (AIVMechPawn* M = Mech()) M->PlayAction(N);
 }

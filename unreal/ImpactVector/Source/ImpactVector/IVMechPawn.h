@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "IVRigAnim.h"
 #include "IVMechPawn.generated.h"
 
 class UCapsuleComponent;
@@ -11,6 +12,8 @@ class USceneComponent;
 class UStaticMeshComponent;
 class UCameraComponent;
 class UMaterialInstanceDynamic;
+class USkeletalMeshComponent;
+class UIVRigAnimInstance;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FIVFootfallSignature, int32 /*Side: -1 left, +1 right*/, float /*Strength 0..1*/);
 
@@ -46,6 +49,11 @@ public:
 	FVector GetEyeLocation() const;
 	FVector GetBodyVelocity() const { return Velocity; }
 	float GetSpeedRatio() const { return FMath::Clamp(Velocity.Size2D() / WalkSpeed, 0.f, 2.f); }
+
+	/** Plays a named pose sequence on the upper body, e.g. "swing_up_r" (windup/commit/strike_end/recovery), "block_up" or "dodge_left". */
+	void PlayAction(FName Action, float Speed = 1.f);
+	bool IsRigged() const { return bRigActive; }
+	float GetActionWeight() const { return ActionWeight; }
 
 	/** Tints all grey-box parts (used to differentiate the enemy). */
 	void SetBodyTint(const FLinearColor& Tint);
@@ -87,6 +95,8 @@ protected:
 	void BuildCockpit();
 
 	void UpdateLocomotion(float Dt);
+	void UpdateRig(float Dt);
+	void SetupRig();
 	void UpdateGait(float Dt);
 	void UpdateCockpitCamera(float Dt);
 	void UpdateAI(float Dt);
@@ -113,4 +123,20 @@ protected:
 	FVector PrevVelocity = FVector::ZeroVector;
 
 	TArray<TObjectPtr<UMaterialInstanceDynamic>> BodyMIDs;
+
+	// ---- rigged mesh driven by the anim library
+	UPROPERTY() TObjectPtr<USkeletalMeshComponent> RigMesh;
+	UPROPERTY() TObjectPtr<UIVRigAnimInstance> RigAnim;
+	TSharedPtr<FIVRigData> RigData;
+	FIVRigDriver RigDriver;
+	bool bRigActive = false;
+	float RigClipTime = 0.f;
+	bool bPrevContactL = true, bPrevContactR = true;
+
+	struct FActionStep { FName Pose; float Duration; };
+	TArray<FActionStep> ActionSteps;
+	int32 ActionIndex = -1;
+	float ActionTimer = 0.f;
+	float ActionWeight = 0.f;
+	FIVPoseAngles ActionFrom;
 };
