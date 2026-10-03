@@ -56,6 +56,7 @@ Input RandomInput(Rng& rng) {
   in.dodge = rng.Chance(0.03f);
   in.dodgeDir = rng.Chance(0.5f) ? -1 : 1;
   in.weaponHeld = rng.Chance(0.1f);
+  in.ultimate = rng.Chance(0.02f);
   in.setPriority = rng.Chance(0.01f);
   in.priority = static_cast<EnergyPriority>(rng.Below(4));
   return in;
@@ -68,7 +69,46 @@ uint64_t RunRandomInputs(uint64_t seed, int ticks) {
   return duel.log().hash();
 }
 
+// v2 stress: every weapon, a pre-filled ultimate gauge and a training dummy in the mix; returns (hash, cinematics seen).
+struct V2Run {
+  uint64_t hash;
+  int cinematics;
+  int ultimates;
+};
+V2Run RunV2(uint64_t seed, int ticks, bool dummy) {
+  Duel duel(seed, true);
+  duel.SetLoadout(Side::A, static_cast<WeaponKind>(seed % kWeaponKindCount));
+  duel.SetLoadout(Side::B, static_cast<WeaponKind>((seed / 3) % kWeaponKindCount));
+  duel.fighter(Side::A).ultimate = tune::kUltimateMax;
+  if (dummy) duel.SetDummy(Side::B, DummyMode::Scripted);
+  Rng a(seed + 1), b(seed + 2);
+  for (int t = 0; t < ticks; ++t) {
+    duel.Step(RandomInput(a), RandomInput(b));
+    if (t % 1500 == 0) duel.fighter(Side::A).ultimate = tune::kUltimateMax;
+  }
+  V2Run r;
+  r.hash = duel.log().hash();
+  r.cinematics = duel.log().CountOf(EventType::CinematicBegin);
+  r.ultimates = duel.log().CountOf(EventType::UltimateUsed);
+  return r;
+}
+
 }  // namespace
+
+IV_TEST(Determinism, V2WeaponsUltimateCinematicsAndDummyAreReproducible) {
+  int cinematics = 0, ultimates = 0;
+  for (uint64_t seed = 1; seed <= 9; ++seed) {
+    const V2Run r1 = RunV2(seed, 8000, seed % 2 == 0);
+    const V2Run r2 = RunV2(seed, 8000, seed % 2 == 0);
+    IV_CHECK(r1.hash == r2.hash);
+    IV_CHECK_EQ(r1.cinematics, r2.cinematics);
+    cinematics += r1.cinematics;
+    ultimates += r1.ultimates;
+  }
+  IV_CHECK(cinematics > 5);   // the scenarios really exercise the cut-scenes
+  IV_CHECK(ultimates > 0);
+  IV_CHECK(RunV2(1, 8000, false).hash != RunV2(2, 8000, false).hash);
+}
 
 IV_TEST(Determinism, SameSeedAndInputsGiveTheSameEventHistoryForEveryArchetypePair) {
   for (int a = 0; a < kArchetypeCount; ++a)

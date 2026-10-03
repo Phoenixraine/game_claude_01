@@ -18,6 +18,9 @@ void Duel::Reset(uint64_t seed) {
   tick_ = 0;
   chain_ = Chain();
   clinch_ = ClinchState();
+  cinematic_ = CinematicState();
+  dummy_[0].Reset();
+  dummy_[1].Reset();
   result_ = MatchResult();
   log_.Clear();
   rng_.Seed(seed);
@@ -47,7 +50,25 @@ void Duel::Emit(EventType t, Side actor, Zone z, int a, int b, float v) {
 
 void Duel::Step(const Input& a, const Input& b, const World& world) {
   if (result_.over) return;
+  if (cinematic_.active) {  // v2: the fight is frozen while an external cut plays
+    StepCinematic();
+    ++tick_;
+    if (!result_.over && timeLimit_ > 0 && tick_ >= timeLimit_) {
+      result_.over = true;
+      result_.draw = true;
+      result_.reason = EndReason::TimeLimit;
+      Emit(EventType::MatchEnd, Side::A, Zone::Torso, static_cast<int>(EndReason::TimeLimit), 1);
+    }
+    return;
+  }
+  Input dummyIn[2];
   const Input* in[2] = {&a, &b};
+  for (int i = 0; i < 2; ++i) {
+    if (dummy_[i].mode() != DummyMode::Off) {
+      dummyIn[i] = dummy_[i].Next(f_[i], f_[1 - i], tick_);
+      in[i] = &dummyIn[i];
+    }
+  }
 
   for (int i = 0; i < 2; ++i) f_[i].Step(*in[i], Ctx(i, world));
 
@@ -78,9 +99,11 @@ void Duel::Step(const Input& a, const Input& b, const World& world) {
       if (has[i]) Apply(i, d[i], world);
     for (int i = 0; i < 2; ++i)
       if (f_[i].firePending) ResolveWeapon(i, world);
+    for (int i = 0; i < 2; ++i)
+      if (f_[i].ultimatePending && !cinematic_.active) ResolveUltimate(i, world);
   }
 
-  CheckEnd();
+  if (!cinematic_.active) CheckEnd();
   ++tick_;
   if (!result_.over && timeLimit_ > 0 && tick_ >= timeLimit_) {
     result_.over = true;
@@ -165,16 +188,20 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
       break;
     case Outcome::Parried:
     case Outcome::GrabParried:
-      Emit(EventType::Parried, ds, d.zone);
+      Emit(EventType::ParrySuccess, ds, d.zone);
+      EmitHit(def, as, d.zone, HitReport(), 0.f, atk.strike.side, false, true);
+      GainUltimate(1 - ai, tune::kUltGainParry, w);
       atk.LoseStability(tune::kParryStabilityHit, actx);
       def.counterTicks = tune::kCounterWindowTicks;
       def.res.Spend(tune::kParryEnergy);
       break;
     case Outcome::Intercepted: {
-      Emit(EventType::Intercepted, ds, d.zone);
+      Emit(EventType::InterceptSuccess, ds, d.zone);
       // The interceptor's strike carries on as an inner-line counter; the attacker's striking arm takes the clash.
       const float clash = def.StrikeDamage() * tune::kInterceptArmDamage;
-      atk.TakeHit(ArmZone(atk.strike.arm), clash, StrikeKind::Quick, tune::kInterceptStabilityHit, actx);
+      const HitReport cr = atk.TakeHit(ArmZone(atk.strike.arm), clash, StrikeKind::Quick, tune::kInterceptStabilityHit, actx);
+      EmitHit(atk, ds, ArmZone(atk.strike.arm), cr, tune::kInterceptStabilityHit, def.strike.side, false, false);
+      GainUltimate(1 - ai, tune::kUltGainIntercept, w);
       def.strike.innerLine = true;
       def.res.Spend(tune::kInterceptEnergy);
       chain_.active = true;
@@ -185,7 +212,11 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
     }
     case Outcome::Hit: {
       const float stab = kind == StrikeKind::Quick ? tune::kQuickStabilityHit : d.raw * tune::kHitStabilityFactor;
-      def.TakeHit(d.zone, d.raw, kind, stab, dctx);
+      const HitReport hr = def.TakeHit(d.zone, d.raw, kind, stab, dctx);
+      EmitHit(def, as, d.zone, hr, stab, atk.strike.side, false, false);
+      if (hr.dealt > 0.f) {
+        GainUltimate(ai, tune::kUltGainHit + (hr.after >= ZoneState::Critical ? tune::kUltGainCriticalHit : 0.f), w);
+      }
       break;
     }
     case Outcome::Blocked: {
@@ -193,14 +224,19 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
       const float strength = std::max(0.4f, am.blockStrength * def.res.ArmsMult());
       const float through = std::min(1.f, tune::kBlockDamageMult / strength);
       Emit(EventType::Blocked, ds, d.zone, 0, 0, d.raw * through);
-      def.TakeHit(d.zone, d.raw * through, kind, 0.f, dctx);
-      def.TakeHit(GuardZone(def.guard.side), d.raw * tune::kBlockArmLoad, StrikeKind::Quick, d.raw * tune::kBlockStabilityFactor / strength, dctx);
+      const HitReport h1 = def.TakeHit(d.zone, d.raw * through, kind, 0.f, dctx);
+      EmitHit(def, as, d.zone, h1, 0.f, atk.strike.side, true, false);
+      const float armStab = d.raw * tune::kBlockStabilityFactor / strength;
+      const HitReport h2 = def.TakeHit(GuardZone(def.guard.side), d.raw * tune::kBlockArmLoad, StrikeKind::Quick, armStab, dctx);
+      EmitHit(def, as, GuardZone(def.guard.side), h2, armStab, atk.strike.side, true, false);
       break;
     }
     case Outcome::HardStanceBlocked: {
       const float mult = IsLegZone(d.zone) ? tune::kHardStanceLegDamageMult : tune::kHardStanceDamageMult;
       Emit(EventType::Blocked, ds, d.zone, 1, 0, d.raw * mult);
-      def.TakeHit(d.zone, d.raw * mult, kind, d.raw * tune::kHardStanceStabilityFactor, dctx);
+      const float hs = d.raw * tune::kHardStanceStabilityFactor;
+      const HitReport hr = def.TakeHit(d.zone, d.raw * mult, kind, hs, dctx);
+      EmitHit(def, as, d.zone, hr, hs, atk.strike.side, true, false);
       break;
     }
     case Outcome::Grabbed: {
@@ -208,7 +244,9 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
       atk.res.AddHeat(tune::kGrabHeat);
       // pitch §12: a destroyed limb can be torn off by a grab.
       const bool tear = IsLimbZone(d.zone) && def.body.state(d.zone) == ZoneState::Destroyed;
-      def.TakeHit(d.zone, tear ? tune::kSeverMinDamage : d.raw, StrikeKind::Grab, tune::kGrabStability, dctx);
+      const HitReport hr = def.TakeHit(d.zone, tear ? tune::kSeverMinDamage : d.raw, StrikeKind::Grab, tune::kGrabStability, dctx);
+      EmitHit(def, as, d.zone, hr, tune::kGrabStability, atk.strike.side, false, false);
+      if (hr.dealt > 0.f) GainUltimate(ai, tune::kUltGainHit, w);
       break;
     }
   }
@@ -220,18 +258,89 @@ void Duel::ResolveWeapon(int ai, const World& w) {
   Fighter& def = f_[1 - ai];
   const StepContext actx = Ctx(ai, w);
   const StepContext dctx = Ctx(1 - ai, w);
-  bool hit = false;
-  if (distance_ >= tune::kWeaponMinDistance && !def.Evading()) hit = rng_.Chance(atk.body.modifiers().weaponAccuracy);
-  Emit(EventType::WeaponFired, atk.side(), atk.weaponTarget, hit ? 1 : 0);
-  if (hit) {
-    Zone z = atk.weaponTarget;
+  const tune::WeaponProfile& wp = atk.WeaponProf();
+  const WeaponKind kind = atk.weapon;
+  static const Zone kSpread[] = {Zone::Torso, Zone::ShoulderL, Zone::ShoulderR, Zone::ArmL, Zone::ArmR, Zone::LegL, Zone::LegR, Zone::Head};
+  const float accuracy = Clamp(atk.body.modifiers().weaponAccuracy * wp.accuracy, 0.f, 1.f);
+  int hits = 0;
+  for (int k = 0; k < wp.salvo; ++k) {
+    bool hit = false;
+    if (distance_ >= tune::kWeaponMinDistance) {
+      float chance = accuracy;
+      if (def.Evading()) chance = wp.salvo > 1 ? chance * tune::kWeaponEvadeHitMult : 0.f;
+      hit = rng_.Chance(chance);
+    }
+    if (!hit) continue;
+    ++hits;
+    Zone z = k == 0 ? atk.weaponTarget : kSpread[rng_.Below(static_cast<uint32_t>(sizeof(kSpread) / sizeof(kSpread[0])))];
     if (z == Zone::Reactor && std::fabs(def.flank) < tune::kRearAngleDeg) z = Zone::Torso;
-    float dmg = tune::kWeaponDamage;
-    if (def.GuardReady() && def.guard.age >= tune::kBlockRaiseTicks) dmg *= tune::kWeaponBlockMult;
+    float dmg = wp.damage;
+    if (def.GuardReady() && def.guard.age >= tune::kBlockRaiseTicks) dmg *= wp.blockMult;
     if (def.HardStanceActive()) dmg *= tune::kHardStanceDamageMult * 2.f;
-    def.TakeHit(z, dmg, StrikeKind::Heavy, dmg * tune::kHitStabilityFactor, dctx);
+    const float stab = dmg * tune::kHitStabilityFactor * wp.stabilityFactor / 0.6f;
+    const HitReport hr = def.TakeHit(z, dmg, StrikeKind::Heavy, stab, dctx);
+    EmitHit(def, atk.side(), z, hr, stab, SwingSide::Up, false, false);
+    if (hr.dealt > 0.f) GainUltimate(ai, tune::kUltGainHit + (hr.after >= ZoneState::Critical ? tune::kUltGainCriticalHit : 0.f), w);
   }
+  Emit(EventType::WeaponFired, atk.side(), atk.weaponTarget, hits, Index(kind));
   atk.FinishWeapon(actx);
+  // v2: every heavy weapon cuts to an external camera; a hit target is left staggered afterwards.
+  StartCinematic(CinematicOf(kind), atk.side(), wp.cinematicTicks, hits > 0);
+}
+
+void Duel::ResolveUltimate(int ai, const World& w) {
+  Fighter& atk = f_[ai];
+  Fighter& def = f_[1 - ai];
+  const StepContext actx = Ctx(ai, w);
+  const StepContext dctx = Ctx(1 - ai, w);
+  Zone z = atk.ultimateTarget;
+  if (z == Zone::Reactor && std::fabs(def.flank) < tune::kRearAngleDeg) z = Zone::Torso;
+  atk.ConsumeUltimate();
+  Emit(EventType::UltimateUsed, atk.side(), z);
+  const HitReport hr = def.TakeHit(z, tune::kUltimateDamage, StrikeKind::Heavy, tune::kUltimateStabilityHit, dctx);
+  EmitHit(def, atk.side(), z, hr, tune::kUltimateStabilityHit, SwingSide::Up, false, false);
+  atk.phase = Phase::Recovery;
+  atk.phaseTicks = 0;
+  atk.recoveryLen = tune::kHeavyRecoveryTicks;
+  (void)actx;
+  StartCinematic(CinematicKind::Ultimate, atk.side(), tune::kUltimateCinematicTicks, true);
+}
+
+void Duel::StartCinematic(CinematicKind k, Side who, int length, bool stun) {
+  cinematic_.active = true;
+  cinematic_.kind = k;
+  cinematic_.who = who;
+  cinematic_.ticks = 0;
+  cinematic_.length = length;
+  cinematic_.stunTarget = stun;
+  Emit(EventType::CinematicBegin, who, Zone::Torso, static_cast<int>(k), length);
+}
+
+void Duel::StepCinematic() {
+  if (++cinematic_.ticks < cinematic_.length) return;
+  const int who = Index(cinematic_.who);
+  cinematic_.active = false;
+  Emit(EventType::CinematicEnd, cinematic_.who, Zone::Torso, static_cast<int>(cinematic_.kind));
+  World w;
+  if (cinematic_.stunTarget) f_[1 - who].ForceStagger(Ctx(1 - who, w));
+  f_[who].protectedTicks = tune::kCinematicProtectTicks;
+  CheckEnd();
+}
+
+void Duel::GainUltimate(int who, float amount, const World& w) { f_[who].GainUltimate(amount, Ctx(who, w)); }
+
+void Duel::EmitHit(const Fighter& def, Side attacker, Zone zone, const HitReport& r, float stability, SwingSide dir, bool blocked, bool parried) {
+  Event e;
+  e.tick = tick_;
+  e.type = EventType::HitEvent;
+  e.actor = attacker;
+  e.zone = zone;
+  e.a = static_cast<int32_t>(r.layer);
+  e.b = static_cast<int32_t>(def.body.state(zone));
+  e.c = PackHitFlags(dir, blocked, parried);
+  e.value = r.dealt;
+  e.value2 = stability;
+  log_.Push(e);
 }
 
 // ------------------------------------------------------------------------------- reverse chain
@@ -271,7 +380,7 @@ void Duel::TryReply(int who, const Input& in, const World& w) {
   const float dmg = tune::kReverseDamage * (1.f + tune::kReverseDepthDamageGrowth * static_cast<float>(depth)) *
                     r.body.modifiers().arm[Index(arm)].power * r.res.ArmsMult();
   if (o.phase == Phase::Strike || o.phase == Phase::Windup) o.Interrupt(tune::kInterceptedRecoveryTicks, octx);
-  Emit(EventType::ReverseReply, r.side(), zone, chain_.depth);
+  Emit(EventType::ReverseChain, r.side(), zone, chain_.depth);
   o.TakeHit(zone, dmg, StrikeKind::Quick, dmg * tune::kHitStabilityFactor, octx);
 
   if (chain_.depth >= tune::kMaxReverseReplies) {
@@ -291,7 +400,7 @@ void Duel::StartClinch() {
   clinch_.ticks = 0;
   distance_ = tune::kMinDistance;
   chain_.active = false;
-  Emit(EventType::ClinchStart, Side::A);
+  Emit(EventType::Clinch, Side::A);
 }
 
 void Duel::ResolveClinch(const World& w) {
@@ -332,8 +441,18 @@ void Duel::ResolveClinch(const World& w) {
 
 void Duel::CheckEnd() {
   if (result_.over) return;
-  const EndReason r0 = f_[0].body.CheckEnd(f_[0].res.shutdown);
-  const EndReason r1 = f_[1].body.CheckEnd(f_[1].res.shutdown);
+  EndReason r0 = f_[0].body.CheckEnd(f_[0].res.shutdown);
+  EndReason r1 = f_[1].body.CheckEnd(f_[1].res.shutdown);
+  // v2: a training dummy is repaired instead of ending the lesson.
+  EndReason* rr[2] = {&r0, &r1};
+  for (int i = 0; i < 2; ++i) {
+    if (dummy_[i].mode() != DummyMode::Off && *rr[i] != EndReason::None) {
+      f_[i].body.Reset();
+      f_[i].res = Resources();
+      f_[i].posture = Posture::Standing;
+      *rr[i] = EndReason::None;
+    }
+  }
   if (r0 == EndReason::None && r1 == EndReason::None) return;
   result_.over = true;
   if (r0 != EndReason::None && r1 != EndReason::None) {

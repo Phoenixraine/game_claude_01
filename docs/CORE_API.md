@@ -15,7 +15,9 @@
 | `iv/Fighter.h` | боец: конечный автомат удара, поза рук, защита, финты, уклонение, орудие. `Input` |
 | `iv/Duel.h` | два бойца, контакты, перехват, цепочка реверсов, клинч, конец матча. `World`, `MatchResult` |
 | `iv/Ai.h` | `Observation`, `MakeObservation`, `Ai` (6 архетипов × 3 сложности), память привычек |
-| `iv/Events.h` | `Event`, `EventLog` (список событий + хэш истории) |
+| `iv/Events.h` | `Event`, `EventLog` (список событий + хэш истории), `HitInfo`/`DecodeHit` |
+| `iv/Anim.h` | **v2** `AnimState`, `MakeAnimState(fighter)` — состояние для процедурной анимации |
+| `iv/Dummy.h` | **v2** тренировочный манекен (`DummyMode`) |
 | `iv/Rng.h` | PCG32 с сидом |
 
 Сборка и проверка с нуля:
@@ -25,7 +27,7 @@ cmake -S core -B build && cmake --build build && ctest --test-dir build --output
 ./build/ivsim --seeds 20          # баланс-симуляция, см. docs/BALANCE_REPORT.md
 ```
 
-Флаги: `-Wall -Wextra -Werror -fno-exceptions -fno-rtti`, только стандартная библиотека.
+Флаги: `-Wall -Wextra -Werror -fno-exceptions -fno-rtti`, только стандартная библиотека. CI: g++, clang++ (`-std=c++17 -fno-exceptions -fno-rtti -Wall -Wextra -Werror`), ASan+UBSan и MSVC (`/W4 /WX /GR-`) — см. `.github/workflows/core.yml`.
 
 ## 2. Модель времени
 
@@ -58,6 +60,7 @@ cmake -S core -B build && cmake --build build && ctest --test-dir build --output
 | `move` | левый стик вперёд/назад | `+1` сближение, `-1` отход (§11) |
 | `dodge`, `dodgeDir` | A + стик | один тяжёлый шаг, `-1` влево / `+1` вправо (§6) |
 | `weaponHeld` | Y в оружейном режиме | зажать — заряд, отпустить — выстрел (§13) |
+| `ultimate` | кнопка ультимейта (ребро) | v2: срабатывает при полной шкале (`Fighter::UltimateReady()`), цель — `target` |
 | `setPriority`, `priority` | крестовина | запрос приоритета питания; применяется с задержкой (§10) |
 
 Смена `target`/`side` считается финтом **только пока `strikeHeld == true`**: возврат стика в центр при отпускании RT финтом не
@@ -104,19 +107,19 @@ struct World {
 | `Interrupted` | `a` = `Phase` | замах/удар сбит попаданием (§5.3) |
 | `StrikeContact` | `a` = `StrikeKind`, `b` = `Outcome`, `zone`, `value` = сырой урон | точка удара |
 | `Hit` | `zone`, `value` = нанесено | искры, вмятина, тряска кабины на стороне зоны |
-| `Blocked` / `Parried` / `Evaded` / `Intercepted` | `actor` = защитник; `Blocked.a == 1` — усиленная стойка | звук/VFX защиты |
+| `Blocked` / `ParrySuccess` / `Evaded` / `InterceptSuccess` | `actor` = защитник; `Blocked.a == 1` — усиленная стойка | звук/VFX защиты |
 | `Whiff` | `actor` = атакующий | промах, удар по зданию |
 | `Dodge` | `a` = направление | гидравлический шаг |
 | `ZoneState` | `zone`, `a` = новое, `b` = прежнее состояние | замена панелей, дым, искры, предупреждение HUD |
 | `LimbSevered` | `zone` | отрыв конечности |
-| `Staggered` / `KnockedDown` / `GotUp` | — | позы падения |
+| `StaggerBegin` / `StaggerEnd` / `Knockdown` / `GotUp` | — | позы падения |
 | `HeatWarning` / `CoolantLeak` / `Shutdown` | — | HUD, пар, отключение питания |
-| `EnergyFlow` / `EnergySwitched` | `a` = `EnergyPriority` | видимый поток энергии по меху (§10) |
-| `ReverseReply` / `ReverseFailed` | `a` = глубина | цепочка реверсов (§7) |
-| `ClinchStart` / `ClinchResolved` / `WallSlam` | `value` = перевес / урон | клинч, прижатие к зданию |
+| `EnergyFlow` / `EnergyShift` | `EnergyFlow.a` = целевой `EnergyPriority`; `EnergyShift.a` = новый, `.b` = прежний | видимый поток энергии по меху (§10) |
+| `ReverseChain` / `ReverseFailed` | `a` = шаг (1 или 2) | цепочка реверсов (§7) |
+| `Clinch` / `ClinchResolved` / `WallSlam` | `value` = перевес / урон | клинч, прижатие к зданию |
 | `HardStanceOn` / `HardStanceOff` | — | усиленная стойка |
 | `GrabHit` | — | захват |
-| `WeaponCharging` / `WeaponFired` / `WeaponInterrupted` | `WeaponFired.a` = попадание | орудие (§13) |
+| `WeaponCharging` / `WeaponFired` / `WeaponInterrupted` | `WeaponCharging.a` = `WeaponKind`; `WeaponFired.a` = число попаданий (0 — промах; у ракет до 6), `.b` = `WeaponKind` | орудие (§13) |
 | `PoseReturn` | `a` = `ArmPose` | рука возвращается в нейтральную позу (§5.4) |
 | `MatchEnd` | `a` = `EndReason`, `actor` = проигравший, `b == 1` — ничья | конец боя |
 
@@ -161,7 +164,62 @@ void FixedTick60Hz(const Input& playerInput, const World& world) {   // вызы
 - Тесты `Ai.*` доказывают: сигнатура `Decide` принимает только `Observation`; два мира, различающиеся только скрытой целью
   замаха, дают побитово одинаковые решения; первое действие в ответ на атаку не раньше задержки.
 
-## 7. Подключение в Unreal (план для локальной стороны)
+## 7. v2: орудия, ультимейт, внешние ракурсы, события презентации, AnimState, манекен
+
+Игра — **только от первого лица**; внешний ракурс показывается как короткая вставка (`Cinematic`).
+
+### Орудия и перезарядка
+
+`Duel::SetLoadout(Side, WeaponKind)` (по умолчанию `RailSpear`). Профили — `tune::kWeapons[]` в `Tuning.h`:
+
+| Орудие | Заряд | Урон | Перезарядка | Особенности |
+|---|---|---|---|---|
+| `RailSpear` | 1,8 с | 40 | 9 с | фиксация ног на время заряда (`Fighter::LegsLocked()`: нет шагов и уклонений), без боезапаса |
+| `SuppressionRockets` | 0,7 с | 6 × 6 ракет | 7 с | боезапас 3 залпа (`WeaponEmpty`), каждая ракета попадает независимо, цели разбросаны по телу |
+| `PlasmaCannon` | 1,3 с | 34 | 6 с | +38 тепла за выстрел — второй выстрел подряд грозит отключением |
+
+Перезарядка (`Fighter::weaponCooldown`) идёт только в боевое время (не во время вставки); конец — событие `WeaponReady`.
+
+### Ультимейт
+
+Шкала `Fighter::ultimate` (0…`kUltimateMax`). Растёт: успешное парирование/перехват, попадание по зоне в состоянии `Critical` и хуже,
+любое попадание, **в меньшей степени** — за полученный урон (потолок за удар `kUltGainTakenCap`). Событие `UltimateReady`, когда шкала полна.
+Кнопка `Input::ultimate` при полной шкале: неблокируемый удар по `target` (`kUltimateDamage`), событие `UltimateUsed` + `CinematicBegin`.
+
+### `Cinematic`
+
+`Duel::cinematic()` (`active`, `kind`, `who`, `ticks`, `length`). События:
+`CinematicBegin{actor, a = CinematicKind, b = длительность в тиках}` и `CinematicEnd`. Пока вставка идёт, **бой заморожен**: вводы игнорируются,
+таймеры бойцов стоят (время матча идёт). Урон выстрела/ультимейта применяется в начале вставки. По `CinematicEnd`: цель оглушена (`kCinematicStunTicks`),
+стрелок неуязвим `kCinematicProtectTicks`; проверка конца матча откладывается до `CinematicEnd`. Длительности — 1,75–3,5 с (`WeaponProfile::cinematicTicks`,
+`kUltimateCinematicTicks`). Unreal на `CinematicBegin` включает внешнюю камеру/анимацию, на `CinematicEnd` возвращает кабину.
+
+### События для презентации
+
+| Событие | Поля |
+|---|---|
+| `HitEvent` | `actor` = атакующий, `zone`; `DecodeHit(event, &HitInfo)` даёт `layer` (глубина слоя), `severity` (`ZoneState` после), `direction` (`SwingSide`), `damage`, `stabilityDamage`, `wasBlocked`, `wasParried` (при парировании — `damage = 0`) |
+| `ArmorPlateLost` | `zone`, `a` = индекс пластины (с 0), `b` = число пластин зоны (`kArmorPlates`) |
+| `ReactorBreach` | реактор впервые `Damaged` — синее свечение, охлаждающая жидкость в кабине |
+| `SystemFailure` | `a` = `SystemId` (`Sensors, Power, Cooling, ArmL/R, LegL/R, Weapon`): зона стала `Critical`, течь охлаждения, отключение питания |
+| `StaggerBegin` / `StaggerEnd` / `Knockdown` / `Clinch` / `ParrySuccess` / `InterceptSuccess` / `ReverseChain{step}` / `EnergyShift{from,to}` / `HeatWarning` / `LimbSevered{zone}` | см. таблицу выше |
+| `UltimateReady` / `UltimateUsed` / `CinematicBegin` / `CinematicEnd` / `WeaponReady` / `WeaponEmpty` | см. выше |
+
+`Event` теперь имеет ещё `c` (int) и `value2` (float); оба входят в хэш детерминизма.
+
+### `AnimState`
+
+`AnimState a = MakeAnimState(duel.fighter(Side::A));` каждый кадр: `phase`, `progress` 0–1 внутри фазы (замах — до точки фиксации, затем задержка фиксации; удар — путь руки;
+восстановление — возврат), `committed`, `kind/side/arm/target`, `charge`, `pose[2]` (`ArmPose`), `footPlant`, `weightShift` (−1 назад … +1 вперёд),
+`lateralShift` (уклонение/поворот), `legsLocked`, `posture` и `postureProgress`, поднятый блок, усиленная стойка, заряд/перезарядка орудия, нормированные стабильность/тепло/шкала ультимейта.
+
+### `DummyMode` (обучение)
+
+`Duel::SetDummy(Side, DummyMode)`: `Passive` — не действует; `Scripted` — повторяет сценарий атак (`Dummy::SetScript`; по умолчанию 5 ударов: вверх, вправо, быстрый, влево, вниз);
+`BlockOnly` — только поднимает блок на видимый сектор замаха игрока после человеческой задержки (`kDummyReactionTicks`) и сам не атакует.
+Манекен не проигрывает: при условии конца боя он «чинится» и урок продолжается. Ввод, поданный в `Step` за сторону манекена, игнорируется.
+
+## 8. Подключение в Unreal (план для локальной стороны)
 
 1. Положить `core/include/iv` и `core/src` в модуль проекта (ядро не использует исключения и RTTI — как и UE по умолчанию).
 2. Обернуть `Duel` в `UActorComponent` с аккумулятором фиксированного шага; `Input` собирать из Enhanced Input.
@@ -170,7 +228,7 @@ void FixedTick60Hz(const Input& playerInput, const World& world) {   // вызы
 4. Данные (таблицы атак, зоны, ИИ) на стороне Unreal брать из `data/` (TASK-006); числа боя живут в `Tuning.h` и при необходимости
    выносятся в `UDataAsset` без изменения логики.
 
-## 8. Контракты и ограничения
+## 9. Контракты и ограничения
 
 - Порядок значений в `Types.h` и `EventType` — часть контракта с Unreal-стороной.
 - Арифметика `float`. Побитовая воспроизводимость гарантируется на одной сборке (один компилятор и флаги); между разными

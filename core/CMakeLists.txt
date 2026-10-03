@@ -9,7 +9,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # Unreal builds with exceptions and RTTI disabled; the core must too (CLAUDE.md).
-set(IV_FLAGS -Wall -Wextra -Werror -fno-exceptions -fno-rtti)
+if(MSVC)
+  # MSVC build (CI job 'msvc'): warnings as errors, no RTTI, exceptions disabled for our own code.
+  set(IV_FLAGS /W4 /WX /GR- /EHs-c- /D_HAS_EXCEPTIONS=0 /permissive-)
+else()
+  set(IV_FLAGS -Wall -Wextra -Werror -fno-exceptions -fno-rtti)
+endif()
 
 file(GLOB IV_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_library(ivcore STATIC ${IV_SOURCES})
@@ -33,7 +38,7 @@ target_link_libraries(iv_tests PRIVATE ivcore)
 target_compile_options(iv_tests PRIVATE ${IV_FLAGS})
 
 # One ctest entry per module so a failure points at the module (filter = "Module.").
-foreach(module IN ITEMS Body Resources Strike Defense Ai Determinism Sim)
+foreach(module IN ITEMS Body Resources Strike Defense Ai Determinism Sim Weapons Ultimate Presentation Anim Dummy)
   add_test(NAME ${module} COMMAND iv_tests "${module}.")
 endforeach()
 add_test(NAME Example COMMAND iv_example)

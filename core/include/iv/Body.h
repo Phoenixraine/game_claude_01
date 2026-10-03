@@ -41,6 +41,9 @@ struct DamageResult {
   ZoneState after = ZoneState::Intact;
   bool severed = false;    // the limb was torn off by this hit
   bool ignored = false;    // zone already Destroyed/Severed and the hit could not sever it
+  Layer deepest = Layer::Armor;  // deepest layer this hit touched (v2 HitEvent)
+  float armorBefore = 0.f;       // Armor layer before / after (v2 ArmorPlateLost)
+  float armorAfter = 0.f;
 };
 
 class Body {

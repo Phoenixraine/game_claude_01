@@ -20,24 +20,25 @@ enum class EventType : uint8_t {
   StrikeContact,     // a: StrikeKind, b: Outcome
   Hit,               // zone: zone hit, value: damage dealt
   Blocked,           // value: damage after block
-  Parried,
-  Intercepted,       // actor: the interceptor
+  ParrySuccess,      // actor: the defender who parried
+  InterceptSuccess,  // actor: the interceptor
   Evaded,
   Whiff,
   Dodge,             // a: direction
   ZoneState,         // zone, a: new ZoneState, b: previous ZoneState
   LimbSevered,       // zone
-  Staggered,
-  KnockedDown,
+  StaggerBegin,
+  StaggerEnd,
+  Knockdown,
   GotUp,
   HeatWarning,
   CoolantLeak,
   Shutdown,
   EnergyFlow,        // a: EnergyPriority being switched to (visible to the opponent)
-  EnergySwitched,    // a: EnergyPriority now active
-  ReverseReply,      // a: reply depth (1 or 2)
+  EnergyShift,       // a: EnergyPriority now active (to), b: the previous one (from)
+  ReverseChain,      // a: step = reply depth (1 or 2)
   ReverseFailed,
-  ClinchStart,
+  Clinch,            // clinch begins
   ClinchResolved,    // actor: winner, value: score margin
   WallSlam,          // value: damage
   HardStanceOn,
@@ -47,6 +48,17 @@ enum class EventType : uint8_t {
   WeaponFired,       // a: 1 if hit
   WeaponInterrupted,
   PoseReturn,        // a: ArmPose being returned from
+  // ---- v2: presentation events (the Unreal layer turns each into animation / sound / VFX / cockpit damage) ----
+  HitEvent,          // actor: attacker, zone, a: Layer reached, b: ZoneState after, c: flags (see HitInfo), value: damage, value2: stability damage
+  ArmorPlateLost,    // zone, a: plate index (0-based), b: plates in the zone
+  ReactorBreach,     // the Reactor zone was breached (state >= Damaged for the first time) - blue glow / coolant on the cockpit
+  SystemFailure,     // a: SystemId that failed
+  UltimateReady,     // actor: the gauge just became full
+  UltimateUsed,
+  CinematicBegin,    // actor: who triggered it, a: CinematicKind, b: duration in ticks
+  CinematicEnd,
+  WeaponReady,       // a: WeaponKind: the cooldown is over
+  WeaponEmpty,       // a: WeaponKind: no ammo left
   MatchEnd,          // a: EndReason, actor: the fighter that lost (or Side::A on a draw with b == 1)
 };
 
@@ -58,7 +70,40 @@ struct Event {
   int32_t a = 0;
   int32_t b = 0;
   float value = 0.0f;
+  int32_t c = 0;        // v2: extra payload (HitEvent flags)
+  float value2 = 0.0f;  // v2: extra payload (HitEvent stability damage)
 };
+
+// Flags packed in Event::c of a HitEvent.
+struct HitInfo {
+  Side attacker = Side::A;
+  Zone zone = Zone::Torso;
+  Layer layer = Layer::Armor;     // deepest layer the hit reached
+  ZoneState severity = ZoneState::Intact;
+  SwingSide direction = SwingSide::Up;
+  float damage = 0.f;
+  float stabilityDamage = 0.f;
+  bool wasBlocked = false;
+  bool wasParried = false;
+};
+constexpr int32_t PackHitFlags(SwingSide dir, bool blocked, bool parried) {
+  return static_cast<int32_t>(dir) | (blocked ? 4 : 0) | (parried ? 8 : 0);
+}
+
+// Decodes a HitEvent (returns false for any other event type).
+inline bool DecodeHit(const Event& e, HitInfo* out) {
+  if (e.type != EventType::HitEvent) return false;
+  out->attacker = e.actor;
+  out->zone = e.zone;
+  out->layer = static_cast<Layer>(e.a);
+  out->severity = static_cast<ZoneState>(e.b);
+  out->direction = static_cast<SwingSide>(e.c & 3);
+  out->wasBlocked = (e.c & 4) != 0;
+  out->wasParried = (e.c & 8) != 0;
+  out->damage = e.value;
+  out->stabilityDamage = e.value2;
+  return true;
+}
 
 // Collects events and folds every one of them into a running FNV-1a hash. The hash is what the
 // determinism test compares, so recording the full list can be switched off for long headless runs.
@@ -74,6 +119,8 @@ class EventLog {
     Mix(static_cast<uint64_t>(static_cast<uint32_t>(e.a)));
     Mix(static_cast<uint64_t>(static_cast<uint32_t>(e.b)));
     Mix(static_cast<uint64_t>(static_cast<int64_t>(std::llround(static_cast<double>(e.value) * 1000.0))));
+    Mix(static_cast<uint64_t>(static_cast<uint32_t>(e.c)));
+    Mix(static_cast<uint64_t>(static_cast<int64_t>(std::llround(static_cast<double>(e.value2) * 1000.0))));
     ++count_;
     if (keep_) events_.push_back(e);
   }

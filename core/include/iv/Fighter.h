@@ -34,6 +34,7 @@ struct Input {
   int8_t dodgeDir = 1;                // -1 left, +1 right
   // Systems.
   bool weaponHeld = false;            // Y (weapon mode): hold to charge, release to fire, pitch §13
+  bool ultimate = false;              // edge: v2 ultimate button (needs a full gauge)
   bool setPriority = false;           // d-pad
   EnergyPriority priority = EnergyPriority::Guard;
 };
@@ -95,6 +96,7 @@ struct HitReport {
   bool interrupted = false;
   ZoneState before = ZoneState::Intact;
   ZoneState after = ZoneState::Intact;
+  Layer layer = Layer::Armor;   // deepest layer reached (v2)
 };
 
 class Fighter {
@@ -117,6 +119,14 @@ class Fighter {
   void Interrupt(int recoveryTicks, const StepContext& ctx);
   void EnterClinch();
   void LeaveClinch();
+  // v2
+  void SetLoadout(WeaponKind k);
+  const tune::WeaponProfile& WeaponProf() const { return tune::kWeapons[Index(weapon)]; }
+  void GainUltimate(float amount, const StepContext& ctx);
+  bool UltimateReady() const { return ultimate >= tune::kUltimateMax - 0.0001f; }
+  bool LegsLocked() const { return weaponCharging && WeaponProf().locksLegs; }
+  void ForceStagger(const StepContext& ctx) { if (posture == Posture::Standing || posture == Posture::Dodging) EnterStagger(ctx); }
+  void ConsumeUltimate() { ultimate = 0.f; ultimatePending = false; }
 
   // ---- queries ---------------------------------------------------------------------------
   Side side() const { return side_; }
@@ -137,6 +147,7 @@ class Fighter {
   Posture posture = Posture::Standing;
   int postureTicks = 0;
   int dodgeTicks = 0;
+  int8_t dodgeSide = 1;         // v2: direction of the current/last dodge (-1 left, +1 right)
   int8_t dodgeDirNow = 0;       // set for one tick when a dodge starts; Duel turns the opponent
   Phase phase = Phase::Idle;
   int phaseTicks = 0;
@@ -160,6 +171,13 @@ class Fighter {
   bool weaponCharging = false;
   float weaponCharge = 0.f;
   Zone weaponTarget = Zone::Torso;
+  WeaponKind weapon = WeaponKind::RailSpear;  // v2 loadout
+  int weaponAmmo = -1;          // shots left (-1 = unlimited)
+  int weaponCooldown = 0;       // ticks until the next charge may start
+  float ultimate = 0.f;         // v2 gauge 0..tune::kUltimateMax
+  bool ultimatePending = false; // the ultimate button was accepted this tick; Duel resolves it
+  Zone ultimateTarget = Zone::Torso;
+  int protectedTicks = 0;       // v2: invulnerable after an external cut
   Tick lastHitTick = -100000;
   // Bookkeeping the pilot can feel or see; feeds the AI observation (never the opponent's intent).
   Outcome lastOwnOutcome = Outcome::Whiff;       // result of this fighter's last strike

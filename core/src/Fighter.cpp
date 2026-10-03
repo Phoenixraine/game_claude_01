@@ -62,6 +62,11 @@ void Fighter::Reset() {
   weaponCharging = false;
   weaponCharge = 0.f;
   weaponTarget = Zone::Torso;
+  weaponAmmo = WeaponProf().ammo;
+  weaponCooldown = 0;
+  ultimate = 0.f;
+  ultimatePending = false;
+  protectedTicks = 0;
   lastHitTick = -100000;
   lastOwnOutcome = lastIncomingOutcome = Outcome::Whiff;
   lastOwnTarget = lastIncomingZone = Zone::Torso;
@@ -141,10 +146,13 @@ float Fighter::StrikeDamage() const {
 void Fighter::Step(const Input& in, const StepContext& ctx) {
   contactPending = false;
   firePending = false;
+  ultimatePending = false;
   dodgeDirNow = 0;
   moveDelta = 0.f;
   proximity = ctx.proximity;
   lastMove = in.move;
+  if (protectedTicks > 0) --protectedTicks;
+  if (weaponCooldown > 0 && --weaponCooldown == 0) Emit(ctx, EventType::WeaponReady, Zone::ShoulderR, Index(weapon));
 
   if (in.setPriority && res.RequestPriority(in.priority)) Emit(ctx, EventType::EnergyFlow, Zone::Torso, static_cast<int>(in.priority));
 
@@ -153,6 +161,7 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
       if (++postureTicks >= tune::kStaggerTicks) {
         posture = Posture::Standing;
         res.stability = std::max(res.stability, tune::kStaggerResetStability);
+        Emit(ctx, EventType::StaggerEnd);
       }
       break;
     case Posture::KnockedDown:
@@ -203,6 +212,10 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
         break;
     }
     HandleWeapon(in, ctx);
+    if (in.ultimate && UltimateReady() && !weaponCharging && (phase == Phase::Idle || phase == Phase::Recovery)) {
+      ultimatePending = true;
+      ultimateTarget = in.target;
+    }
 
     if (in.move != 0 && !guard.hard && !weaponCharging) {
       float mult = 0.f;
@@ -224,13 +237,18 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
   }
 
   const bool regen = posture != Posture::Clinched && !guard.held && phase != Phase::Windup;
+  const EnergyPriority prioBefore = res.priority;
   const ResourceTickResult t = res.Tick(body.modifiers(), body.DamagedLimbs(), ctx.coolingMult, regen);
   if (t.heatWarningStarted) Emit(ctx, EventType::HeatWarning, Zone::Reactor);
-  if (t.coolantLeakStarted) Emit(ctx, EventType::CoolantLeak, Zone::Reactor);
-  if (t.prioritySwitched) Emit(ctx, EventType::EnergySwitched, Zone::Torso, static_cast<int>(res.priority));
+  if (t.coolantLeakStarted) {
+    Emit(ctx, EventType::CoolantLeak, Zone::Reactor);
+    Emit(ctx, EventType::SystemFailure, Zone::Reactor, static_cast<int>(SystemId::Cooling));
+  }
+  if (t.prioritySwitched) Emit(ctx, EventType::EnergyShift, Zone::Torso, static_cast<int>(res.priority), static_cast<int>(prioBefore));
   if (t.shutdown) {
     posture = Posture::ShutDown;
     Emit(ctx, EventType::Shutdown, Zone::Reactor);
+    Emit(ctx, EventType::SystemFailure, Zone::Reactor, static_cast<int>(SystemId::Power));
   }
 
   // Re-facing the opponent (pitch §11: no instant 180s).
@@ -496,6 +514,7 @@ void Fighter::FinishStrike(Outcome outcome, const StepContext& ctx) {
 }
 
 void Fighter::HandleWeapon(const Input& in, const StepContext& ctx) {
+  const tune::WeaponProfile& wp = WeaponProf();
   const bool can = posture == Posture::Standing && body.state(Zone::ShoulderR) < ZoneState::Destroyed;
   if (weaponCharging) {
     if (!can || phase != Phase::Idle) {
@@ -509,24 +528,42 @@ void Fighter::HandleWeapon(const Input& in, const StepContext& ctx) {
       weaponTarget = in.target;
     } else {
       weaponCharging = false;
-      if (weaponCharge >= static_cast<float>(tune::kWeaponChargeTicks)) firePending = true;
+      if (weaponCharge >= static_cast<float>(wp.chargeTicks)) firePending = true;
       else weaponCharge = 0.f;
     }
-  } else if (in.weaponHeld && can && phase == Phase::Idle && !guard.held) {
+  } else if (in.weaponHeld && can && phase == Phase::Idle && !guard.held && weaponCooldown == 0 && weaponAmmo != 0) {
     weaponCharging = true;
     weaponCharge = 0.f;
     weaponTarget = in.target;
-    Emit(ctx, EventType::WeaponCharging);
+    Emit(ctx, EventType::WeaponCharging, Zone::ShoulderR, Index(weapon));
   }
 }
 
-void Fighter::FinishWeapon(const StepContext&) {
+void Fighter::FinishWeapon(const StepContext& ctx) {
+  const tune::WeaponProfile& wp = WeaponProf();
   weaponCharge = 0.f;
   weaponCharging = false;
-  res.AddHeat(tune::kWeaponFireHeat);
+  res.AddHeat(wp.heatPerShot);
   phase = Phase::Recovery;
   phaseTicks = 0;
-  recoveryLen = tune::kWeaponRecoveryTicks;
+  recoveryLen = wp.recoveryTicks;
+  weaponCooldown = wp.cooldownTicks;
+  if (weaponAmmo > 0 && --weaponAmmo == 0) Emit(ctx, EventType::WeaponEmpty, Zone::ShoulderR, Index(weapon));
+}
+
+void Fighter::SetLoadout(WeaponKind k) {
+  weapon = k;
+  weaponAmmo = WeaponProf().ammo;
+  weaponCooldown = 0;
+  weaponCharging = false;
+  weaponCharge = 0.f;
+}
+
+void Fighter::GainUltimate(float amount, const StepContext& ctx) {
+  if (amount <= 0.f) return;
+  const bool was = UltimateReady();
+  ultimate = std::min(tune::kUltimateMax, ultimate + amount);
+  if (!was && UltimateReady()) Emit(ctx, EventType::UltimateReady);
 }
 
 void Fighter::TryDodge(const Input& in, const StepContext& ctx) {
@@ -539,6 +576,7 @@ void Fighter::TryDodge(const Input& in, const StepContext& ctx) {
   posture = Posture::Dodging;
   dodgeTicks = 0;
   dodgeDirNow = in.dodgeDir < 0 ? -1 : 1;
+  dodgeSide = dodgeDirNow;
   Emit(ctx, EventType::Dodge, Zone::Torso, dodgeDirNow);
   // pitch §6: a dodge is one heavy step; the cost lands on stability, and the mech is exposed afterwards.
   res.LoseStability(tune::kDodgeStability);
@@ -558,7 +596,7 @@ void Fighter::EnterStagger(const StepContext& ctx) {
   guard = GuardState();
   weaponCharging = false;
   weaponCharge = 0.f;
-  Emit(ctx, EventType::Staggered);
+  Emit(ctx, EventType::StaggerBegin);
 }
 
 void Fighter::EnterKnockdown(const StepContext& ctx) {
@@ -571,7 +609,7 @@ void Fighter::EnterKnockdown(const StepContext& ctx) {
   guard = GuardState();
   weaponCharging = false;
   weaponCharge = 0.f;
-  Emit(ctx, EventType::KnockedDown);
+  Emit(ctx, EventType::Knockdown);
 }
 
 void Fighter::LoseStability(float amount, const StepContext& ctx) {
@@ -590,6 +628,7 @@ void Fighter::Interrupt(int recoveryTicks, const StepContext& ctx) {
 
 HitReport Fighter::TakeHit(Zone zone, float damage, StrikeKind kind, float stabilityHit, const StepContext& ctx) {
   HitReport r;
+  if (protectedTicks > 0) return r;  // v2: the shooter is untouchable for a moment after an external cut
   float dmg = damage * res.DamageTakenMult();
   if (posture == Posture::Staggered) dmg *= tune::kStaggerDamageMult;
   else if (posture == Posture::KnockedDown) dmg *= tune::kKnockdownDamageMult;
@@ -599,10 +638,33 @@ HitReport Fighter::TakeHit(Zone zone, float damage, StrikeKind kind, float stabi
   r.severed = d.severed;
   r.before = d.before;
   r.after = d.after;
+  r.layer = d.deepest;
   if (!d.ignored) {
     Emit(ctx, EventType::Hit, zone, 0, 0, d.dealt);
     if (d.before != d.after) Emit(ctx, EventType::ZoneState, zone, static_cast<int>(d.after), static_cast<int>(d.before));
     if (d.severed) Emit(ctx, EventType::LimbSevered, zone);
+    // v2 presentation: armour plates come off in equal steps as the Armor layer drains.
+    const int plates = tune::kArmorPlates[Index(zone)];
+    const float maxArmor = tune::kArmorMax[Index(zone)];
+    const int lostBefore = static_cast<int>(std::floor((1.f - d.armorBefore / maxArmor) * static_cast<float>(plates) + 0.0001f));
+    const int lostAfter = static_cast<int>(std::floor((1.f - d.armorAfter / maxArmor) * static_cast<float>(plates) + 0.0001f));
+    for (int k = lostBefore; k < std::min(lostAfter, plates); ++k) Emit(ctx, EventType::ArmorPlateLost, zone, k, plates);
+    if (zone == Zone::Reactor && d.before < ZoneState::Damaged && d.after >= ZoneState::Damaged) Emit(ctx, EventType::ReactorBreach, zone);
+    if (d.before < ZoneState::Critical && d.after >= ZoneState::Critical) {
+      int sys = -1;
+      switch (zone) {
+        case Zone::Head: sys = static_cast<int>(SystemId::Sensors); break;
+        case Zone::Reactor: sys = static_cast<int>(SystemId::Power); break;
+        case Zone::ArmL: sys = static_cast<int>(SystemId::ArmL); break;
+        case Zone::ArmR: sys = static_cast<int>(SystemId::ArmR); break;
+        case Zone::LegL: sys = static_cast<int>(SystemId::LegL); break;
+        case Zone::LegR: sys = static_cast<int>(SystemId::LegR); break;
+        case Zone::ShoulderR: sys = static_cast<int>(SystemId::Weapon); break;
+        default: break;
+      }
+      if (sys >= 0) Emit(ctx, EventType::SystemFailure, zone, sys);
+    }
+    GainUltimate(std::min(tune::kUltGainTakenCap, d.dealt * tune::kUltGainTakenPerDamage), ctx);
   }
   lastHitTick = ctx.now;
 

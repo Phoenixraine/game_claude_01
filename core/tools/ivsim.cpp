@@ -49,6 +49,10 @@ struct Totals {
   int weaponHits = 0;
   int staggers = 0;
   int knockdowns = 0;
+  int ultimates = 0;
+  int cinematics = 0;
+  int plates = 0;
+  int hitEvents = 0;
 };
 
 const char* kOutcomeNames[9] = {"Hit", "Blocked", "Parried", "Evaded", "Intercepted", "Whiff", "HardStanceBlocked", "Grabbed", "GrabParried"};
@@ -187,9 +191,9 @@ int main(int argc, char** argv) {
                 ++t.aimed[Index(e.zone)];
                 ++t.outcomes[e.b];
                 break;
-              case EventType::ClinchStart: ++clinches; ++t.clinches; break;
-              case EventType::Intercepted: ++t.intercepts; break;
-              case EventType::ReverseReply: ++t.replies; break;
+              case EventType::Clinch: ++clinches; ++t.clinches; break;
+              case EventType::InterceptSuccess: ++t.intercepts; break;
+              case EventType::ReverseChain: ++t.replies; break;
               case EventType::Feint: ++feints; ++t.feints; break;
               case EventType::Committed:
                 if (e.a == static_cast<int>(StrikeKind::Heavy)) ++t.heavy;
@@ -197,8 +201,12 @@ int main(int argc, char** argv) {
                 else ++t.grabs;
                 break;
               case EventType::WeaponFired: ++t.weaponShots; t.weaponHits += e.a; break;
-              case EventType::Staggered: ++t.staggers; break;
-              case EventType::KnockedDown: ++t.knockdowns; break;
+              case EventType::StaggerBegin: ++t.staggers; break;
+              case EventType::Knockdown: ++t.knockdowns; break;
+              case EventType::UltimateUsed: ++t.ultimates; break;
+              case EventType::CinematicBegin: ++t.cinematics; break;
+              case EventType::ArmorPlateLost: ++t.plates; break;
+              case EventType::HitEvent: ++t.hitEvents; break;
               default: break;
             }
             if (eventsFile)
@@ -259,6 +267,8 @@ int main(int argc, char** argv) {
         static_cast<double>(t.feints) / t.duels, static_cast<double>(t.clinches) / t.duels, static_cast<double>(t.replies) / t.duels,
         static_cast<double>(t.staggers) / t.duels, static_cast<double>(t.knockdowns) / t.duels, static_cast<double>(t.weaponShots) / t.duels,
         t.weaponShots ? 100.0 * t.weaponHits / t.weaponShots : 0.0);
+    Out("\nv2 per duel: ultimates %.2f, cinematic cuts %.2f, armour plates lost %.1f, HitEvents %.1f\n", static_cast<double>(t.ultimates) / t.duels,
+        static_cast<double>(t.cinematics) / t.duels, static_cast<double>(t.plates) / t.duels, static_cast<double>(t.hitEvents) / t.duels);
   }
   if (g_md) std::fclose(g_md);
   return 0;

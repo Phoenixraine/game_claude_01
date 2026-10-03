@@ -83,7 +83,7 @@ IV_TEST(Defense, PressingLtJustBeforeContactParriesAndOpensACounterWindow) {
   const float stabA = r.A().res.stability;
   r.StepUntil([&] { return r.Count(EventType::StrikeContact) > 0; }, 100);
   IV_CHECK_EQ(r.LastOutcome(Side::A), static_cast<int>(Outcome::Parried));
-  IV_CHECK_EQ(r.Count(EventType::Parried), 1);
+  IV_CHECK_EQ(r.Count(EventType::ParrySuccess), 1);
   IV_CHECK_NEAR(Lost(r, Side::B), 0.0, 1e-4);                  // no damage taken
   IV_CHECK(r.A().res.stability < stabA - tune::kParryStabilityHit + 1.f);  // the attacker's tempo breaks
   IV_CHECK(r.B().counterTicks > 0);                             // pitch §6: a short counter window opens
@@ -148,7 +148,7 @@ IV_TEST(Defense, CounterStrikeAfterAParryTravelsTheInnerLine) {
   r.StepUntil([&] { return r.A().TicksToContact() == 5; });
   r.b.guardHeld = true;
   r.b.guardSide = SwingSide::Up;
-  r.StepUntil([&] { return r.Count(EventType::Parried) > 0; }, 100);
+  r.StepUntil([&] { return r.Count(EventType::ParrySuccess) > 0; }, 100);
   r.b.guardHeld = false;
   r.b.quick = true;
   r.b.side = SwingSide::Left;
@@ -310,7 +310,7 @@ IV_TEST(Defense, InterceptOnTheWrongLineDoesNotWork) {
     t.b.quick = true;
     t.b.side = SwingSide::Up;
     t.StepUntil([&] { return t.Count(EventType::StrikeContact) > 0; }, 100);
-    if (t.Count(EventType::Intercepted) > 0) any = true;
+    if (t.Count(EventType::InterceptSuccess) > 0) any = true;
   }
   IV_CHECK(!any);
 }
@@ -338,7 +338,13 @@ IV_TEST(Defense, ReverseChainAllowsTwoAnswersThenClinch) {
   const float eA0 = r.A().res.energy;
   r.a.reverse = true;  // reply 1 by A with the other arm
   r.Step();
-  IV_CHECK_EQ(r.Count(EventType::ReverseReply), 1);
+  IV_CHECK_EQ(r.Count(EventType::ReverseChain), 1);
+  {
+    int step = 0;
+    for (const Event& e : r.duel.log().events())
+      if (e.type == EventType::ReverseChain) step = e.a;
+    IV_CHECK_EQ(step, 1);  // v2: ReverseChain{step}
+  }
   IV_CHECK(r.duel.chain().active);
   IV_CHECK(r.duel.chain().who == Side::B);
   IV_CHECK_EQ(r.duel.chain().windowLeft, tune::kReverseWindowTicks[1]);  // pitch §7: each window is shorter
@@ -349,17 +355,17 @@ IV_TEST(Defense, ReverseChainAllowsTwoAnswersThenClinch) {
   const float eB0 = r.B().res.energy;
   r.b.reverse = true;  // reply 2 by B
   r.Step();
-  IV_CHECK_EQ(r.Count(EventType::ReverseReply), 2);
+  IV_CHECK_EQ(r.Count(EventType::ReverseChain), 2);
   const float cost2 = eB0 - r.B().res.energy;
   IV_CHECK(cost2 > cost1);  // pitch §7: bigger energy bill each time
-  IV_CHECK_EQ(r.Count(EventType::ClinchStart), 1);
+  IV_CHECK_EQ(r.Count(EventType::Clinch), 1);
   IV_CHECK(r.duel.clinch().active);
   IV_CHECK(r.A().posture == Posture::Clinched && r.B().posture == Posture::Clinched);
 
   // A third reverse is impossible: the chain is closed and the clinch decides.
   r.a.reverse = true;
   r.Step();
-  IV_CHECK_EQ(r.Count(EventType::ReverseReply), 2);
+  IV_CHECK_EQ(r.Count(EventType::ReverseChain), 2);
   IV_CHECK(!r.duel.chain().active);
 }
 
@@ -378,7 +384,7 @@ IV_TEST(Defense, ReverseDamageGrowsWithDepthAndMissingTheWindowEndsTheChain) {
   // Nobody answers: the window runs out and the chain closes.
   r.Step(tune::kReverseWindowTicks[0] + 1);
   IV_CHECK(!r.duel.chain().active);
-  IV_CHECK_EQ(r.Count(EventType::ReverseReply), 0);
+  IV_CHECK_EQ(r.Count(EventType::ReverseChain), 0);
 
   const float d1 = tune::kReverseDamage * (1.f + tune::kReverseDepthDamageGrowth * 0.f);
   const float d2 = tune::kReverseDamage * (1.f + tune::kReverseDepthDamageGrowth * 1.f);
@@ -404,7 +410,7 @@ IV_TEST(Defense, FailedReverseCostsStabilityAndClosesTheChain) {
   IV_CHECK_EQ(r.Count(EventType::ReverseFailed), 1);
   IV_CHECK(r.A().res.stability < stab);
   IV_CHECK(!r.duel.chain().active);
-  IV_CHECK_EQ(r.Count(EventType::ReverseReply), 0);
+  IV_CHECK_EQ(r.Count(EventType::ReverseChain), 0);
 }
 
 IV_TEST(Defense, ReverseNeedsTheOtherArmToBeUsable) {
@@ -421,7 +427,7 @@ IV_TEST(Defense, ReverseNeedsTheOtherArmToBeUsable) {
   r.Step();
   r.a.reverse = true;
   r.Step();
-  IV_CHECK_EQ(r.Count(EventType::ReverseReply), 0);
+  IV_CHECK_EQ(r.Count(EventType::ReverseChain), 0);
   IV_CHECK_EQ(r.Count(EventType::ReverseFailed), 1);
 }
 
@@ -511,10 +517,10 @@ IV_TEST(Defense, ZeroStabilityStaggersAndASecondCollapseKnocksTheMechDown) {
   }();
   b.TakeHit(Zone::Torso, 1.f, StrikeKind::Heavy, 200.f, ctx);
   IV_CHECK(b.posture == Posture::Staggered);
-  IV_CHECK_EQ(r.Count(EventType::Staggered), 1);
+  IV_CHECK_EQ(r.Count(EventType::StaggerBegin), 1);
   b.TakeHit(Zone::Torso, 1.f, StrikeKind::Heavy, 200.f, ctx);  // stability hits zero again while staggered
   IV_CHECK(b.posture == Posture::KnockedDown);
-  IV_CHECK_EQ(r.Count(EventType::KnockedDown), 1);
+  IV_CHECK_EQ(r.Count(EventType::Knockdown), 1);
 
   // A downed mech takes more damage, stays down for the configured time and then gets up.
   Rig up, down;

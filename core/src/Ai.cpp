@@ -53,7 +53,9 @@ Observation MakeObservation(const Duel& duel, Side viewer) {
   s.counterTicks = me.counterTicks;
   s.strikeTicksLeft = me.phase == Phase::Strike ? me.TicksToContact() : -1;
   s.weaponCharging = me.weaponCharging;
-  s.weaponChargeFrac = me.weaponCharge / static_cast<float>(tune::kWeaponChargeTicks);
+  s.weaponChargeFrac = me.weaponCharge / static_cast<float>(me.WeaponProf().chargeTicks);
+  s.weaponReady = me.weaponCooldown == 0 && me.weaponAmmo != 0;
+  s.ultimateReady = me.UltimateReady();
   s.lastOwnOutcome = me.lastOwnOutcome;
   s.lastOwnTarget = me.lastOwnTarget;
   s.sinceOwn = duel.tick() - me.lastOwnTick;
@@ -552,6 +554,13 @@ void Ai::Offend(const Observation& cur, const OppView& seen, Input* in) {
   }
   if (cooldown_ > 0) return;
 
+  // ---- ultimate (v2): used as soon as it is ready and the opponent is not mid-strike ----
+  if (self.ultimateReady && seen.phase != Phase::Strike && self.posture == Posture::Standing) {
+    in->ultimate = true;
+    in->target = Zone::Torso;
+    return;
+  }
+
   // ---- weapon (pitch §13) ----
   if (st.weapon > 0.f) {
     const bool oppThreat = seen.phase == Phase::Windup || seen.phase == Phase::Strike;
@@ -565,7 +574,7 @@ void Ai::Offend(const Observation& cur, const OppView& seen, Input* in) {
       }
       return;
     }
-    if (!oppThreat && cur.distance >= tune::kWeaponMinDistance + 4.f && self.armUsable[1] && self.zones[Index(Zone::ShoulderR)] < ZoneState::Destroyed && Roll() < st.weapon) {
+    if (self.weaponReady && !oppThreat && cur.distance >= tune::kWeaponMinDistance + 4.f && self.armUsable[1] && self.zones[Index(Zone::ShoulderR)] < ZoneState::Destroyed && Roll() < st.weapon) {
       in->weaponHeld = true;
       in->target = Zone::Torso;
       return;

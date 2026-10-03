@@ -2,6 +2,7 @@
 // match end (pitch §5-§7, §14). Duel owns two Fighters, the gap between them and the event log.
 #pragma once
 
+#include "iv/Dummy.h"
 #include "iv/Events.h"
 #include "iv/Fighter.h"
 #include "iv/Rng.h"
@@ -28,6 +29,16 @@ struct ClinchState {
   int ticks = 0;
 };
 
+// v2: a scripted external camera cut (weapon with a long cooldown, or the ultimate). The fight is frozen while it plays.
+struct CinematicState {
+  bool active = false;
+  CinematicKind kind = CinematicKind::None;
+  Side who = Side::A;        // the fighter that triggered it
+  int ticks = 0;             // elapsed
+  int length = 0;
+  bool stunTarget = false;   // the opponent is staggered when the cut ends
+};
+
 struct MatchResult {
   bool over = false;
   bool draw = false;
@@ -51,6 +62,11 @@ class Duel {
   const MatchResult& result() const { return result_; }
   const Chain& chain() const { return chain_; }
   const ClinchState& clinch() const { return clinch_; }
+  const CinematicState& cinematic() const { return cinematic_; }
+  // v2 loadout and training dummy.
+  void SetLoadout(Side s, WeaponKind k) { f_[Index(s)].SetLoadout(k); }
+  void SetDummy(Side s, DummyMode m) { dummy_[Index(s)].Set(m); }
+  Dummy& dummy(Side s) { return dummy_[Index(s)]; }
   EventLog& log() { return log_; }
   const EventLog& log() const { return log_; }
   // Headless sims: end the match as a draw after this many ticks (0 = no limit).
@@ -72,6 +88,11 @@ class Duel {
   void StartClinch();
   void ResolveClinch(const World& w);
   void CheckEnd();
+  void StartCinematic(CinematicKind k, Side who, int length, bool stun);
+  void StepCinematic();
+  void ResolveUltimate(int ai, const World& w);
+  void EmitHit(const Fighter& def, Side attacker, Zone zone, const HitReport& r, float stability, SwingSide dir, bool blocked, bool parried);
+  void GainUltimate(int who, float amount, const World& w);
   void Emit(EventType t, Side actor, Zone z = Zone::Torso, int a = 0, int b = 0, float v = 0.f);
 
   Fighter f_[2];
@@ -79,6 +100,8 @@ class Duel {
   Tick tick_ = 0;
   Chain chain_;
   ClinchState clinch_;
+  CinematicState cinematic_;
+  Dummy dummy_[2];
   MatchResult result_;
   EventLog log_;
   Rng rng_;

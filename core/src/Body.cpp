@@ -57,12 +57,15 @@ DamageResult Body::ApplyDamage(Zone zone, float amount, StrikeKind kind) {
     return r;
   }
   float remaining = amount;
+  r.armorBefore = h.layer[0];
   for (int l = 0; l < kLayerCount && remaining > 0.f; ++l) {
     const float take = std::min(h.layer[l], remaining);
+    if (take > 0.f) r.deepest = static_cast<Layer>(l);
     h.layer[l] -= take;
     remaining -= take;
     r.dealt += take;
   }
+  r.armorAfter = h.layer[0];
   h.state = Classify(zone, h.layer);
   r.after = h.state;
   if (r.after != r.before) Recompute();

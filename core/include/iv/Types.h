@@ -69,6 +69,23 @@ enum class EndReason : uint8_t {
   TimeLimit,
 };
 
+// v2: heavy weapons with a long cooldown (each one triggers an external cinematic cut when fired).
+enum class WeaponKind : uint8_t { RailSpear, SuppressionRockets, PlasmaCannon, Count };
+constexpr int kWeaponKindCount = static_cast<int>(WeaponKind::Count);
+constexpr int Index(WeaponKind k) { return static_cast<int>(k); }
+
+// v2: subsystems reported by SystemFailure events.
+enum class SystemId : uint8_t { Sensors, Power, Cooling, ArmL, ArmR, LegL, LegR, Weapon, Count };
+
+// v2: kind of the scripted external cut (CinematicBegin / CinematicEnd).
+enum class CinematicKind : uint8_t { None, Ultimate, RailSpear, SuppressionRockets, PlasmaCannon };
+constexpr CinematicKind CinematicOf(WeaponKind k) {
+  return k == WeaponKind::RailSpear ? CinematicKind::RailSpear : k == WeaponKind::SuppressionRockets ? CinematicKind::SuppressionRockets : CinematicKind::PlasmaCannon;
+}
+
+// v2: training dummy behaviour (pitch tutorial, TASK-006 update).
+enum class DummyMode : uint8_t { Off, Passive, Scripted, BlockOnly };
+
 // pitch §20.
 enum class Archetype : uint8_t { Counterpuncher, Breaker, LimbHunter, Trickster, Gunner, Grappler };
 constexpr int kArchetypeCount = 6;
@@ -88,6 +105,10 @@ inline const char* Name(EndReason r) {
   static const char* const kNames[] = {"None",         "ReactorDestroyed",    "CockpitCritical", "TotalImmobility",
                                        "PowerLoss",    "ArmsLostImmobilised", "TimeLimit"};
   return kNames[static_cast<int>(r)];
+}
+inline const char* Name(WeaponKind k) {
+  static const char* const kNames[] = {"RailSpear", "SuppressionRockets", "PlasmaCannon"};
+  return kNames[Index(k)];
 }
 inline const char* Name(Archetype a) {
   static const char* const kNames[] = {"Counterpuncher", "Breaker", "LimbHunter", "Trickster", "Gunner", "Grappler"};

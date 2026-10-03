@@ -36,3 +36,37 @@ jobs:
           cmp a.csv b.csv
           cmp a.md b.md
           head -5 a.csv
+
+  clang-strict:
+    # TASK-001 v2: the core must compile with exactly these flags (what Unreal's toolchain uses).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile every core source with clang++ -std=c++17 -fno-exceptions -fno-rtti -Wall -Wextra -Werror
+        run: |
+          for f in core/src/*.cpp; do
+            clang++ -std=c++17 -fno-exceptions -fno-rtti -Wall -Wextra -Werror -Icore/include -c "$f" -o /dev/null
+          done
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure (ASan + UBSan)
+        run: cmake -S core -B build-san -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+      - name: Build
+        run: cmake --build build-san -j
+      - name: Tests under sanitizers
+        run: ctest --test-dir build-san --output-on-failure
+
+  msvc:
+    # TASK-001 v2: the core must build with MSVC (no GCC extensions). /W4 /WX /GR-.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S core -B build-msvc -G "Visual Studio 17 2022" -A x64
+      - name: Build
+        run: cmake --build build-msvc --config Release
+      - name: Tests
+        run: ctest --test-dir build-msvc -C Release --output-on-failure

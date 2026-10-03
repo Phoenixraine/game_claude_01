@@ -32,6 +32,8 @@ struct SelfView {
   int strikeTicksLeft = -1;    // own strike in flight (-1 otherwise)
   bool weaponCharging = false;
   float weaponChargeFrac = 0.f;
+  bool weaponReady = true;      // v2: cooldown over and ammo left
+  bool ultimateReady = false;   // v2: the gauge is full
   Outcome lastOwnOutcome = Outcome::Whiff;
   Zone lastOwnTarget = Zone::Torso;
   int sinceOwn = 100000;       // ticks since own last strike landed / missed

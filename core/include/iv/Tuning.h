@@ -224,6 +224,54 @@ constexpr float kWeaponBlockMult = 0.55f;
 constexpr float kWeaponBaseAccuracy = 0.8f;
 constexpr int kWeaponRecoveryTicks = MsToTicks(1200);  // pitch §13: the shoulder launcher is slow to close again
 
+
+// ================================================================ v2 (TASK-001 update): weapons, ultimate, cinematics, presentation
+// Heavy weapons (pitch §13 + v2): each has a long cooldown; firing one cuts to an external camera (Cinematic).
+struct WeaponProfile {
+  int chargeTicks;        // hold time before the shot can be released
+  float damage;           // per projectile
+  int salvo;              // projectiles per shot
+  int recoveryTicks;      // locked after the shot
+  int cooldownTicks;      // before the next charge may start (the "large reload")
+  int ammo;               // shots in the magazine (-1 = unlimited)
+  float heatPerShot;
+  float accuracy;         // multiplier on the base accuracy of the head/shoulder (pitch §9, §13)
+  float blockMult;        // damage multiplier when the target blocks in time
+  float stabilityFactor;  // stability damage = damage * factor
+  bool locksLegs;         // the pilot cannot step or dodge while charging (RailSpear)
+  int cinematicTicks;     // length of the external cut
+};
+constexpr WeaponProfile kWeapons[kWeaponKindCount] = {
+    // RailSpear: long charge, legs locked, one devastating shot (the pitch §13 shoulder launcher, kept as the default loadout)
+    {kWeaponChargeTicks, kWeaponDamage, 1, kWeaponRecoveryTicks, MsToTicks(9000), -1, 18.f, 1.0f, 0.7f, 0.6f, true, MsToTicks(2500)},
+    // SuppressionRockets: short lock-on, six small rockets, three salvos in the rack
+    {MsToTicks(700), 6.5f, 6, MsToTicks(900), MsToTicks(7000), 3, 10.f, 0.75f, 0.5f, 0.8f, false, MsToTicks(2000)},
+    // PlasmaCannon: medium charge, heavy heat: a second shot soon after risks a shutdown
+    {MsToTicks(1300), 34.f, 1, MsToTicks(1100), MsToTicks(6000), -1, 38.f, 0.9f, 0.6f, 0.7f, false, MsToTicks(1750)},
+};
+constexpr float kWeaponEvadeHitMult = 0.35f;            // rockets: a dodging target still gets clipped sometimes
+constexpr int kCinematicStunTicks = MsToTicks(1500);    // the target of a hit cut is staggered for this long afterwards
+constexpr int kCinematicProtectTicks = MsToTicks(2000); // the shooter takes no damage for this long after the cut
+constexpr int kUltimateCinematicTicks = MsToTicks(3500);
+
+// Ultimate gauge (v2): fills from skill, much less from suffering.
+constexpr float kUltimateMax = 100.f;
+constexpr float kUltGainParry = 6.f;                   // successful parry (the parrying fighter)
+constexpr float kUltGainIntercept = 8.f;               // successful intercept (the interceptor)
+constexpr float kUltGainCriticalHit = 1.5f;              // landing a hit on a zone that is Critical or worse
+constexpr float kUltGainHit = 0.45f;                     // any landed hit
+constexpr float kUltGainTakenPerDamage = 0.04f;         // receiving damage (small, capped per hit)
+constexpr float kUltGainTakenCap = 0.6f;
+constexpr float kUltimateDamage = 42.f;                 // scripted unblockable strike on the chosen zone
+constexpr float kUltimateStabilityHit = 70.f;
+
+// Armour plates per zone (ArmorPlateLost events fire as the Armor layer drains in equal steps).
+constexpr int kArmorPlates[kZoneCount] = {3, 8, 4, 5, 5, 6, 6, 6, 6};
+
+// Training dummy (v2).
+constexpr int kDummyReactionTicks = 14;
+constexpr int kDummyScriptGapTicks = MsToTicks(2200);
+
 // ---------------------------------------------------------------- movement (pitch §11)
 constexpr float kMoveSpeedPerTick = 0.09f;             // distance units per tick at full leg condition
 constexpr float kRetreatSpeedMult = 0.6f;              // pitch §11: backing away is slower than closing in
