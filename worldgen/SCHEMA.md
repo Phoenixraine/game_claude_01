@@ -95,7 +95,7 @@ structure: {
 - `overpass_id`: id постановочного здания-эстакады. `guardrails[{id, points[[x,y,z]…], height}]` — ограждения набережной, эстакады, причала.
 
 ## `props[]`
-`{id, kind: car|tree|lamp|bench, pos[x,y,z], yaw_deg, variant}`. Автомобилей ≥ 600 (в `seed 1` около 950), деревьев ~600, фонарей ~560. Вне
+`{id, kind: car|tree|lamp|bench, pos[x,y,z], yaw_deg, variant}`. Автомобилей ≥ 600 (в `seed 1` — 996), деревьев ~490, фонарей ~590, скамеек 10. Вне
 footprint'ов зданий и вне воды.
 
 ## `pois[]`
