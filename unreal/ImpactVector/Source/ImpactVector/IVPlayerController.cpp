@@ -1,15 +1,27 @@
 #include "IVPlayerController.h"
 #include "IVMechPawn.h"
+#include "IVCombat.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "InputModifiers.h"
 #include "Misc/CommandLine.h"
+#include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 
 AIVMechPawn* AIVPlayerController::Mech() const
 {
 	return Cast<AIVMechPawn>(GetPawn());
+}
+
+AIVCombatDirector* AIVPlayerController::GetDirector()
+{
+	if (!Director.IsValid())
+	{
+		for (TActorIterator<AIVCombatDirector> It(GetWorld()); It; ++It) { Director = *It; break; }
+	}
+	return Director.Get();
 }
 
 void AIVPlayerController::BeginPlay()
@@ -53,10 +65,9 @@ void AIVPlayerController::SetupInputComponent()
 	Mapping->MapKey(LookAction, EKeys::Mouse2D);
 	Mapping->MapKey(LookAction, EKeys::Gamepad_Right2D);
 
-	FireAction = NewObject<UInputAction>(this, TEXT("IA_Fire"));
+	FireAction = NewObject<UInputAction>(this, TEXT("IA_DebugBlast"));
 	FireAction->ValueType = EInputActionValueType::Boolean;
-	Mapping->MapKey(FireAction, EKeys::LeftMouseButton);
-	Mapping->MapKey(FireAction, EKeys::Gamepad_RightTrigger);
+	Mapping->MapKey(FireAction, EKeys::T);                 // debug: blast the point under the crosshair
 
 	Mapping->MapKey(SprintAction, EKeys::LeftShift);
 	Mapping->MapKey(SprintAction, EKeys::Gamepad_LeftThumbstick);
@@ -71,33 +82,155 @@ void AIVPlayerController::SetupInputComponent()
 		EIC->BindAction(MoveAction, ETriggerEvent::Completed, this, &AIVPlayerController::OnMoveEnd);
 		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnLook);
 		EIC->BindAction(FireAction, ETriggerEvent::Started, this, &AIVPlayerController::OnFire);
-		InputComponent->BindKey(EKeys::One, IE_Pressed, this, &AIVPlayerController::OnAct1);
-		InputComponent->BindKey(EKeys::Two, IE_Pressed, this, &AIVPlayerController::OnAct2);
-		InputComponent->BindKey(EKeys::Three, IE_Pressed, this, &AIVPlayerController::OnAct3);
-		InputComponent->BindKey(EKeys::Four, IE_Pressed, this, &AIVPlayerController::OnAct4);
-		InputComponent->BindKey(EKeys::Five, IE_Pressed, this, &AIVPlayerController::OnAct5);
-		InputComponent->BindKey(EKeys::Six, IE_Pressed, this, &AIVPlayerController::OnAct6);
+		// pose test keys on the numpad
+		InputComponent->BindKey(EKeys::NumPadOne, IE_Pressed, this, &AIVPlayerController::OnAct1);
+		InputComponent->BindKey(EKeys::NumPadTwo, IE_Pressed, this, &AIVPlayerController::OnAct2);
+		InputComponent->BindKey(EKeys::NumPadThree, IE_Pressed, this, &AIVPlayerController::OnAct3);
+		InputComponent->BindKey(EKeys::NumPadFour, IE_Pressed, this, &AIVPlayerController::OnAct4);
+		InputComponent->BindKey(EKeys::NumPadFive, IE_Pressed, this, &AIVPlayerController::OnAct5);
+		InputComponent->BindKey(EKeys::NumPadSix, IE_Pressed, this, &AIVPlayerController::OnAct6);
 		EIC->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnSprint);
 		EIC->BindAction(SprintAction, ETriggerEvent::Completed, this, &AIVPlayerController::OnSprint);
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+iv::SwingSide AIVPlayerController::SideFromStick(const FVector2D& S)
+{
+	if (FMath::Abs(S.Y) >= FMath::Abs(S.X)) return S.Y >= 0.f ? iv::SwingSide::Up : iv::SwingSide::Down;
+	return S.X >= 0.f ? iv::SwingSide::Right : iv::SwingSide::Left;
+}
+
+// Body sectors of the right stick (pitch 5.2 step 2): up = head, upper diagonals = shoulders, sides = arms,
+// centre = torso, lower diagonals = legs, down = reactor (only reachable when the enemy is flanked).
+iv::Zone AIVPlayerController::ZoneFromStick(const FVector2D& S)
+{
+	if (S.Size() < 0.45f) return iv::Zone::Torso;
+	const float Ang = FMath::RadiansToDegrees(FMath::Atan2(S.X, S.Y));      // 0 = up, +90 = right
+	const float A = FMath::Fmod(Ang + 360.f + 22.5f, 360.f);
+	switch (FMath::FloorToInt(A / 45.f) % 8)
+	{
+	case 0: return iv::Zone::Head;
+	case 1: return iv::Zone::ShoulderR;
+	case 2: return iv::Zone::ArmR;
+	case 3: return iv::Zone::LegR;
+	case 4: return iv::Zone::Reactor;
+	case 5: return iv::Zone::LegL;
+	case 6: return iv::Zone::ArmL;
+	default: return iv::Zone::ShoulderL;
 	}
 }
 
 void AIVPlayerController::OnLook(const FInputActionValue& V)
 {
 	const FVector2D L = V.Get<FVector2D>();
-	// Mouse2D delivers per-frame deltas, the gamepad stick a deflection: distinguish by the active key magnitude
-	if (AIVMechPawn* M = Mech())
+	AIVMechPawn* M = Mech();
+	if (!M) return;
+	const bool bMouse = FMath::Abs(L.X) > 1.001f || FMath::Abs(L.Y) > 1.001f;
+	const bool bVectorMode = IsInputKeyDown(EKeys::LeftMouseButton) || IsInputKeyDown(EKeys::RightMouseButton) || GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.2f || GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.2f;
+	if (bMouse)
 	{
-		if (FMath::Abs(L.X) > 1.001f || FMath::Abs(L.Y) > 1.001f)
+		if (bVectorMode)
 		{
-			M->AddAim(L.X * LookSensitivity, L.Y * LookSensitivity);
-			LookStick = FVector2D::ZeroVector;
+			Stick += FVector2D(L.X, L.Y) * VectorSensitivity;
+			if (Stick.Size() > 1.f) Stick = Stick.GetSafeNormal();
+		}
+		else if (bLockOn && GetDirector())
+		{
+			LockOffYaw = FMath::Clamp(LockOffYaw + L.X * LookSensitivity, -38.f, 38.f);
+			LockOffPitch = FMath::Clamp(LockOffPitch + L.Y * LookSensitivity, -18.f, 18.f);
 		}
 		else
 		{
-			LookStick = L;
+			M->AddAim(L.X * LookSensitivity, L.Y * LookSensitivity);
 		}
+		LookStick = FVector2D::ZeroVector;
 	}
+	else
+	{
+		LookStick = L;      // gamepad right stick
+	}
+}
+
+void AIVPlayerController::UpdateCombatInput(float Dt)
+{
+	AIVCombatDirector* Dir = GetDirector();
+	AIVMechPawn* M = Mech();
+	if (!Dir || !M) return;
+	FIVCombatInput& In = Dir->PlayerIn;
+
+	const bool bPadStrike = GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.4f;
+	const bool bPadGuard = GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.4f;
+	const bool bStrikeDown = IsInputKeyDown(EKeys::LeftMouseButton) || bPadStrike;
+	const bool bGuardDown = IsInputKeyDown(EKeys::RightMouseButton) || bPadGuard;
+
+	// gamepad right stick drives the combat vector while a trigger is down
+	if (bPadStrike || bPadGuard)
+	{
+		const FVector2D Pad(GetInputAnalogKeyState(EKeys::Gamepad_RightX), GetInputAnalogKeyState(EKeys::Gamepad_RightY));
+		Stick = Pad;
+		LookStick = FVector2D::ZeroVector;
+	}
+	if (!bStrikeDown && !bGuardDown)
+	{
+		Stick = FMath::Vector2DInterpTo(Stick, FVector2D::ZeroVector, Dt, 6.f);     // the virtual stick returns to centre
+	}
+
+	// ---- strike (RT / LMB): tap = quick, hold + release = heavy
+	if (bStrikeDown)
+	{
+		StrikeHeldTime += Dt;
+		if (!bStrikeWasDown) { bSideLocked = false; CurSide = iv::SwingSide::Up; Stick = FVector2D::ZeroVector; }
+		if (!bSideLocked && Stick.Size() > 0.5f) { CurSide = SideFromStick(Stick); bSideLocked = true; }
+	}
+	const bool bJustReleased = bStrikeWasDown && !bStrikeDown;
+	if (bJustReleased && StrikeHeldTime <= 0.18f)
+	{
+		In.bQuick = true;                 // short press = quick strike on the family chosen by the first flick
+		In.Side = bSideLocked ? CurSide : iv::SwingSide::Up;
+		In.Target = ZoneFromStick(Stick);
+	}
+	In.bStrikeHeld = bStrikeDown && StrikeHeldTime > 0.18f;
+	In.Side = In.bQuick ? In.Side : CurSide;
+	In.Target = In.bQuick ? In.Target : (bSideLocked ? ZoneFromStick(Stick) : iv::Zone::Torso);
+	if (!bStrikeDown) StrikeHeldTime = 0.f;
+	bStrikeWasDown = bStrikeDown;
+
+	// ---- footwork from the movement keys while striking
+	const float Fwd = MoveValue.Y, Str = MoveValue.X;
+	In.Footwork = Fwd > 0.4f ? iv::Footwork::StepIn : (Fwd < -0.4f ? iv::Footwork::StepBack : (FMath::Abs(Str) > 0.4f ? iv::Footwork::Turn : iv::Footwork::Hold));
+	In.Move = Fwd > 0.3f ? 1 : (Fwd < -0.3f ? -1 : 0);
+	if (FMath::Abs(Str) > 0.3f) LastStrafe = Str > 0.f ? 1 : -1;
+	In.DodgeDir = LastStrafe;
+
+	// ---- arm
+	if (WasInputKeyJustPressed(EKeys::Q) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder))
+	{
+		if (In.bStrikeHeld) In.bSwitchArm = true;
+		CurArm = (CurArm == iv::Arm::R) ? iv::Arm::L : iv::Arm::R;
+	}
+	In.Arm = CurArm;
+
+	// ---- guard (LT / RMB)
+	In.bGuardHeld = bGuardDown;
+	if (bGuardDown && Stick.Size() > 0.4f) CurGuardSide = SideFromStick(Stick);
+	In.GuardSide = CurGuardSide;
+	In.bHardStance = bGuardDown && (IsInputKeyDown(EKeys::E) || IsInputKeyDown(EKeys::Gamepad_FaceButton_Top));
+
+	// ---- edges
+	if (WasInputKeyJustPressed(EKeys::SpaceBar) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom)) In.bDodge = true;
+	if (WasInputKeyJustPressed(EKeys::C) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) In.bCancel = true;
+	if (WasInputKeyJustPressed(EKeys::F) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left)) In.bGrab = true;
+	if (WasInputKeyJustPressed(EKeys::R) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) In.bReverse = true;
+	if (WasInputKeyJustPressed(EKeys::V) || WasInputKeyJustPressed(EKeys::Gamepad_RightThumbstick)) In.bUltimate = true;
+	In.bWeaponHeld = IsInputKeyDown(EKeys::G);
+	if (WasInputKeyJustPressed(EKeys::One))  { In.Priority = iv::EnergyPriority::Arms;   In.bSetPriority = true; }
+	if (WasInputKeyJustPressed(EKeys::Two))  { In.Priority = iv::EnergyPriority::Legs;   In.bSetPriority = true; }
+	if (WasInputKeyJustPressed(EKeys::Three)){ In.Priority = iv::EnergyPriority::Guard;  In.bSetPriority = true; }
+	if (WasInputKeyJustPressed(EKeys::Four)) { In.Priority = iv::EnergyPriority::Weapon; In.bSetPriority = true; }
+
+	if (WasInputKeyJustPressed(EKeys::Tab) || WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder)) { bLockOn = !bLockOn; LockOffYaw = LockOffPitch = 0.f; }
+	if (WasInputKeyJustPressed(EKeys::Enter) && Dir->IsMatchOver()) Dir->Restart();
 }
 
 void AIVPlayerController::PlayerTick(float Dt)
@@ -118,7 +251,27 @@ void AIVPlayerController::PlayerTick(float Dt)
 	}
 	M->SetMoveIntent(Move);
 	M->SetSprint(bSpr);
-	if (!LookStick.IsNearlyZero(0.05f))
+
+	AIVCombatDirector* Dir = GetDirector();
+	if (Dir && !bAuto)
+	{
+		UpdateCombatInput(Dt);
+		if (bLockOn && Dir->GetDuel() && !Dir->IsMatchOver())
+		{
+			// lock-on: aim follows the opponent; the mouse only offsets the view a little, which eases back
+			for (TActorIterator<AIVMechPawn> It(GetWorld()); It; ++It)
+			{
+				if (*It == M) continue;
+				const FVector To = (It->GetActorLocation() + FVector(0, 0, 3800.f)) - M->GetEyeLocation();
+				const FRotator R = To.Rotation();
+				M->SetAim(R.Yaw + LockOffYaw, R.Pitch + LockOffPitch);
+				break;
+			}
+			const float Back = FMath::Exp(-1.8f * Dt);
+			LockOffYaw *= Back; LockOffPitch *= Back;
+		}
+	}
+	if (!LookStick.IsNearlyZero(0.05f) && !(Dir && (IsInputKeyDown(EKeys::Gamepad_RightTriggerAxis) || GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.2f)))
 	{
 		M->AddAim(LookStick.X * StickLookRate * Dt, LookStick.Y * StickLookRate * Dt);
 	}

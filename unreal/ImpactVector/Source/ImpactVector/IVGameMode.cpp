@@ -4,6 +4,7 @@
 #include "IVHUD.h"
 #include "IVEnvironment.h"
 #include "IVDistrict.h"
+#include "IVCombat.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "Misc/CommandLine.h"
@@ -64,6 +65,37 @@ void AIVGameMode::StartPlay()
 				Pawn->SetActorLocationAndRotation(FVector(StartX, StartY, PlayerLoc.Z), FRotator(0.f, StartYaw, 0.f), false, nullptr, ETeleportType::TeleportPhysics);
 				float StartPitch = 0.f; FParse::Value(FCommandLine::Get(), TEXT("-IVPitch="), StartPitch);
 				if (AIVMechPawn* M = Cast<AIVMechPawn>(Pawn)) M->SetAim(StartYaw, StartPitch);
+			}
+		}
+	}
+
+	// combat: the player is side A, the enemy mech side B
+	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoCombat")))
+	{
+		if (APlayerController* PC = W->GetFirstPlayerController())
+		{
+			if (AIVMechPawn* PlayerMech = Cast<AIVMechPawn>(PC->GetPawn()))
+			{
+				AIVCombatDirector* Dir = W->SpawnActor<AIVCombatDirector>(FVector::ZeroVector, FRotator::ZeroRotator);
+				int32 Style = 0, Level = 1;
+				FParse::Value(FCommandLine::Get(), TEXT("-IVStyle="), Style);
+				FParse::Value(FCommandLine::Get(), TEXT("-IVLevel="), Level);
+				if (EnemyMech)
+				{
+					EnemyMech->bAIControlled = false;
+					Dir->Setup(PlayerMech, EnemyMech, static_cast<iv::Archetype>(FMath::Clamp(Style, 0, iv::kArchetypeCount - 1)), static_cast<iv::Difficulty>(FMath::Clamp(Level, 0, iv::kDifficultyCount - 1)), 20261003ull);
+					if (FParse::Param(FCommandLine::Get(), TEXT("IVAutoFight")))
+					{
+						Dir->EnableAutoPlayer(iv::Archetype::LimbHunter, iv::Difficulty::Normal);
+						// face to face on the plaza, 60 core units apart
+						const FVector Mid = EnemyMech->GetActorLocation();
+						PlayerMech->SetActorLocationAndRotation(Mid + FVector(-(60.f + AIVCombatDirector::kBodyGapUnits) * 100.f, 0.f, 0.f), FRotator::ZeroRotator, false, nullptr, ETeleportType::TeleportPhysics);
+						EnemyMech->SetActorRotation(FRotator(0.f, 180.f, 0.f));
+						PlayerMech->SetAim(0.f, 0.f);
+					}
+					int32 Dummy = 0;
+					if (FParse::Value(FCommandLine::Get(), TEXT("-IVDummy="), Dummy) && Dummy > 0) Dir->SetDummy(static_cast<iv::DummyMode>(Dummy));
+				}
 			}
 		}
 	}

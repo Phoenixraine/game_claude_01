@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "IVRigAnim.h"
+#include "iv/Anim.h"
+#include "iv/Events.h"
 #include "IVMechPawn.generated.h"
 
 class UCapsuleComponent;
@@ -60,6 +62,24 @@ public:
 	/** Hide parts that would block the first-person view. */
 	void SetFirstPersonView(bool bFirstPerson);
 
+	// ---- combat presentation (driven by AIVCombatDirector) ----
+	void SetCombatAnim(const iv::AnimState& S) { CombatAnim = S; bCombat = true; }
+	void SetMovementLocked(bool b) { bMoveLocked = b; }
+	void SetExternalControl(bool b) { bExternalControl = b; }
+	void AddVelocityImpulse(const FVector& V) { Velocity += V; }
+	void OnCombatHit(iv::Zone Z, float Strength01, bool bBlocked, bool bParried, iv::SwingSide Dir);
+	void OnDefenceEffect(bool bParry, bool bIntercept);
+	void OnZoneState(iv::Zone Z, iv::ZoneState NewState, iv::ZoneState OldState);
+	void OnLimbSevered(iv::Zone Z);
+	void OnArmorPlateLost(iv::Zone Z, int32 Index, int32 Count);
+	void AddCockpitImpulse(float Right, float Up, float Strength);
+	void StartCinematic(AIVMechPawn* Subject, float Seconds, int32 Kind);
+	void StopCinematic();
+	bool IsInCinematic() const { return bCine; }
+	FVector GetZoneWorldLocation(iv::Zone Z) const;
+	iv::ZoneState GetZoneState(iv::Zone Z) const { return ZoneStates[iv::Index(Z)]; }
+	const iv::AnimState& GetCombatAnim() const { return CombatAnim; }
+
 	FIVFootfallSignature OnFootfall;
 
 	// ---- tuning (cm, seconds, degrees) ----
@@ -108,6 +128,21 @@ protected:
 	float AimYaw = 0.f, AimPitch = 0.f;
 	float TorsoYawRel = 0.f;
 	bool bSprint = false;
+
+	// combat state
+	iv::AnimState CombatAnim;
+	bool bCombat = false;
+	bool bMoveLocked = false;
+	bool bExternalControl = false;
+	iv::ZoneState ZoneStates[iv::kZoneCount] = {};
+	FIVPoseAngles CombatPose;          // smoothed upper-body pose target
+	bool bCombatPoseInit = false;
+	FVector HitKick = FVector::ZeroVector;      // decaying torso kick (rx, ry, rz degrees)
+	TWeakObjectPtr<AIVMechPawn> CineSubject;
+	bool bCine = false;
+	float CineT = 0.f, CineDur = 0.f;
+	int32 CineKind = 0;
+	void BuildCombatPose(FIVPoseAngles& InOut, float Dt);
 
 	float GaitPhase = 0.f;      // 0..1 per full two-step cycle
 	float GaitAmp = 0.f;        // smoothed speed ratio
