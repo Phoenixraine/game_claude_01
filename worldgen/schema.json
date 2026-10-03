@@ -1,0 +1,1078 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IMPACT VECTOR district.json",
+  "description": "Contract between worldgen/ (generator) and the Unreal project. Units: metres; x right, y from the sea toward the city, z up. schema_version 1.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "bounds": {
+      "type": "object",
+      "properties": {
+        "units": {
+          "type": "string"
+        },
+        "axes": {
+          "type": "string"
+        },
+        "playable": {
+          "type": "object",
+          "properties": {
+            "x_min": {
+              "type": "number"
+            },
+            "x_max": {
+              "type": "number"
+            },
+            "y_min": {
+              "type": "number"
+            },
+            "y_max": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "x_min",
+            "x_max",
+            "y_min",
+            "y_max"
+          ],
+          "additionalProperties": false
+        },
+        "terrain": {
+          "type": "object",
+          "properties": {
+            "x_min": {
+              "type": "number"
+            },
+            "x_max": {
+              "type": "number"
+            },
+            "y_min": {
+              "type": "number"
+            },
+            "y_max": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "x_min",
+            "x_max",
+            "y_min",
+            "y_max"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "units",
+        "axes",
+        "playable",
+        "terrain"
+      ],
+      "additionalProperties": false
+    },
+    "terrain": {
+      "type": "object",
+      "properties": {
+        "heightmap": {
+          "type": "string"
+        },
+        "format": {
+          "const": "r16_little_endian"
+        },
+        "resolution": {
+          "const": 1009
+        },
+        "row_order": {
+          "const": "y_ascending"
+        },
+        "extent": {
+          "type": "object",
+          "properties": {
+            "x_min": {
+              "type": "number"
+            },
+            "x_max": {
+              "type": "number"
+            },
+            "y_min": {
+              "type": "number"
+            },
+            "y_max": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "x_min",
+            "x_max",
+            "y_min",
+            "y_max"
+          ],
+          "additionalProperties": false
+        },
+        "cell_size_m": {
+          "type": "number"
+        },
+        "height_encoding": {
+          "type": "object",
+          "properties": {
+            "zero_value": {
+              "type": "integer"
+            },
+            "units_per_meter": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "zero_value",
+            "units_per_meter"
+          ],
+          "additionalProperties": false
+        },
+        "min_z": {
+          "type": "number"
+        },
+        "max_z": {
+          "type": "number"
+        },
+        "sea_level_z": {
+          "type": "number"
+        },
+        "unreal_landscape_hint": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "heightmap",
+        "format",
+        "resolution",
+        "row_order",
+        "extent",
+        "cell_size_m",
+        "height_encoding",
+        "min_z",
+        "max_z",
+        "sea_level_z",
+        "unreal_landscape_hint"
+      ],
+      "additionalProperties": false
+    },
+    "water": {
+      "type": "object",
+      "properties": {
+        "level_z": {
+          "type": "number"
+        },
+        "sea_floor_z": {
+          "type": "number"
+        },
+        "shoreline": {
+          "$ref": "#/definitions/polyline"
+        },
+        "flood_zones": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/id"
+          }
+        }
+      },
+      "required": [
+        "level_z",
+        "sea_floor_z",
+        "shoreline",
+        "flood_zones"
+      ],
+      "additionalProperties": false
+    },
+    "roads": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/road"
+      },
+      "minItems": 1
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/block"
+      },
+      "minItems": 1
+    },
+    "buildings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/building"
+      },
+      "minItems": 6
+    },
+    "infrastructure": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": "object",
+          "properties": {
+            "quay": {
+              "$ref": "#/definitions/polygon"
+            },
+            "block_id": {
+              "$ref": "#/definitions/id"
+            },
+            "containers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/id"
+                  },
+                  "pos": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "yaw_deg": {
+                    "type": "number"
+                  },
+                  "levels": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 6
+                  },
+                  "variant": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id",
+                  "pos",
+                  "yaw_deg",
+                  "levels",
+                  "variant"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "cranes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/id"
+              }
+            }
+          },
+          "required": [
+            "quay",
+            "block_id",
+            "containers",
+            "cranes"
+          ],
+          "additionalProperties": false
+        },
+        "substation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/id"
+            },
+            "yard": {
+              "$ref": "#/definitions/polygon"
+            },
+            "power_station_id": {
+              "$ref": "#/definitions/id"
+            },
+            "transformers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pos": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "required": [
+                  "pos"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "yard",
+            "power_station_id",
+            "transformers"
+          ],
+          "additionalProperties": false
+        },
+        "metro": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/id"
+            },
+            "width": {
+              "type": "number"
+            },
+            "floor_z": {
+              "type": "number"
+            },
+            "ceiling_thickness": {
+              "type": "number"
+            },
+            "points": {
+              "$ref": "#/definitions/polyline"
+            },
+            "weak_segments": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/id"
+                  },
+                  "from": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "to": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "ceiling_thickness": {
+                    "type": "number"
+                  },
+                  "normal_thickness": {
+                    "type": "number"
+                  },
+                  "hint": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "from",
+                  "to",
+                  "ceiling_thickness",
+                  "normal_thickness",
+                  "hint"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "stations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/id"
+                  },
+                  "entrance": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "platform_center": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "required": [
+                  "id",
+                  "entrance",
+                  "platform_center"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "width",
+            "floor_z",
+            "ceiling_thickness",
+            "points",
+            "weak_segments",
+            "stations"
+          ],
+          "additionalProperties": false
+        },
+        "overpass_id": {
+          "$ref": "#/definitions/id"
+        },
+        "guardrails": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "points": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "minItems": 2
+              },
+              "height": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "points",
+              "height"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "port",
+        "substation",
+        "metro",
+        "overpass_id",
+        "guardrails"
+      ],
+      "additionalProperties": false
+    },
+    "props": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/prop"
+      }
+    },
+    "pois": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/poi"
+      },
+      "minItems": 5
+    },
+    "hazards": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/hazard"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "seed",
+    "bounds",
+    "terrain",
+    "water",
+    "roads",
+    "blocks",
+    "buildings",
+    "infrastructure",
+    "props",
+    "pois",
+    "hazards"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "point2": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "point3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "polygon": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/point2"
+      },
+      "minItems": 3
+    },
+    "polyline": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/point2"
+      },
+      "minItems": 2
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "column": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "pos": {
+          "$ref": "#/definitions/point3"
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0
+        },
+        "strength": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tier": {
+          "type": "integer"
+        },
+        "role": {
+          "enum": [
+            "regular",
+            "weak"
+          ]
+        },
+        "holds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "pos",
+        "height",
+        "strength",
+        "tier",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "floor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "z": {
+          "type": "number"
+        },
+        "supports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/id"
+          },
+          "minItems": 3
+        },
+        "mass": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tier": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "z",
+        "supports",
+        "mass",
+        "tier"
+      ],
+      "additionalProperties": false
+    },
+    "tier": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "z": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0
+        },
+        "mass": {
+          "type": "number",
+          "minimum": 0
+        },
+        "com": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "index",
+        "z",
+        "height",
+        "mass",
+        "com"
+      ],
+      "additionalProperties": false
+    },
+    "weak_line": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/id"
+          },
+          "minItems": 2
+        },
+        "tier": {
+          "type": "integer"
+        },
+        "collapse_dir": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "hint": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "columns",
+        "tier",
+        "collapse_dir",
+        "hint"
+      ],
+      "additionalProperties": false
+    },
+    "fracture_stage": {
+      "type": "object",
+      "properties": {
+        "stage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "floors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/id"
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "required": [
+        "stage",
+        "floors",
+        "sections"
+      ],
+      "additionalProperties": false
+    },
+    "structure": {
+      "type": "object",
+      "properties": {
+        "stacked": {
+          "type": "boolean"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/column"
+          },
+          "minItems": 3
+        },
+        "floors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/floor"
+          },
+          "minItems": 1
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tier"
+          },
+          "minItems": 1
+        },
+        "weak_lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/weak_line"
+          },
+          "minItems": 1
+        },
+        "fracture_stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/fracture_stage"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "stacked",
+        "columns",
+        "floors",
+        "tiers",
+        "weak_lines",
+        "fracture_stages"
+      ],
+      "additionalProperties": false
+    },
+    "road": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "kind": {
+          "enum": [
+            "promenade",
+            "avenue",
+            "street",
+            "alley"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "width": {
+          "type": "number",
+          "minimum": 40,
+          "maximum": 90
+        },
+        "points": {
+          "$ref": "#/definitions/polyline"
+        },
+        "dead_end": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "width",
+        "points",
+        "dead_end"
+      ],
+      "additionalProperties": false
+    },
+    "block": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "kind": {
+          "enum": [
+            "block",
+            "site",
+            "plaza"
+          ]
+        },
+        "district": {
+          "enum": [
+            "downtown",
+            "residential",
+            "industrial",
+            "mixed",
+            "civic"
+          ]
+        },
+        "col": {
+          "type": "integer"
+        },
+        "row": {
+          "type": "integer"
+        },
+        "polygon": {
+          "$ref": "#/definitions/polygon"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sub_block": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "district",
+        "col",
+        "row",
+        "polygon"
+      ],
+      "additionalProperties": false
+    },
+    "building": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "enum": [
+            "generic",
+            "hero"
+          ]
+        },
+        "hero_kind": {
+          "enum": [
+            "glass_tower",
+            "stadium",
+            "residential_complex",
+            "overpass",
+            "port_crane",
+            "power_station"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "block_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "district": {
+          "enum": [
+            "downtown",
+            "residential",
+            "industrial",
+            "mixed",
+            "civic"
+          ]
+        },
+        "building_type": {
+          "enum": [
+            "office",
+            "residential",
+            "industrial",
+            "parking",
+            "stadium",
+            "overpass",
+            "crane"
+          ]
+        },
+        "facade_style": {
+          "type": "string"
+        },
+        "footprint": {
+          "$ref": "#/definitions/polygon"
+        },
+        "height": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 220
+        },
+        "floors": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "base_z": {
+          "type": "number"
+        },
+        "yaw_deg": {
+          "type": "number"
+        },
+        "deck_z": {
+          "type": "number"
+        },
+        "length": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "hazard": {
+          "type": "string"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "structure": {
+          "$ref": "#/definitions/structure"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "block_id",
+        "district",
+        "building_type",
+        "facade_style",
+        "footprint",
+        "height",
+        "floors",
+        "base_z",
+        "yaw_deg"
+      ],
+      "additionalProperties": false
+    },
+    "prop": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "kind": {
+          "enum": [
+            "car",
+            "tree",
+            "lamp",
+            "bench"
+          ]
+        },
+        "pos": {
+          "$ref": "#/definitions/point3"
+        },
+        "yaw_deg": {
+          "type": "number"
+        },
+        "variant": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "pos",
+        "yaw_deg",
+        "variant"
+      ],
+      "additionalProperties": false
+    },
+    "poi": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "kind": {
+          "enum": [
+            "spawn_player",
+            "spawn_enemy",
+            "spawn_duel_a",
+            "spawn_duel_b",
+            "camera"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "pos": {
+          "$ref": "#/definitions/point3"
+        },
+        "yaw_deg": {
+          "type": "number"
+        },
+        "look_at": {
+          "$ref": "#/definitions/point3"
+        },
+        "fov_deg": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "pos"
+      ],
+      "additionalProperties": false
+    },
+    "hazard": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "kind": {
+          "enum": [
+            "electrical",
+            "flood",
+            "metro_collapse"
+          ]
+        },
+        "polygon": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/point2"
+          },
+          "minItems": 2
+        },
+        "effect": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "polygon",
+        "effect"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
