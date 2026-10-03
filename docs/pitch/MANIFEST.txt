@@ -1,0 +1,16 @@
+IMPACT VECTOR PACKAGE
+Generated: 2026-10-03
+
+FILES
+-----
+README_RU.md
+MANIFEST.txt
+01_visual_references/01_key_art_mech_in_city.png
+01_visual_references/02_cockpit_city_view.png
+01_visual_references/03_combat_hud_enemy_attack.png
+01_visual_references/04_damaged_cockpit.png
+01_visual_references/05_hangar_main_menu.png
+01_visual_references/06_local_split_screen_duel.png
+01_visual_references/07_survival_mode_port_battle.png
+02_pitch/IMPACT_VECTOR_FULL_PITCH_RU.md
+03_prompts/VISUAL_REFERENCE_PROMPTS_RU.md
