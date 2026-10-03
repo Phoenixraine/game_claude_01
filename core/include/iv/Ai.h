@@ -148,9 +148,10 @@ class Ai {
   Reaction reaction_ = Reaction::None;
   SwingSide lastOppSide_ = SwingSide::Up;
   Tick lastOppSideTick_ = -100000;
-  int attackSeenAt_ = 0;
   int parryJitter_ = 0;
   bool parryPressed_ = false;
+  bool grabAnswer_ = false;     // decided to hit a grabbing arm
+  bool grabAnswered_ = false;
   bool reacted_ = false;       // dodge / intercept already fired for this attack
   int priorityCooldown_ = 0;
 
@@ -167,12 +168,14 @@ class Ai {
   SwingSide guardSide_ = SwingSide::Up;
   int guardRethink_ = 0;
   bool guardIdle_ = false;
-  int weaponHold_ = 0;
   int reverseUntil_ = -1;
   int reverseFrom_ = -1;
-  int quickLatch_ = 0;
+  bool weaponSeen_ = false;     // the opponent is charging its launcher (visible shoulder + tone)
+  Tick weaponSeenTick_ = 0;
+  bool rushing_ = false;
+  bool weaponDodged_ = false;
+  int weaponJitter_ = 0;
   int moving_ = 0;          // -1 opening, 0 holding, +1 closing (hysteresis state)
-  Tick prevTick_ = -1;
 };
 
 }  // namespace iv

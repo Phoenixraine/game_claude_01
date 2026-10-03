@@ -212,6 +212,7 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
         case Phase::Windup: mult = tune::kWindupMoveMult; break;
         default: break;
       }
+      if (in.move < 0) mult *= tune::kRetreatSpeedMult;  // pitch §11: stepping back is slower than stepping in
       moveDelta -= static_cast<float>(in.move) * MoveSpeed() * mult;
     }
     if (strike.plant == FootPlant::Retreated && phase == Phase::Recovery && phaseTicks < 20) moveDelta += tune::kStepBackDistance / 20.f;

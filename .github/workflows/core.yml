@@ -1,0 +1,38 @@
+name: core
+
+on:
+  push:
+    paths:
+      - 'core/**'
+      - '.github/workflows/core.yml'
+  pull_request:
+    paths:
+      - 'core/**'
+      - '.github/workflows/core.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S core -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (-Wall -Wextra -Werror -fno-exceptions -fno-rtti)
+        run: cmake --build build -j
+
+      - name: Unit tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: ivsim smoke run is reproducible
+        run: |
+          ./build/ivsim --seeds 2 --quiet --duels a.csv --markdown a.md
+          ./build/ivsim --seeds 2 --quiet --duels b.csv --markdown b.md
+          cmp a.csv b.csv
+          cmp a.md b.md
+          head -5 a.csv

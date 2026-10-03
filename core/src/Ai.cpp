@@ -167,27 +167,29 @@ struct Style {
   EnergyPriority prio;
   bool stepIn;
   float counter;
+  float rush;         // P(charging in to break a weapon charge) when the opponent charges the launcher (pitch §13)
+  bool kite;          // opens the distance when crowded (backing away is slow, so only a ranged style tries it)
 };
 
 const Style kStyles[kArchetypeCount] = {
     // Counterpuncher: waits, punishes mistakes (pitch §20).
-    {0.0025f, 30.f, 28.f, 0.65f, 0.02f, 0.10f, 0.f, 80, 10, {0.10f, 0.35f, 0.05f, 0.10f, 0.10f, 0.10f, 0.10f, 0.05f, 0.05f},
-     {0.30f, 0.35f, 0.05f, 0.30f, 0.f}, 0.85f, EnergyPriority::Guard, false, 0.9f},
+    {0.0025f, 30.f, 22.f, 0.65f, 0.02f, 0.10f, 0.f, 80, 10, {0.10f, 0.35f, 0.05f, 0.10f, 0.10f, 0.10f, 0.10f, 0.05f, 0.05f},
+     {0.35f, 0.25f, 0.05f, 0.30f, 0.f}, 0.85f, EnergyPriority::Guard, false, 0.9f, 0.4f, false},
     // Breaker: pushes the centre and the space (pitch §20 "Разрушитель").
-    {0.016f, 3.f, 20.f, 0.85f, 0.03f, 0.05f, 0.f, 45, 25, {0.10f, 0.50f, 0.10f, 0.08f, 0.08f, 0.04f, 0.04f, 0.03f, 0.03f},
-     {0.55f, 0.10f, 0.10f, 0.10f, 0.15f}, 0.35f, EnergyPriority::Arms, true, 0.4f},
+    {0.013f, 3.f, 18.f, 0.85f, 0.03f, 0.05f, 0.f, 45, 25, {0.10f, 0.50f, 0.10f, 0.08f, 0.08f, 0.04f, 0.04f, 0.03f, 0.03f},
+     {0.55f, 0.10f, 0.10f, 0.10f, 0.15f}, 0.35f, EnergyPriority::Arms, true, 0.4f, 0.9f, false},
     // LimbHunter: arms and legs first (pitch §20 "Охотник за конечностями").
-    {0.012f, 3.f, 24.f, 0.55f, 0.04f, 0.12f, 0.f, 50, 15, {0.04f, 0.06f, 0.02f, 0.14f, 0.14f, 0.22f, 0.22f, 0.10f, 0.10f},
-     {0.40f, 0.20f, 0.25f, 0.15f, 0.f}, 0.5f, EnergyPriority::Arms, false, 0.5f},
+    {0.012f, 3.f, 20.f, 0.55f, 0.04f, 0.12f, 0.f, 50, 15, {0.05f, 0.14f, 0.02f, 0.13f, 0.13f, 0.17f, 0.17f, 0.09f, 0.09f},
+     {0.40f, 0.20f, 0.25f, 0.15f, 0.f}, 0.5f, EnergyPriority::Arms, false, 0.5f, 0.7f, false},
     // Trickster: feints and delays (pitch §20 "Обманщик").
-    {0.016f, 3.f, 26.f, 0.50f, 0.08f, 0.55f, 0.f, 40, 15, {0.12f, 0.25f, 0.05f, 0.12f, 0.12f, 0.12f, 0.12f, 0.05f, 0.05f},
-     {0.30f, 0.15f, 0.35f, 0.20f, 0.f}, 0.4f, EnergyPriority::Legs, false, 0.6f},
+    {0.016f, 3.f, 20.f, 0.50f, 0.08f, 0.55f, 0.f, 40, 15, {0.12f, 0.25f, 0.05f, 0.12f, 0.12f, 0.12f, 0.12f, 0.05f, 0.05f},
+     {0.30f, 0.15f, 0.35f, 0.20f, 0.f}, 0.4f, EnergyPriority::Legs, false, 0.6f, 0.6f, false},
     // Gunner: keeps the range and prepares the weapon (pitch §20 "Стрелок").
-    {0.005f, 3.f, 70.f, 0.40f, 0.f, 0.05f, 0.012f, 60, 10, {0.10f, 0.35f, 0.05f, 0.10f, 0.10f, 0.10f, 0.10f, 0.05f, 0.05f},
-     {0.50f, 0.10f, 0.35f, 0.05f, 0.f}, 0.4f, EnergyPriority::Weapon, false, 0.3f},
+    {0.010f, 3.f, 70.f, 0.50f, 0.f, 0.05f, 0.03f, 60, 10, {0.10f, 0.35f, 0.05f, 0.10f, 0.10f, 0.10f, 0.10f, 0.05f, 0.05f},
+     {0.50f, 0.10f, 0.35f, 0.05f, 0.f}, 0.4f, EnergyPriority::Weapon, false, 0.3f, 0.3f, true},
     // Grappler: closes the gap and looks for the grab (pitch §20 "Борец").
-    {0.014f, 3.f, 12.f, 0.45f, 0.45f, 0.15f, 0.f, 45, 15, {0.05f, 0.30f, 0.05f, 0.08f, 0.08f, 0.14f, 0.14f, 0.08f, 0.08f},
-     {0.30f, 0.10f, 0.05f, 0.15f, 0.40f}, 0.5f, EnergyPriority::Legs, true, 0.5f},
+    {0.014f, 3.f, 10.f, 0.45f, 0.30f, 0.15f, 0.f, 45, 15, {0.05f, 0.30f, 0.05f, 0.08f, 0.08f, 0.14f, 0.14f, 0.08f, 0.08f},
+     {0.30f, 0.10f, 0.05f, 0.15f, 0.40f}, 0.5f, EnergyPriority::Legs, true, 0.5f, 0.9f, false},
 };
 
 SwingSide SideFromIndex(int i) { return static_cast<SwingSide>(i); }
@@ -272,8 +274,8 @@ void Ai::ChooseReaction(const OppView& seen, const SelfView& self) {
   if (self.energy < 25.f) { w[3] = 0.f; w[4] = 0.f; }
   // Easy pilots stick to the plain block; harder ones mix in the timing-based answers.
   const float skill = tune::kAnalysisDepth[static_cast<int>(difficulty_)];
-  w[1] *= 0.3f + skill;
-  w[3] *= 0.2f + skill;
+  w[1] *= 0.3f + 0.6f * skill;
+  w[3] *= 0.2f + 0.6f * skill;
   w[2] *= 0.4f + 0.6f * skill;
   float sum = 0.f;
   for (int i = 0; i < 5; ++i) sum += w[i];
@@ -295,6 +297,7 @@ bool Ai::Defend(const OppView& seen, const Observation& cur, Input* in) {
     oppAttacking_ = false;
     parryPressed_ = false;
     reacted_ = false;
+    grabAnswered_ = false;
     reaction_ = Reaction::None;
     return false;
   }
@@ -321,6 +324,23 @@ bool Ai::Defend(const OppView& seen, const Observation& cur, Input* in) {
   }
   if (self.phase != Phase::Idle && self.phase != Phase::Recovery) return false;  // busy: nothing to do now
 
+  // A grab is a slow, visible reach (pitch §12): hit the grabbing arm before it closes, a block does not help.
+  if (seen.kind == StrikeKind::Grab && (seen.phase == Phase::Windup || seen.phase == Phase::Strike)) {
+    const float skill = tune::kAnalysisDepth[static_cast<int>(difficulty_)];
+    if (!reacted_) {
+      reacted_ = true;
+      grabAnswer_ = Roll() < 0.15f + 0.45f * skill;
+    }
+    if (grabAnswer_ && !grabAnswered_ && cur.distance <= tune::kQuickReach) {
+      in->quick = true;
+      in->side = SwingSide::Up;
+      in->target = Zone::Torso;
+      in->arm = Roll() < 0.5f ? Arm::L : Arm::R;
+      if (!self.armUsable[Index(in->arm)]) in->arm = Other(in->arm);
+      grabAnswered_ = true;
+    }
+    return true;
+  }
   const int eta = seen.strikeTicksLeft >= 0 ? seen.strikeTicksLeft - delay_ : -1;  // observation is `delay_` ticks old
   const bool etaKnown = seen.strikeTicksLeft >= 0;
   in->guardSide = seen.side;
@@ -502,7 +522,34 @@ void Ai::Offend(const Observation& cur, const OppView& seen, Input* in) {
     return;
   }
 
-  if (self.phase != Phase::Idle || cooldown_ > 0) return;
+  if (self.phase != Phase::Idle) return;
+  const float reach = tune::kHeavyReach + (st.stepIn ? tune::kStepInReachBonus : 0.f) - 4.f;
+
+  // ---- counter window after a parry (pitch §6): the inner-line counter is the Counterpuncher's bread and butter ----
+  if (self.counterTicks > 0 && cur.distance <= reach) {
+    const float p = std::min(1.f, st.counter * tune::kCounterChance[static_cast<int>(difficulty_)] * 1.6f + 0.1f);
+    if (Roll() < p) {
+      if (Roll() < 0.6f) {
+        PickStrike(cur, seen);
+        if (script_.active) {
+          in->strikeHeld = true;
+          in->side = script_.side;
+          in->target = script_.target;
+          in->arm = script_.arm;
+          in->footwork = script_.foot;
+        }
+      } else {
+        in->quick = true;
+        in->target = PickTarget(seen, self);
+        in->side = SideFromIndex(static_cast<int>(rng_.Below(4)));
+        in->arm = Roll() < 0.5f ? Arm::L : Arm::R;
+        if (!self.armUsable[Index(in->arm)]) in->arm = Other(in->arm);
+        cooldown_ = std::max(12, st.cooldown / 3);
+      }
+      return;
+    }
+  }
+  if (cooldown_ > 0) return;
 
   // ---- weapon (pitch §13) ----
   if (st.weapon > 0.f) {
@@ -517,7 +564,7 @@ void Ai::Offend(const Observation& cur, const OppView& seen, Input* in) {
       }
       return;
     }
-    if (!oppThreat && cur.distance >= 40.f && self.armUsable[1] && self.zones[Index(Zone::ShoulderR)] < ZoneState::Destroyed && Roll() < st.weapon) {
+    if (!oppThreat && cur.distance >= tune::kWeaponMinDistance + 4.f && self.armUsable[1] && self.zones[Index(Zone::ShoulderR)] < ZoneState::Destroyed && Roll() < st.weapon) {
       in->weaponHeld = true;
       in->target = Zone::Torso;
       return;
@@ -531,7 +578,9 @@ void Ai::Offend(const Observation& cur, const OppView& seen, Input* in) {
   else if (seen.phase == Phase::Windup || seen.phase == Phase::Strike) chance = 0.f;
   if (chase_ > 0) chance = std::max(chance, 0.25f);
   if (self.stability < 25.f) chance *= 0.3f;
-  const float reach = tune::kHeavyReach + (st.stepIn ? tune::kStepInReachBonus : 0.f) - 2.f;
+  // A long quiet spell makes every style restless, so stalemates end (pitch §26 "Combat Lab" pacing).
+  const int quiet = std::min(self.sinceOwn, self.sinceIncoming);
+  if (quiet > 600) chance *= 1.f + std::min(3.f, static_cast<float>(quiet - 600) / 400.f);
   if (cur.distance > reach || Roll() >= chance) return;
 
   // Habit-based exploitation (pitch §8 "Поведенческое чтение").
@@ -609,6 +658,31 @@ Input Ai::Decide(const Observation& cur) {
   }
   if (reverseUntil_ >= 0 && cur.tick > reverseUntil_) reverseFrom_ = reverseUntil_ = -1;
 
+  // The opponent charges its weapon (pitch §13): break the charge up close, or sidestep the shot on its known timing.
+  if (seen.weaponCharging) {
+    if (!weaponSeen_) {
+      weaponSeen_ = true;
+      weaponSeenTick_ = old.tick;
+      weaponDodged_ = false;
+      rushing_ = Roll() < st.rush * (0.3f + 0.7f * tune::kAnalysisDepth[di]);
+      weaponJitter_ = static_cast<int>(std::lround((Roll() * 2.f - 1.f) * tune::kParryTimingJitter[di]));
+    }
+    if (rushing_) {
+      chase_ = std::max(chase_, 15);
+    } else if (!weaponDodged_ && (self.phase == Phase::Idle || self.phase == Phase::Recovery)) {
+      const float mult = seen.priority == EnergyPriority::Weapon ? tune::kPrioWeaponCharge : 1.f;
+      const Tick fireAt = weaponSeenTick_ + static_cast<Tick>(static_cast<float>(tune::kWeaponChargeTicks) / mult);
+      if (cur.tick >= fireAt - tune::kDodgeEvadeTicks / 2 + weaponJitter_) {
+        in.dodge = true;
+        in.dodgeDir = Roll() < 0.5f ? -1 : 1;
+        weaponDodged_ = true;
+      }
+    }
+  } else {
+    weaponSeen_ = false;
+    rushing_ = false;
+  }
+
   const bool defending = Defend(seen, cur, &in);
   if (!defending) {
     // Neutral: keep a guard up against the quick strikes that cannot be reacted to (pitch §20).
@@ -652,12 +726,14 @@ Input Ai::Decide(const Observation& cur) {
   // Hysteresis: start closing / opening only outside the tolerance band, but run all the way to the
   // preferred distance. Stopping at the band edge would park melee styles just outside their own reach.
   if (!script_.active && !self.weaponCharging && !in.hardStance) {
-    const float tol = 3.f + (1.f - tune::kPositionQuality[di]) * 6.f;
     float pref = st.preferred;
+    // The band must end inside the style's own strike reach, otherwise both pilots park just out of range.
+    const float styleReach = tune::kHeavyReach + (st.stepIn ? tune::kStepInReachBonus : 0.f) - 4.f;
+    const float tol = std::max(1.f, std::min(3.f + (1.f - tune::kPositionQuality[di]) * 6.f, styleReach - pref - 1.f));
     if (seen.phase == Phase::Recovery || seen.posture != Posture::Standing) pref -= 4.f;  // close in on a recovering enemy
     if (chase_ > 0) pref = 10.f;
     if (cur.distance > pref + tol) moving_ = 1;
-    else if (cur.distance < pref - tol) moving_ = -1;
+    else if (cur.distance < pref - tol) moving_ = st.kite && cur.distance > styleReach - 4.f ? -1 : 0;
     else if ((moving_ > 0 && cur.distance <= pref) || (moving_ < 0 && cur.distance >= pref)) moving_ = 0;
     in.move = static_cast<int8_t>(moving_);
     // Dodging stands still: the sidestep is the movement (pitch §6).

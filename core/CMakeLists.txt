@@ -21,6 +21,11 @@ add_executable(ivsim tools/ivsim.cpp)
 target_link_libraries(ivsim PRIVATE ivcore)
 target_compile_options(ivsim PRIVATE ${IV_FLAGS})
 
+# The documented game loop (docs/CORE_API.md) as a runnable example, kept honest by CTest.
+add_executable(iv_example examples/game_loop.cpp)
+target_link_libraries(iv_example PRIVATE ivcore)
+target_compile_options(iv_example PRIVATE ${IV_FLAGS})
+
 enable_testing()
 file(GLOB IV_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp)
 add_executable(iv_tests ${IV_TEST_SOURCES})
@@ -31,3 +36,4 @@ target_compile_options(iv_tests PRIVATE ${IV_FLAGS})
 foreach(module IN ITEMS Body Resources Strike Defense Ai Determinism Sim)
   add_test(NAME ${module} COMMAND iv_tests "${module}.")
 endforeach()
+add_test(NAME Example COMMAND iv_example)
