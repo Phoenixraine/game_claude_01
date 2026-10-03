@@ -12,8 +12,8 @@ namespace tune {
 // Layer capacities per zone: Armor -> Mechanism -> System.
 constexpr float kArmorMax[kZoneCount] = {
     50.f,   // Head       pitch §9 "Голова и сенсоры"
-    120.f,  // Torso      pitch §9 "лучше всего бронирован"
-    60.f,   // Reactor    pitch §9 "Задняя часть корпуса"
+    180.f,  // Torso      pitch §9 "лучше всего бронирован"
+    40.f,   // Reactor    pitch §9 "Задняя часть корпуса"
     70.f,   // ShoulderL  pitch §9 "Плечи и руки"
     70.f,   // ShoulderR  pitch §9
     55.f,   // ArmL       pitch §9
@@ -21,8 +21,8 @@ constexpr float kArmorMax[kZoneCount] = {
     90.f,   // LegL       pitch §9 "Ноги"
     90.f,   // LegR       pitch §9
 };
-constexpr float kMechanismMax[kZoneCount] = {40.f, 80.f, 50.f, 50.f, 50.f, 45.f, 45.f, 70.f, 70.f};  // pitch §14
-constexpr float kSystemMax[kZoneCount] = {60.f, 100.f, 90.f, 60.f, 60.f, 50.f, 50.f, 70.f, 70.f};      // pitch §14
+constexpr float kMechanismMax[kZoneCount] = {40.f, 110.f, 30.f, 50.f, 50.f, 45.f, 45.f, 70.f, 70.f};  // pitch §14
+constexpr float kSystemMax[kZoneCount] = {60.f, 140.f, 60.f, 60.f, 60.f, 50.f, 50.f, 70.f, 70.f};      // pitch §14
 
 constexpr float kCriticalMechanismFraction = 0.30f;  // pitch §14: below this the mechanism is Critical
 
@@ -44,7 +44,7 @@ constexpr int kBaseLockDelayTicks = 12;
 constexpr int kHeadLockDelay[kZoneStateCount] = {0, 0, 4, 10, 20, 40, 40};
 
 // pitch §9 "Задняя часть корпуса": the Reactor can only be hit if the victim is flanked this far.
-constexpr float kRearAngleDeg = 55.f;
+constexpr float kRearAngleDeg = 45.f;
 
 // ---------------------------------------------------------------- resources (pitch §10)
 constexpr float kStabilityMax = 100.f;                 // pitch §10 Стабильность

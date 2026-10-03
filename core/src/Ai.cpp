@@ -169,27 +169,28 @@ struct Style {
   float counter;
   float rush;         // P(charging in to break a weapon charge) when the opponent charges the launcher (pitch §13)
   bool kite;          // opens the distance when crowded (backing away is slow, so only a ranged style tries it)
+  float flank;        // P(per ready tick) of sidestepping to the opponent's back while he recovers (pitch §6 "зайти к повреждённому боку")
 };
 
 const Style kStyles[kArchetypeCount] = {
     // Counterpuncher: waits, punishes mistakes (pitch §20).
     {0.0025f, 30.f, 22.f, 0.65f, 0.02f, 0.10f, 0.f, 80, 10, {0.10f, 0.35f, 0.05f, 0.10f, 0.10f, 0.10f, 0.10f, 0.05f, 0.05f},
-     {0.35f, 0.25f, 0.05f, 0.30f, 0.f}, 0.85f, EnergyPriority::Guard, false, 0.9f, 0.4f, false},
+     {0.35f, 0.25f, 0.05f, 0.30f, 0.f}, 0.85f, EnergyPriority::Guard, false, 0.9f, 0.4f, false, 0.f},
     // Breaker: pushes the centre and the space (pitch §20 "Разрушитель").
     {0.013f, 3.f, 18.f, 0.85f, 0.03f, 0.05f, 0.f, 45, 25, {0.10f, 0.50f, 0.10f, 0.08f, 0.08f, 0.04f, 0.04f, 0.03f, 0.03f},
-     {0.55f, 0.10f, 0.10f, 0.10f, 0.15f}, 0.35f, EnergyPriority::Arms, true, 0.4f, 0.9f, false},
+     {0.55f, 0.10f, 0.10f, 0.10f, 0.15f}, 0.35f, EnergyPriority::Arms, true, 0.4f, 0.9f, false, 0.f},
     // LimbHunter: arms and legs first (pitch §20 "Охотник за конечностями").
     {0.012f, 3.f, 20.f, 0.55f, 0.04f, 0.12f, 0.f, 50, 15, {0.05f, 0.14f, 0.02f, 0.13f, 0.13f, 0.17f, 0.17f, 0.09f, 0.09f},
-     {0.40f, 0.20f, 0.25f, 0.15f, 0.f}, 0.5f, EnergyPriority::Arms, false, 0.5f, 0.7f, false},
+     {0.40f, 0.20f, 0.25f, 0.15f, 0.f}, 0.5f, EnergyPriority::Arms, false, 0.5f, 0.7f, false, 0.004f},
     // Trickster: feints and delays (pitch §20 "Обманщик").
     {0.016f, 3.f, 20.f, 0.50f, 0.08f, 0.55f, 0.f, 40, 15, {0.12f, 0.25f, 0.05f, 0.12f, 0.12f, 0.12f, 0.12f, 0.05f, 0.05f},
-     {0.30f, 0.15f, 0.35f, 0.20f, 0.f}, 0.4f, EnergyPriority::Legs, false, 0.6f, 0.6f, false},
+     {0.30f, 0.15f, 0.35f, 0.20f, 0.f}, 0.4f, EnergyPriority::Legs, false, 0.6f, 0.6f, false, 0.012f},
     // Gunner: keeps the range and prepares the weapon (pitch §20 "Стрелок").
     {0.010f, 3.f, 70.f, 0.50f, 0.f, 0.05f, 0.03f, 60, 10, {0.10f, 0.35f, 0.05f, 0.10f, 0.10f, 0.10f, 0.10f, 0.05f, 0.05f},
-     {0.50f, 0.10f, 0.35f, 0.05f, 0.f}, 0.4f, EnergyPriority::Weapon, false, 0.3f, 0.3f, true},
+     {0.50f, 0.10f, 0.35f, 0.05f, 0.f}, 0.4f, EnergyPriority::Weapon, false, 0.3f, 0.3f, true, 0.f},
     // Grappler: closes the gap and looks for the grab (pitch §20 "Борец").
     {0.014f, 3.f, 10.f, 0.45f, 0.30f, 0.15f, 0.f, 45, 15, {0.05f, 0.30f, 0.05f, 0.08f, 0.08f, 0.14f, 0.14f, 0.08f, 0.08f},
-     {0.30f, 0.10f, 0.05f, 0.15f, 0.40f}, 0.5f, EnergyPriority::Legs, true, 0.5f, 0.9f, false},
+     {0.30f, 0.10f, 0.05f, 0.15f, 0.40f}, 0.5f, EnergyPriority::Legs, true, 0.5f, 0.9f, false, 0.004f},
 };
 
 SwingSide SideFromIndex(int i) { return static_cast<SwingSide>(i); }
@@ -404,7 +405,7 @@ Zone Ai::PickTarget(const OppView& seen, const SelfView& self) {
     // pitch §12: a destroyed limb is worth tearing off.
     if (zs == ZoneState::Destroyed && IsLimbZone(static_cast<Zone>(z))) w[z] += 0.8f;
     // pitch §9: finish what is already open.
-    if (zs >= ZoneState::Exposed && zs < ZoneState::Destroyed) w[z] *= 1.5f;
+    if (zs >= ZoneState::Exposed && zs < ZoneState::Destroyed) w[z] *= 1.25f;
     if (zs == ZoneState::Destroyed && !IsLimbZone(static_cast<Zone>(z))) w[z] *= 0.2f;
   }
   w[Index(Zone::Reactor)] = std::fabs(seen.flank) >= tune::kRearAngleDeg ? w[Index(Zone::Reactor)] + 1.5f : 0.f;
@@ -578,6 +579,17 @@ void Ai::Offend(const Observation& cur, const OppView& seen, Input* in) {
   else if (seen.phase == Phase::Windup || seen.phase == Phase::Strike) chance = 0.f;
   if (chase_ > 0) chance = std::max(chance, 0.25f);
   if (self.stability < 25.f) chance *= 0.3f;
+  // The opponent's back is open (pitch §9): take the quick shot at the reactor while the angle lasts.
+  const bool rear = std::fabs(seen.flank) >= tune::kRearAngleDeg;
+  if (rear && cur.distance <= tune::kQuickReach - 2.f && Roll() < 0.35f + 0.5f * depth) {
+    in->quick = true;
+    in->target = Zone::Reactor;
+    in->side = SideFromIndex(static_cast<int>(rng_.Below(4)));
+    in->arm = Roll() < 0.5f ? Arm::L : Arm::R;
+    if (!self.armUsable[Index(in->arm)]) in->arm = Other(in->arm);
+    cooldown_ = std::max(8, st.cooldown / 4);
+    return;
+  }
   // A long quiet spell makes every style restless, so stalemates end (pitch §26 "Combat Lab" pacing).
   const int quiet = std::min(self.sinceOwn, self.sinceIncoming);
   if (quiet > 600) chance *= 1.f + std::min(3.f, static_cast<float>(quiet - 600) / 400.f);
@@ -710,6 +722,13 @@ Input Ai::Decide(const Observation& cur) {
         guardIdle_ = true;
         guardRethink_ = 50;
       }
+    }
+    // Circle to the opponent's back while he recovers (pitch §6, §9): the turned mech exposes its rear zone for a while.
+    if (st.flank > 0.f && self.phase == Phase::Idle && !script_.active && (seen.phase == Phase::Recovery || seen.posture != Posture::Standing) &&
+        cur.distance <= tune::kHeavyReach + 6.f && std::fabs(seen.flank) < tune::kRearAngleDeg &&
+        Roll() < st.flank * (0.5f + tune::kAnalysisDepth[di])) {
+      in.dodge = true;
+      in.dodgeDir = Roll() < 0.5f ? -1 : 1;
     }
     // Do not drop the guard in the middle of nothing if I am about to swing: Offend decides.
     const bool wasGuard = in.guardHeld;
