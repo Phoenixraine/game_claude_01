@@ -1,0 +1,6408 @@
+{
+ "name": "BASTION-01",
+ "height_m": 82.0,
+ "units": "metres, +Z up, forward -Y, origin on the ground between the feet",
+ "triangles_total": 52216,
+ "triangle_budget": 450000,
+ "part_count": 241,
+ "bbox_min": [
+  -39.2,
+  -18.68,
+  0.0
+ ],
+ "bbox_max": [
+  39.2,
+  22.7,
+  82.0
+ ],
+ "params": {
+  "height": 82.0,
+  "hip_z": 42.0,
+  "knee_z": 26.0,
+  "ankle_z": 5.0,
+  "waist_z": 48.0,
+  "chest_z": 60.5,
+  "shoulder_z": 66.0,
+  "neck_z": 68.0,
+  "head_y": -7.0,
+  "head_top": 79.0,
+  "shoulder_x": 23.0,
+  "arm_x": 30.0,
+  "elbow_z": 47.0,
+  "wrist_z": 27.0,
+  "leg_x": 11.5,
+  "reactor_y": 15.5,
+  "reactor_z": 57.0
+ },
+ "bones": {
+  "root": {
+   "head": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "tail": [
+    0.0,
+    0.0,
+    4.0
+   ],
+   "parent": null
+  },
+  "pelvis": {
+   "head": [
+    0.0,
+    0.0,
+    44.0
+   ],
+   "tail": [
+    0.0,
+    0.0,
+    50.0
+   ],
+   "parent": "root"
+  },
+  "torso": {
+   "head": [
+    0.0,
+    0.0,
+    48.0
+   ],
+   "tail": [
+    0.0,
+    0.0,
+    68.0
+   ],
+   "parent": "pelvis"
+  },
+  "head": {
+   "head": [
+    0.0,
+    -7.0,
+    68.0
+   ],
+   "tail": [
+    0.0,
+    -7.0,
+    79.0
+   ],
+   "parent": "torso"
+  },
+  "reactor": {
+   "head": [
+    0.0,
+    15.5,
+    57.0
+   ],
+   "tail": [
+    0.0,
+    15.5,
+    65.0
+   ],
+   "parent": "torso"
+  },
+  "shoulder_l": {
+   "head": [
+    18.4,
+    0.0,
+    66.0
+   ],
+   "tail": [
+    23.0,
+    0.0,
+    66.0
+   ],
+   "parent": "torso"
+  },
+  "upperarm_l": {
+   "head": [
+    23.0,
+    0.0,
+    65.0
+   ],
+   "tail": [
+    30.0,
+    -2.0,
+    47.0
+   ],
+   "parent": "shoulder_l"
+  },
+  "forearm_l": {
+   "head": [
+    30.0,
+    -2.0,
+    47.0
+   ],
+   "tail": [
+    30.0,
+    -4.0,
+    27.0
+   ],
+   "parent": "upperarm_l"
+  },
+  "hand_l": {
+   "head": [
+    30.0,
+    -4.0,
+    27.0
+   ],
+   "tail": [
+    30.0,
+    -4.0,
+    19.0
+   ],
+   "parent": "forearm_l"
+  },
+  "shoulder_r": {
+   "head": [
+    -18.4,
+    0.0,
+    66.0
+   ],
+   "tail": [
+    -23.0,
+    0.0,
+    66.0
+   ],
+   "parent": "torso"
+  },
+  "upperarm_r": {
+   "head": [
+    -23.0,
+    0.0,
+    65.0
+   ],
+   "tail": [
+    -30.0,
+    -2.0,
+    47.0
+   ],
+   "parent": "shoulder_r"
+  },
+  "forearm_r": {
+   "head": [
+    -30.0,
+    -2.0,
+    47.0
+   ],
+   "tail": [
+    -30.0,
+    -4.0,
+    27.0
+   ],
+   "parent": "upperarm_r"
+  },
+  "hand_r": {
+   "head": [
+    -30.0,
+    -4.0,
+    27.0
+   ],
+   "tail": [
+    -30.0,
+    -4.0,
+    19.0
+   ],
+   "parent": "forearm_r"
+  },
+  "thigh_l": {
+   "head": [
+    11.5,
+    0.0,
+    42.0
+   ],
+   "tail": [
+    11.5,
+    -1.0,
+    26.0
+   ],
+   "parent": "pelvis"
+  },
+  "shin_l": {
+   "head": [
+    11.5,
+    -1.0,
+    26.0
+   ],
+   "tail": [
+    11.5,
+    2.0,
+    5.0
+   ],
+   "parent": "thigh_l"
+  },
+  "foot_l": {
+   "head": [
+    11.5,
+    2.0,
+    5.0
+   ],
+   "tail": [
+    11.5,
+    -9.0,
+    1.5
+   ],
+   "parent": "shin_l"
+  },
+  "thigh_r": {
+   "head": [
+    -11.5,
+    0.0,
+    42.0
+   ],
+   "tail": [
+    -11.5,
+    -1.0,
+    26.0
+   ],
+   "parent": "pelvis"
+  },
+  "shin_r": {
+   "head": [
+    -11.5,
+    -1.0,
+    26.0
+   ],
+   "tail": [
+    -11.5,
+    2.0,
+    5.0
+   ],
+   "parent": "thigh_r"
+  },
+  "foot_r": {
+   "head": [
+    -11.5,
+    2.0,
+    5.0
+   ],
+   "tail": [
+    -11.5,
+    -9.0,
+    1.5
+   ],
+   "parent": "shin_r"
+  }
+ },
+ "zones": {
+  "Head": {
+   "triangles": 1424,
+   "armor": [
+    "Armor_Head_01",
+    "Armor_Head_02",
+    "Armor_Head_03",
+    "Armor_Head_04",
+    "Armor_Head_05"
+   ],
+   "inner": [
+    "Inner_Head_01",
+    "Inner_Head_02"
+   ],
+   "body": [
+    "Body_head"
+   ],
+   "joint": [
+    "Joint_head"
+   ],
+   "cable": []
+  },
+  "Torso": {
+   "triangles": 7700,
+   "armor": [
+    "Armor_Torso_01",
+    "Armor_Torso_02",
+    "Armor_Torso_03",
+    "Armor_Torso_04",
+    "Armor_Torso_05",
+    "Armor_Torso_06",
+    "Armor_Torso_07",
+    "Armor_Torso_08",
+    "Armor_Torso_09",
+    "Armor_Torso_10",
+    "Armor_Torso_11",
+    "Armor_Torso_12",
+    "Armor_Torso_13",
+    "Armor_Torso_14",
+    "Armor_Torso_15",
+    "Armor_Torso_16",
+    "Armor_Torso_17"
+   ],
+   "inner": [
+    "Inner_Torso_01",
+    "Inner_Torso_02",
+    "Inner_Torso_03",
+    "Inner_Torso_04",
+    "Inner_Torso_05",
+    "Inner_Torso_06",
+    "Inner_Torso_07"
+   ],
+   "body": [
+    "Body_torso",
+    "Body_pelvis"
+   ],
+   "joint": [
+    "Joint_torso"
+   ],
+   "cable": [
+    "Cable_Torso_01",
+    "Cable_Torso_02",
+    "Cable_Torso_03",
+    "Cable_Torso_04",
+    "Cable_Torso_05"
+   ]
+  },
+  "Reactor": {
+   "triangles": 1860,
+   "armor": [
+    "Armor_Reactor_01",
+    "Armor_Reactor_02",
+    "Armor_Reactor_03",
+    "Armor_Reactor_04",
+    "Armor_Reactor_05"
+   ],
+   "inner": [
+    "Inner_Reactor_01",
+    "Inner_Reactor_02"
+   ],
+   "body": [
+    "Body_reactor"
+   ],
+   "joint": [],
+   "cable": []
+  },
+  "ShoulderL": {
+   "triangles": 4068,
+   "armor": [
+    "Armor_ShoulderL_01",
+    "Armor_ShoulderL_02",
+    "Armor_ShoulderL_03",
+    "Armor_ShoulderL_04",
+    "Armor_ShoulderL_05",
+    "Armor_ShoulderL_06",
+    "Armor_ShoulderL_07",
+    "Armor_ShoulderL_08"
+   ],
+   "inner": [
+    "Inner_ShoulderL_01",
+    "Inner_ShoulderL_02",
+    "Inner_ShoulderL_03",
+    "Inner_ShoulderL_04",
+    "Inner_ShoulderL_05"
+   ],
+   "body": [
+    "Body_shoulder_l"
+   ],
+   "joint": [
+    "Joint_shoulder_l"
+   ],
+   "cable": [
+    "Cable_ShoulderL_01",
+    "Cable_ShoulderL_02",
+    "Cable_ShoulderL_03",
+    "Cable_ShoulderL_04"
+   ]
+  },
+  "ArmL": {
+   "triangles": 8720,
+   "armor": [
+    "Armor_ArmL_01",
+    "Armor_ArmL_02",
+    "Armor_ArmL_03",
+    "Armor_ArmL_04",
+    "Armor_ArmL_05",
+    "Armor_ArmL_06",
+    "Armor_ArmL_07",
+    "Armor_ArmL_08",
+    "Armor_ArmL_09",
+    "Armor_ArmL_10",
+    "Armor_ArmL_11",
+    "Armor_ArmL_12",
+    "Armor_ArmL_13"
+   ],
+   "inner": [
+    "Inner_ArmL_01",
+    "Inner_ArmL_02",
+    "Inner_ArmL_03",
+    "Inner_ArmL_04",
+    "Inner_ArmL_05",
+    "Inner_ArmL_06",
+    "Inner_ArmL_07",
+    "Inner_ArmL_08",
+    "Inner_ArmL_09",
+    "Inner_ArmL_10",
+    "Inner_ArmL_11",
+    "Inner_ArmL_12",
+    "Inner_ArmL_13"
+   ],
+   "body": [
+    "Body_upperarm_l",
+    "Body_forearm_l",
+    "Body_hand_l"
+   ],
+   "joint": [
+    "Joint_upperarm_l",
+    "Joint_forearm_l",
+    "Joint_hand_l"
+   ],
+   "cable": [
+    "Cable_ArmL_01",
+    "Cable_ArmL_02",
+    "Cable_ArmL_03",
+    "Cable_ArmL_04",
+    "Cable_ArmL_05",
+    "Cable_ArmL_06",
+    "Cable_ArmL_07",
+    "Cable_ArmL_08"
+   ]
+  },
+  "LegL": {
+   "triangles": 7828,
+   "armor": [
+    "Armor_LegL_01",
+    "Armor_LegL_02",
+    "Armor_LegL_03",
+    "Armor_LegL_04",
+    "Armor_LegL_05",
+    "Armor_LegL_06",
+    "Armor_LegL_07",
+    "Armor_LegL_08",
+    "Armor_LegL_09",
+    "Armor_LegL_10",
+    "Armor_LegL_11",
+    "Armor_LegL_12",
+    "Armor_LegL_13"
+   ],
+   "inner": [
+    "Inner_LegL_01",
+    "Inner_LegL_02",
+    "Inner_LegL_03",
+    "Inner_LegL_04",
+    "Inner_LegL_05",
+    "Inner_LegL_06",
+    "Inner_LegL_07",
+    "Inner_LegL_08",
+    "Inner_LegL_09",
+    "Inner_LegL_10",
+    "Inner_LegL_11"
+   ],
+   "body": [
+    "Body_thigh_l",
+    "Body_shin_l",
+    "Body_foot_l"
+   ],
+   "joint": [
+    "Joint_thigh_l",
+    "Joint_shin_l",
+    "Joint_foot_l"
+   ],
+   "cable": [
+    "Cable_LegL_01",
+    "Cable_LegL_02",
+    "Cable_LegL_03",
+    "Cable_LegL_04",
+    "Cable_LegL_05",
+    "Cable_LegL_06",
+    "Cable_LegL_07"
+   ]
+  },
+  "ShoulderR": {
+   "triangles": 4068,
+   "armor": [
+    "Armor_ShoulderR_01",
+    "Armor_ShoulderR_02",
+    "Armor_ShoulderR_03",
+    "Armor_ShoulderR_04",
+    "Armor_ShoulderR_05",
+    "Armor_ShoulderR_06",
+    "Armor_ShoulderR_07",
+    "Armor_ShoulderR_08"
+   ],
+   "inner": [
+    "Inner_ShoulderR_01",
+    "Inner_ShoulderR_02",
+    "Inner_ShoulderR_03",
+    "Inner_ShoulderR_04",
+    "Inner_ShoulderR_05"
+   ],
+   "body": [
+    "Body_shoulder_r"
+   ],
+   "joint": [
+    "Joint_shoulder_r"
+   ],
+   "cable": [
+    "Cable_ShoulderR_01",
+    "Cable_ShoulderR_02",
+    "Cable_ShoulderR_03",
+    "Cable_ShoulderR_04"
+   ]
+  },
+  "ArmR": {
+   "triangles": 8720,
+   "armor": [
+    "Armor_ArmR_01",
+    "Armor_ArmR_02",
+    "Armor_ArmR_03",
+    "Armor_ArmR_04",
+    "Armor_ArmR_05",
+    "Armor_ArmR_06",
+    "Armor_ArmR_07",
+    "Armor_ArmR_08",
+    "Armor_ArmR_09",
+    "Armor_ArmR_10",
+    "Armor_ArmR_11",
+    "Armor_ArmR_12",
+    "Armor_ArmR_13"
+   ],
+   "inner": [
+    "Inner_ArmR_01",
+    "Inner_ArmR_02",
+    "Inner_ArmR_03",
+    "Inner_ArmR_04",
+    "Inner_ArmR_05",
+    "Inner_ArmR_06",
+    "Inner_ArmR_07",
+    "Inner_ArmR_08",
+    "Inner_ArmR_09",
+    "Inner_ArmR_10",
+    "Inner_ArmR_11",
+    "Inner_ArmR_12",
+    "Inner_ArmR_13"
+   ],
+   "body": [
+    "Body_upperarm_r",
+    "Body_forearm_r",
+    "Body_hand_r"
+   ],
+   "joint": [
+    "Joint_upperarm_r",
+    "Joint_forearm_r",
+    "Joint_hand_r"
+   ],
+   "cable": [
+    "Cable_ArmR_01",
+    "Cable_ArmR_02",
+    "Cable_ArmR_03",
+    "Cable_ArmR_04",
+    "Cable_ArmR_05",
+    "Cable_ArmR_06",
+    "Cable_ArmR_07",
+    "Cable_ArmR_08"
+   ]
+  },
+  "LegR": {
+   "triangles": 7828,
+   "armor": [
+    "Armor_LegR_01",
+    "Armor_LegR_02",
+    "Armor_LegR_03",
+    "Armor_LegR_04",
+    "Armor_LegR_05",
+    "Armor_LegR_06",
+    "Armor_LegR_07",
+    "Armor_LegR_08",
+    "Armor_LegR_09",
+    "Armor_LegR_10",
+    "Armor_LegR_11",
+    "Armor_LegR_12",
+    "Armor_LegR_13"
+   ],
+   "inner": [
+    "Inner_LegR_01",
+    "Inner_LegR_02",
+    "Inner_LegR_03",
+    "Inner_LegR_04",
+    "Inner_LegR_05",
+    "Inner_LegR_06",
+    "Inner_LegR_07",
+    "Inner_LegR_08",
+    "Inner_LegR_09",
+    "Inner_LegR_10",
+    "Inner_LegR_11"
+   ],
+   "body": [
+    "Body_thigh_r",
+    "Body_shin_r",
+    "Body_foot_r"
+   ],
+   "joint": [
+    "Joint_thigh_r",
+    "Joint_shin_r",
+    "Joint_foot_r"
+   ],
+   "cable": [
+    "Cable_LegR_01",
+    "Cable_LegR_02",
+    "Cable_LegR_03",
+    "Cable_LegR_04",
+    "Cable_LegR_05",
+    "Cable_LegR_06",
+    "Cable_LegR_07"
+   ]
+  }
+ },
+ "parts": [
+  {
+   "name": "Body_head",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "body",
+   "triangles": 156,
+   "vertices": 88,
+   "materials": [
+    "M_Graphite",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    -6.446,
+    -14.05,
+    69.1
+   ],
+   "bbox_max": [
+    6.446,
+    -0.624,
+    79.7
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 818.53
+  },
+  {
+   "name": "Armor_Head_01",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -5.5,
+    -15.167,
+    69.832
+   ],
+   "bbox_max": [
+    5.5,
+    -13.127,
+    74.519
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 198.01
+  },
+  {
+   "name": "Armor_Head_02",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    6.1,
+    -11.25,
+    70.6
+   ],
+   "bbox_max": [
+    7.7,
+    -1.75,
+    76.2
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 212.21
+  },
+  {
+   "name": "Armor_Head_03",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -7.7,
+    -11.25,
+    70.6
+   ],
+   "bbox_max": [
+    -6.1,
+    -1.75,
+    76.2
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 212.21
+  },
+  {
+   "name": "Armor_Head_04",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -3.75,
+    -8.45,
+    79.45
+   ],
+   "bbox_max": [
+    3.75,
+    -1.95,
+    80.58
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 177.7
+  },
+  {
+   "name": "Joint_head",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "joint",
+   "triangles": 156,
+   "vertices": 80,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -3.6,
+    -9.6,
+    67.5
+   ],
+   "bbox_max": [
+    3.6,
+    -2.4,
+    69.7
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 124.27
+  },
+  {
+   "name": "Inner_Head_01",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "inner",
+   "triangles": 100,
+   "vertices": 56,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -3.7,
+    -8.5,
+    71.4
+   ],
+   "bbox_max": [
+    3.5,
+    -4.5,
+    81.35
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 78.51
+  },
+  {
+   "name": "Inner_Head_02",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "inner",
+   "triangles": 36,
+   "vertices": 24,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    -1.65,
+    -14.25,
+    69.85
+   ],
+   "bbox_max": [
+    1.65,
+    -13.95,
+    70.15
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 2.34
+  },
+  {
+   "name": "Armor_Head_05",
+   "bone": "head",
+   "zone": "Head",
+   "kind": "armor",
+   "triangles": 92,
+   "vertices": 52,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    1.7,
+    -4.8,
+    79.5
+   ],
+   "bbox_max": [
+    3.3,
+    -3.2,
+    82.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 11.68
+  },
+  {
+   "name": "Body_torso",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "body",
+   "triangles": 180,
+   "vertices": 96,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -17.574,
+    -10.0,
+    47.5
+   ],
+   "bbox_max": [
+    17.574,
+    10.0,
+    73.55
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 5137.56
+  },
+  {
+   "name": "Joint_torso",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "joint",
+   "triangles": 220,
+   "vertices": 112,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -11.5,
+    -11.5,
+    46.0
+   ],
+   "bbox_max": [
+    11.5,
+    11.5,
+    49.2
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1029.15
+  },
+  {
+   "name": "Armor_Torso_01",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -17.3,
+    -12.861,
+    59.016
+   ],
+   "bbox_max": [
+    -1.3,
+    -9.703,
+    69.584
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 622.24
+  },
+  {
+   "name": "Armor_Torso_02",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 248,
+   "vertices": 144,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    1.3,
+    -12.94,
+    59.016
+   ],
+   "bbox_max": [
+    17.3,
+    -9.703,
+    69.584
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 650.65
+  },
+  {
+   "name": "Armor_Torso_03",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 224,
+   "vertices": 128,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    -2.0,
+    -12.14,
+    59.2
+   ],
+   "bbox_max": [
+    2.0,
+    -10.2,
+    68.2
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 154.28
+  },
+  {
+   "name": "Armor_Torso_04",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 272,
+   "vertices": 160,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    -15.12,
+    -12.74,
+    51.45
+   ],
+   "bbox_max": [
+    15.12,
+    -10.8,
+    57.95
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 693.75
+  },
+  {
+   "name": "Armor_Torso_05",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -13.5,
+    -10.53,
+    48.5
+   ],
+   "bbox_max": [
+    -4.5,
+    -8.9,
+    54.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 206.36
+  },
+  {
+   "name": "Armor_Torso_06",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    4.5,
+    -10.9,
+    48.5
+   ],
+   "bbox_max": [
+    13.5,
+    -8.9,
+    54.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 222.48
+  },
+  {
+   "name": "Armor_Torso_07",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 260,
+   "vertices": 152,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -20.223,
+    -10.522,
+    55.0
+   ],
+   "bbox_max": [
+    -16.652,
+    4.522,
+    69.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 800.6
+  },
+  {
+   "name": "Armor_Torso_08",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    16.652,
+    -10.522,
+    55.0
+   ],
+   "bbox_max": [
+    20.082,
+    4.522,
+    69.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 776.9
+  },
+  {
+   "name": "Armor_Torso_09",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange",
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    -16.0,
+    10.4,
+    55.0
+   ],
+   "bbox_max": [
+    -1.0,
+    12.65,
+    69.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 903.81
+  },
+  {
+   "name": "Armor_Torso_10",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 260,
+   "vertices": 152,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    1.0,
+    10.4,
+    55.0
+   ],
+   "bbox_max": [
+    16.0,
+    12.6,
+    69.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 789.94
+  },
+  {
+   "name": "Armor_Torso_11",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -16.5,
+    -6.5,
+    73.3
+   ],
+   "bbox_max": [
+    -8.5,
+    4.5,
+    74.53
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 310.2
+  },
+  {
+   "name": "Armor_Torso_12",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 372,
+   "vertices": 192,
+   "materials": [
+    "M_CeramicGray",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    7.8,
+    -5.2,
+    73.45
+   ],
+   "bbox_max": [
+    16.2,
+    3.2,
+    74.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 245.19
+  },
+  {
+   "name": "Armor_Torso_13",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 180,
+   "vertices": 120,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    21.425,
+    5.55,
+    54.25
+   ],
+   "bbox_max": [
+    21.775,
+    8.45,
+    67.75
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 79.43
+  },
+  {
+   "name": "Inner_Torso_01",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "inner",
+   "triangles": 192,
+   "vertices": 128,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -13.4,
+    -9.4,
+    54.05
+   ],
+   "bbox_max": [
+    13.4,
+    9.4,
+    66.95
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1073.76
+  },
+  {
+   "name": "Inner_Torso_02",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "inner",
+   "triangles": 324,
+   "vertices": 172,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -2.146,
+    -10.45,
+    53.14
+   ],
+   "bbox_max": [
+    2.146,
+    -9.35,
+    67.86
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 138.75
+  },
+  {
+   "name": "Inner_Torso_03",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    -8.45,
+    -12.45,
+    54.35
+   ],
+   "bbox_max": [
+    8.45,
+    -8.55,
+    66.3
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 139.92
+  },
+  {
+   "name": "Inner_Torso_04",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -9.1,
+    -9.65,
+    55.848
+   ],
+   "bbox_max": [
+    9.1,
+    -9.25,
+    64.305
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 76.66
+  },
+  {
+   "name": "Cable_Torso_01",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -7.938,
+    -10.696,
+    53.251
+   ],
+   "bbox_max": [
+    -6.234,
+    -9.829,
+    68.523
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 25.79
+  },
+  {
+   "name": "Cable_Torso_02",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -0.543,
+    -10.583,
+    53.279
+   ],
+   "bbox_max": [
+    1.072,
+    -9.904,
+    68.517
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 19.24
+  },
+  {
+   "name": "Cable_Torso_03",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    6.094,
+    -10.514,
+    53.27
+   ],
+   "bbox_max": [
+    7.769,
+    -9.8,
+    68.505
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 26.87
+  },
+  {
+   "name": "Inner_Torso_05",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "inner",
+   "triangles": 176,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -10.75,
+    -10.9,
+    58.5
+   ],
+   "bbox_max": [
+    10.75,
+    -9.1,
+    68.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 139.71
+  },
+  {
+   "name": "Inner_Torso_06",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "inner",
+   "triangles": 188,
+   "vertices": 104,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -13.0,
+    9.8,
+    56.0
+   ],
+   "bbox_max": [
+    13.0,
+    11.0,
+    68.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 264.44
+  },
+  {
+   "name": "Inner_Torso_07",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "inner",
+   "triangles": 72,
+   "vertices": 40,
+   "materials": [
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    -17.866,
+    -5.7,
+    55.5
+   ],
+   "bbox_max": [
+    17.866,
+    -4.3,
+    67.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 109.59
+  },
+  {
+   "name": "Cable_Torso_04",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -18.493,
+    -11.551,
+    68.18
+   ],
+   "bbox_max": [
+    -2.955,
+    -2.872,
+    69.817
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 38.82
+  },
+  {
+   "name": "Cable_Torso_05",
+   "bone": "torso",
+   "zone": "Torso",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    2.955,
+    -11.551,
+    68.18
+   ],
+   "bbox_max": [
+    18.493,
+    -2.872,
+    69.817
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 38.82
+  },
+  {
+   "name": "Body_pelvis",
+   "bone": "pelvis",
+   "zone": "Torso",
+   "kind": "body",
+   "triangles": 104,
+   "vertices": 56,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -13.905,
+    -8.452,
+    43.5
+   ],
+   "bbox_max": [
+    13.905,
+    9.5,
+    50.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1775.47
+  },
+  {
+   "name": "Armor_Torso_14",
+   "bone": "pelvis",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -9.0,
+    -10.6,
+    44.0
+   ],
+   "bbox_max": [
+    9.0,
+    -8.6,
+    50.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 436.85
+  },
+  {
+   "name": "Armor_Torso_15",
+   "bone": "pelvis",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -15.18,
+    -6.0,
+    44.5
+   ],
+   "bbox_max": [
+    -13.65,
+    6.0,
+    49.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 230.23
+  },
+  {
+   "name": "Armor_Torso_16",
+   "bone": "pelvis",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    13.65,
+    -6.0,
+    44.5
+   ],
+   "bbox_max": [
+    15.18,
+    6.0,
+    49.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 230.23
+  },
+  {
+   "name": "Armor_Torso_17",
+   "bone": "pelvis",
+   "zone": "Torso",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -9.0,
+    8.6,
+    44.0
+   ],
+   "bbox_max": [
+    9.0,
+    10.6,
+    50.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 436.85
+  },
+  {
+   "name": "Body_reactor",
+   "bone": "reactor",
+   "zone": "Reactor",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -7.5,
+    10.5,
+    53.0
+   ],
+   "bbox_max": [
+    7.5,
+    20.5,
+    68.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 933.54
+  },
+  {
+   "name": "Inner_Reactor_01",
+   "bone": "reactor",
+   "zone": "Reactor",
+   "kind": "inner",
+   "triangles": 304,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    -6.166,
+    7.3,
+    54.5
+   ],
+   "bbox_max": [
+    6.166,
+    12.9,
+    66.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 499.87
+  },
+  {
+   "name": "Armor_Reactor_01",
+   "bone": "reactor",
+   "zone": "Reactor",
+   "kind": "armor",
+   "triangles": 272,
+   "vertices": 160,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -7.55,
+    20.7,
+    54.0
+   ],
+   "bbox_max": [
+    -1.05,
+    22.7,
+    67.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 340.47
+  },
+  {
+   "name": "Armor_Reactor_02",
+   "bone": "reactor",
+   "zone": "Reactor",
+   "kind": "armor",
+   "triangles": 284,
+   "vertices": 168,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    1.05,
+    20.7,
+    54.0
+   ],
+   "bbox_max": [
+    7.55,
+    22.7,
+    67.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 345.13
+  },
+  {
+   "name": "Armor_Reactor_03",
+   "bone": "reactor",
+   "zone": "Reactor",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -5.5,
+    11.5,
+    67.9
+   ],
+   "bbox_max": [
+    5.5,
+    19.5,
+    70.773
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 335.4
+  },
+  {
+   "name": "Armor_Reactor_04",
+   "bone": "reactor",
+   "zone": "Reactor",
+   "kind": "armor",
+   "triangles": 308,
+   "vertices": 168,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -11.575,
+    11.25,
+    54.25
+   ],
+   "bbox_max": [
+    -7.925,
+    19.75,
+    66.75
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1572.84
+  },
+  {
+   "name": "Armor_Reactor_05",
+   "bone": "reactor",
+   "zone": "Reactor",
+   "kind": "armor",
+   "triangles": 308,
+   "vertices": 168,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    7.925,
+    11.25,
+    54.25
+   ],
+   "bbox_max": [
+    11.575,
+    19.75,
+    66.75
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1572.84
+  },
+  {
+   "name": "Inner_Reactor_02",
+   "bone": "reactor",
+   "zone": "Reactor",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    -4.5,
+    15.5,
+    67.5
+   ],
+   "bbox_max": [
+    4.5,
+    17.5,
+    73.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 86.54
+  },
+  {
+   "name": "Body_shoulder_l",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    17.129,
+    -10.404,
+    63.0
+   ],
+   "bbox_max": [
+    33.871,
+    10.404,
+    76.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1298.77
+  },
+  {
+   "name": "Armor_ShoulderL_01",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    18.25,
+    -9.5,
+    75.5
+   ],
+   "bbox_max": [
+    32.75,
+    9.5,
+    77.66
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 981.18
+  },
+  {
+   "name": "Armor_ShoulderL_02",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "armor",
+   "triangles": 248,
+   "vertices": 144,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    18.5,
+    -12.385,
+    64.37
+   ],
+   "bbox_max": [
+    32.5,
+    -8.985,
+    75.43
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 586.59
+  },
+  {
+   "name": "Armor_ShoulderL_03",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    18.5,
+    8.985,
+    64.37
+   ],
+   "bbox_max": [
+    32.5,
+    12.372,
+    75.43
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 568.9
+  },
+  {
+   "name": "Armor_ShoulderL_04",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "armor",
+   "triangles": 272,
+   "vertices": 160,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    32.2,
+    -9.5,
+    63.75
+   ],
+   "bbox_max": [
+    34.6,
+    9.5,
+    75.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 845.59
+  },
+  {
+   "name": "Armor_ShoulderL_05",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    17.07,
+    -8.0,
+    65.55
+   ],
+   "bbox_max": [
+    18.9,
+    8.0,
+    75.05
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 548.44
+  },
+  {
+   "name": "Armor_ShoulderL_06",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    18.75,
+    -8.5,
+    61.62
+   ],
+   "bbox_max": [
+    32.25,
+    8.5,
+    63.35
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 800.35
+  },
+  {
+   "name": "Inner_ShoulderL_01",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "inner",
+   "triangles": 96,
+   "vertices": 64,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    19.1,
+    -8.9,
+    66.8
+   ],
+   "bbox_max": [
+    31.9,
+    8.9,
+    72.2
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 362.88
+  },
+  {
+   "name": "Inner_ShoulderL_02",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "inner",
+   "triangles": 180,
+   "vertices": 96,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    23.775,
+    -9.95,
+    65.36
+   ],
+   "bbox_max": [
+    27.225,
+    -8.85,
+    73.64
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 60.31
+  },
+  {
+   "name": "Inner_ShoulderL_03",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    20.55,
+    -11.95,
+    65.1
+   ],
+   "bbox_max": [
+    24.45,
+    -8.05,
+    73.55
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 140.26
+  },
+  {
+   "name": "Inner_ShoulderL_04",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    21.3,
+    -9.15,
+    66.18
+   ],
+   "bbox_max": [
+    29.7,
+    -8.75,
+    72.116
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 35.84
+  },
+  {
+   "name": "Cable_ShoulderL_01",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    21.824,
+    -10.206,
+    65.394
+   ],
+   "bbox_max": [
+    23.133,
+    -9.304,
+    74.046
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 10.22
+  },
+  {
+   "name": "Cable_ShoulderL_02",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    24.7,
+    -10.309,
+    65.394
+   ],
+   "bbox_max": [
+    26.281,
+    -9.355,
+    74.044
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 10.91
+  },
+  {
+   "name": "Cable_ShoulderL_03",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    27.863,
+    -10.25,
+    65.391
+   ],
+   "bbox_max": [
+    28.989,
+    -9.305,
+    74.04
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 10.96
+  },
+  {
+   "name": "Inner_ShoulderL_05",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "inner",
+   "triangles": 132,
+   "vertices": 72,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    21.0,
+    -10.3,
+    69.0
+   ],
+   "bbox_max": [
+    30.0,
+    10.3,
+    72.9
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 126.73
+  },
+  {
+   "name": "Armor_ShoulderL_07",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "armor",
+   "triangles": 64,
+   "vertices": 36,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    28.7,
+    6.2,
+    76.3
+   ],
+   "bbox_max": [
+    30.3,
+    7.8,
+    82.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 31.33
+  },
+  {
+   "name": "Armor_ShoulderL_08",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "armor",
+   "triangles": 108,
+   "vertices": 64,
+   "materials": [
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    20.25,
+    -5.25,
+    76.55
+   ],
+   "bbox_max": [
+    24.75,
+    -0.75,
+    81.05
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 115.34
+  },
+  {
+   "name": "Joint_shoulder_l",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "joint",
+   "triangles": 188,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    15.36,
+    -6.2,
+    59.3
+   ],
+   "bbox_max": [
+    22.36,
+    6.2,
+    71.7
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 496.8
+  },
+  {
+   "name": "Cable_ShoulderL_04",
+   "bone": "shoulder_l",
+   "zone": "ShoulderL",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    13.693,
+    -11.874,
+    57.783
+   ],
+   "bbox_max": [
+    27.311,
+    -3.811,
+    70.853
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 51.79
+  },
+  {
+   "name": "Body_upperarm_l",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    24.282,
+    -7.221,
+    47.0
+   ],
+   "bbox_max": [
+    35.718,
+    5.221,
+    64.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 860.16
+  },
+  {
+   "name": "Armor_ArmL_01",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    35.6,
+    -7.0,
+    48.75
+   ],
+   "bbox_max": [
+    37.8,
+    5.0,
+    63.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 643.3
+  },
+  {
+   "name": "Armor_ArmL_02",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    22.82,
+    -6.5,
+    49.5
+   ],
+   "bbox_max": [
+    24.55,
+    4.5,
+    62.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 516.41
+  },
+  {
+   "name": "Armor_ArmL_03",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    24.75,
+    -8.76,
+    48.75
+   ],
+   "bbox_max": [
+    35.25,
+    -6.8,
+    63.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 555.48
+  },
+  {
+   "name": "Armor_ArmL_04",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 224,
+   "vertices": 128,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    24.75,
+    5.0,
+    48.75
+   ],
+   "bbox_max": [
+    35.25,
+    6.94,
+    63.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 557.53
+  },
+  {
+   "name": "Armor_ArmL_05",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    23.75,
+    -7.75,
+    64.0
+   ],
+   "bbox_max": [
+    36.25,
+    5.75,
+    65.63
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 593.52
+  },
+  {
+   "name": "Joint_upperarm_l",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "joint",
+   "triangles": 156,
+   "vertices": 80,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    18.0,
+    -5.5,
+    59.0
+   ],
+   "bbox_max": [
+    28.0,
+    5.5,
+    69.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 487.43
+  },
+  {
+   "name": "Inner_ArmL_01",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 144,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    25.0,
+    -6.8,
+    49.717
+   ],
+   "bbox_max": [
+    35.0,
+    4.8,
+    59.283
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 387.72
+  },
+  {
+   "name": "Inner_ArmL_02",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 180,
+   "vertices": 96,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    27.926,
+    -7.85,
+    48.52
+   ],
+   "bbox_max": [
+    32.074,
+    -6.75,
+    60.48
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 84.29
+  },
+  {
+   "name": "Inner_ArmL_03",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    30.35,
+    -9.85,
+    49.1
+   ],
+   "bbox_max": [
+    34.25,
+    -5.95,
+    59.55
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 132.62
+  },
+  {
+   "name": "Inner_ArmL_04",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    26.78,
+    -7.05,
+    50.797
+   ],
+   "bbox_max": [
+    33.22,
+    -6.65,
+    59.047
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 27.67
+  },
+  {
+   "name": "Cable_ArmL_01",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    26.807,
+    -8.186,
+    48.615
+   ],
+   "bbox_max": [
+    27.868,
+    -7.182,
+    61.018
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 15.97
+  },
+  {
+   "name": "Cable_ArmL_02",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    29.133,
+    -8.159,
+    48.619
+   ],
+   "bbox_max": [
+    30.705,
+    -7.296,
+    61.071
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 16.44
+  },
+  {
+   "name": "Cable_ArmL_03",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    32.15,
+    -8.087,
+    48.563
+   ],
+   "bbox_max": [
+    33.614,
+    -7.208,
+    61.013
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 23.71
+  },
+  {
+   "name": "Inner_ArmL_05",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 136,
+   "vertices": 72,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    33.03,
+    -9.635,
+    49.748
+   ],
+   "bbox_max": [
+    35.37,
+    -7.261,
+    56.972
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 58.08
+  },
+  {
+   "name": "Inner_ArmL_06",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 36,
+   "vertices": 20,
+   "materials": [
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    33.729,
+    -9.491,
+    44.042
+   ],
+   "bbox_max": [
+    34.671,
+    -8.173,
+    51.238
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 23.34
+  },
+  {
+   "name": "Inner_ArmL_07",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 136,
+   "vertices": 72,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    24.63,
+    -9.635,
+    49.748
+   ],
+   "bbox_max": [
+    26.97,
+    -7.261,
+    56.972
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 58.08
+  },
+  {
+   "name": "Inner_ArmL_08",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 36,
+   "vertices": 20,
+   "materials": [
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    25.329,
+    -9.491,
+    44.042
+   ],
+   "bbox_max": [
+    26.271,
+    -8.173,
+    51.238
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 23.34
+  },
+  {
+   "name": "Joint_forearm_l",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "joint",
+   "triangles": 188,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    23.25,
+    -7.4,
+    41.6
+   ],
+   "bbox_max": [
+    36.75,
+    3.4,
+    52.4
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 623.68
+  },
+  {
+   "name": "Cable_ArmL_04",
+   "bone": "upperarm_l",
+   "zone": "ArmL",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    31.672,
+    -10.154,
+    43.865
+   ],
+   "bbox_max": [
+    35.3,
+    -7.661,
+    60.156
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 38.34
+  },
+  {
+   "name": "Body_forearm_l",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    23.324,
+    -10.433,
+    27.5
+   ],
+   "bbox_max": [
+    36.676,
+    4.433,
+    45.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1046.7
+  },
+  {
+   "name": "Armor_ArmL_06",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 260,
+   "vertices": 152,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    36.8,
+    -10.0,
+    29.75
+   ],
+   "bbox_max": [
+    39.2,
+    4.0,
+    45.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 821.38
+  },
+  {
+   "name": "Armor_ArmL_07",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    21.57,
+    -9.25,
+    30.25
+   ],
+   "bbox_max": [
+    23.4,
+    3.25,
+    44.75
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 650.4
+  },
+  {
+   "name": "Armor_ArmL_08",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    24.0,
+    -12.44,
+    29.75
+   ],
+   "bbox_max": [
+    36.0,
+    -10.3,
+    45.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 684.19
+  },
+  {
+   "name": "Armor_ArmL_09",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    24.0,
+    4.1,
+    29.75
+   ],
+   "bbox_max": [
+    36.0,
+    6.5,
+    45.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 687.11
+  },
+  {
+   "name": "Armor_ArmL_10",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    23.25,
+    -10.75,
+    45.15
+   ],
+   "bbox_max": [
+    36.75,
+    4.75,
+    46.88
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 734.27
+  },
+  {
+   "name": "Inner_ArmL_09",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 192,
+   "vertices": 128,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    24.2,
+    -9.6,
+    30.425
+   ],
+   "bbox_max": [
+    35.8,
+    3.6,
+    42.575
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 591.2
+  },
+  {
+   "name": "Inner_ArmL_10",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 324,
+   "vertices": 172,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    27.502,
+    -10.65,
+    29.6
+   ],
+   "bbox_max": [
+    32.498,
+    -9.55,
+    43.4
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 139.03
+  },
+  {
+   "name": "Inner_ArmL_11",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    25.35,
+    -12.65,
+    30.6
+   ],
+   "bbox_max": [
+    29.25,
+    -8.75,
+    42.077
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 152.63
+  },
+  {
+   "name": "Inner_ArmL_12",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    26.22,
+    -9.85,
+    33.278
+   ],
+   "bbox_max": [
+    33.78,
+    -9.45,
+    39.339
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 32.34
+  },
+  {
+   "name": "Cable_ArmL_05",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    26.398,
+    -10.973,
+    29.719
+   ],
+   "bbox_max": [
+    28.035,
+    -9.984,
+    44.014
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 22.58
+  },
+  {
+   "name": "Cable_ArmL_06",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    28.941,
+    -11.082,
+    29.677
+   ],
+   "bbox_max": [
+    30.65,
+    -10.007,
+    44.073
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 26.81
+  },
+  {
+   "name": "Cable_ArmL_07",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    32.025,
+    -11.027,
+    29.694
+   ],
+   "bbox_max": [
+    33.798,
+    -10.054,
+    44.048
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 21.78
+  },
+  {
+   "name": "Inner_ArmL_13",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    24.1,
+    -11.3,
+    29.5
+   ],
+   "bbox_max": [
+    35.9,
+    -9.1,
+    43.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 205.84
+  },
+  {
+   "name": "Cable_ArmL_08",
+   "bone": "forearm_l",
+   "zone": "ArmL",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    31.749,
+    -11.473,
+    27.801
+   ],
+   "bbox_max": [
+    35.756,
+    -9.495,
+    44.098
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 35.11
+  },
+  {
+   "name": "Joint_hand_l",
+   "bone": "hand_l",
+   "zone": "ArmL",
+   "kind": "joint",
+   "triangles": 156,
+   "vertices": 80,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    24.75,
+    -7.8,
+    23.2
+   ],
+   "bbox_max": [
+    35.25,
+    -0.2,
+    30.8
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 330.32
+  },
+  {
+   "name": "Body_hand_l",
+   "bone": "hand_l",
+   "zone": "ArmL",
+   "kind": "body",
+   "triangles": 360,
+   "vertices": 192,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    20.8,
+    -14.6,
+    15.8
+   ],
+   "bbox_max": [
+    36.5,
+    2.472,
+    25.8
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1325.02
+  },
+  {
+   "name": "Armor_ArmL_11",
+   "bone": "hand_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    24.0,
+    -11.0,
+    25.75
+   ],
+   "bbox_max": [
+    36.0,
+    2.0,
+    27.28
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 545.11
+  },
+  {
+   "name": "Armor_ArmL_12",
+   "bone": "hand_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 120,
+   "vertices": 64,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    24.25,
+    -15.73,
+    16.9
+   ],
+   "bbox_max": [
+    35.75,
+    -14.3,
+    21.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 196.42
+  },
+  {
+   "name": "Armor_ArmL_13",
+   "bone": "hand_l",
+   "zone": "ArmL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    36.3,
+    -10.0,
+    17.1
+   ],
+   "bbox_max": [
+    37.73,
+    1.0,
+    24.1
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 276.69
+  },
+  {
+   "name": "Body_thigh_l",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    4.796,
+    -9.45,
+    26.75
+   ],
+   "bbox_max": [
+    18.204,
+    8.45,
+    41.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1115.03
+  },
+  {
+   "name": "Armor_LegL_01",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    18.4,
+    -7.5,
+    28.5
+   ],
+   "bbox_max": [
+    20.8,
+    6.5,
+    40.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 631.15
+  },
+  {
+   "name": "Armor_LegL_02",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    5.0,
+    -11.66,
+    28.45
+   ],
+   "bbox_max": [
+    18.0,
+    -9.5,
+    40.95
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 590.82
+  },
+  {
+   "name": "Armor_LegL_03",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    5.5,
+    8.6,
+    28.45
+   ],
+   "bbox_max": [
+    17.5,
+    10.43,
+    40.95
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 533.69
+  },
+  {
+   "name": "Armor_LegL_04",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    2.97,
+    -6.5,
+    29.5
+   ],
+   "bbox_max": [
+    4.8,
+    5.5,
+    40.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 478.66
+  },
+  {
+   "name": "Joint_thigh_l",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "joint",
+   "triangles": 188,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    6.75,
+    -6.6,
+    35.4
+   ],
+   "bbox_max": [
+    16.25,
+    6.6,
+    48.6
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 648.64
+  },
+  {
+   "name": "Inner_LegL_01",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 144,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    5.7,
+    -7.9,
+    29.55
+   ],
+   "bbox_max": [
+    17.3,
+    6.9,
+    38.45
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 471.24
+  },
+  {
+   "name": "Inner_LegL_02",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 180,
+   "vertices": 96,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    9.282,
+    -8.95,
+    28.48
+   ],
+   "bbox_max": [
+    13.718,
+    -7.85,
+    39.52
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 86.46
+  },
+  {
+   "name": "Inner_LegL_03",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    6.85,
+    -10.95,
+    28.85
+   ],
+   "bbox_max": [
+    10.75,
+    -7.05,
+    38.8
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 150.21
+  },
+  {
+   "name": "Inner_LegL_04",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    7.72,
+    -8.15,
+    31.591
+   ],
+   "bbox_max": [
+    15.28,
+    -7.75,
+    36.359
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 32.34
+  },
+  {
+   "name": "Cable_LegL_01",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    7.539,
+    -9.029,
+    28.587
+   ],
+   "bbox_max": [
+    8.963,
+    -8.31,
+    40.061
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 14.97
+  },
+  {
+   "name": "Cable_LegL_02",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    10.5,
+    -9.286,
+    28.563
+   ],
+   "bbox_max": [
+    12.029,
+    -8.396,
+    40.066
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 16.49
+  },
+  {
+   "name": "Cable_LegL_03",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    13.594,
+    -9.309,
+    28.541
+   ],
+   "bbox_max": [
+    15.349,
+    -8.321,
+    40.032
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 16.61
+  },
+  {
+   "name": "Inner_LegL_05",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    6.5,
+    -10.8,
+    27.5
+   ],
+   "bbox_max": [
+    16.5,
+    -8.4,
+    40.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 211.08
+  },
+  {
+   "name": "Joint_shin_l",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "joint",
+   "triangles": 188,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    3.75,
+    -7.0,
+    20.0
+   ],
+   "bbox_max": [
+    19.25,
+    5.0,
+    32.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 790.55
+  },
+  {
+   "name": "Armor_LegL_05",
+   "bone": "thigh_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 104,
+   "vertices": 56,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    5.654,
+    -14.872,
+    25.168
+   ],
+   "bbox_max": [
+    17.346,
+    -9.577,
+    32.397
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 327.67
+  },
+  {
+   "name": "Body_shin_l",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    5.329,
+    -7.911,
+    5.5
+   ],
+   "bbox_max": [
+    17.671,
+    8.911,
+    24.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1118.0
+  },
+  {
+   "name": "Armor_LegL_06",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 224,
+   "vertices": 128,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    17.75,
+    -6.5,
+    8.0
+   ],
+   "bbox_max": [
+    19.79,
+    7.5,
+    24.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 810.47
+  },
+  {
+   "name": "Armor_LegL_07",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    3.47,
+    -6.0,
+    8.5
+   ],
+   "bbox_max": [
+    5.3,
+    7.0,
+    23.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 697.95
+  },
+  {
+   "name": "Armor_LegL_08",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 248,
+   "vertices": 144,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    5.75,
+    -11.314,
+    8.217
+   ],
+   "bbox_max": [
+    17.25,
+    -6.777,
+    24.183
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 689.71
+  },
+  {
+   "name": "Armor_LegL_09",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 260,
+   "vertices": 152,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    5.75,
+    8.8,
+    7.0
+   ],
+   "bbox_max": [
+    17.25,
+    11.4,
+    24.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 744.84
+  },
+  {
+   "name": "Joint_foot_l",
+   "bone": "foot_l",
+   "zone": "LegL",
+   "kind": "joint",
+   "triangles": 156,
+   "vertices": 80,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    5.25,
+    -2.6,
+    0.4
+   ],
+   "bbox_max": [
+    17.75,
+    6.6,
+    9.6
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 480.22
+  },
+  {
+   "name": "Inner_LegL_06",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 240,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    6.3,
+    -6.3,
+    8.25
+   ],
+   "bbox_max": [
+    16.7,
+    7.3,
+    22.75
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 715.8
+  },
+  {
+   "name": "Inner_LegL_07",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 324,
+   "vertices": 172,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    8.984,
+    -7.35,
+    7.68
+   ],
+   "bbox_max": [
+    14.016,
+    -6.25,
+    23.32
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 143.71
+  },
+  {
+   "name": "Inner_LegL_08",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    7.15,
+    -9.35,
+    9.1
+   ],
+   "bbox_max": [
+    15.85,
+    -5.45,
+    21.55
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 150.99
+  },
+  {
+   "name": "Inner_LegL_09",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    8.14,
+    -6.55,
+    12.582
+   ],
+   "bbox_max": [
+    14.86,
+    -6.15,
+    19.804
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 28.84
+  },
+  {
+   "name": "Cable_LegL_04",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    7.97,
+    -7.311,
+    7.819
+   ],
+   "bbox_max": [
+    9.277,
+    -6.69,
+    24.025
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 21.0
+  },
+  {
+   "name": "Cable_LegL_05",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    10.867,
+    -7.71,
+    7.811
+   ],
+   "bbox_max": [
+    12.488,
+    -6.741,
+    24.012
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 26.36
+  },
+  {
+   "name": "Cable_LegL_06",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    13.246,
+    -7.503,
+    7.8
+   ],
+   "bbox_max": [
+    14.997,
+    -6.745,
+    24.04
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 27.09
+  },
+  {
+   "name": "Inner_LegL_10",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    6.6,
+    -9.5,
+    7.5
+   ],
+   "bbox_max": [
+    16.4,
+    -7.3,
+    22.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 219.5
+  },
+  {
+   "name": "Inner_LegL_11",
+   "bone": "foot_l",
+   "zone": "LegL",
+   "kind": "inner",
+   "triangles": 72,
+   "vertices": 40,
+   "materials": [
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    7.129,
+    -9.0,
+    7.0
+   ],
+   "bbox_max": [
+    15.871,
+    -7.8,
+    13.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 48.73
+  },
+  {
+   "name": "Cable_LegL_07",
+   "bone": "shin_l",
+   "zone": "LegL",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    13.185,
+    -8.764,
+    7.728
+   ],
+   "bbox_max": [
+    17.987,
+    -4.73,
+    23.052
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 39.44
+  },
+  {
+   "name": "Body_foot_l",
+   "bone": "foot_l",
+   "zone": "LegL",
+   "kind": "body",
+   "triangles": 120,
+   "vertices": 64,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    5.097,
+    -17.173,
+    0.2
+   ],
+   "bbox_max": [
+    17.903,
+    9.173,
+    8.4
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1071.78
+  },
+  {
+   "name": "Armor_LegL_10",
+   "bone": "foot_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    4.8,
+    -18.0,
+    0.0
+   ],
+   "bbox_max": [
+    18.2,
+    10.0,
+    0.9
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 773.38
+  },
+  {
+   "name": "Armor_LegL_11",
+   "bone": "foot_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    5.75,
+    -16.0,
+    3.5
+   ],
+   "bbox_max": [
+    17.25,
+    -6.0,
+    5.06
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 406.87
+  },
+  {
+   "name": "Armor_LegL_12",
+   "bone": "foot_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 120,
+   "vertices": 64,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    5.6,
+    -18.68,
+    0.6
+   ],
+   "bbox_max": [
+    17.4,
+    -16.95,
+    3.8
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 155.36
+  },
+  {
+   "name": "Armor_LegL_13",
+   "bone": "foot_l",
+   "zone": "LegL",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    17.65,
+    -14.5,
+    0.9
+   ],
+   "bbox_max": [
+    19.18,
+    6.5,
+    3.9
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 254.59
+  },
+  {
+   "name": "Body_shoulder_r",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -33.871,
+    -10.404,
+    63.0
+   ],
+   "bbox_max": [
+    -17.129,
+    10.404,
+    76.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1298.77
+  },
+  {
+   "name": "Armor_ShoulderR_01",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -32.75,
+    -9.5,
+    75.5
+   ],
+   "bbox_max": [
+    -18.25,
+    9.5,
+    77.66
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 981.18
+  },
+  {
+   "name": "Armor_ShoulderR_02",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "armor",
+   "triangles": 248,
+   "vertices": 144,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -32.5,
+    -12.385,
+    64.37
+   ],
+   "bbox_max": [
+    -18.5,
+    -8.985,
+    75.43
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 586.59
+  },
+  {
+   "name": "Armor_ShoulderR_03",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    -32.5,
+    8.985,
+    64.37
+   ],
+   "bbox_max": [
+    -18.5,
+    12.372,
+    75.43
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 568.9
+  },
+  {
+   "name": "Armor_ShoulderR_04",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "armor",
+   "triangles": 272,
+   "vertices": 160,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -34.6,
+    -9.5,
+    63.75
+   ],
+   "bbox_max": [
+    -32.2,
+    9.5,
+    75.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 845.59
+  },
+  {
+   "name": "Armor_ShoulderR_05",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -18.9,
+    -8.0,
+    65.55
+   ],
+   "bbox_max": [
+    -17.07,
+    8.0,
+    75.05
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 548.44
+  },
+  {
+   "name": "Armor_ShoulderR_06",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -32.25,
+    -8.5,
+    61.62
+   ],
+   "bbox_max": [
+    -18.75,
+    8.5,
+    63.35
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 800.35
+  },
+  {
+   "name": "Inner_ShoulderR_01",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "inner",
+   "triangles": 96,
+   "vertices": 64,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -31.9,
+    -8.9,
+    66.8
+   ],
+   "bbox_max": [
+    -19.1,
+    8.9,
+    72.2
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 362.88
+  },
+  {
+   "name": "Inner_ShoulderR_02",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "inner",
+   "triangles": 180,
+   "vertices": 96,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -27.63,
+    -9.95,
+    65.36
+   ],
+   "bbox_max": [
+    -23.37,
+    -8.85,
+    73.64
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 73.82
+  },
+  {
+   "name": "Inner_ShoulderR_03",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    -30.45,
+    -11.95,
+    65.1
+   ],
+   "bbox_max": [
+    -20.55,
+    -8.05,
+    73.55
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 148.99
+  },
+  {
+   "name": "Inner_ShoulderR_04",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -29.7,
+    -9.15,
+    66.677
+   ],
+   "bbox_max": [
+    -21.3,
+    -8.75,
+    71.441
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 35.84
+  },
+  {
+   "name": "Cable_ShoulderR_01",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -29.797,
+    -10.37,
+    65.364
+   ],
+   "bbox_max": [
+    -27.943,
+    -9.243,
+    74.125
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 14.52
+  },
+  {
+   "name": "Cable_ShoulderR_02",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -25.957,
+    -10.292,
+    65.396
+   ],
+   "bbox_max": [
+    -25.187,
+    -9.391,
+    74.025
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 12.58
+  },
+  {
+   "name": "Cable_ShoulderR_03",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -23.063,
+    -10.341,
+    65.376
+   ],
+   "bbox_max": [
+    -21.734,
+    -9.384,
+    74.077
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 12.3
+  },
+  {
+   "name": "Inner_ShoulderR_05",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "inner",
+   "triangles": 132,
+   "vertices": 72,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -30.0,
+    -10.3,
+    69.0
+   ],
+   "bbox_max": [
+    -21.0,
+    10.3,
+    72.9
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 126.73
+  },
+  {
+   "name": "Armor_ShoulderR_07",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "armor",
+   "triangles": 64,
+   "vertices": 36,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -30.3,
+    6.2,
+    76.3
+   ],
+   "bbox_max": [
+    -28.7,
+    7.8,
+    82.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 31.33
+  },
+  {
+   "name": "Armor_ShoulderR_08",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "armor",
+   "triangles": 108,
+   "vertices": 64,
+   "materials": [
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -24.75,
+    -5.25,
+    76.55
+   ],
+   "bbox_max": [
+    -20.25,
+    -0.75,
+    81.05
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 115.34
+  },
+  {
+   "name": "Joint_shoulder_r",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "joint",
+   "triangles": 188,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -22.36,
+    -6.2,
+    59.3
+   ],
+   "bbox_max": [
+    -15.36,
+    6.2,
+    71.7
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 496.8
+  },
+  {
+   "name": "Cable_ShoulderR_04",
+   "bone": "shoulder_r",
+   "zone": "ShoulderR",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -27.311,
+    -11.874,
+    57.783
+   ],
+   "bbox_max": [
+    -13.693,
+    -3.811,
+    70.853
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 51.79
+  },
+  {
+   "name": "Body_upperarm_r",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -35.718,
+    -7.221,
+    47.0
+   ],
+   "bbox_max": [
+    -24.282,
+    5.221,
+    64.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 860.16
+  },
+  {
+   "name": "Armor_ArmR_01",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -37.8,
+    -7.0,
+    48.75
+   ],
+   "bbox_max": [
+    -35.6,
+    5.0,
+    63.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 643.3
+  },
+  {
+   "name": "Armor_ArmR_02",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -24.55,
+    -6.5,
+    49.5
+   ],
+   "bbox_max": [
+    -22.82,
+    4.5,
+    62.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 516.41
+  },
+  {
+   "name": "Armor_ArmR_03",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -35.25,
+    -8.76,
+    48.75
+   ],
+   "bbox_max": [
+    -24.75,
+    -6.8,
+    63.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 555.48
+  },
+  {
+   "name": "Armor_ArmR_04",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 224,
+   "vertices": 128,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    -35.25,
+    5.0,
+    48.75
+   ],
+   "bbox_max": [
+    -24.75,
+    6.94,
+    63.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 557.53
+  },
+  {
+   "name": "Armor_ArmR_05",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -36.25,
+    -7.75,
+    64.0
+   ],
+   "bbox_max": [
+    -23.75,
+    5.75,
+    65.63
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 593.52
+  },
+  {
+   "name": "Joint_upperarm_r",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "joint",
+   "triangles": 156,
+   "vertices": 80,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -28.0,
+    -5.5,
+    59.0
+   ],
+   "bbox_max": [
+    -18.0,
+    5.5,
+    69.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 487.43
+  },
+  {
+   "name": "Inner_ArmR_01",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 144,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -35.0,
+    -6.8,
+    49.717
+   ],
+   "bbox_max": [
+    -25.0,
+    4.8,
+    59.283
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 387.72
+  },
+  {
+   "name": "Inner_ArmR_02",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 180,
+   "vertices": 96,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -32.159,
+    -7.85,
+    48.52
+   ],
+   "bbox_max": [
+    -27.841,
+    -6.75,
+    60.48
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 87.36
+  },
+  {
+   "name": "Inner_ArmR_03",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    -29.65,
+    -9.85,
+    49.1
+   ],
+   "bbox_max": [
+    -25.75,
+    -5.95,
+    59.55
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 146.47
+  },
+  {
+   "name": "Inner_ArmR_04",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -33.22,
+    -7.05,
+    51.299
+   ],
+   "bbox_max": [
+    -26.78,
+    -6.65,
+    57.217
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 27.67
+  },
+  {
+   "name": "Cable_ArmR_01",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -33.166,
+    -8.185,
+    48.641
+   ],
+   "bbox_max": [
+    -31.469,
+    -7.213,
+    61.027
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 17.9
+  },
+  {
+   "name": "Cable_ArmR_02",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -30.642,
+    -8.282,
+    48.598
+   ],
+   "bbox_max": [
+    -29.276,
+    -7.184,
+    61.045
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 23.17
+  },
+  {
+   "name": "Cable_ArmR_03",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -28.464,
+    -8.142,
+    48.634
+   ],
+   "bbox_max": [
+    -26.563,
+    -7.224,
+    61.063
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 17.71
+  },
+  {
+   "name": "Inner_ArmR_05",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 136,
+   "vertices": 72,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -35.37,
+    -9.635,
+    49.748
+   ],
+   "bbox_max": [
+    -33.03,
+    -7.261,
+    56.972
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 58.08
+  },
+  {
+   "name": "Inner_ArmR_06",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 36,
+   "vertices": 20,
+   "materials": [
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    -34.671,
+    -9.491,
+    44.042
+   ],
+   "bbox_max": [
+    -33.729,
+    -8.173,
+    51.238
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 23.34
+  },
+  {
+   "name": "Inner_ArmR_07",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 136,
+   "vertices": 72,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -26.97,
+    -9.635,
+    49.748
+   ],
+   "bbox_max": [
+    -24.63,
+    -7.261,
+    56.972
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 58.08
+  },
+  {
+   "name": "Inner_ArmR_08",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 36,
+   "vertices": 20,
+   "materials": [
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    -26.271,
+    -9.491,
+    44.042
+   ],
+   "bbox_max": [
+    -25.329,
+    -8.173,
+    51.238
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 23.34
+  },
+  {
+   "name": "Joint_forearm_r",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "joint",
+   "triangles": 188,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -36.75,
+    -7.4,
+    41.6
+   ],
+   "bbox_max": [
+    -23.25,
+    3.4,
+    52.4
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 623.68
+  },
+  {
+   "name": "Cable_ArmR_04",
+   "bone": "upperarm_r",
+   "zone": "ArmR",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -35.3,
+    -10.154,
+    43.865
+   ],
+   "bbox_max": [
+    -31.672,
+    -7.661,
+    60.156
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 38.34
+  },
+  {
+   "name": "Body_forearm_r",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -36.676,
+    -10.433,
+    27.5
+   ],
+   "bbox_max": [
+    -23.324,
+    4.433,
+    45.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1046.7
+  },
+  {
+   "name": "Armor_ArmR_06",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 260,
+   "vertices": 152,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -39.2,
+    -10.0,
+    29.75
+   ],
+   "bbox_max": [
+    -36.8,
+    4.0,
+    45.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 821.38
+  },
+  {
+   "name": "Armor_ArmR_07",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -23.4,
+    -9.25,
+    30.25
+   ],
+   "bbox_max": [
+    -21.57,
+    3.25,
+    44.75
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 650.4
+  },
+  {
+   "name": "Armor_ArmR_08",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    -36.0,
+    -12.44,
+    29.75
+   ],
+   "bbox_max": [
+    -24.0,
+    -10.3,
+    45.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 684.19
+  },
+  {
+   "name": "Armor_ArmR_09",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -36.0,
+    4.1,
+    29.75
+   ],
+   "bbox_max": [
+    -24.0,
+    6.5,
+    45.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 687.11
+  },
+  {
+   "name": "Armor_ArmR_10",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -36.75,
+    -10.75,
+    45.15
+   ],
+   "bbox_max": [
+    -23.25,
+    4.75,
+    46.88
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 734.27
+  },
+  {
+   "name": "Inner_ArmR_09",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 192,
+   "vertices": 128,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -35.8,
+    -9.6,
+    30.425
+   ],
+   "bbox_max": [
+    -24.2,
+    3.6,
+    42.575
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 591.2
+  },
+  {
+   "name": "Inner_ArmR_10",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 324,
+   "vertices": 172,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -32.452,
+    -10.65,
+    29.6
+   ],
+   "bbox_max": [
+    -27.548,
+    -9.55,
+    43.4
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 153.74
+  },
+  {
+   "name": "Inner_ArmR_11",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    -34.65,
+    -12.65,
+    30.6
+   ],
+   "bbox_max": [
+    -30.75,
+    -8.75,
+    42.05
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 147.23
+  },
+  {
+   "name": "Inner_ArmR_12",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -33.78,
+    -9.85,
+    31.408
+   ],
+   "bbox_max": [
+    -26.22,
+    -9.45,
+    40.335
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 32.34
+  },
+  {
+   "name": "Cable_ArmR_05",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -33.522,
+    -10.99,
+    29.694
+   ],
+   "bbox_max": [
+    -31.96,
+    -10.016,
+    44.026
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 20.04
+  },
+  {
+   "name": "Cable_ArmR_06",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -30.974,
+    -10.777,
+    29.73
+   ],
+   "bbox_max": [
+    -29.323,
+    -10.07,
+    44.016
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 18.29
+  },
+  {
+   "name": "Cable_ArmR_07",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -27.844,
+    -10.917,
+    29.728
+   ],
+   "bbox_max": [
+    -26.428,
+    -9.987,
+    44.054
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 18.65
+  },
+  {
+   "name": "Inner_ArmR_13",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -35.9,
+    -11.3,
+    29.5
+   ],
+   "bbox_max": [
+    -24.1,
+    -9.1,
+    43.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 205.84
+  },
+  {
+   "name": "Cable_ArmR_08",
+   "bone": "forearm_r",
+   "zone": "ArmR",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -35.756,
+    -11.473,
+    27.801
+   ],
+   "bbox_max": [
+    -31.749,
+    -9.495,
+    44.098
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 35.11
+  },
+  {
+   "name": "Joint_hand_r",
+   "bone": "hand_r",
+   "zone": "ArmR",
+   "kind": "joint",
+   "triangles": 156,
+   "vertices": 80,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -35.25,
+    -7.8,
+    23.2
+   ],
+   "bbox_max": [
+    -24.75,
+    -0.2,
+    30.8
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 330.32
+  },
+  {
+   "name": "Body_hand_r",
+   "bone": "hand_r",
+   "zone": "ArmR",
+   "kind": "body",
+   "triangles": 360,
+   "vertices": 192,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -36.5,
+    -14.6,
+    15.8
+   ],
+   "bbox_max": [
+    -20.8,
+    2.472,
+    25.8
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1325.02
+  },
+  {
+   "name": "Armor_ArmR_11",
+   "bone": "hand_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -36.0,
+    -11.0,
+    25.75
+   ],
+   "bbox_max": [
+    -24.0,
+    2.0,
+    27.28
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 545.11
+  },
+  {
+   "name": "Armor_ArmR_12",
+   "bone": "hand_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 120,
+   "vertices": 64,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -35.75,
+    -15.73,
+    16.9
+   ],
+   "bbox_max": [
+    -24.25,
+    -14.3,
+    21.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 196.42
+  },
+  {
+   "name": "Armor_ArmR_13",
+   "bone": "hand_r",
+   "zone": "ArmR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -37.73,
+    -10.0,
+    17.1
+   ],
+   "bbox_max": [
+    -36.3,
+    1.0,
+    24.1
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 276.69
+  },
+  {
+   "name": "Body_thigh_r",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -18.204,
+    -9.45,
+    26.75
+   ],
+   "bbox_max": [
+    -4.796,
+    8.45,
+    41.25
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1115.03
+  },
+  {
+   "name": "Armor_LegR_01",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 236,
+   "vertices": 136,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -20.8,
+    -7.5,
+    28.5
+   ],
+   "bbox_max": [
+    -18.4,
+    6.5,
+    40.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 631.15
+  },
+  {
+   "name": "Armor_LegR_02",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -18.0,
+    -11.66,
+    28.45
+   ],
+   "bbox_max": [
+    -5.0,
+    -9.5,
+    40.95
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 590.82
+  },
+  {
+   "name": "Armor_LegR_03",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -17.5,
+    8.6,
+    28.45
+   ],
+   "bbox_max": [
+    -5.5,
+    10.43,
+    40.95
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 533.69
+  },
+  {
+   "name": "Armor_LegR_04",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -4.8,
+    -6.5,
+    29.5
+   ],
+   "bbox_max": [
+    -2.97,
+    5.5,
+    40.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 478.66
+  },
+  {
+   "name": "Joint_thigh_r",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "joint",
+   "triangles": 188,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -16.25,
+    -6.6,
+    35.4
+   ],
+   "bbox_max": [
+    -6.75,
+    6.6,
+    48.6
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 648.64
+  },
+  {
+   "name": "Inner_LegR_01",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 144,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -17.3,
+    -7.9,
+    29.55
+   ],
+   "bbox_max": [
+    -5.7,
+    6.9,
+    38.45
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 471.24
+  },
+  {
+   "name": "Inner_LegR_02",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 180,
+   "vertices": 96,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -13.56,
+    -8.95,
+    28.48
+   ],
+   "bbox_max": [
+    -9.44,
+    -7.85,
+    39.52
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 80.67
+  },
+  {
+   "name": "Inner_LegR_03",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    -16.15,
+    -10.95,
+    28.85
+   ],
+   "bbox_max": [
+    -12.25,
+    -7.05,
+    38.8
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 131.47
+  },
+  {
+   "name": "Inner_LegR_04",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -15.28,
+    -8.15,
+    31.561
+   ],
+   "bbox_max": [
+    -7.72,
+    -7.75,
+    37.208
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 32.34
+  },
+  {
+   "name": "Cable_LegR_01",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -15.531,
+    -9.299,
+    28.514
+   ],
+   "bbox_max": [
+    -13.491,
+    -8.361,
+    40.046
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 18.52
+  },
+  {
+   "name": "Cable_LegR_02",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -12.504,
+    -9.359,
+    28.513
+   ],
+   "bbox_max": [
+    -10.692,
+    -8.327,
+    40.101
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 21.18
+  },
+  {
+   "name": "Cable_LegR_03",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -9.43,
+    -9.251,
+    28.544
+   ],
+   "bbox_max": [
+    -7.728,
+    -8.281,
+    40.098
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 21.87
+  },
+  {
+   "name": "Inner_LegR_05",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -16.5,
+    -10.8,
+    27.5
+   ],
+   "bbox_max": [
+    -6.5,
+    -8.4,
+    40.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 211.08
+  },
+  {
+   "name": "Joint_shin_r",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "joint",
+   "triangles": 188,
+   "vertices": 96,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -19.25,
+    -7.0,
+    20.0
+   ],
+   "bbox_max": [
+    -3.75,
+    5.0,
+    32.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 790.55
+  },
+  {
+   "name": "Armor_LegR_05",
+   "bone": "thigh_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 104,
+   "vertices": 56,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -17.346,
+    -14.872,
+    25.168
+   ],
+   "bbox_max": [
+    -5.654,
+    -9.577,
+    32.397
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 327.67
+  },
+  {
+   "name": "Body_shin_r",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "body",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -17.671,
+    -7.911,
+    5.5
+   ],
+   "bbox_max": [
+    -5.329,
+    8.911,
+    24.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1118.0
+  },
+  {
+   "name": "Armor_LegR_06",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 224,
+   "vertices": 128,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_Glass_Sensor"
+   ],
+   "bbox_min": [
+    -19.79,
+    -6.5,
+    8.0
+   ],
+   "bbox_max": [
+    -17.75,
+    7.5,
+    24.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 810.47
+  },
+  {
+   "name": "Armor_LegR_07",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -5.3,
+    -6.0,
+    8.5
+   ],
+   "bbox_max": [
+    -3.47,
+    7.0,
+    23.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 697.95
+  },
+  {
+   "name": "Armor_LegR_08",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 248,
+   "vertices": 144,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -17.25,
+    -11.314,
+    8.217
+   ],
+   "bbox_max": [
+    -5.75,
+    -6.777,
+    24.183
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 689.71
+  },
+  {
+   "name": "Armor_LegR_09",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 260,
+   "vertices": 152,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -17.25,
+    8.8,
+    7.0
+   ],
+   "bbox_max": [
+    -5.75,
+    11.4,
+    24.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 744.84
+  },
+  {
+   "name": "Joint_foot_r",
+   "bone": "foot_r",
+   "zone": "LegR",
+   "kind": "joint",
+   "triangles": 156,
+   "vertices": 80,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -17.75,
+    -2.6,
+    0.4
+   ],
+   "bbox_max": [
+    -5.25,
+    6.6,
+    9.6
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 480.22
+  },
+  {
+   "name": "Inner_LegR_06",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 240,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -16.7,
+    -6.3,
+    8.25
+   ],
+   "bbox_max": [
+    -6.3,
+    7.3,
+    22.75
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 715.8
+  },
+  {
+   "name": "Inner_LegR_07",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 324,
+   "vertices": 172,
+   "materials": [
+    "M_Hydraulic",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -13.594,
+    -7.35,
+    7.68
+   ],
+   "bbox_max": [
+    -9.406,
+    -6.25,
+    23.32
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 133.13
+  },
+  {
+   "name": "Inner_LegR_08",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 296,
+   "vertices": 160,
+   "materials": [
+    "M_DarkMetal",
+    "M_Emissive_Status"
+   ],
+   "bbox_min": [
+    -15.85,
+    -9.35,
+    9.1
+   ],
+   "bbox_max": [
+    -7.15,
+    -5.45,
+    21.55
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 139.99
+  },
+  {
+   "name": "Inner_LegR_09",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -14.86,
+    -6.55,
+    11.5
+   ],
+   "bbox_max": [
+    -8.14,
+    -6.15,
+    18.69
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 28.84
+  },
+  {
+   "name": "Cable_LegR_04",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -14.951,
+    -7.733,
+    7.8
+   ],
+   "bbox_max": [
+    -13.122,
+    -6.753,
+    24.018
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 26.27
+  },
+  {
+   "name": "Cable_LegR_05",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -11.695,
+    -7.666,
+    7.82
+   ],
+   "bbox_max": [
+    -10.553,
+    -6.806,
+    24.017
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 20.87
+  },
+  {
+   "name": "Cable_LegR_06",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "cable",
+   "triangles": 396,
+   "vertices": 216,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -9.445,
+    -7.669,
+    7.814
+   ],
+   "bbox_max": [
+    -7.991,
+    -6.73,
+    24.018
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 21.5
+  },
+  {
+   "name": "Inner_LegR_10",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 88,
+   "vertices": 48,
+   "materials": [
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -16.4,
+    -9.5,
+    7.5
+   ],
+   "bbox_max": [
+    -6.6,
+    -7.3,
+    22.5
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 219.5
+  },
+  {
+   "name": "Inner_LegR_11",
+   "bone": "foot_r",
+   "zone": "LegR",
+   "kind": "inner",
+   "triangles": 72,
+   "vertices": 40,
+   "materials": [
+    "M_Hydraulic"
+   ],
+   "bbox_min": [
+    -15.871,
+    -9.0,
+    7.0
+   ],
+   "bbox_max": [
+    -7.129,
+    -7.8,
+    13.0
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 48.73
+  },
+  {
+   "name": "Cable_LegR_07",
+   "bone": "shin_r",
+   "zone": "LegR",
+   "kind": "cable",
+   "triangles": 300,
+   "vertices": 168,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -17.987,
+    -8.764,
+    7.728
+   ],
+   "bbox_max": [
+    -13.185,
+    -4.73,
+    23.052
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 39.44
+  },
+  {
+   "name": "Body_foot_r",
+   "bone": "foot_r",
+   "zone": "LegR",
+   "kind": "body",
+   "triangles": 120,
+   "vertices": 64,
+   "materials": [
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -17.903,
+    -17.173,
+    0.2
+   ],
+   "bbox_max": [
+    -5.097,
+    9.173,
+    8.4
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 1071.78
+  },
+  {
+   "name": "Armor_LegR_10",
+   "bone": "foot_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 60,
+   "vertices": 32,
+   "materials": [
+    "M_Rubber"
+   ],
+   "bbox_min": [
+    -18.2,
+    -18.0,
+    0.0
+   ],
+   "bbox_max": [
+    -4.8,
+    10.0,
+    0.9
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 773.38
+  },
+  {
+   "name": "Armor_LegR_11",
+   "bone": "foot_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 212,
+   "vertices": 120,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal",
+    "M_AccentOrange"
+   ],
+   "bbox_min": [
+    -17.25,
+    -16.0,
+    3.5
+   ],
+   "bbox_max": [
+    -5.75,
+    -6.0,
+    5.06
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 406.87
+  },
+  {
+   "name": "Armor_LegR_12",
+   "bone": "foot_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 120,
+   "vertices": 64,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite"
+   ],
+   "bbox_min": [
+    -17.4,
+    -18.68,
+    0.6
+   ],
+   "bbox_max": [
+    -5.6,
+    -16.95,
+    3.8
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 155.36
+  },
+  {
+   "name": "Armor_LegR_13",
+   "bone": "foot_r",
+   "zone": "LegR",
+   "kind": "armor",
+   "triangles": 200,
+   "vertices": 112,
+   "materials": [
+    "M_CeramicGray",
+    "M_Graphite",
+    "M_DarkMetal"
+   ],
+   "bbox_min": [
+    -19.18,
+    -14.5,
+    0.9
+   ],
+   "bbox_max": [
+    -17.65,
+    6.5,
+    3.9
+   ],
+   "uv_texel_density_uv_per_m": 0.012149,
+   "area_m2": 254.59
+  }
+ ]
+}
