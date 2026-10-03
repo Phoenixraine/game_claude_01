@@ -260,8 +260,8 @@ constexpr float kUltGainParry = 6.f;                   // successful parry (the 
 constexpr float kUltGainIntercept = 8.f;               // successful intercept (the interceptor)
 constexpr float kUltGainCriticalHit = 1.5f;              // landing a hit on a zone that is Critical or worse
 constexpr float kUltGainHit = 0.45f;                     // any landed hit
-constexpr float kUltGainTakenPerDamage = 0.04f;         // receiving damage (small, capped per hit)
-constexpr float kUltGainTakenCap = 0.6f;
+constexpr float kUltGainTakenPerDamage = 0.02f;         // receiving damage (small, capped per hit)
+constexpr float kUltGainTakenCap = 0.3f;
 constexpr float kUltimateDamage = 42.f;                 // scripted unblockable strike on the chosen zone
 constexpr float kUltimateStabilityHit = 70.f;
 
