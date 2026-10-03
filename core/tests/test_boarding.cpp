@@ -34,7 +34,7 @@ struct BRig {
   Input& MyIn() { return owner == Side::A ? a : b; }
 
   void Tick() {
-    if (bot && bd.phase() == BoardPhase::Hacking && bd.hack().WantsConfirm()) bi.hack.confirm = true;
+    if (bot && bd.phase() == BoardPhase::Hacking) bi.hack = bd.hack().PerfectInput();
     const Input mine = bd.Filter(duel, MyIn());
     const Input other = owner == Side::A ? b : a;
     if (owner == Side::A) duel.Step(mine, other, world);
@@ -604,7 +604,7 @@ RunSummary ScriptedRun(uint64_t seed) {
   r.Start();
   int t = 0;
   for (; t < 5000 && !r.duel.result().over; ++t) {
-    if (r.bd.phase() == BoardPhase::Hacking && r.bd.hack().WantsConfirm() && ctl.Chance(0.9f)) r.bi.hack.confirm = true;
+    if (r.bd.phase() == BoardPhase::Hacking && ctl.Chance(0.9f)) r.bi.hack = r.bd.hack().PerfectInput();
     if (r.bd.swatActive() && r.bd.swatTicksToImpact() < tune::kSwingWindowTicks - 6) r.bi.swing = true;
     r.Tick();
   }

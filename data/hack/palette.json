@@ -1,0 +1,27 @@
+{
+  "note": "Palette of the hack screen (glass AR overlay, DESIGN_BIBLE section 5: thin glowing lines, white-blue base, red for threats, orange for damage). ui/palette.json does not exist yet: when TASK-010 lands, map these names onto it.",
+  "colors": {
+    "glassDark":    "#06111a",
+    "glassMid":     "#0b2230",
+    "line":         "#9fd8ff",
+    "lineDim":      "#3f6f92",
+    "lineFaint":    "#1c3b50",
+    "ok":           "#e8fbff",
+    "key":          "#ffd24a",
+    "warn":         "#ff9a2e",
+    "threat":       "#ff4a3d",
+    "ice":          "#7fe4ff",
+    "blocker":      "#2b4a60",
+    "timerFull":    "#9fd8ff",
+    "timerLow":     "#ff4a3d"
+  },
+  "usage": {
+    "line": "frames, grid edges, route taken, needle of the hacker sector",
+    "ok": "a hit: a 120 ms white flash on the node / lane / lock",
+    "key": "keys 1..4 (digits only), the next key pulses",
+    "warn": "ICE heat above the alarm level, the time penalty popping out of the timer",
+    "threat": "a mistake (0.25 s red flash), the ICE window on the frequency ring, the swat telegraph frame",
+    "ice": "ice nodes (a pale diamond with a cross)"
+  },
+  "colorBlindSafe": "state is never carried by colour alone: blockers are crossed hexagons, ice nodes are diamonds with a cross, keys carry digits, mistakes add a shake and a sound"
+}
