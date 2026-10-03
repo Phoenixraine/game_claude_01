@@ -63,6 +63,9 @@ void Fighter::Reset() {
   weaponCharge = 0.f;
   weaponTarget = Zone::Torso;
   lastHitTick = -100000;
+  lastOwnOutcome = lastIncomingOutcome = Outcome::Whiff;
+  lastOwnTarget = lastIncomingZone = Zone::Torso;
+  lastOwnTick = lastIncomingTick = -100000;
 }
 
 void Fighter::Emit(const StepContext& ctx, EventType t, Zone z, int a, int b, float v) const {
@@ -374,7 +377,8 @@ void Fighter::HandleWindup(const Input& in, const StepContext& ctx) {
         s.minHold = ScaledTicks(tune::kWindupMinTicks, SwingSpeed(other)) + PoseReturnPenalty(other, s.side);
         RegisterFeint(ctx);
       }
-    } else if (am.canRetarget && (in.target != s.target || in.side != s.side)) {
+    } else if (in.strikeHeld && am.canRetarget && (in.target != s.target || in.side != s.side)) {
+      // Only while RT is still held: the stick springs back to centre on release and must not count as a feint.
       bool changed = false;
       if (in.target != s.target) {
         s.target = in.target;

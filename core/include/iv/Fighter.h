@@ -161,6 +161,13 @@ class Fighter {
   float weaponCharge = 0.f;
   Zone weaponTarget = Zone::Torso;
   Tick lastHitTick = -100000;
+  // Bookkeeping the pilot can feel or see; feeds the AI observation (never the opponent's intent).
+  Outcome lastOwnOutcome = Outcome::Whiff;       // result of this fighter's last strike
+  Zone lastOwnTarget = Zone::Torso;
+  Tick lastOwnTick = -100000;
+  Outcome lastIncomingOutcome = Outcome::Whiff;  // what the opponent's last strike did to this fighter
+  Zone lastIncomingZone = Zone::Torso;
+  Tick lastIncomingTick = -100000;
 
  private:
   void Emit(const StepContext& ctx, EventType t, Zone z = Zone::Torso, int a = 0, int b = 0, float v = 0.f) const;

@@ -147,6 +147,12 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
   const Side ds = def.side();
   const StrikeKind kind = atk.strike.kind;
   Emit(EventType::StrikeContact, as, d.zone, static_cast<int>(kind), static_cast<int>(d.outcome), d.raw);
+  atk.lastOwnOutcome = d.outcome;
+  atk.lastOwnTarget = d.zone;
+  atk.lastOwnTick = tick_;
+  def.lastIncomingOutcome = d.outcome;
+  def.lastIncomingZone = d.zone;
+  def.lastIncomingTick = tick_;
 
   switch (d.outcome) {
     case Outcome::Whiff:
