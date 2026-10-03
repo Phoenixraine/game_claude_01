@@ -1,0 +1,1930 @@
+{
+ "format": 1,
+ "generated_with_scale": 1,
+ "sizes": {
+  "material": 2048,
+  "decal": 512,
+  "trim": 4096,
+  "atlas_frame": 256,
+  "mask": 1024
+ },
+ "conventions": {
+  "Normal": "tangent space, OpenGL (Y+), RGB = n*0.5+0.5",
+  "ORM": "R = ambient occlusion, G = roughness, B = metallic (Linear)",
+  "BaseColor": "sRGB",
+  "atlas": "8x8 flipbook, row-major from the top-left, 64 frames, RGBA premultiplied alpha",
+  "decals": "RGBA straight alpha, alpha = 0 on the border"
+ },
+ "materials": [
+  {
+   "name": "graphite_armor_worn",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/graphite_armor_worn/graphite_armor_worn_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/graphite_armor_worn/graphite_armor_worn_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/graphite_armor_worn/graphite_armor_worn_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/graphite_armor_worn/graphite_armor_worn_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "ceramic_gray_panels",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/ceramic_gray_panels/ceramic_gray_panels_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/ceramic_gray_panels/ceramic_gray_panels_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/ceramic_gray_panels/ceramic_gray_panels_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/ceramic_gray_panels/ceramic_gray_panels_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "dark_metal_scratched",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/dark_metal_scratched/dark_metal_scratched_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/dark_metal_scratched/dark_metal_scratched_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/dark_metal_scratched/dark_metal_scratched_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/dark_metal_scratched/dark_metal_scratched_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "basalt_armor_worn",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/basalt_armor_worn/basalt_armor_worn_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/basalt_armor_worn/basalt_armor_worn_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/basalt_armor_worn/basalt_armor_worn_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/basalt_armor_worn/basalt_armor_worn_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "hydraulic_steel",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/hydraulic_steel/hydraulic_steel_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/hydraulic_steel/hydraulic_steel_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/hydraulic_steel/hydraulic_steel_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/hydraulic_steel/hydraulic_steel_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "rubber_black",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/rubber_black/rubber_black_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/rubber_black/rubber_black_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/rubber_black/rubber_black_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/rubber_black/rubber_black_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "concrete_weathered",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/concrete_weathered/concrete_weathered_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/concrete_weathered/concrete_weathered_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/concrete_weathered/concrete_weathered_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/concrete_weathered/concrete_weathered_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "concrete_cracked",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/concrete_cracked/concrete_cracked_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/concrete_cracked/concrete_cracked_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/concrete_cracked/concrete_cracked_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/concrete_cracked/concrete_cracked_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "asphalt_wet",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/asphalt_wet/asphalt_wet_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/asphalt_wet/asphalt_wet_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/asphalt_wet/asphalt_wet_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/asphalt_wet/asphalt_wet_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "asphalt_cracked",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/asphalt_cracked/asphalt_cracked_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/asphalt_cracked/asphalt_cracked_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/asphalt_cracked/asphalt_cracked_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/asphalt_cracked/asphalt_cracked_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "sidewalk_tiles",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/sidewalk_tiles/sidewalk_tiles_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/sidewalk_tiles/sidewalk_tiles_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/sidewalk_tiles/sidewalk_tiles_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/sidewalk_tiles/sidewalk_tiles_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "brick_facade",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/brick_facade/brick_facade_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/brick_facade/brick_facade_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/brick_facade/brick_facade_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/brick_facade/brick_facade_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "glass_curtain_wall",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/glass_curtain_wall/glass_curtain_wall_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/glass_curtain_wall/glass_curtain_wall_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/glass_curtain_wall/glass_curtain_wall_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/glass_curtain_wall/glass_curtain_wall_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "rusty_steel_plate",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/rusty_steel_plate/rusty_steel_plate_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/rusty_steel_plate/rusty_steel_plate_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/rusty_steel_plate/rusty_steel_plate_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/rusty_steel_plate/rusty_steel_plate_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "corrugated_metal",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/corrugated_metal/corrugated_metal_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/corrugated_metal/corrugated_metal_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/corrugated_metal/corrugated_metal_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/corrugated_metal/corrugated_metal_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "container_painted_worn",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/container_painted_worn/container_painted_worn_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/container_painted_worn/container_painted_worn_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/container_painted_worn/container_painted_worn_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/container_painted_worn/container_painted_worn_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  },
+  {
+   "name": "water_foam_mask",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/water_foam_mask/water_foam_mask_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/water_foam_mask/water_foam_mask_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/water_foam_mask/water_foam_mask_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/water_foam_mask/water_foam_mask_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "white = foam; BaseColor doubles as the foam mask (grayscale)"
+  },
+  {
+   "name": "gravel_rubble",
+   "size": 2048,
+   "tile": true,
+   "files": {
+    "BaseColor": {
+     "file": "out/gravel_rubble/gravel_rubble_BaseColor.png",
+     "colorspace": "sRGB"
+    },
+    "Normal": {
+     "file": "out/gravel_rubble/gravel_rubble_Normal.png",
+     "colorspace": "Linear"
+    },
+    "ORM": {
+     "file": "out/gravel_rubble/gravel_rubble_ORM.png",
+     "colorspace": "Linear"
+    },
+    "Height": {
+     "file": "out/gravel_rubble/gravel_rubble_Height.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": ""
+  }
+ ],
+ "decals": [
+  {
+   "name": "scratch_01",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/scratch_01.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/scratch_01_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "bright bare-metal scratches"
+  },
+  {
+   "name": "scratch_02",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/scratch_02.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/scratch_02_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "bright bare-metal scratches"
+  },
+  {
+   "name": "scratch_03",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/scratch_03.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/scratch_03_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "bright bare-metal scratches"
+  },
+  {
+   "name": "scratch_04",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/scratch_04.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/scratch_04_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "bright bare-metal scratches"
+  },
+  {
+   "name": "dent_01_normal",
+   "size": 512,
+   "kind": "normal",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/dent_01_normal.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "tangent-space normal in RGB, alpha = mask; blend as DBuffer normal"
+  },
+  {
+   "name": "dent_02_normal",
+   "size": 512,
+   "kind": "normal",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/dent_02_normal.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "tangent-space normal in RGB, alpha = mask; blend as DBuffer normal"
+  },
+  {
+   "name": "dent_03_normal",
+   "size": 512,
+   "kind": "normal",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/dent_03_normal.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "tangent-space normal in RGB, alpha = mask; blend as DBuffer normal"
+  },
+  {
+   "name": "dent_04_normal",
+   "size": 512,
+   "kind": "normal",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/dent_04_normal.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "tangent-space normal in RGB, alpha = mask; blend as DBuffer normal"
+  },
+  {
+   "name": "burn_01",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/burn_01.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/burn_01_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "soot / scorch"
+  },
+  {
+   "name": "burn_02",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/burn_02.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/burn_02_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "soot / scorch"
+  },
+  {
+   "name": "burn_03",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/burn_03.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/burn_03_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "soot / scorch"
+  },
+  {
+   "name": "burn_04",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/burn_04.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/burn_04_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "soot / scorch"
+  },
+  {
+   "name": "fluid_01",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/fluid_01.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/fluid_01_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "oil"
+  },
+  {
+   "name": "fluid_02",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/fluid_02.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/fluid_02_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "coolant (green-teal)"
+  },
+  {
+   "name": "fluid_03",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/fluid_03.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/fluid_03_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "hydraulic fluid"
+  },
+  {
+   "name": "fluid_04",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/fluid_04.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/fluid_04_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "rusty water"
+  },
+  {
+   "name": "salt_streak_01",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/salt_streak_01.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/salt_streak_01_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "salt crust and rain streaks, run top to bottom"
+  },
+  {
+   "name": "salt_streak_02",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/salt_streak_02.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/salt_streak_02_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "salt crust and rain streaks, run top to bottom"
+  },
+  {
+   "name": "salt_streak_03",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/salt_streak_03.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/salt_streak_03_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "salt crust and rain streaks, run top to bottom"
+  },
+  {
+   "name": "salt_streak_04",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/salt_streak_04.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/salt_streak_04_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "salt crust and rain streaks, run top to bottom"
+  },
+  {
+   "name": "mark_arrow_up",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/mark_arrow_up.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/mark_arrow_up_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "marking without text"
+  },
+  {
+   "name": "mark_chevrons",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/mark_chevrons.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/mark_chevrons_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "marking without text"
+  },
+  {
+   "name": "mark_ring_dot",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/mark_ring_dot.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/mark_ring_dot_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "marking without text"
+  },
+  {
+   "name": "mark_crosshair",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/mark_crosshair.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/mark_crosshair_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "marking without text"
+  },
+  {
+   "name": "mark_warning_triangle",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/mark_warning_triangle.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/mark_warning_triangle_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "marking without text"
+  },
+  {
+   "name": "mark_tick_bars",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/mark_tick_bars.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/mark_tick_bars_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "marking without text"
+  },
+  {
+   "name": "hazard_stripes_01",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/hazard_stripes_01.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/hazard_stripes_01_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "orange marking stripes"
+  },
+  {
+   "name": "hazard_stripes_02",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/hazard_stripes_02.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/hazard_stripes_02_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "orange marking stripes"
+  },
+  {
+   "name": "hazard_stripes_03",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/hazard_stripes_03.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/hazard_stripes_03_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "orange marking stripes"
+  },
+  {
+   "name": "panel_seam_01_normal",
+   "size": 512,
+   "kind": "normal",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/panel_seam_01_normal.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "panel seam with rivets"
+  },
+  {
+   "name": "panel_seam_02_normal",
+   "size": 512,
+   "kind": "normal",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/panel_seam_02_normal.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "panel seam with rivets"
+  },
+  {
+   "name": "panel_seam_03_normal",
+   "size": 512,
+   "kind": "normal",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/panel_seam_03_normal.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "panel seam with rivets"
+  },
+  {
+   "name": "vent_grille_01",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/vent_grille_01.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/vent_grille_01_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "dark vent slots in a frame"
+  },
+  {
+   "name": "vent_grille_02",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/vent_grille_02.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/vent_grille_02_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "dark vent slots in a frame"
+  },
+  {
+   "name": "vent_grille_03",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/vent_grille_03.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/vent_grille_03_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "dark vent slots in a frame"
+  },
+  {
+   "name": "plate_blank_01",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/plate_blank_01.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/plate_blank_01_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "blank plate, no characters"
+  },
+  {
+   "name": "plate_blank_02",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/plate_blank_02.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/plate_blank_02_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "blank plate, no characters"
+  },
+  {
+   "name": "plate_blank_03",
+   "size": 512,
+   "kind": "albedo",
+   "files": {
+    "RGBA": {
+     "file": "out/decals/plate_blank_03.png",
+     "colorspace": "sRGB"
+    },
+    "Roughness": {
+     "file": "out/decals/plate_blank_03_Roughness.png",
+     "colorspace": "Linear"
+    }
+   },
+   "note": "blank plate, no characters"
+  }
+ ],
+ "trim_sheet": {
+  "name": "trim_sheet",
+  "size": 4096,
+  "files": {
+   "BaseColor": {
+    "file": "out/trim_sheet/trim_sheet_BaseColor.png",
+    "colorspace": "sRGB"
+   },
+   "Normal": {
+    "file": "out/trim_sheet/trim_sheet_Normal.png",
+    "colorspace": "Linear"
+   },
+   "ORM": {
+    "file": "out/trim_sheet/trim_sheet_ORM.png",
+    "colorspace": "Linear"
+   },
+   "Height": {
+    "file": "out/trim_sheet/trim_sheet_Height.png",
+    "colorspace": "Linear"
+   }
+  },
+  "regions": [
+   {
+    "name": "panel_line_wide",
+    "desc": "wide recessed panel line with chamfered walls",
+    "pixels": [
+     0,
+     0,
+     4096,
+     273
+    ],
+    "uv_top_left": [
+     0.0,
+     0.0,
+     1.0,
+     0.06665
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.93335,
+     1.0,
+     1.0
+    ]
+   },
+   {
+    "name": "panel_line_narrow",
+    "desc": "narrow recessed panel line",
+    "pixels": [
+     0,
+     273,
+     4096,
+     437
+    ],
+    "uv_top_left": [
+     0.0,
+     0.06665,
+     1.0,
+     0.106689
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.893311,
+     1.0,
+     0.93335
+    ]
+   },
+   {
+    "name": "bevel_soft",
+    "desc": "soft rounded edge strip",
+    "pixels": [
+     0,
+     437,
+     4096,
+     710
+    ],
+    "uv_top_left": [
+     0.0,
+     0.106689,
+     1.0,
+     0.17334
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.82666,
+     1.0,
+     0.893311
+    ]
+   },
+   {
+    "name": "bevel_hard",
+    "desc": "hard 45 degree chamfer strip",
+    "pixels": [
+     0,
+     710,
+     4096,
+     983
+    ],
+    "uv_top_left": [
+     0.0,
+     0.17334,
+     1.0,
+     0.23999
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.76001,
+     1.0,
+     0.82666
+    ]
+   },
+   {
+    "name": "rivets_small",
+    "desc": "row of small domed rivets",
+    "pixels": [
+     0,
+     983,
+     4096,
+     1147
+    ],
+    "uv_top_left": [
+     0.0,
+     0.23999,
+     1.0,
+     0.280029
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.719971,
+     1.0,
+     0.76001
+    ]
+   },
+   {
+    "name": "rivets_large",
+    "desc": "row of large bolts",
+    "pixels": [
+     0,
+     1147,
+     4096,
+     1420
+    ],
+    "uv_top_left": [
+     0.0,
+     0.280029,
+     1.0,
+     0.34668
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.65332,
+     1.0,
+     0.719971
+    ]
+   },
+   {
+    "name": "slots_vent",
+    "desc": "rounded vent slots",
+    "pixels": [
+     0,
+     1420,
+     4096,
+     1693
+    ],
+    "uv_top_left": [
+     0.0,
+     0.34668,
+     1.0,
+     0.41333
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.58667,
+     1.0,
+     0.65332
+    ]
+   },
+   {
+    "name": "cable_channel",
+    "desc": "channel with three cables",
+    "pixels": [
+     0,
+     1693,
+     4096,
+     2021
+    ],
+    "uv_top_left": [
+     0.0,
+     0.41333,
+     1.0,
+     0.493408
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.506592,
+     1.0,
+     0.58667
+    ]
+   },
+   {
+    "name": "screw_heads",
+    "desc": "hex screw heads",
+    "pixels": [
+     0,
+     2021,
+     4096,
+     2239
+    ],
+    "uv_top_left": [
+     0.0,
+     0.493408,
+     1.0,
+     0.546631
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.453369,
+     1.0,
+     0.506592
+    ]
+   },
+   {
+    "name": "hazard_stripe",
+    "desc": "orange/graphite diagonal stripes",
+    "pixels": [
+     0,
+     2239,
+     4096,
+     2457
+    ],
+    "uv_top_left": [
+     0.0,
+     0.546631,
+     1.0,
+     0.599854
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.400146,
+     1.0,
+     0.453369
+    ]
+   },
+   {
+    "name": "plain_graphite",
+    "desc": "plain worn graphite",
+    "pixels": [
+     0,
+     2457,
+     4096,
+     2730
+    ],
+    "uv_top_left": [
+     0.0,
+     0.599854,
+     1.0,
+     0.666504
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.333496,
+     1.0,
+     0.400146
+    ]
+   },
+   {
+    "name": "plain_ceramic",
+    "desc": "plain ceramic gray",
+    "pixels": [
+     0,
+     2730,
+     4096,
+     3003
+    ],
+    "uv_top_left": [
+     0.0,
+     0.666504,
+     1.0,
+     0.733154
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.266846,
+     1.0,
+     0.333496
+    ]
+   },
+   {
+    "name": "grille",
+    "desc": "fine grille",
+    "pixels": [
+     0,
+     3003,
+     4096,
+     3276
+    ],
+    "uv_top_left": [
+     0.0,
+     0.733154,
+     1.0,
+     0.799805
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.200195,
+     1.0,
+     0.266846
+    ]
+   },
+   {
+    "name": "tread_plate",
+    "desc": "diamond tread",
+    "pixels": [
+     0,
+     3276,
+     4096,
+     3549
+    ],
+    "uv_top_left": [
+     0.0,
+     0.799805,
+     1.0,
+     0.866455
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.133545,
+     1.0,
+     0.200195
+    ]
+   },
+   {
+    "name": "seam_double",
+    "desc": "double seam with rivets",
+    "pixels": [
+     0,
+     3549,
+     4096,
+     3767
+    ],
+    "uv_top_left": [
+     0.0,
+     0.866455,
+     1.0,
+     0.919678
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.080322,
+     1.0,
+     0.133545
+    ]
+   },
+   {
+    "name": "handle_rail",
+    "desc": "recessed handle rail",
+    "pixels": [
+     0,
+     3767,
+     4096,
+     4096
+    ],
+    "uv_top_left": [
+     0.0,
+     0.919678,
+     1.0,
+     1.0
+    ],
+    "uv_bottom_left": [
+     0.0,
+     0.0,
+     1.0,
+     0.080322
+    ]
+   }
+  ],
+  "convention": "regions are horizontal strips tileable along U; uv_top_left has V from the top (Unreal), uv_bottom_left from the bottom (Blender)"
+ },
+ "vfx": [
+  {
+   "name": "smoke_dark",
+   "file": "out/vfx/smoke_dark.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 24,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "dense dark smoke column",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "smoke_light",
+   "file": "out/vfx/smoke_light.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 24,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "light grey smoke",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "collapse_dust",
+   "file": "out/vfx/collapse_dust.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 24,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "dust rolling out from a collapse base",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "coolant_steam",
+   "file": "out/vfx/coolant_steam.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 30,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "thin fast white steam",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "sparks",
+   "file": "out/vfx/sparks.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 30,
+   "blend": "additive",
+   "loop": false,
+   "premultiplied": true,
+   "note": "spark fountain with gravity",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "water_splash_impact",
+   "file": "out/vfx/water_splash_impact.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 30,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "impact crown",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "water_splash_wide",
+   "file": "out/vfx/water_splash_wide.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 30,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "wide splash",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "fire_smoke",
+   "file": "out/vfx/fire_smoke.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 24,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "flames with dark smoke above",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "electric_arc",
+   "file": "out/vfx/electric_arc.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 30,
+   "blend": "additive",
+   "loop": true,
+   "premultiplied": true,
+   "note": "flickering arc with branches",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "glass_shards",
+   "file": "out/vfx/glass_shards.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 30,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "flying glass fragments",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "missile_explosion",
+   "file": "out/vfx/missile_explosion.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 30,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "fireball, shock ring, debris, low smoke",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "rain_drops",
+   "file": "out/vfx/rain_drops.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 24,
+   "blend": "additive",
+   "loop": true,
+   "premultiplied": true,
+   "note": "ripple rings on wet ground",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "wave_ring",
+   "file": "out/vfx/wave_ring.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 24,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "expanding ring wave with foam",
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "projectile_trail",
+   "file": "out/vfx/projectile_trail.png",
+   "size": 2048,
+   "frame": 256,
+   "grid": [
+    8,
+    8
+   ],
+   "frames": 64,
+   "fps": 30,
+   "blend": "alpha",
+   "loop": false,
+   "premultiplied": true,
+   "note": "projectile with smoky trail",
+   "colorspace": "sRGB"
+  }
+ ],
+ "luts": [
+  {
+   "name": "heat_lut",
+   "file": "out/luts/heat_lut.png",
+   "size": [
+    256,
+    1
+   ],
+   "colorspace": "sRGB",
+   "note": "0 cold (deep blue) .. 1 hottest (white)",
+   "stops": [
+    [
+     0.0,
+     [
+      0.02,
+      0.04,
+      0.22
+     ]
+    ],
+    [
+     0.25,
+     [
+      0.05,
+      0.45,
+      0.85
+     ]
+    ],
+    [
+     0.45,
+     [
+      0.55,
+      0.9,
+      0.95
+     ]
+    ],
+    [
+     0.6,
+     [
+      1.0,
+      0.95,
+      0.4
+     ]
+    ],
+    [
+     0.78,
+     [
+      1.0,
+      0.55,
+      0.08
+     ]
+    ],
+    [
+     0.92,
+     [
+      0.95,
+      0.12,
+      0.04
+     ]
+    ],
+    [
+     1.0,
+     [
+      1.0,
+      1.0,
+      1.0
+     ]
+    ]
+   ]
+  },
+  {
+   "name": "damage_color_lut",
+   "file": "out/luts/damage_color_lut.png",
+   "size": [
+    256,
+    2
+   ],
+   "colorspace": "sRGB",
+   "note": "row 0 = 5 hard bands, row 1 = smooth blend; order neutral, exposed, damaged, critical, lost (pitch \u00a721)",
+   "steps": [
+    {
+     "name": "neutral",
+     "rgb": [
+      0.78,
+      0.92,
+      1.0
+     ]
+    },
+    {
+     "name": "exposed",
+     "rgb": [
+      1.0,
+      0.85,
+      0.2
+     ]
+    },
+    {
+     "name": "damaged",
+     "rgb": [
+      1.0,
+      0.5,
+      0.1
+     ]
+    },
+    {
+     "name": "critical",
+     "rgb": [
+      1.0,
+      0.1,
+      0.08
+     ]
+    },
+    {
+     "name": "lost",
+     "rgb": [
+      0.01,
+      0.01,
+      0.012
+     ]
+    }
+   ]
+  }
+ ],
+ "masks": [
+  {
+   "name": "mask_dent_01",
+   "kind": "Dent",
+   "variant": 0,
+   "file": "out/masks/mask_dent_01.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_dent_02",
+   "kind": "Dent",
+   "variant": 1,
+   "file": "out/masks/mask_dent_02.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_dent_03",
+   "kind": "Dent",
+   "variant": 2,
+   "file": "out/masks/mask_dent_03.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_dent_04",
+   "kind": "Dent",
+   "variant": 3,
+   "file": "out/masks/mask_dent_04.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_crack_01",
+   "kind": "Crack",
+   "variant": 0,
+   "file": "out/masks/mask_crack_01.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_crack_02",
+   "kind": "Crack",
+   "variant": 1,
+   "file": "out/masks/mask_crack_02.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_crack_03",
+   "kind": "Crack",
+   "variant": 2,
+   "file": "out/masks/mask_crack_03.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_crack_04",
+   "kind": "Crack",
+   "variant": 3,
+   "file": "out/masks/mask_crack_04.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_burn_01",
+   "kind": "Burn",
+   "variant": 0,
+   "file": "out/masks/mask_burn_01.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_burn_02",
+   "kind": "Burn",
+   "variant": 1,
+   "file": "out/masks/mask_burn_02.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_burn_03",
+   "kind": "Burn",
+   "variant": 2,
+   "file": "out/masks/mask_burn_03.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  },
+  {
+   "name": "mask_burn_04",
+   "kind": "Burn",
+   "variant": 3,
+   "file": "out/masks/mask_burn_04.png",
+   "size": 1024,
+   "colorspace": "Linear",
+   "tile": true
+  }
+ ],
+ "mask_zone_variants": {
+  "Head": {
+   "Dent": 0,
+   "Crack": 0,
+   "Burn": 0
+  },
+  "Torso": {
+   "Dent": 1,
+   "Crack": 1,
+   "Burn": 3
+  },
+  "Reactor": {
+   "Dent": 2,
+   "Crack": 3,
+   "Burn": 2
+  },
+  "ShoulderL": {
+   "Dent": 3,
+   "Crack": 0,
+   "Burn": 1
+  },
+  "ShoulderR": {
+   "Dent": 0,
+   "Crack": 2,
+   "Burn": 1
+  },
+  "ArmL": {
+   "Dent": 1,
+   "Crack": 3,
+   "Burn": 0
+  },
+  "ArmR": {
+   "Dent": 2,
+   "Crack": 1,
+   "Burn": 3
+  },
+  "LegL": {
+   "Dent": 3,
+   "Crack": 2,
+   "Burn": 2
+  },
+  "LegR": {
+   "Dent": 0,
+   "Crack": 0,
+   "Burn": 2
+  }
+ }
+}
