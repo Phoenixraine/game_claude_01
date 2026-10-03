@@ -20,7 +20,7 @@
 | `iv/Dummy.h` | **v2** тренировочный манекен (`DummyMode`) |
 | `iv/Rng.h` | PCG32 с сидом |
 | `iv/Boarding.h` | **v4** абордаж: `Boarding`, `BoardPhase`, `BoardingInput` (см. §7a) |
-| `iv/HackGame.h` | **v4** логика мини-игры взлома люка (в TASK-017 — минимальная, TASK-018 расширяет) |
+| `iv/HackGame.h`, `iv/HackBot.h`, `iv/HackExport.h` | **v4** логика мини-игры взлома люка (три слоя), боты для калибровки, экспорт JSON |
 
 Сборка и проверка с нуля:
 
@@ -318,9 +318,8 @@ Idle ──start──▶ ClimbOut ▶ OnShoulder ▶ HookLaunch ▶ HookFlight 
 ### Изменения в остальном ядре (контракт)
 - `EndReason::PilotLost` добавлен в конец; `Name(EndReason)` знает его.
 - `Duel::ForceEnd(loser, reason)` — завершить матч снаружи (используется абордажем).
-- `Fighter::autopilot` / `set_autopilot()`; `Fighter::TakeHit` умножает урон на `kAutopilotDamageMult` (1,8) только при `autopilot`.
-- `HackGame` (`iv/HackGame.h`) — **минимальная** реализация «синхронизации сигнала» для тестов абордажа; TASK-018 заменяет внутренности на трёхслойную игру, сохраняя интерфейс
-  (`Start, Step, Reroll, AddPenalty, state, progress, mistakes, ticksLeft, quality, DifficultyFor`).
+- `Fighter::autopilot` / `set_autopilot()`; `Fighter::TakeHit` умножает урон на `kAutopilotDamageMult` (1,4) только при `autopilot`.
+- `HackGame` (`iv/HackGame.h`) — мини-игра взлома из трёх слоёв (TASK-018): путь по сетке, ритм, подбор частоты; интерфейс `Start, Step, Reroll, AddPenalty, state, progress, mistakes, ticksLeft, quality, PerfectInput, DifficultyFor` + доступ к раскладкам для экрана; данные — `data/hack/`, спецификация экрана — `docs/ux/hack_minigame.md`, калибровка — `docs/ux/hack_calibration.md`.
 - `Boarding::Hash()` — хэш состояния для теста детерминизма (равный сид и ввод → равные хэш истории событий и хэш абордажа).
 - Баланс — `docs/BOARDING_BALANCE.md` (`ivsim --boarding`).
 

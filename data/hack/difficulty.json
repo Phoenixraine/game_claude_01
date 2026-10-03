@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "note": "Mirror of tune::kHackLevels in core/include/iv/Tuning.h (a test keeps them equal)",
+  "constants": {"leadTicks": 60, "travelTicks": 90, "alarmHeat": 70, "tripHeat": 100, "tripHeatAfter": 40, "heatDecayPerTick": 0.100, "tripPenaltyMult": 3, "undoPenaltyTicks": 12, "lockSpeedGain": 0.050, "alarmSpeedMult": 1.120, "lockHalfMinDeg": 6.000},
+  "levels": [
+    {"level": 1, "stages": 3, "gridW": 5, "gridH": 4, "blocks": 4, "ice": 0, "keys": 1, "lanes": 3, "impulses": 10, "gapMin": 26, "gapMax": 44, "hitWindow": 5, "locks": 3, "lockHalfDeg": 20.000, "lockShrink": 0.880, "relSpeed": 5.000, "timeLimitSec": 25, "penaltyMs": 1500, "heatPerMistake": 30},
+    {"level": 2, "stages": 3, "gridW": 5, "gridH": 4, "blocks": 5, "ice": 0, "keys": 1, "lanes": 3, "impulses": 10, "gapMin": 24, "gapMax": 42, "hitWindow": 5, "locks": 3, "lockHalfDeg": 20.000, "lockShrink": 0.880, "relSpeed": 5.000, "timeLimitSec": 26, "penaltyMs": 1600, "heatPerMistake": 31},
+    {"level": 3, "stages": 3, "gridW": 6, "gridH": 4, "blocks": 6, "ice": 1, "keys": 1, "lanes": 3, "impulses": 12, "gapMin": 22, "gapMax": 40, "hitWindow": 6, "locks": 4, "lockHalfDeg": 21.000, "lockShrink": 0.880, "relSpeed": 5.100, "timeLimitSec": 28, "penaltyMs": 1700, "heatPerMistake": 32},
+    {"level": 4, "stages": 3, "gridW": 6, "gridH": 5, "blocks": 8, "ice": 1, "keys": 2, "lanes": 3, "impulses": 12, "gapMin": 22, "gapMax": 40, "hitWindow": 6, "locks": 4, "lockHalfDeg": 20.000, "lockShrink": 0.880, "relSpeed": 5.300, "timeLimitSec": 30, "penaltyMs": 1400, "heatPerMistake": 26},
+    {"level": 5, "stages": 3, "gridW": 7, "gridH": 5, "blocks": 9, "ice": 2, "keys": 2, "lanes": 4, "impulses": 14, "gapMin": 22, "gapMax": 40, "hitWindow": 6, "locks": 4, "lockHalfDeg": 19.000, "lockShrink": 0.870, "relSpeed": 5.600, "timeLimitSec": 34, "penaltyMs": 1450, "heatPerMistake": 26},
+    {"level": 6, "stages": 3, "gridW": 7, "gridH": 5, "blocks": 10, "ice": 2, "keys": 2, "lanes": 4, "impulses": 16, "gapMin": 20, "gapMax": 36, "hitWindow": 5, "locks": 5, "lockHalfDeg": 18.000, "lockShrink": 0.870, "relSpeed": 5.900, "timeLimitSec": 42, "penaltyMs": 1500, "heatPerMistake": 27},
+    {"level": 7, "stages": 3, "gridW": 8, "gridH": 5, "blocks": 12, "ice": 3, "keys": 3, "lanes": 4, "impulses": 18, "gapMin": 18, "gapMax": 32, "hitWindow": 5, "locks": 5, "lockHalfDeg": 17.500, "lockShrink": 0.860, "relSpeed": 6.000, "timeLimitSec": 40, "penaltyMs": 1600, "heatPerMistake": 28},
+    {"level": 8, "stages": 5, "gridW": 8, "gridH": 6, "blocks": 13, "ice": 3, "keys": 3, "lanes": 4, "impulses": 18, "gapMin": 18, "gapMax": 32, "hitWindow": 6, "locks": 5, "lockHalfDeg": 22.000, "lockShrink": 0.900, "relSpeed": 5.100, "timeLimitSec": 45, "penaltyMs": 1500, "heatPerMistake": 25},
+    {"level": 9, "stages": 5, "gridW": 9, "gridH": 6, "blocks": 15, "ice": 4, "keys": 3, "lanes": 5, "impulses": 20, "gapMin": 17, "gapMax": 30, "hitWindow": 6, "locks": 5, "lockHalfDeg": 21.500, "lockShrink": 0.900, "relSpeed": 5.100, "timeLimitSec": 44, "penaltyMs": 1600, "heatPerMistake": 26},
+    {"level": 10, "stages": 5, "gridW": 9, "gridH": 6, "blocks": 16, "ice": 4, "keys": 4, "lanes": 5, "impulses": 22, "gapMin": 16, "gapMax": 28, "hitWindow": 5, "locks": 6, "lockHalfDeg": 22.500, "lockShrink": 0.900, "relSpeed": 4.900, "timeLimitSec": 48, "penaltyMs": 1700, "heatPerMistake": 27}
+  ]
+}

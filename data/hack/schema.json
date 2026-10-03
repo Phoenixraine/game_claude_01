@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IMPACT VECTOR hack mini-game: pre-generated sessions (hack_levels.json)",
+  "description": "Every session is exactly what HackGame::Start(difficulty = level, seed) builds; the stage layouts are the output of HackGame::GeneratePath / GenerateRhythm / GenerateFreq with seed = HackGame::StageSeed(seed, stageIndex, 0). Unreal may play these files without porting the generator; the C++ core stays the source of truth (test Hack.LevelsJsonEqualsGenerator).",
+  "type": "object",
+  "required": ["version", "sessions"],
+  "properties": {
+    "version": {"const": 1},
+    "note": {"type": "string"},
+    "sessions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["level", "seed", "timeLimitTicks", "stages"],
+        "properties": {
+          "level": {"type": "integer", "minimum": 1, "maximum": 10},
+          "seed": {"type": "integer", "minimum": 0},
+          "timeLimitTicks": {"type": "integer", "minimum": 1500, "maximum": 3600},
+          "stages": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 5,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["kind", "boss", "w", "h", "entry", "core", "cells", "keys", "solution"],
+                  "properties": {
+                    "kind": {"const": "path"},
+                    "boss": {"type": "boolean"},
+                    "w": {"type": "integer"},
+                    "h": {"type": "integer"},
+                    "entry": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2},
+                    "core": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2},
+                    "cells": {"type": "array", "items": {"type": "string", "pattern": "^[012]+$"}, "description": "rows top to bottom: 0 empty, 1 blocker, 2 ice node"},
+                    "keys": {"type": "array", "items": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2}, "description": "[x, y], to be taken in this order"},
+                    "solution": {"type": "string", "pattern": "^[LRUD]+$", "description": "reference presses; an ice node slides on and costs no extra press"}
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["kind", "boss", "lanes", "impulses"],
+                  "properties": {
+                    "kind": {"const": "rhythm"},
+                    "boss": {"type": "boolean"},
+                    "lanes": {"type": "integer", "minimum": 3, "maximum": 5, "description": "lane 0 left, 1 down, 2 up, 3 right, 4 confirm"},
+                    "impulses": {"type": "array", "items": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2, "description": "[tick of the hit, lane], ticks from the stage start"}}
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["kind", "boss", "locks", "hackerStart", "iceStart", "hackerSpeed", "iceSpeed", "halfDeg"],
+                  "properties": {
+                    "kind": {"const": "frequency"},
+                    "boss": {"type": "boolean"},
+                    "locks": {"type": "integer"},
+                    "hackerStart": {"type": "number"},
+                    "iceStart": {"type": "number"},
+                    "hackerSpeed": {"type": "number", "description": "degrees per tick, turns +"},
+                    "iceSpeed": {"type": "number", "description": "degrees per tick, turns -"},
+                    "halfDeg": {"type": "array", "items": {"type": "number"}, "description": "window half-width of every lock, degrees"}
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
