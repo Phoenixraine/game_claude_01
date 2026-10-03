@@ -1,12 +1,3 @@
-node_modules/
-dist/
 build/
-tools/
-*.msi
-*.exe
-.vscode/
-.idea/
-Saved/
-Intermediate/
-Binaries/
-DerivedDataCache/
+build-*/
+*.csv.tmp
