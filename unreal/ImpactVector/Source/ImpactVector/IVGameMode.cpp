@@ -35,11 +35,18 @@ void AIVGameMode::StartPlay()
 		EnemyMech->SetBodyTint(FLinearColor(0.9f, 0.45f, 0.4f));
 	}
 
-	if (APlayerController* PC = W->GetFirstPlayerController())
 	{
-		if (APawn* Pawn = PC->GetPawn())
+		float StartX = -24000.f, StartY = 0.f, StartYaw = 0.f;
+		FParse::Value(FCommandLine::Get(), TEXT("-IVX="), StartX);
+		FParse::Value(FCommandLine::Get(), TEXT("-IVY="), StartY);
+		FParse::Value(FCommandLine::Get(), TEXT("-IVYaw="), StartYaw);
+		if (APlayerController* PC = W->GetFirstPlayerController())
 		{
-			Pawn->SetActorLocationAndRotation(FVector(-24000.f, 0.f, 4100.f), FRotator::ZeroRotator, false, nullptr, ETeleportType::TeleportPhysics);
+			if (APawn* Pawn = PC->GetPawn())
+			{
+				Pawn->SetActorLocationAndRotation(FVector(StartX, StartY, 4100.f), FRotator(0.f, StartYaw, 0.f), false, nullptr, ETeleportType::TeleportPhysics);
+				if (AIVMechPawn* M = Cast<AIVMechPawn>(Pawn)) M->SetAim(StartYaw, 0.f);
+			}
 		}
 	}
 

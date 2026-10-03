@@ -76,12 +76,12 @@ AIVEnvironment::AIVEnvironment()
 		return M;
 	};
 	Ground = MakeSlab(TEXT("Ground"));
-	Ground->SetRelativeLocation(FVector(0, 0, -100));
-	Ground->SetRelativeScale3D(FVector(3000.f, 3000.f, 2.f));
+	Ground->SetRelativeLocation(FVector(45000.f, 0, -100));
+	Ground->SetRelativeScale3D(FVector(2100.f, 3000.f, 2.f));        // land: x from -60 km... -60000 cm (quay edge) to +150000
 	Ground->SetCollisionProfileName(TEXT("BlockAll"));
 	Sea = MakeSlab(TEXT("Sea"));
-	Sea->SetRelativeLocation(FVector(-120000.f, 0, -3000));
-	Sea->SetRelativeScale3D(FVector(1200.f, 3000.f, 2.f));
+	Sea->SetRelativeLocation(FVector(-210000.f, 0, -1700));
+	Sea->SetRelativeScale3D(FVector(3000.f, 6000.f, 2.f));           // top at z = -1600: a 16 m drop from the quay
 	Sea->SetCollisionProfileName(TEXT("BlockAll"));
 
 	Concrete = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Concrete"));
@@ -101,17 +101,40 @@ void AIVEnvironment::OnConstruction(const FTransform&)
 void AIVEnvironment::BeginPlay()
 {
 	Super::BeginPlay();
-	static UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
-	auto Tint = [this](UPrimitiveComponent* C, const FLinearColor& Col, int32 Idx = 0) {
-		if (!Base) return;
-		UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(Base, this);
-		M->SetVectorParameterValue(TEXT("Color"), Col);
-		C->SetMaterial(Idx, M);
+	UMaterialInterface* Fallback = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	UMaterialInterface* Facade = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_BuildingFacade.M_BuildingFacade"));
+	UMaterialInterface* GroundM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_WetGround.M_WetGround"));
+	UMaterialInterface* SeaM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Sea.M_Sea"));
+
+	auto Apply = [this](UPrimitiveComponent* C, UMaterialInterface* Src, UMaterialInterface* Fb,
+		TFunctionRef<void(UMaterialInstanceDynamic*)> Setup)
+	{
+		UMaterialInterface* Use = Src ? Src : Fb;
+		if (!Use) return;
+		UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(Use, this);
+		Setup(M);
+		C->SetMaterial(0, M);
 	};
-	Tint(Ground, FLinearColor(0.06f, 0.065f, 0.07f));
-	Tint(Sea, FLinearColor(0.012f, 0.03f, 0.05f));
-	Tint(Concrete, FLinearColor(0.2f, 0.21f, 0.22f));
-	Tint(Glass, FLinearColor(0.04f, 0.07f, 0.1f));
+	Apply(Ground, GroundM, Fallback, [](UMaterialInstanceDynamic* M) {
+		M->SetVectorParameterValue(TEXT("BaseTint"), FLinearColor(0.045f, 0.047f, 0.052f));
+		M->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.06f, 0.065f, 0.07f));
+	});
+	Apply(Sea, SeaM, Fallback, [](UMaterialInstanceDynamic* M) {
+		M->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.012f, 0.03f, 0.05f));
+	});
+	Apply(Concrete, Facade, Fallback, [](UMaterialInstanceDynamic* M) {
+		M->SetVectorParameterValue(TEXT("Tint"), FLinearColor(0.2f, 0.21f, 0.22f));
+		M->SetVectorParameterValue(TEXT("GlassColor"), FLinearColor(0.03f, 0.045f, 0.06f));
+		M->SetScalarParameterValue(TEXT("Glassiness"), 0.5f);
+		M->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.2f, 0.21f, 0.22f));
+	});
+	Apply(Glass, Facade, Fallback, [](UMaterialInstanceDynamic* M) {
+		M->SetVectorParameterValue(TEXT("Tint"), FLinearColor(0.07f, 0.1f, 0.13f));
+		M->SetVectorParameterValue(TEXT("GlassColor"), FLinearColor(0.02f, 0.05f, 0.08f));
+		M->SetScalarParameterValue(TEXT("WindowSpacing"), 330.f);
+		M->SetScalarParameterValue(TEXT("Glassiness"), 0.9f);
+		M->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.04f, 0.07f, 0.1f));
+	});
 	BuildCityBlockout();
 }
 

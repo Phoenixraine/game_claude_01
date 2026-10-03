@@ -22,6 +22,7 @@ namespace
 {
 	UStaticMesh* GCube = nullptr;
 	UMaterialInterface* GBaseMat = nullptr;
+	UMaterialInterface* GArmorMat = nullptr;
 	constexpr float kTwoPi = 6.28318530718f;
 }
 
@@ -31,8 +32,10 @@ AIVMechPawn::AIVMechPawn()
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeF(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MatF(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> ArmorF(TEXT("/Game/Materials/M_MechArmor.M_MechArmor"));
 	GCube = CubeF.Object;
 	GBaseMat = MatF.Object;
+	GArmorMat = ArmorF.Succeeded() ? ArmorF.Object : nullptr;
 
 	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
 	Capsule->InitCapsuleSize(1300.f, 4100.f);
@@ -140,8 +143,9 @@ void AIVMechPawn::BeginPlay()
 	auto MakeMID = [this](UStaticMeshComponent* M, const FLinearColor& C)
 	{
 		if (!M || !GBaseMat) return;
-		UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(GBaseMat, this);
+		UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(GArmorMat ? GArmorMat : GBaseMat, this);
 		MID->SetVectorParameterValue(TEXT("Color"), C);
+		MID->SetVectorParameterValue(TEXT("Tint"), C);
 		M->SetMaterial(0, MID);
 		BodyMIDs.Add(MID);
 	};
@@ -170,7 +174,9 @@ void AIVMechPawn::SetBodyTint(const FLinearColor& Tint)
 		if (M->GetVectorParameterValue(TEXT("Color"), Cur))
 		{
 			const float L = FMath::Max3(Cur.R, Cur.G, Cur.B);
-			M->SetVectorParameterValue(TEXT("Color"), FLinearColor(Tint.R * (0.4f + L), Tint.G * (0.4f + L), Tint.B * (0.4f + L)));
+			const FLinearColor New(Tint.R * (0.4f + L), Tint.G * (0.4f + L), Tint.B * (0.4f + L));
+			M->SetVectorParameterValue(TEXT("Color"), New);
+			M->SetVectorParameterValue(TEXT("Tint"), New);
 		}
 	}
 }
