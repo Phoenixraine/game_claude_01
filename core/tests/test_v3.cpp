@@ -245,3 +245,22 @@ IV_TEST(Ai, BlindPilotCannotReadTheSectorAndMimicsThePlayersLine) {
   IV_CHECK(trials >= 10);
   IV_CHECK(mimic * 3 >= trials);   // at least a third of the first answers repeat the player's line (chance alone gives about a quarter)
 }
+
+IV_TEST(Weapons, SwitchingWeaponsKeepsEachCooldownRunning) {
+  Rig r(1, 40.f);
+  r.duel.SetLoadout(Side::A, WeaponKind::RailSpear);
+  r.a.weaponHeld = true;
+  r.Step(tune::kWeapons[0].chargeTicks * 2 + 10);
+  r.a.weaponHeld = false;
+  r.Step(3);
+  r.StepUntil([&] { return !r.duel.cinematic().active && r.A().phase == Phase::Idle; }, 3000);
+  IV_CHECK(r.A().weaponCooldown > 0);
+  const int railLeft = r.A().weaponCooldown;
+  IV_CHECK(r.duel.SelectWeapon(Side::A, WeaponKind::PlasmaCannon));
+  IV_CHECK_EQ(r.A().weaponCooldown, 0);                           // plasma is ready: switching does not refresh the rail
+  IV_CHECK(r.A().CooldownOf(WeaponKind::RailSpear) == railLeft);
+  r.Step(120);
+  IV_CHECK(r.A().CooldownOf(WeaponKind::RailSpear) == railLeft - 120);
+  IV_CHECK(r.duel.SelectWeapon(Side::A, WeaponKind::RailSpear));
+  IV_CHECK(r.A().weaponCooldown == railLeft - 120);
+}

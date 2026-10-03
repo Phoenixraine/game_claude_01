@@ -224,8 +224,6 @@ TEAR_POSES = [
     {"upperarm_l": (-150, 0, 0), "forearm_l": (-100, 0, 0), "upperarm_r": (-30, 0, 0)},
     {"upperarm_l": (-20, 0, 70), "forearm_l": (-60, 0, 0), "hand_l": (0, 55, 0)},
     {"upperarm_l": (55, 0, 0), "forearm_l": (-90, 0, 0), "hand_l": (40, 0, 0)},
-    {"thigh_l": (-55, 0, 0), "shin_l": (100, 0, 0), "foot_l": (-30, 0, 0), "thigh_r": (30, 0, 0)},
-    {"thigh_l": (0, 0, -22), "thigh_r": (-30, 0, 20), "shin_r": (60, 0, 0)},
     {"torso": (0, 0, 40), "head": (0, 0, 45), "upperarm_l": (-90, 0, 20), "upperarm_r": (-60, 0, -10), "forearm_r": (-70, 0, 0)},
     {"torso": (15, 0, -40), "upperarm_r": (-150, 0, -20), "forearm_r": (-90, 0, 0), "pelvis": (0, 0, 15)},
 ]
@@ -235,7 +233,7 @@ for sp in TEAR_POSES + [mirror(q) for q in TEAR_POSES]:
     vp = lbs(v, W, pose_mats(sp))
     for k, (a, b) in enumerate(((0, 1), (1, 2), (2, 0))):
         e1 = np.linalg.norm(vp[f[:, a]] - vp[f[:, b]], axis=1)
-        tear |= (e1 > 2.2 * e0[k] + 0.8)
+        tear |= (e1 > 2.6 * e0[k] + 1.0)
 print("tearing faces removed", int(tear.sum()), "of", len(f))
 if tear.any():
     f = f[~tear]

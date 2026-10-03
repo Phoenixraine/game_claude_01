@@ -3,6 +3,8 @@
 #include "IVPlayerController.h"
 #include "IVHUD.h"
 #include "IVEnvironment.h"
+#include "IVFlow.h"
+#include "EngineUtils.h"
 #include "IVDistrict.h"
 #include "IVCombat.h"
 #include "IVAudio.h"
@@ -54,6 +56,12 @@ void AIVGameMode::StartPlay()
 		{
 			EnemyMech->RigAssetPath = TEXT("/Game/Mechs/Enemy/ENEMY_01.ENEMY_01");
 			EnemyMech->bUseHullMaterial = true;
+			EnemyMech->HullTint = FLinearColor(0.035f, 0.037f, 0.042f);
+			EnemyMech->HullAccent = FLinearColor(0.55f, 0.02f, 0.015f);
+			EnemyMech->HullGlow = FLinearColor(4.5f, 0.2f, 0.05f);
+			EnemyMech->HullAccentAmount = 1.f;
+			EnemyMech->SwordEdge = FLinearColor(3.2f, 0.12f, 0.05f);
+			EnemyMech->LampColor = FLinearColor(1.f, 0.28f, 0.12f);
 		}
 		EnemyMech->FinishSpawning(FTransform(FRotator(0.f, EnemyYaw, 0.f), EnemyLoc));
 		EnemyMech->bAIControlled = true;
@@ -102,6 +110,31 @@ void AIVGameMode::StartPlay()
 					}
 					int32 Dummy = 0;
 					if (FParse::Value(FCommandLine::Get(), TEXT("-IVDummy="), Dummy) && Dummy > 0) Dir->SetDummy(static_cast<iv::DummyMode>(Dummy));
+				}
+			}
+		}
+	}
+
+	// game flow: title menu -> tutorial -> duel (the command line can skip straight to a state for automated captures)
+	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoCombat")) && !FParse::Param(FCommandLine::Get(), TEXT("IVAutoFight")) && !FParse::Param(FCommandLine::Get(), TEXT("IVNoFlow")))
+	{
+		if (APawn* Pw = UGameplayStatics::GetPlayerPawn(this, 0))
+		{
+			AIVCombatDirector* Dr = nullptr;
+			for (TActorIterator<AIVCombatDirector> It(W); It; ++It) { Dr = *It; break; }
+			if (AIVMechPawn* Pl = Cast<AIVMechPawn>(Pw))
+			{
+				if (Dr && EnemyMech)
+				{
+					EIVFlowState Start = EIVFlowState::Menu;
+					FString StartName;
+					if (FParse::Value(FCommandLine::Get(), TEXT("-IVStart="), StartName))
+					{
+						if (StartName.Equals(TEXT("tutorial"), ESearchCase::IgnoreCase)) Start = EIVFlowState::Tutorial;
+						else if (StartName.Equals(TEXT("duel"), ESearchCase::IgnoreCase)) Start = EIVFlowState::Duel;
+					}
+					AIVGameFlow* Fl = W->SpawnActor<AIVGameFlow>(FVector::ZeroVector, FRotator::ZeroRotator);
+					if (Fl) Fl->Begin(Pl, EnemyMech, Dr, Start);
 				}
 			}
 		}

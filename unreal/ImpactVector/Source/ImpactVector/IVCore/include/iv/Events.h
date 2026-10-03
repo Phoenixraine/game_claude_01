@@ -60,6 +60,14 @@ enum class EventType : uint8_t {
   WeaponReady,       // a: WeaponKind: the cooldown is over
   WeaponEmpty,       // a: WeaponKind: no ammo left
   MatchEnd,          // a: EndReason, actor: the fighter that lost (or Side::A on a draw with b == 1)
+  // ---- v3 (appended: order of the values above is a contract) ----
+  BladesClash,       // actor: the fighter whose contact tick came first, a: its SwingSide, b: the other's SwingSide - both strikes are stopped
+  StatusApplied,     // actor: the afflicted fighter, a: StatusKind, b: duration in ticks
+  StatusEnded,       // actor: the afflicted fighter, a: StatusKind
+  UltimateFinisher,  // actor: the attacker: the target is cut in half (match ends)
+  UltimateSever,     // actor: the attacker, zone: the severed arm; the target can no longer use its ultimate
+  ExternalHit,       // actor: the victim, zone, a: source (0 debris thrown, 1 crash into a building, 2 fall), value: damage
+  BurnTick,          // actor: the burning fighter, value: damage
 };
 
 struct Event {

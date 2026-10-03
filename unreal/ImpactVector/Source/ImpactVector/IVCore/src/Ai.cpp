@@ -38,6 +38,8 @@ Observation MakeObservation(const Duel& duel, Side viewer) {
   o.chainMine = duel.chain().active && duel.chain().who == viewer;
 
   SelfView& s = o.self;
+  s.blinded = me.Blind();
+  s.strikeLocked = me.strikeLockTicks > 0;
   s.posture = me.posture;
   s.phase = me.phase;
   s.stability = me.res.stability;
@@ -270,8 +272,8 @@ void Ai::ChooseReaction(const OppView& seen, const SelfView& self) {
   const Style& st = kStyles[static_cast<int>(archetype_)];
   float w[5];
   for (int i = 0; i < 5; ++i) w[i] = st.react[i];
-  const bool linear = IsLinearSwing(seen.side);
-  if (!linear) w[2] = 0.f;                                  // a dodge does not beat wide swings (pitch §6)
+  const bool lateral = IsLateralSwing(seen.side);
+  if (!lateral) w[2] = 0.f;                                 // v3: a dodge only beats lateral slashes
   if (self.stability > 60.f) w[4] *= 0.3f;                  // hard stance is for when the mech is in trouble
   if (self.stability < 35.f) w[4] = w[4] * 3.f + 0.2f;
   if (self.energy < 25.f) { w[3] = 0.f; w[4] = 0.f; }
@@ -465,6 +467,10 @@ void Ai::PickStrike(const Observation& cur, const OppView& seen) {
     r -= w[i];
     side = i;
   }
+  // v3: a pilot who has just seen a swing line is tempted to answer on the same line (the player's own trajectory comes back at him).
+  if (lastOppSideTick_ > -1000 && cur.tick - lastOppSideTick_ < 720 && w[Index(lastOppSide_)] > 0.f &&
+      Roll() < tune::kMirrorChance[static_cast<int>(difficulty_)])
+    side = Index(lastOppSide_);
   script_.side = SideFromIndex(side);
 
   const float stepRange = tune::kHeavyReach + tune::kStepInReachBonus;
@@ -646,8 +652,9 @@ Input Ai::Decide(const Observation& cur) {
   history_.push_back(cur);
   if (static_cast<int>(history_.size()) > delay_ + 1) history_.erase(history_.begin());
   const Observation& old = history_.front();  // pitch §20: the opponent as it was `delay_` ticks ago
-  const OppView& seen = old.opp;
+  OppView seen = old.opp;
   const SelfView& self = cur.self;
+  if (self.blinded) seen.side = SideFromIndex(static_cast<int>(((cur.tick / 40) * 7 + 3) % 4));   // v3: cannot read the sector
 
   if (cooldown_ > 0) --cooldown_;
   if (chase_ > 0) --chase_;

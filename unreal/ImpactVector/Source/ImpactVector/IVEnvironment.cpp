@@ -43,7 +43,7 @@ AIVEnvironment::AIVEnvironment()
 	Moon = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("Moon"));
 	Moon->SetupAttachment(Root);
 	Moon->SetRelativeRotation(FRotator(-38.f, 140.f, 0.f));
-	Moon->SetIntensity(2.6f);
+	Moon->SetIntensity(4.f);
 	Moon->SetLightColor(FLinearColor(0.55f, 0.66f, 1.0f).ToFColor(true));
 	Moon->SetMobility(EComponentMobility::Movable);
 	Moon->SetCastShadows(true);
@@ -283,4 +283,10 @@ int32 AIVEnvironment::CollapseNearestAhead(const FVector& From, const FVector& D
 	const FVector BaseCenter(B.Center.X, B.Center.Y, 1000.f);
 	const float R = FMath::Max(B.Size.X, B.Size.Y) * 0.78f;
 	return BlastAt(BaseCenter, R, 1500.f);
+}
+
+bool AIVEnvironment::FindScoopBuilding(const FVector& From, const FVector& Dir, FVector& OutBase, FVector& OutSize) const
+{
+	if (District) return District->FindBuildingNear(From, Dir, 1500.f, 17000.f, OutBase, OutSize);
+	return false;
 }

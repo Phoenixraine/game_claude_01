@@ -252,12 +252,15 @@ col = lerp(col, float3(0.05, 0.045, 0.04), Wear * 0.25 * frac(h * 91.0) * step(0
     return m
 
 
-def build_mechhull():
+def build_mechhull(name="M_MechHull", masked=False):
     """Hull of the generated mechs (skeletal mesh): dark painted metal, rest-pose procedural panels/grime (UV0 = rest XY/82+.5,
     UV1.x = rest Z/82), vertex colour R = convexity (edge wear), G = ambient occlusion, B = zone, A = emissive mask."""
-    m = make_material("M_MechHull")
+    m = make_material(name)
     m.set_editor_property("used_with_skeletal_mesh", True)
     m.set_editor_property("used_with_morph_targets", True)
+    if masked:
+        m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
+        m.set_editor_property("two_sided", True)
     uva = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 0)
     uva.set_editor_property("coordinate_index", 0)
     uvb = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 120)
@@ -319,9 +322,27 @@ col = lerp(col, float3(0.012, 0.011, 0.01), soot);
     emi = custom(m, common + "float ember = step(0.93, n) * step(0.45, Damage) * saturate(Damage * 2.0 - 0.7) * (0.5 + fine); return Glow * (em * (0.7 + 0.3 * n) + ember * 0.5);", t.CMOT_FLOAT3, names, -900, 900, "hull_emissive")
     wire_custom(emi, srcs)
     MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    if masked:
+        wpos = expr(m, unreal.MaterialExpressionWorldPosition, -1500, 1100)
+        corg = vector(m, "ClipOrigin", (0, 0, 0, 1), -1500, 1250)
+        cnrm = vector(m, "ClipNormal", (0, 1, 0, 1), -1500, 1350)
+        side = scalar(m, "ClipSide", 1.0, -1500, 1450)
+        face = expr(m, unreal.MaterialExpressionTwoSidedSign, -1500, 1550)
+        mask = custom(m, "return (dot(WP - O, N) * Side > 0.0) ? 1.0 : 0.0;", t.CMOT_FLOAT1, ["WP", "O", "N", "Side"], -900, 1100, "clip_mask")
+        wire_custom(mask, [(wpos, ""), (corg, ""), (cnrm, ""), (side, "")])
+        MEL.connect_material_property(mask, "", unreal.MaterialProperty.MP_OPACITY_MASK)
+        # the inside of the cut glows like molten metal
+        glow2 = custom(m, "float k = step(Face, 0.0); return float3(4.0, 1.1, 0.18) * k * (0.7 + 0.3 * sin(T * 9.0));", t.CMOT_FLOAT3, ["Face", "T"], -900, 1300, "clip_inside")
+        tm2 = expr(m, unreal.MaterialExpressionTime, -1500, 1650)
+        wire_custom(glow2, [(face, ""), (tm2, "")])
+        MEL.connect_material_property(glow2, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m)
     return m
+
+
+def build_mechhull_clip():
+    return build_mechhull("M_MechHullClip", True)
 
 
 def build_rain():
@@ -515,6 +536,144 @@ float run = step(0.82, sx) * smoothstep(0.0, 0.2, sy) * smoothstep(0.6, 0.2, sy)
     return m
 
 
+def build_sword():
+    """Duel sword: dark steel with worn bright edges, a glowing plasma edge (Heat, EdgeColor), rubber grip, orange accents."""
+    m = make_material("M_Sword")
+    uv0 = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 0)
+    uv0.set_editor_property("coordinate_index", 0)
+    uv1 = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 120)
+    uv1.set_editor_property("coordinate_index", 1)
+    tm = expr(m, unreal.MaterialExpressionTime, -1500, 240)
+    heat = scalar(m, "Heat", 0.35, -1500, 360)
+    edge = vector(m, "EdgeColor", (3.0, 0.8, 0.12, 1), -1500, 460)
+    dmg = scalar(m, "Damage", 0.0, -1500, 560)
+    names = ["A", "Bq", "T", "Heat", "EdgeColor", "Damage"]
+    srcs = [(uv0, ""), (uv1, ""), (tm, ""), (heat, ""), (edge, ""), (dmg, "")]
+    common = """
+float3 P = float3((A.x - 0.5) * 2.0, (0.5 - A.y) * 2.0, (Bq.x - 0.5) * 2.0);
+float cls = 1.0 - Bq.y;
+float c0 = step(-0.5, cls) * step(cls, 0.5);
+float c1 = step(0.5, cls) * step(cls, 1.5);
+float c2 = step(1.5, cls) * step(cls, 2.5);
+float c3 = step(2.5, cls) * step(cls, 3.5);
+float c4 = step(3.5, cls);
+float n = 0.0, a = 0.5; float3 p = P * 0.45;
+for (int i = 0; i < 4; i++)
+{
+    float3 ip = floor(p), fp = frac(p);
+    float3 u = fp * fp * (3.0 - 2.0 * fp);
+    float3 k = float3(127.1, 311.7, 74.7);
+    float c000 = frac(sin(dot(ip, k)) * 43758.5453);
+    float c100 = frac(sin(dot(ip + float3(1,0,0), k)) * 43758.5453);
+    float c010 = frac(sin(dot(ip + float3(0,1,0), k)) * 43758.5453);
+    float c110 = frac(sin(dot(ip + float3(1,1,0), k)) * 43758.5453);
+    float c001 = frac(sin(dot(ip + float3(0,0,1), k)) * 43758.5453);
+    float c101 = frac(sin(dot(ip + float3(1,0,1), k)) * 43758.5453);
+    float c011 = frac(sin(dot(ip + float3(0,1,1), k)) * 43758.5453);
+    float c111 = frac(sin(dot(ip + float3(1,1,1), k)) * 43758.5453);
+    n += a * lerp(lerp(lerp(c000, c100, u.x), lerp(c010, c110, u.x), u.y), lerp(lerp(c001, c101, u.x), lerp(c011, c111, u.x), u.y), u.z);
+    p *= 2.2; a *= 0.5;
+}
+float scratch = smoothstep(0.55, 0.75, frac(sin(floor(P.x * 5.0) * 12.9 + floor(P.y * 14.0) * 78.2) * 43758.5)) * smoothstep(0.35, 0.7, n);
+float pulse = 0.82 + 0.18 * sin(T * 3.1 + P.x * 0.35);
+"""
+    t = unreal.CustomMaterialOutputType
+    base = custom(m, common + """
+float3 steel = float3(0.04, 0.042, 0.05) * (0.6 + 0.9 * n);
+float3 bright = lerp(float3(0.22, 0.22, 0.23), float3(0.5, 0.5, 0.52), scratch) * (0.7 + 0.5 * n);
+float3 grip = float3(0.012, 0.011, 0.012);
+float3 org = float3(0.42, 0.11, 0.008) * (0.7 + 0.6 * n);
+float3 col = steel * c0 + bright * c1 + float3(0.01, 0.01, 0.01) * c2 + grip * c3 + org * c4;
+return lerp(col, col * 0.25, Damage * smoothstep(0.45, 0.8, n));
+""", t.CMOT_FLOAT3, names, -900, 0, "sword_base")
+    wire_custom(base, srcs)
+    MEL.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = custom(m, common + "return clamp(c0 * (0.32 + 0.3 * n) + c1 * (0.22 + 0.25 * scratch) + c2 * 0.3 + c3 * 0.9 + c4 * 0.5, 0.15, 0.95);", t.CMOT_FLOAT1, names, -900, 300, "sword_rough")
+    wire_custom(rough, srcs)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    metal = custom(m, common + "return c0 * 0.9 + c1 * 1.0 + c3 * 0.0 + c4 * 0.2;", t.CMOT_FLOAT1, names, -900, 600, "sword_metal")
+    wire_custom(metal, srcs)
+    MEL.connect_material_property(metal, "", unreal.MaterialProperty.MP_METALLIC)
+    emi = custom(m, common + "return EdgeColor * c2 * (0.15 + 1.6 * Heat) * pulse + EdgeColor * c4 * 0.0;", t.CMOT_FLOAT3, names, -900, 900, "sword_emissive")
+    wire_custom(emi, srcs)
+    MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+def build_fire():
+    """Flame / explosion sprite: additive, radial blob warped by rising noise, white-yellow -> orange -> deep red with age."""
+    m = make_material("M_Fire")
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("two_sided", True)
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    uv = expr(m, unreal.MaterialExpressionTextureCoordinate, -1200, 0)
+    age = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 150)
+    age.set_editor_property("data_index", 0)
+    seed = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 300)
+    seed.set_editor_property("data_index", 1)
+    heat = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 450)
+    heat.set_editor_property("data_index", 2)
+    gain = scalar(m, "Gain", 2.2, -1200, 600)
+    code = """
+float2 q = (UV - 0.5) * 2.0;
+float r = length(q);
+float2 p = q * 2.4 + Seed * 53.0 + float2(0.0, -Age * 3.2);
+float n = 0.0, a = 0.5;
+for (int i = 0; i < 4; i++)
+{
+    float2 ip = floor(p), fp = frac(p);
+    float2 u = fp * fp * (3.0 - 2.0 * fp);
+    float h00 = frac(sin(dot(ip, float2(127.1, 311.7))) * 43758.5453);
+    float h10 = frac(sin(dot(ip + float2(1,0), float2(127.1, 311.7))) * 43758.5453);
+    float h01 = frac(sin(dot(ip + float2(0,1), float2(127.1, 311.7))) * 43758.5453);
+    float h11 = frac(sin(dot(ip + float2(1,1), float2(127.1, 311.7))) * 43758.5453);
+    n += a * lerp(lerp(h00, h10, u.x), lerp(h01, h11, u.x), u.y);
+    p *= 2.07; a *= 0.5;
+}
+float shape = saturate(1.0 - r);
+shape = shape * shape;
+float alpha = saturate(shape * (0.55 + 1.5 * n) - 0.16) * smoothstep(0.0, 0.07, Age) * pow(saturate(1.0 - Age), 1.3);
+"""
+    col = custom(m, code + """
+float3 hot = lerp(float3(3.0, 2.2, 1.0), float3(2.4, 0.9, 0.18), saturate(Age * 2.2));
+float3 cool = lerp(float3(1.8, 0.5, 0.08), float3(0.55, 0.06, 0.01), saturate(Age * 1.6));
+float3 c = lerp(cool, hot, Heat) * lerp(0.7, 1.4, n);
+return c * alpha * Gain;
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["UV", "Age", "Seed", "Heat", "Gain"], -700, 0, "fire_color")
+    wire_custom(col, [(uv, ""), (age, ""), (seed, ""), (heat, ""), (gain, "")])
+    MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+def build_trail():
+    """Blade trail ribbon: additive, colour = EdgeColor, vertex colour alpha = age fade, UV.y across (0 = tip, 1 = inner edge)."""
+    m = make_material("M_BladeTrail")
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("two_sided", True)
+    uv = expr(m, unreal.MaterialExpressionTextureCoordinate, -1200, 0)
+    vc = expr(m, unreal.MaterialExpressionVertexColor, -1200, 150)
+    col = vector(m, "EdgeColor", (0.4, 1.4, 3.0, 1), -1200, 300)
+    gain = scalar(m, "Gain", 3.0, -1200, 450)
+    c = custom(m, """
+float across = saturate(UV.y);
+float edge = pow(saturate(1.0 - across), 1.6);
+float core = smoothstep(0.0, 0.18, 1.0 - across);
+float3 c = lerp(Col.rgb, float3(1.0, 1.0, 1.0) * 1.5, core * 0.55);
+return c * edge * Fade * Gain;
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["UV", "Fade", "Col", "Gain"], -700, 0, "trail")
+    wire_custom(c, [(uv, ""), (vc, "A"), (col, ""), (gain, "")])
+    MEL.connect_material_property(c, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 def build_puff():
     """Soft dust/smoke sprite: procedural radial noise, per-instance age/seed from custom data."""
     m = make_material("M_Puff")
@@ -527,6 +686,8 @@ def build_puff():
     age.set_editor_property("data_index", 0)
     seed = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 300)
     seed.set_editor_property("data_index", 1)
+    dark = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 380)
+    dark.set_editor_property("data_index", 2)
     bright = scalar(m, "Brightness", 0.55, -1200, 450)
     code = """
 float2 q = (UV - 0.5) * 2.0;
@@ -553,9 +714,9 @@ float alpha = saturate(shape * (0.35 + 1.1 * n) - 0.12) * fadeIn * fadeOut;
 """
     op = custom(m, code + "return alpha * 0.85;", unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["UV", "Age", "Seed"], -700, 0, "puff_alpha")
     wire_custom(op, [(uv, ""), (age, ""), (seed, "")])
-    col = custom(m, "float3 c = lerp(float3(0.62, 0.6, 0.57), float3(0.28, 0.27, 0.27), frac(Seed * 7.13)); return c * B;",
-                 unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["Seed", "B"], -700, 250, "puff_color")
-    wire_custom(col, [(seed, ""), (bright, "")])
+    col = custom(m, "float3 c = lerp(float3(0.62, 0.6, 0.57), float3(0.28, 0.27, 0.27), frac(Seed * 7.13)); return c * B * (1.0 - 0.9 * Dark);",
+                 unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["Seed", "B", "Dark"], -700, 250, "puff_color")
+    wire_custom(col, [(seed, ""), (bright, ""), (dark, "")])
     MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
     MEL.recompile_material(m)
@@ -596,7 +757,7 @@ def build_spark():
     return m
 
 
-for fn in (build_facade, build_ground, build_water, build_armor, build_mechhull, build_rain, build_cockpit, build_cockpit_glass, build_puff, build_spark, build_propcolor):
+for fn in (build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor):
     try:
         fn()
         unreal.log("IV material OK: %s" % fn.__name__)

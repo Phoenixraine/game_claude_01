@@ -122,6 +122,11 @@ class Fighter {
   void LeaveClinch();
   // v2
   void SetLoadout(WeaponKind k);
+  // v3: switch between the three heavy weapons without resetting their cooldowns (only while idle and not charging).
+  bool SelectWeapon(WeaponKind k);
+  // Remaining cooldown / ammo of any weapon (the active one reads the live counters).
+  int CooldownOf(WeaponKind k) const { return k == weapon ? weaponCooldown : savedCooldown[Index(k)]; }
+  int AmmoOf(WeaponKind k) const { return k == weapon ? weaponAmmo : savedAmmo[Index(k)]; }
   const tune::WeaponProfile& WeaponProf() const { return tune::kWeapons[Index(weapon)]; }
   void GainUltimate(float amount, const StepContext& ctx);
   bool UltimateReady() const { return ultimate >= tune::kUltimateMax - 0.0001f; }
@@ -180,6 +185,8 @@ class Fighter {
   WeaponKind weapon = WeaponKind::RailSpear;  // v2 loadout
   int weaponAmmo = -1;          // shots left (-1 = unlimited)
   int weaponCooldown = 0;       // ticks until the next charge may start
+  int savedCooldown[kWeaponKindCount] = {0, 0, 0};   // v3: cooldowns of the weapons that are not selected
+  int savedAmmo[kWeaponKindCount] = {-1, 3, -1};
   float ultimate = 0.f;         // v2 gauge 0..tune::kUltimateMax
   bool ultimatePending = false; // the ultimate button was accepted this tick; Duel resolves it
   Zone ultimateTarget = Zone::Torso;

@@ -89,12 +89,12 @@ constexpr float kPrioWeaponCharge = 1.40f;             // Weapon: faster charge,
 constexpr float kPrioWeaponGuardPenalty = 1.0f;       // damage taken while Weapon is prioritised
 
 // ---------------------------------------------------------------- strikes (pitch §5)
-constexpr int kWindupMinTicks = MsToTicks(300);        // pitch §5.2 (1): shortest legal heavy windup
+constexpr int kWindupMinTicks = MsToTicks(450);        // pitch §5.2 (1): shortest legal heavy windup
 constexpr int kWindupMaxChargeTicks = MsToTicks(1000); // pitch §5.2: extra hold that still adds power
 constexpr int kChargeAudibleTicks = MsToTicks(250);    // pitch §8 "звук набирающего давление привода"
-constexpr int kCommitDelayTicks = MsToTicks(100);      // pitch §5.2 (4): release -> irreversible Strike
-constexpr int kHeavyStrikeTicks = MsToTicks(330);      // pitch §5.2: travel time of the arm
-constexpr int kHeavyRecoveryTicks = MsToTicks(600);    // pitch §5.4
+constexpr int kCommitDelayTicks = MsToTicks(140);      // pitch §5.2 (4): release -> irreversible Strike
+constexpr int kHeavyStrikeTicks = MsToTicks(560);      // pitch §5.2: travel time of the arm
+constexpr int kHeavyRecoveryTicks = MsToTicks(950);    // pitch §5.4
 constexpr int kQuickWindupTicks = 3;                   // pitch §5.3 (short press)
 constexpr int kQuickStrikeTicks = 7;
 constexpr int kQuickRecoveryTicks = MsToTicks(230);
@@ -267,6 +267,33 @@ constexpr float kUltimateStabilityHit = 70.f;
 
 // Armour plates per zone (ArmorPlateLost events fire as the Armor layer drains in equal steps).
 constexpr int kArmorPlates[kZoneCount] = {3, 8, 4, 5, 5, 6, 6, 6, 6};
+
+// ---------------------------------------------------------------- v3: sword duel rules
+// Blades that meet: two strikes on the same line whose contact ticks are this close stop each other (double block).
+constexpr int kClashWindowTicks = MsToTicks(110);
+constexpr int kClashRecoveryTicks = MsToTicks(800);
+constexpr float kClashStability = 14.f;
+constexpr float kClashHeat = 3.f;
+constexpr float kUltGainClash = 3.f;
+// No chained stun: after a stagger or a knockdown the mech shrugs off further stability loss for a while.
+constexpr int kStunImmuneTicks = MsToTicks(1600);
+constexpr int kStunImmuneAfterKnockdownTicks = MsToTicks(2600);
+constexpr float kStunImmuneFloor = 6.f;
+// Status conditions.
+constexpr int kBlindTicks = MsToTicks(4200);           // rockets: the target cannot read the sectors
+constexpr int kStrikeLockTicks = MsToTicks(2600);      // rail spear: arm actuators jammed, no strikes (guard and dodge still work)
+constexpr int kBurnTicks = MsToTicks(5000);            // plasma: the hull burns
+constexpr int kBurnPeriodTicks = 30;
+constexpr float kBurnDamage = 1.6f;
+constexpr float kBurnHeatPerTick = 0.12f;
+constexpr int kDebrisBlindTicks = MsToTicks(3200);     // a building thrown in the face
+constexpr float kDebrisDamage = 11.f;
+constexpr float kDebrisStability = 24.f;
+// Ultimate variants: a weakened target is cut in half, a healthy one loses its off-hand arm (and with it the ultimate).
+constexpr float kUltimateKillFraction = 0.38f;
+constexpr float kUltimateSeverDamage = 60.f;
+// AI mimic: chance that an attack repeats the swing line the opponent used last.
+constexpr float kMirrorChance[kDifficultyCount] = {0.25f, 0.45f, 0.65f};
 
 // Training dummy (v2).
 constexpr int kDummyReactionTicks = 14;

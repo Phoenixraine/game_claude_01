@@ -64,6 +64,10 @@ void Fighter::Reset() {
   weaponTarget = Zone::Torso;
   weaponAmmo = WeaponProf().ammo;
   weaponCooldown = 0;
+  for (int k = 0; k < kWeaponKindCount; ++k) {
+    savedCooldown[k] = 0;
+    savedAmmo[k] = tune::kWeapons[k].ammo;
+  }
   ultimate = 0.f;
   ultimatePending = false;
   protectedTicks = 0;
@@ -167,6 +171,8 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
     if (--burnTicks == 0) Emit(ctx, EventType::StatusEnded, Zone::Torso, static_cast<int>(StatusKind::Burn));
   }
   if (weaponCooldown > 0 && --weaponCooldown == 0) Emit(ctx, EventType::WeaponReady, Zone::ShoulderR, Index(weapon));
+  for (int k = 0; k < kWeaponKindCount; ++k)
+    if (k != Index(weapon) && savedCooldown[k] > 0 && --savedCooldown[k] == 0) Emit(ctx, EventType::WeaponReady, Zone::ShoulderR, k);
 
   if (in.setPriority && res.RequestPriority(in.priority)) Emit(ctx, EventType::EnergyFlow, Zone::Torso, static_cast<int>(in.priority));
 
@@ -571,8 +577,23 @@ void Fighter::SetLoadout(WeaponKind k) {
   weapon = k;
   weaponAmmo = WeaponProf().ammo;
   weaponCooldown = 0;
+  for (int i = 0; i < kWeaponKindCount; ++i) {
+    savedCooldown[i] = 0;
+    savedAmmo[i] = tune::kWeapons[i].ammo;
+  }
   weaponCharging = false;
   weaponCharge = 0.f;
+}
+
+bool Fighter::SelectWeapon(WeaponKind k) {
+  if (k == weapon) return true;
+  if (weaponCharging || phase != Phase::Idle || posture != Posture::Standing) return false;
+  savedCooldown[Index(weapon)] = weaponCooldown;
+  savedAmmo[Index(weapon)] = weaponAmmo;
+  weapon = k;
+  weaponCooldown = savedCooldown[Index(k)];
+  weaponAmmo = savedAmmo[Index(k)];
+  return true;
 }
 
 void Fighter::GainUltimate(float amount, const StepContext& ctx) {

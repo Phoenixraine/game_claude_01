@@ -27,6 +27,8 @@ struct FIVCombatInput
 	bool bWeaponHeld = false;
 	iv::EnergyPriority Priority = iv::EnergyPriority::Guard;
 	// edges: consumed by the first simulation step after they were set
+	int8 WeaponSelect = -1;            // 0 rail lance, 1 rockets, 2 plasma: applied by the next step
+	bool bScoop = false;
 	bool bQuick = false, bCancel = false, bGrab = false, bSwitchArm = false, bReverse = false, bDodge = false, bUltimate = false, bSetPriority = false;
 };
 
@@ -46,6 +48,22 @@ public:
 	void SetDummy(iv::DummyMode Mode);
 	void Restart();
 	void EnableAutoPlayer(iv::Archetype Style, iv::Difficulty Level);
+	void ClearPlayerAuto() { PlayerBot.Reset(); }
+	/** A mech ran into a building: the core hears about it as a small external hit on the legs. */
+	void OnMechCrash(AIVMechPawn* Pawn, float Strength);
+	void SetEnemyStyle(iv::Archetype Style, iv::Difficulty Level) { BotStyle = Style; BotLevel = Level; BotSeed += 7919; }
+	iv::Duel* GetMutableDuel() { return Duel.Get(); }
+	/** Training helpers: full repair of one side (also resets its visual damage), a full ultimate gauge, a canned dummy script (1 any side, 2 lateral). */
+	void HealFighter(iv::Side S);
+	void FillUltimate(iv::Side S);
+	void SetDummyScript(int32 Which);
+
+	/** Tear a chunk off the nearest building and throw it into the opponent's face (blinds, hurts). Cooldown applies. */
+	void TryScoop(iv::Side S);
+	static constexpr float kScoopCooldownSec = 16.f;
+	float GetScoopReady01(iv::Side S) const { return 1.f - FMath::Clamp(ScoopCooldown[iv::Index(S)] / kScoopCooldownSec, 0.f, 1.f); }
+	/** Seconds left of a blind status on `S` (for whiteout / sensor-noise effects). */
+	float GetBlindSeconds(iv::Side S) const { return Duel.IsValid() ? Duel->fighter(S).blindTicks / float(iv::kTickHz) : 0.f; }
 
 	FIVCombatInput PlayerIn;
 	FIVCombatEventSignature OnEvent;
@@ -74,6 +92,10 @@ private:
 	FString EndText;
 	float SinceEnd = 0.f;
 	bool bEndHandled = false;
+	float ScoopCooldown[2] = { 0.f, 0.f };
+	float AiScoopTimer = 14.f;
+	float HitStop = 0.f;
+	void ApplyHitStop(float Seconds, float Dilation);
 
 	void StepOnce(bool bFirstOfFrame);
 	float ProximityBehind(AIVMechPawn* Pawn, AIVMechPawn* Other) const;

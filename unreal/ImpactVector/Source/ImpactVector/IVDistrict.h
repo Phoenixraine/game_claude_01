@@ -40,6 +40,8 @@ public:
 	bool IsLoaded() const { return bLoaded; }
 
 	int32 BlastAt(const FVector& Center, float Radius, float Impulse);
+	/** Nearest standing building in front of `From` (along Dir) between MinD and MaxD cm; returns its base centre and size. */
+	bool FindBuildingNear(const FVector& From, const FVector& Dir, float MinD, float MaxD, FVector& OutBase, FVector& OutSize) const;
 	bool GetPoi(const FString& Id, FVector& OutLocationUE, float& OutYawUE) const;
 	float SampleHeightCm(float XUe, float YUe) const;
 

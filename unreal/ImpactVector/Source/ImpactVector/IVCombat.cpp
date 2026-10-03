@@ -3,6 +3,7 @@
 #include "IVFXManager.h"
 #include "IVAudio.h"
 #include "IVEnvironment.h"
+#include "IVAbilities.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -46,6 +47,8 @@ void AIVCombatDirector::Setup(AIVMechPawn* InPlayer, AIVMechPawn* InEnemy, iv::A
 	BotLevel = Level;
 	BotSeed = Seed;
 	if (Enemy.IsValid()) Enemy->SetExternalControl(true);
+	if (Player.IsValid()) Player->OnCrash.AddUObject(this, &AIVCombatDirector::OnMechCrash);
+	if (Enemy.IsValid()) Enemy->OnCrash.AddUObject(this, &AIVCombatDirector::OnMechCrash);
 	Restart();
 }
 
@@ -60,6 +63,10 @@ void AIVCombatDirector::Restart()
 	bEndHandled = false;
 	PlayerIn = FIVCombatInput();
 	UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
+	ScoopCooldown[0] = ScoopCooldown[1] = 0.f;
+	HitStop = 0.f;
+	if (Player.IsValid()) Player->ResetForNewMatch();
+	if (Enemy.IsValid()) Enemy->ResetForNewMatch();
 }
 
 void AIVCombatDirector::EnableAutoPlayer(iv::Archetype Style, iv::Difficulty Level)
@@ -100,6 +107,15 @@ void AIVCombatDirector::Tick(float Dt)
 	AIVMechPawn* E = Enemy.Get();
 	if (!Duel.IsValid() || !P || !E) return;
 
+	if (!Duel->cinematic().active && !Duel->result().over)
+	{
+		for (int32 s = 0; s < 2; ++s) ScoopCooldown[s] = FMath::Max(0.f, ScoopCooldown[s] - Dt);
+	}
+	if (HitStop > 0.f)
+	{
+		HitStop -= Dt;   // Dt is already dilated: it shrinks slowly in game time, which is the point
+		if (HitStop <= 0.f && !Duel->result().over) UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
+	}
 	// the enemy always faces the player
 	E->SetAim((P->GetActorLocation() - E->GetActorLocation()).Rotation().Yaw, 0.f);
 
@@ -150,6 +166,13 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 	const float Units = FMath::Clamp((En - Pl).Size2D() / 100.f - kBodyGapUnits, iv::tune::kMinDistance, iv::tune::kMaxDistance);
 	Duel->set_distance(Units);
 
+	if (PlayerIn.WeaponSelect >= 0)
+	{
+		static const iv::WeaponKind Map[3] = { iv::WeaponKind::RailSpear, iv::WeaponKind::SuppressionRockets, iv::WeaponKind::PlasmaCannon };
+		Duel->SelectWeapon(iv::Side::A, Map[FMath::Clamp<int32>(PlayerIn.WeaponSelect, 0, 2)]);
+		PlayerIn.WeaponSelect = -1;
+	}
+	if (PlayerIn.bScoop) { TryScoop(iv::Side::A); PlayerIn.bScoop = false; }
 	iv::Input A = BuildInput(PlayerIn, bFirstOfFrame);
 	if (PlayerBot.IsValid()) { A = PlayerBot->Decide(iv::MakeObservation(*Duel, iv::Side::A)); P->SetMoveIntent(FVector2D(0.f, float(A.move))); }
 	const iv::Input B = Bot->Decide(iv::MakeObservation(*Duel, iv::Side::B));
@@ -158,6 +181,12 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 	W.proximity[1] = ProximityBehind(E, P);
 	W.coolingMult[0] = W.coolingMult[1] = 1.35f;      // rain
 	Duel->Step(A, B, W);
+	AiScoopTimer -= 1.f / float(iv::kTickHz);
+	if (AiScoopTimer <= 0.f)
+	{
+		AiScoopTimer = FMath::RandRange(22.f, 40.f);
+		if (BotLevel != iv::Difficulty::Easy && !PlayerBot.IsValid()) TryScoop(iv::Side::B);
+	}
 	{
 		static int32 Dbg = 0;
 		if ((Dbg++ % 180) == 0)
@@ -320,10 +349,26 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 		if (Actor) Actor->AddVelocityImpulse(Actor->GetActorRightVector() * (Ev.a >= 0 ? 1.f : -1.f) * 1400.f);
 		break;
 	case EventType::Knockdown:
-		if (Actor) Actor->AddCockpitImpulse(0.f, -1.f, 1.f);
+		if (Actor)
+		{
+			Actor->AddCockpitImpulse(0.f, -1.f, 1.f);
+			if (AIVEnvironment* Env = AIVEnvironment::Get(GetWorld()))
+			{
+				const FVector Fall = Actor->GetActorLocation() - Actor->GetActorForwardVector() * 3600.f + FVector(0, 0, 1200.f);
+				Env->BlastAt(Fall, 4600.f, 2200.f);
+			}
+			if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) { FX->SpawnDust(Actor->GetActorLocation(), 4200.f, 50, 2.2f); FX->SpawnSparks(Actor->GetActorLocation(), FVector::UpVector, 80, 6000.f); }
+		}
 		break;
 	case EventType::CinematicBegin:
 		if (Player.IsValid()) Player->StartCinematic(Actor, float(Ev.b) / float(iv::kTickHz), Ev.a);
+		if (Actor && Other)
+		{
+			if (Ev.a == int32(iv::CinematicKind::UltimateBisect)) Actor->StartUltimateScript(Other, 1);
+			else if (Ev.a == int32(iv::CinematicKind::UltimateSever)) Actor->StartUltimateScript(Other, 2);
+			else if (Ev.a == int32(iv::CinematicKind::Ultimate)) Actor->StartUltimateScript(Other, 0);
+			else Actor->PlaySequence({ FName("weapon_charge_hold"), FName("weapon_charge_peak"), FName("weapon_charge_peak"), FName("guard_neutral") }, { 0.3f, 0.5f, 0.9f, 0.6f });
+		}
 		break;
 	case EventType::CinematicEnd:
 		if (Player.IsValid()) Player->StopCinematic();
@@ -355,4 +400,97 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 	PlayEventSound(Ev);
 	if (Ev.type == EventType::Whiff || Ev.type == EventType::WallSlam) HitCity(Ev);
 	OnEvent.Broadcast(Ev);
+}
+
+void AIVCombatDirector::ApplyHitStop(float Seconds, float Dilation)
+{
+	HitStop = FMath::Max(HitStop, Seconds * Dilation);
+	UGameplayStatics::SetGlobalTimeDilation(this, Dilation);
+}
+
+void AIVCombatDirector::TryScoop(iv::Side S)
+{
+	const int32 Idx = iv::Index(S);
+	AIVMechPawn* A = PawnOf(S);
+	AIVMechPawn* D = PawnOf(iv::Other(S));
+	if (!Duel.IsValid() || !A || !D || Duel->result().over || Duel->cinematic().active) return;
+	if (ScoopCooldown[Idx] > 0.f) return;
+	const iv::Fighter& F = Duel->fighter(S);
+	if (F.posture != iv::Posture::Standing || F.phase != iv::Phase::Idle || F.weaponCharging) return;
+	AIVEnvironment* Env = AIVEnvironment::Get(GetWorld());
+	FVector Base, Size;
+	const FVector ToEnemy = (D->GetActorLocation() - A->GetActorLocation()).GetSafeNormal2D();
+	if (!Env || !Env->FindScoopBuilding(A->GetActorLocation(), ToEnemy, Base, Size))
+	{
+		if (A->IsLocallyControlled()) IVAudio::Play2D(GetWorld(), TEXT("cockpit_alarm_warning"), 0.6f);
+		return;
+	}
+	ScoopCooldown[Idx] = kScoopCooldownSec;
+	A->PlayAction(FName(TEXT("grab_clamp")), 1.2f);
+	// the lower part of the building gives way
+	Env->BlastAt(Base + FVector(0, 0, 900.f), FMath::Max(Size.X, Size.Y) * 0.62f, 2600.f);
+	if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
+	{
+		FX->SpawnDust(Base + FVector(0, 0, 600.f), FMath::Max(Size.X, Size.Y) * 0.8f, 40, 2.5f);
+		FX->SpawnSparks(Base + FVector(0, 0, 600.f), FVector::UpVector, 90, 6000.f);
+	}
+	IVAudio::Play3D(GetWorld(), TEXT("env_concrete_crumble"), Base, 1.f);
+	IVAudio::Play3D(GetWorld(), TEXT("env_distant_boom_01"), Base, 1.f);
+	if (A->IsLocallyControlled()) A->AddCockpitImpulse(0.f, 0.f, 1.0f);
+	FActorSpawnParameters Sp;
+	Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	const FVector From = Base + FVector(0, 0, FMath::Min(Size.Z * 0.45f, 5000.f));
+	if (AIVThrownDebris* T = GetWorld()->SpawnActor<AIVThrownDebris>(From, FRotator::ZeroRotator, Sp))
+	{
+		TWeakObjectPtr<AIVCombatDirector> Self(this);
+		T->Launch(From, D, D->GetZoneWorldLocation(iv::Zone::Head), 1.15f, 1.f, [Self, S](const FVector&)
+		{
+			if (!Self.IsValid() || !Self->Duel.IsValid() || Self->Duel->result().over) return;
+			Self->Duel->ExternalHit(iv::Other(S), iv::Zone::Head, iv::tune::kDebrisDamage, iv::tune::kDebrisStability, 0, iv::StatusKind::Blind, iv::tune::kDebrisBlindTicks);
+		});
+	}
+}
+
+void AIVCombatDirector::HealFighter(iv::Side S)
+{
+	if (!Duel.IsValid()) return;
+	iv::Fighter& F = Duel->fighter(S);
+	F.body.Reset();
+	F.res = iv::Resources();
+	F.posture = iv::Posture::Standing;
+	F.blindTicks = F.strikeLockTicks = F.burnTicks = 0;
+	if (AIVMechPawn* P = PawnOf(S)) P->ResetForNewMatch();
+}
+
+void AIVCombatDirector::FillUltimate(iv::Side S)
+{
+	if (Duel.IsValid()) Duel->fighter(S).ultimate = iv::tune::kUltimateMax;
+}
+
+void AIVCombatDirector::SetDummyScript(int32 Which)
+{
+	if (!Duel.IsValid()) return;
+	std::vector<iv::DummyStepDef> V;
+	const int32 Gap = iv::tune::kDummyScriptGapTicks;
+	const int32 Hold = iv::tune::kWindupMinTicks + 6;
+	if (Which == 2)
+	{
+		V.push_back({ Gap, iv::StrikeKind::Heavy, iv::SwingSide::Left, iv::Arm::R, Hold });
+		V.push_back({ Gap, iv::StrikeKind::Heavy, iv::SwingSide::Right, iv::Arm::R, Hold });
+	}
+	else
+	{
+		V.push_back({ Gap, iv::StrikeKind::Heavy, iv::SwingSide::Up, iv::Arm::R, Hold });
+		V.push_back({ Gap, iv::StrikeKind::Heavy, iv::SwingSide::Right, iv::Arm::R, Hold });
+		V.push_back({ Gap, iv::StrikeKind::Heavy, iv::SwingSide::Left, iv::Arm::R, Hold });
+		V.push_back({ Gap, iv::StrikeKind::Heavy, iv::SwingSide::Down, iv::Arm::R, Hold });
+	}
+	Duel->dummy(iv::Side::B).SetScript(V);
+}
+
+void AIVCombatDirector::OnMechCrash(AIVMechPawn* Pawn, float Strength)
+{
+	if (!Duel.IsValid() || Duel->result().over || Duel->cinematic().active) return;
+	const iv::Side S = (Pawn == Player.Get()) ? iv::Side::A : iv::Side::B;
+	Duel->ExternalHit(S, (FMath::RandBool() ? iv::Zone::LegL : iv::Zone::LegR), 3.5f * Strength, 9.f * Strength, 1);
 }

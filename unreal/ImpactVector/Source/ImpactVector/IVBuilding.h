@@ -49,6 +49,7 @@ public:
 	int32 ApplyBlast(const FVector& WorldCenter, float Radius, float Impulse);
 
 	int32 AliveCount() const { return Alive; }
+	bool IsMostlyGone() const { return Alive <= (Dim.X * Dim.Y * Dim.Z) / 6; }
 
 private:
 	FIntVector Dim = FIntVector(1, 1, 1);

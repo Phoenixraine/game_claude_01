@@ -14,13 +14,14 @@ class AIVCombatDirector;
 /**
  * Builds its Enhanced Input assets in code (no editor assets needed) and drives the possessed mech.
  *
- * Combat controls (keyboard + mouse | gamepad):
- *   LMB tap = quick strike, LMB hold + release = heavy strike | RT
- *   mouse while LMB/RMB held = the "Combat Vector" stick (first flick = swing family, then body sector = target) | right stick
- *   RMB = guard (mouse picks the sector; press again at the right moment to parry) | LT
- *   E = hard stance | Y      Space (+A/D) = dodge | A     C = cancel | B     F = grab | X
- *   Q = switch arm | RB      R = reverse reply | RB      G (hold/release) = heavy weapon | Y      V = ultimate | R3
- *   1-4 = power priority (arms/legs/guard/weapon) | d-pad     Tab = lock-on on/off | LB     Enter = restart the match
+ * Controls (keyboard + mouse | gamepad):
+ *   WASD / left stick = walk, Shift / L3 = sprint, mouse / right stick = look (free) or the sword vector (while a button is held)
+ *   LMB hold + move the mouse + release = heavy sword stroke along the drawn vector | RT + right stick   (a quick tap = left-fist jab)
+ *   RMB = guard, the mouse picks the sector; Ctrl while guarding = hard stance | LT (+ D-pad down)
+ *   Q / E = sidestep left / right (beats lateral slashes only, opens a counter) | LB / RB
+ *   1 = rockets (blind)   2 = rail lance (jams the arms)   3 = plasma (burns)   hold to charge, release to fire | D-pad up / left / right
+ *   F = scoop a building and throw it in the opponent's face | A     G = grab | X     C / R = cancel / reverse | B
+ *   V = ultimate | Y     arrows = power priority     Tab = lock-on | R3     Enter = restart     Esc = menu
  */
 UCLASS()
 class IMPACTVECTOR_API AIVPlayerController : public APlayerController
@@ -38,7 +39,14 @@ public:
 
 	FVector2D GetCombatStick() const { return Stick; }
 	bool IsLockOn() const { return bLockOn; }
+	void SetCombatEnabled(bool bOn) { bCombatEnabled = bOn; if (!bOn) { Stick = FVector2D::ZeroVector; } }
+	bool IsCombatEnabled() const { return bCombatEnabled; }
 	bool IsStrikeDown() const { return bStrikeWasDown; }
+	/** The path drawn with the mouse / right stick while a strike or guard button is held (virtual stick units, -1..1), for the HUD. */
+	const TArray<FVector2D>& GetTrail() const { return Trail; }
+	float GetTrailFade() const { return FMath::Clamp(1.f - TrailAge / 0.6f, 0.f, 1.f); }
+	bool IsTrailLive() const { return bStrikeWasDown || bGuardWasDown; }
+	iv::SwingSide GetTrailSide() const { return CurSide; }
 
 private:
 	UPROPERTY() TObjectPtr<UInputMappingContext> Mapping;
@@ -73,6 +81,7 @@ private:
 	bool bSprint = false;
 	float AutoTime = 0.f;
 	bool bAuto = false;
+	bool bCombatEnabled = true;
 
 	// combat input state
 	bool bLockOn = true;
@@ -84,4 +93,16 @@ private:
 	iv::SwingSide CurGuardSide = iv::SwingSide::Up;
 	iv::Arm CurArm = iv::Arm::R;
 	int8 LastStrafe = 1;
+	TArray<FVector2D> Trail;
+	float TrailAge = 10.f;
+	bool bGuardWasDown = false;
+
+	// scripted input for automated tests (-IVScript=strike=1@12;stick=-0.5,0.6@12.1;strike=0@13): bypasses the OS input entirely
+	struct FScriptCmd { float T; FString Name; FString Arg; bool bDone = false; };
+	TArray<FScriptCmd> ScriptCmd;
+	float ScriptTime = 0.f;
+	bool bScriptStrike = false, bScriptGuard = false, bScriptStick = false;
+	FVector2D ScriptStickVal = FVector2D::ZeroVector;
+	int32 ScriptWeapon = -1;
+	void RunScript(float Dt);
 };

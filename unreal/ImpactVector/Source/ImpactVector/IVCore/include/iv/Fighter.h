@@ -50,6 +50,7 @@ enum class Outcome : uint8_t {
   HardStanceBlocked,
   Grabbed,
   GrabParried,
+  Clashed,      // v3: two blades met on the same line; both strikes stopped
 };
 
 // Per-tick data handed to a Fighter by whoever owns the world (Duel or the game layer).
@@ -121,12 +122,22 @@ class Fighter {
   void LeaveClinch();
   // v2
   void SetLoadout(WeaponKind k);
+  // v3: switch between the three heavy weapons without resetting their cooldowns (only while idle and not charging).
+  bool SelectWeapon(WeaponKind k);
+  // Remaining cooldown / ammo of any weapon (the active one reads the live counters).
+  int CooldownOf(WeaponKind k) const { return k == weapon ? weaponCooldown : savedCooldown[Index(k)]; }
+  int AmmoOf(WeaponKind k) const { return k == weapon ? weaponAmmo : savedAmmo[Index(k)]; }
   const tune::WeaponProfile& WeaponProf() const { return tune::kWeapons[Index(weapon)]; }
   void GainUltimate(float amount, const StepContext& ctx);
   bool UltimateReady() const { return ultimate >= tune::kUltimateMax - 0.0001f; }
   bool LegsLocked() const { return weaponCharging && WeaponProf().locksLegs; }
   void ForceStagger(const StepContext& ctx) { if (posture == Posture::Standing || posture == Posture::Dodging) EnterStagger(ctx); }
   void ConsumeUltimate() { ultimate = 0.f; ultimatePending = false; }
+  // v3
+  void ApplyStatus(StatusKind k, int ticks, const StepContext& ctx);
+  bool Blind() const { return blindTicks > 0; }
+  // Two blades met: the strike (or windup) is dropped into a long recovery.
+  void ClashBreak(const StepContext& ctx);
 
   // ---- queries ---------------------------------------------------------------------------
   Side side() const { return side_; }
@@ -174,10 +185,17 @@ class Fighter {
   WeaponKind weapon = WeaponKind::RailSpear;  // v2 loadout
   int weaponAmmo = -1;          // shots left (-1 = unlimited)
   int weaponCooldown = 0;       // ticks until the next charge may start
+  int savedCooldown[kWeaponKindCount] = {0, 0, 0};   // v3: cooldowns of the weapons that are not selected
+  int savedAmmo[kWeaponKindCount] = {-1, 3, -1};
   float ultimate = 0.f;         // v2 gauge 0..tune::kUltimateMax
   bool ultimatePending = false; // the ultimate button was accepted this tick; Duel resolves it
   Zone ultimateTarget = Zone::Torso;
   int protectedTicks = 0;       // v2: invulnerable after an external cut
+  int stunImmune = 0;           // v3: ticks during which new stability loss cannot stagger again
+  int blindTicks = 0;           // v3 status: sensors blinded (rockets, thrown debris)
+  int strikeLockTicks = 0;      // v3 status: cannot start strikes (rail spear)
+  int burnTicks = 0;            // v3 status: burning (plasma)
+  bool ultimateLocked = false;  // v3: the off-hand arm was cut off, the ultimate is gone
   Tick lastHitTick = -100000;
   // Bookkeeping the pilot can feel or see; feeds the AI observation (never the opponent's intent).
   Outcome lastOwnOutcome = Outcome::Whiff;       // result of this fighter's last strike
@@ -213,8 +231,14 @@ class Fighter {
 ArmPose PoseAfter(StrikeKind kind, SwingSide side);
 // Lines a counter may take against a given attack (pitch §7 "Перехват").
 bool IsInterceptLine(SwingSide attack, SwingSide counter);
-// Dodging gets out of the way of straight strikes only; wide swings still catch a sidestep (pitch §6).
+// v3 rule: the torso-turn + half-step dodge gets out of the way of lateral slashes only; a chop from above or a rising cut follows the mech.
+inline bool IsLateralSwing(SwingSide s) { return s == SwingSide::Left || s == SwingSide::Right; }
 inline bool IsLinearSwing(SwingSide s) { return s == SwingSide::Up || s == SwingSide::Down; }
+// v3: two strikes meet if they come along the same line in the world: Up/Up, Down/Down, or opposite screen sides (Left/Right).
+inline bool SameLine(SwingSide a, SwingSide b) {
+  if (a == SwingSide::Up || a == SwingSide::Down) return a == b;
+  return b == SwingSide::Left || b == SwingSide::Right ? a != b : false;
+}
 // Zone of the blocking arm that takes the load (pitch §6 "нагружает блокирующую руку").
 Zone GuardZone(SwingSide s);
 // The arm that does the blocking for a given sector.

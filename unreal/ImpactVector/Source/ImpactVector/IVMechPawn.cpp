@@ -21,6 +21,10 @@
 #include "IVBuilding.h"
 #include "IVAudio.h"
 #include "Components/PointLightComponent.h"
+#include "Components/SpotLightComponent.h"
+#include "ProceduralMeshComponent.h"
+#include "IVDistrict.h"
+#include "Components/InstancedStaticMeshComponent.h"
 
 static TAutoConsoleVariable<int32> CVarIVCam(TEXT("iv.Cam"), 0,
 	TEXT("0 = cockpit, 1 = chase, 2 = side, 3 = front orbit, 4 = both mechs from the side"), ECVF_Default);
@@ -61,6 +65,25 @@ AIVMechPawn::AIVMechPawn()
 	RigMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RigMesh->SetVisibility(false);
 	RigMesh->bUpdateJointsFromAnimation = true;
+
+	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sword"));
+	SwordMesh->SetupAttachment(RigMesh);
+	{
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SwordF(TEXT("/Game/Weapons/SM_Sword.SM_Sword"));
+		if (SwordF.Succeeded()) SwordMesh->SetStaticMesh(SwordF.Object);
+	}
+	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SwordMesh->SetVisibility(false);
+	SwordMesh->SetCastShadow(true);
+
+	BladeTrail = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("BladeTrail"));
+	BladeTrail->SetupAttachment(RootComponent);
+	BladeTrail->SetUsingAbsoluteLocation(true);
+	BladeTrail->SetUsingAbsoluteRotation(true);
+	BladeTrail->SetUsingAbsoluteScale(true);
+	BladeTrail->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BladeTrail->SetCastShadow(false);
+	BladeTrail->bUseAsyncCooking = false;
 
 	BuildBody();
 	BuildCockpit();
@@ -180,6 +203,23 @@ void AIVMechPawn::BuildCockpit()
 		PL->SetSourceRadius(6.f);
 		CockpitLights.Add(PL);
 	}
+	for (int32 i = 0; i < 2; ++i)
+	{
+		USpotLightComponent* SL = CreateDefaultSubobject<USpotLightComponent>(*FString::Printf(TEXT("HeadLamp%d"), i));
+		SL->SetupAttachment(HeadPivot);
+		SL->SetRelativeLocation(FVector(500.f, (i == 0 ? -1.f : 1.f) * 380.f, 350.f));
+		SL->SetRelativeRotation(FRotator(-13.f, (i == 0 ? 5.f : -5.f), 0.f));
+		SL->SetIntensityUnits(ELightUnits::Candelas);
+		SL->SetIntensity(70000.f);
+		SL->SetAttenuationRadius(26000.f);
+		SL->SetInnerConeAngle(6.f);
+		SL->SetOuterConeAngle(17.f);
+		SL->SetSourceRadius(40.f);
+		SL->SetVolumetricScatteringIntensity(1.6f);
+		SL->SetCastShadows(true);
+		SL->SetLightingChannels(true, false, false);
+		HeadLamp[i] = SL;
+	}
 }
 
 void AIVMechPawn::BeginPlay()
@@ -219,6 +259,7 @@ void AIVMechPawn::BeginPlay()
 		}
 	}
 
+	for (int32 i = 0; i < 2; ++i) if (HeadLamp[i]) { HeadLamp[i]->SetLightColor(LampColor); HeadLamp[i]->SetIntensity(bAIControlled ? 38000.f : 70000.f); HeadLamp[i]->SetVolumetricScatteringIntensity(bAIControlled ? 0.7f : 1.6f); if (bAIControlled) HeadLamp[i]->SetRelativeRotation(FRotator(-22.f, (i == 0 ? 14.f : -14.f), 0.f)); }
 	SetupRig();
 	OnFootfall.AddLambda([this](int32 Side, float Strength)
 	{
@@ -274,6 +315,10 @@ void AIVMechPawn::Tick(float Dt)
 	if (bAIControlled && !bExternalControl) UpdateAI(Dt);
 	UpdateLocomotion(Dt);
 	if (bRigActive) UpdateRig(Dt); else UpdateGait(Dt);
+	UpdateUltimateScript(Dt);
+	UpdateDetached(Dt);
+	UpdateDamageFX(Dt);
+	UpdateBladeTrail(Dt);
 	if (IsLocallyControlled() || GetIVCam() != 0) { UpdateCockpitCamera(Dt); UpdateCockpitArms(Dt); }
 }
 
@@ -340,6 +385,20 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 		AddActorWorldOffset(Move, true, &Hit);
 		if (Hit.IsValidBlockingHit())
 		{
+			// running into a building: it gives way (and costs the mech a little)
+			CrashCooldown -= Dt;
+			const float SpeedNow = Velocity.Size2D();
+			if (CrashCooldown <= 0.f && SpeedNow > 260.f && Hit.GetComponent() && Hit.GetComponent()->IsA<UInstancedStaticMeshComponent>())
+			{
+				CrashCooldown = 0.45f;
+				if (AIVEnvironment* Env = AIVEnvironment::Get(GetWorld()))
+					Env->BlastAt(Hit.ImpactPoint + FVector(0, 0, 1500.f), 2400.f + 4.f * SpeedNow, 1100.f + 2.f * SpeedNow);
+				if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) { FX->SpawnDust(Hit.ImpactPoint, 2400.f, 22, 1.4f); FX->SpawnSparks(Hit.ImpactPoint, Hit.ImpactNormal, 60, 5000.f); }
+				IVAudio::Play3D(GetWorld(), TEXT("env_concrete_crumble"), Hit.ImpactPoint, 1.f);
+				IVAudio::Play3D(GetWorld(), TEXT("hit_lowfreq_thump_heavy"), Hit.ImpactPoint, 1.f);
+				if (IsLocallyControlled()) AddCockpitImpulse(0.f, 0.f, 0.9f);
+				OnCrash.Broadcast(this, FMath::Clamp(SpeedNow / 800.f, 0.2f, 1.f));
+			}
 			const FVector Rest = FVector::VectorPlaneProject(Move, Hit.ImpactNormal) * (1.f - Hit.Time);
 			AddActorWorldOffset(Rest, true);
 			Velocity = FVector::VectorPlaneProject(Velocity, Hit.ImpactNormal) * 0.9f;
@@ -404,8 +463,8 @@ void AIVMechPawn::UpdateCockpitArms(float Dt)
 	{
 		FCockpitArm& A = CockpitArm[i];
 		const float Sd = (i == 0) ? -1.f : 1.f;           // UE: left = -Y
-		const FVector Anchor(15.f, Sd * 100.f, -72.f);
-		const FVector Rest(88.f, Sd * 70.f, -16.f);
+		const FVector Anchor(10.f, Sd * 104.f, -80.f);
+		const FVector Rest(66.f, Sd * 88.f, -46.f);
 		FVector Tgt = Rest;
 		FQuat GloveRot = FQuat::Identity;
 		if (bRigActive && RigMesh)
@@ -459,6 +518,16 @@ void AIVMechPawn::UpdateCockpitArms(float Dt)
 }
 
 
+namespace
+{
+	float OtherDirYaw(AIVMechPawn* A)
+	{
+		for (TActorIterator<AIVMechPawn> It(A->GetWorld()); It; ++It)
+			if (*It != A) return (It->GetActorLocation() - A->GetActorLocation()).Rotation().Yaw;
+		return A->GetActorRotation().Yaw;
+	}
+}
+
 void AIVMechPawn::UpdateCockpitCamera(float Dt)
 {
 	const int32 Mode = GetIVCam();
@@ -496,12 +565,23 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 		AIVMechPawn* Sub = CineSubject.Get();
 		if (!Sub) Sub = this;
 		const float U = FMath::Clamp(CineT / FMath::Max(CineDur, 0.1f), 0.f, 1.f);
-		const FVector CC = Sub->GetActorLocation() + FVector(0, 0, 2800.f);
+		// UltimateFrame: the ultimate (kinds 1, 5, 6) frames both mechs from the side; weapon cuts orbit the shooter
+		const bool bUlt = (CineKind == 1 || CineKind == 5 || CineKind == 6);
+		FVector CC = Sub->GetActorLocation() + FVector(0, 0, 2800.f);
+		float Dist = 9500.f;
+		if (bUlt)
+		{
+			FVector OtherLoc = Sub->GetActorLocation();
+			for (TActorIterator<AIVMechPawn> It(GetWorld()); It; ++It) if (*It != Sub) OtherLoc = It->GetActorLocation();
+			CC = (Sub->GetActorLocation() + OtherLoc) * 0.5f + FVector(0, 0, 4200.f);
+			Dist = 16500.f;
+		}
 		const float Ang = FMath::Lerp(-70.f, 35.f, U);
-		const FVector Off = FRotator(0.f, Sub->GetActorRotation().Yaw + 90.f + Ang, 0.f).Vector() * 9500.f;
-		const FVector From2 = CC + Off + FVector(0, 0, FMath::Lerp(-1500.f, 600.f, U));
-		Camera->SetFieldOfView(58.f);
-		Camera->SetWorldLocationAndRotation(From2, (CC + FVector(0, 0, 900.f) - From2).Rotation());
+		const float YawBase = bUlt ? (OtherDirYaw(Sub)) + 90.f : Sub->GetActorRotation().Yaw + 90.f;
+		const FVector Off = FRotator(0.f, YawBase + Ang * (bUlt ? 0.5f : 1.f), 0.f).Vector() * Dist;
+		const FVector From2 = CC + Off + FVector(0, 0, bUlt ? FMath::Lerp(-2500.f, 1500.f, U) : FMath::Lerp(-1500.f, 600.f, U));
+		Camera->SetFieldOfView(bUlt ? 50.f : 58.f);
+		Camera->SetWorldLocationAndRotation(From2, (CC + FVector(0, 0, bUlt ? 0.f : 900.f) - From2).Rotation());
 		return;
 	}
 	Camera->SetFieldOfView(92.f);
@@ -512,6 +592,18 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 		return;
 	}
 
+	if (Mode == 5)
+	{
+		FVector Other = GetActorLocation();
+		for (TActorIterator<AIVMechPawn> It(GetWorld()); It; ++It) if (*It != this) Other = It->GetActorLocation();
+		const FVector Mid = (GetActorLocation() + Other) * 0.5f + FVector(0, 0, 3600.f);
+		const float Ang = GetWorld()->GetTimeSeconds() * 4.5f + 35.f;
+		const float Rad = 9800.f + 1400.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 0.21f);
+		const FVector From5 = Mid + FRotator(0.f, Ang, 0.f).Vector() * Rad + FVector(0, 0, 1900.f + 800.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 0.33f));
+		Camera->SetFieldOfView(52.f);
+		Camera->SetWorldLocationAndRotation(From5, (Mid - From5).Rotation());
+		return;
+	}
 	// debug cameras for visual checks from outside
 	const float D = GetIVCamDist();
 	const FVector Center = GetActorLocation() + FVector(0, 0, 4200);
@@ -581,6 +673,35 @@ void AIVMechPawn::SetupRig()
 	RigData = Shared;
 	if (!RigDriver.Init(SM)) return;
 	RigMesh->SetSkeletalMesh(SM);
+	if (SwordMesh && SwordMesh->GetStaticMesh())
+	{
+		// The blade points along the hand bone's tail direction (down while the arm hangs); the grip sits in the fist.
+		const FQuat Qh = RigMesh->GetBoneQuaternion(FName(TEXT("hand_r")), EBoneSpaces::ComponentSpace);
+		SwordBladeDirLocal = Qh.UnrotateVector(FVector(0, 0, -1)).GetSafeNormal();
+		float RollDeg = 0.f;
+		FParse::Value(FCommandLine::Get(), TEXT("-IVSwordRoll="), RollDeg);
+		SwordRelRot = FQuat::FindBetweenNormals(FVector(1, 0, 0), SwordBladeDirLocal) * FQuat(FVector(1, 0, 0), FMath::DegreesToRadians(RollDeg));
+		SwordMesh->AttachToComponent(RigMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("hand_r")));
+		// the imported bones carry a uniform rest scale of 100: compensate so the sword keeps its size
+		SwordMesh->SetRelativeLocationAndRotation(SwordBladeDirLocal * 5.2f, SwordRelRot);
+		SwordMesh->SetRelativeScale3D(FVector(0.01f, 0.0175f, 0.02f));   // a broad, heavy blade
+		if (UMaterialInterface* SM2 = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Sword.M_Sword")))
+		{
+			SwordMID = UMaterialInstanceDynamic::Create(SM2, this);
+			SwordMID->SetVectorParameterValue(TEXT("EdgeColor"), SwordEdge);
+			SwordMID->SetScalarParameterValue(TEXT("Heat"), 0.8f);
+			SwordMesh->SetMaterial(0, SwordMID);
+		}
+		if (UMaterialInterface* TM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_BladeTrail.M_BladeTrail")))
+		{
+			TrailMID = UMaterialInstanceDynamic::Create(TM, this);
+			TrailMID->SetVectorParameterValue(TEXT("EdgeColor"), SwordEdge);
+			BladeTrail->SetMaterial(0, TrailMID);
+		}
+		SwordMesh->SetVisibility(true);
+		UE_LOG(LogTemp, Display, TEXT("IV sword: attached, bladeDirLocal=%s relRot=%s world=%s"), *SwordBladeDirLocal.ToString(), *SwordRelRot.Rotator().ToString(), *SwordMesh->GetComponentLocation().ToString());
+	}
+	else UE_LOG(LogTemp, Warning, TEXT("IV sword: mesh missing (%d %d)"), SwordMesh != nullptr, SwordMesh && SwordMesh->GetStaticMesh() != nullptr);
 	if (bUseHullMaterial)
 	{
 		if (UMaterialInterface* HM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_MechHull.M_MechHull")))
@@ -588,6 +709,8 @@ void AIVMechPawn::SetupRig()
 			HullMID = UMaterialInstanceDynamic::Create(HM, this);
 			HullMID->SetVectorParameterValue(TEXT("Tint"), HullTint);
 			HullMID->SetVectorParameterValue(TEXT("Accent"), HullAccent);
+			HullMID->SetVectorParameterValue(TEXT("Glow"), HullGlow);
+			HullMID->SetScalarParameterValue(TEXT("AccentAmount"), HullAccentAmount);
 			for (int32 i = 0; i < RigMesh->GetNumMaterials(); ++i) RigMesh->SetMaterial(i, HullMID);
 		}
 	}
@@ -617,6 +740,19 @@ void AIVMechPawn::SetupRig()
 			UE_LOG(LogTemp, Display, TEXT("IV rig local[%d]: %s"), i, *RigAnim->PoseLocal[i].ToHumanReadableString());
 	}
 	UE_LOG(LogTemp, Display, TEXT("IV rig active: %d poses, %d clips, %d bones"), RigData->Poses.Num(), RigData->Clips.Num(), RigDriver.NumBones());
+}
+
+void AIVMechPawn::GetBladeSegment(FVector& OutBase, FVector& OutTip) const
+{
+	if (!SwordMesh) { OutBase = OutTip = GetActorLocation(); return; }
+	const FTransform T = SwordMesh->GetComponentTransform();
+	OutBase = T.TransformPosition(FVector(500.f, 0, 0));
+	OutTip = T.TransformPosition(FVector(6100.f, 0, 0));
+}
+
+void AIVMechPawn::SetSwordHeat(float Heat)
+{
+	if (SwordMID) SwordMID->SetScalarParameterValue(TEXT("Heat"), Heat);
 }
 
 void AIVMechPawn::SetHullDamage(float Amount)
@@ -802,9 +938,160 @@ void AIVMechPawn::OnDefenceEffect(bool bParry, bool bIntercept)
 void AIVMechPawn::OnZoneState(iv::Zone Z, iv::ZoneState NewState, iv::ZoneState OldState)
 {
 	ZoneStates[iv::Index(Z)] = NewState;
-	if (NewState >= iv::ZoneState::Damaged && OldState < iv::ZoneState::Damaged)
+	AIVFXManager* FX = AIVFXManager::Get(GetWorld());
+	const FVector Loc = GetZoneWorldLocation(Z);
+	if (FX)
 	{
-		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) FX->SpawnDust(GetZoneWorldLocation(Z), 700.f, 6, 0.4f);
+		if (NewState >= iv::ZoneState::Damaged && OldState < iv::ZoneState::Damaged) FX->SpawnDust(Loc, 700.f, 6, 0.4f);
+		if (NewState >= iv::ZoneState::Critical && OldState < iv::ZoneState::Critical)
+		{
+			FX->SpawnExplosion(Loc, 0.9f);
+			IVAudio::Play3D(GetWorld(), TEXT("cockpit_panel_burst"), Loc, 1.f);
+			IVAudio::Play3D(GetWorld(), TEXT("env_distant_boom_01"), Loc, 0.8f);
+		}
+		if (NewState >= iv::ZoneState::Destroyed && OldState < iv::ZoneState::Destroyed)
+		{
+			FX->SpawnExplosion(Loc, 1.6f);
+			IVAudio::Play3D(GetWorld(), TEXT("env_distant_boom_01"), Loc, 1.f);
+			if (IsLocallyControlled()) AddCockpitImpulse(0.f, 0.5f, 1.4f);
+		}
+	}
+	RefreshHullDamage();
+}
+
+void AIVMechPawn::RefreshHullDamage()
+{
+	float Sum = 0.f;
+	for (int32 i = 0; i < iv::kZoneCount; ++i) Sum += FMath::Clamp(float(int32(ZoneStates[i])) / 5.f, 0.f, 1.f);
+	SetHullDamage(Sum / float(iv::kZoneCount) * 1.6f);
+}
+
+void AIVMechPawn::OnStatus(iv::StatusKind K, bool bOn, float Seconds)
+{
+	switch (K)
+	{
+	case iv::StatusKind::Blind:
+		BlindLeft = bOn ? Seconds : 0.f;
+		BlindTotal = FMath::Max(Seconds, 0.5f);
+		if (bOn && IsLocallyControlled()) { AddCockpitImpulse(0.f, 0.4f, 1.2f); IVAudio::Play2D(GetWorld(), TEXT("cockpit_alarm_warning"), 0.8f); }
+		break;
+	case iv::StatusKind::StrikeLock:
+		bStrikeLocked = bOn;
+		if (bOn)
+		{
+			if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) FX->SpawnSparks(GetZoneWorldLocation(iv::Zone::ArmR), FVector::UpVector, 120, 6000.f);
+			if (IsLocallyControlled()) { AddCockpitImpulse(0.f, 0.f, 1.f); IVAudio::Play2D(GetWorld(), TEXT("cockpit_alarm_critical"), 0.8f); }
+		}
+		break;
+	case iv::StatusKind::Burn:
+		bBurning = bOn;
+		if (bOn && IsLocallyControlled()) IVAudio::Play2D(GetWorld(), TEXT("cockpit_alarm_critical"), 0.9f);
+		break;
+	default: break;
+	}
+}
+
+void AIVMechPawn::ResetMotion()
+{
+	Velocity = FVector::ZeroVector;
+	PrevVelocity = FVector::ZeroVector;
+	MoveIntent = FVector2D::ZeroVector;
+	SwayOffset = FVector::ZeroVector; SwayVel = FVector::ZeroVector;
+	SwayRot = FRotator::ZeroRotator; SwayRotVel = FVector::ZeroVector;
+	ActionIndex = -1;
+	bCine = false;
+}
+
+void AIVMechPawn::ResetForNewMatch()
+{
+	ClearDetached();
+	Ult = FUltScript();
+	SetBodyOffset(FVector::ZeroVector);
+	if (RigMesh) RigMesh->SetVisibility(true, true);
+	if (SwordMesh) SwordMesh->SetVisibility(true);
+	bDying = false; bBurning = false; bStrikeLocked = false;
+	BlindLeft = 0.f; DeathT = 0.f;
+	for (float& F : FxAcc) F = 0.f;
+	for (int32 i = 0; i < iv::kZoneCount; ++i) ZoneStates[i] = iv::ZoneState::Intact;
+	if (bRigActive && RigMesh)
+	{
+		static const TCHAR* Bones[] = { TEXT("shoulder_l"), TEXT("shoulder_r"), TEXT("upperarm_l"), TEXT("upperarm_r"), TEXT("forearm_l"), TEXT("forearm_r"), TEXT("hand_l"), TEXT("hand_r"),
+			TEXT("thigh_l"), TEXT("thigh_r"), TEXT("shin_l"), TEXT("shin_r"), TEXT("foot_l"), TEXT("foot_r"), TEXT("head"), TEXT("torso") };
+		for (const TCHAR* B : Bones) RigMesh->UnHideBoneByName(FName(B));
+	}
+	SetHullDamage(0.f);
+	SetSwordHeat(0.8f);
+	ResetMotion();
+}
+
+void AIVMechPawn::StartDeathSequence()
+{
+	bDying = true;
+	DeathT = 0.f;
+}
+
+void AIVMechPawn::UpdateDamageFX(float Dt)
+{
+	if (!bRigActive) return;
+	if (BlindLeft > 0.f) BlindLeft = FMath::Max(0.f, BlindLeft - Dt);
+	AIVFXManager* FX = AIVFXManager::Get(GetWorld());
+	if (!FX) return;
+	const float Fd = FMath::Min(Dt, 0.1f);
+	for (int32 z = 0; z < iv::kZoneCount; ++z)
+	{
+		const iv::ZoneState St = ZoneStates[z];
+		if (St < iv::ZoneState::Damaged) continue;
+		FxAcc[z] += Fd;
+		const float Period = St >= iv::ZoneState::Destroyed ? 0.07f : (St >= iv::ZoneState::Critical ? 0.12f : 0.4f);
+		if (FxAcc[z] < Period) continue;
+		FxAcc[z] = 0.f;
+		const FVector Loc = GetZoneWorldLocation(static_cast<iv::Zone>(z)) + FMath::VRand() * 300.f;
+		if (St >= iv::ZoneState::Critical)
+		{
+			FX->SpawnFlame(Loc, 220.f, St >= iv::ZoneState::Destroyed ? 3 : 2, St >= iv::ZoneState::Destroyed ? 1.4f : 1.f);
+			FX->SpawnSmoke(Loc + FVector(0, 0, 400.f), 300.f, 1, 1.f);
+			if (FMath::FRand() < 0.12f) FX->SpawnSparks(Loc, FVector::UpVector, 16, 3500.f);
+		}
+		else
+		{
+			FX->SpawnSmoke(Loc, 250.f, 1, 0.6f);
+			if (FMath::FRand() < 0.18f) FX->SpawnSparks(Loc, GetActorForwardVector(), 8, 2500.f);
+		}
+	}
+	if (bBurning)
+	{
+		FxAcc[iv::kZoneCount] += Fd;
+		if (FxAcc[iv::kZoneCount] > 0.05f)
+		{
+			FxAcc[iv::kZoneCount] = 0.f;
+			const FVector Loc = GetZoneWorldLocation(iv::Zone::Torso) + FMath::VRand() * FVector(600.f, 600.f, 900.f);
+			FX->SpawnFlame(Loc, 250.f, 2, 1.2f);
+			if (FMath::FRand() < 0.3f) FX->SpawnSmoke(Loc + FVector(0, 0, 600.f), 300.f, 1, 1.f);
+		}
+	}
+	if (bDying)
+	{
+		DeathT += Fd;
+		FxAcc[iv::kZoneCount + 1] += Fd;
+		if (FxAcc[iv::kZoneCount + 1] > FMath::Lerp(0.55f, 0.2f, FMath::Clamp(DeathT / 3.f, 0.f, 1.f)))
+		{
+			FxAcc[iv::kZoneCount + 1] = 0.f;
+			const iv::Zone Zn = static_cast<iv::Zone>(FMath::RandRange(0, iv::kZoneCount - 1));
+			const FVector Loc = GetZoneWorldLocation(Zn);
+			FX->SpawnExplosion(Loc, FMath::RandRange(0.9f, 1.8f));
+			IVAudio::Play3D(GetWorld(), TEXT("env_distant_boom_01"), Loc, 1.f);
+		}
+		if (DeathT > 3.2f && DeathT - Fd <= 3.2f)
+		{
+			FX->SpawnExplosion(GetZoneWorldLocation(iv::Zone::Torso), 3.6f);
+			IVAudio::Play3D(GetWorld(), TEXT("env_distant_boom_01"), GetZoneWorldLocation(iv::Zone::Torso), 1.f);
+		}
+		FxAcc[iv::kZoneCount] += Fd;
+		if (FxAcc[iv::kZoneCount] > 0.05f)
+		{
+			FxAcc[iv::kZoneCount] = 0.f;
+			FX->SpawnFlame(GetZoneWorldLocation(iv::Zone::Torso) + FMath::VRand() * FVector(700.f, 700.f, 1200.f), 300.f, 3, 1.5f);
+		}
 	}
 }
 
@@ -1011,4 +1298,359 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 	HitKick *= FMath::Exp(-7.f * Dt);
 	if (FVector* T = Pose.Joint.Find(FName(TEXT("torso")))) *T += HitKick;
 	if (FVector* H = Pose.Joint.Find(FName(TEXT("head")))) *H += HitKick * 0.5f;
+}
+
+
+void AIVMechPawn::UpdateBladeTrail(float Dt)
+{
+	if (!BladeTrail || !SwordMesh || !bRigActive || !SwordMesh->IsVisible()) return;
+	FVector B, T;
+	GetBladeSegment(B, T);
+	const float Now = GetWorld()->GetTimeSeconds();
+	const FVector Mid = B + (T - B) * 0.3f;
+	const float TipSpeed = PrevTip.IsZero() ? 0.f : (T - PrevTip).Size() / FMath::Max(Dt, 1e-3f);
+	PrevTip = T;
+	// record only while the blade really moves (a swing): the trail then fades out on its own
+	const float Life = 0.30f;
+	if (TipSpeed > 1800.f) TrailSamples.Add({ Mid, T, Now });
+	while (TrailSamples.Num() > 0 && Now - TrailSamples[0].Time > Life) TrailSamples.RemoveAt(0);
+	if (TrailSamples.Num() < 2)
+	{
+		BladeTrail->ClearAllMeshSections();
+		return;
+	}
+	TArray<FVector> V, N;
+	TArray<FVector2D> UV;
+	TArray<FLinearColor> Col;
+	TArray<int32> Tri;
+	TArray<FProcMeshTangent> Tan;
+	const int32 Num = TrailSamples.Num();
+	for (int32 i = 0; i < Num; ++i)
+	{
+		const FTrailSample& S = TrailSamples[i];
+		const float Age = (Now - S.Time) / Life;
+		const float Fade = FMath::Clamp(1.f - Age, 0.f, 1.f);
+		const float U = float(i) / float(Num - 1);
+		V.Add(S.Tip); UV.Add(FVector2D(U, 0.f)); Col.Add(FLinearColor(1, 1, 1, Fade * Fade)); N.Add(FVector::UpVector);
+		V.Add(S.Mid); UV.Add(FVector2D(U, 1.f)); Col.Add(FLinearColor(1, 1, 1, Fade * Fade)); N.Add(FVector::UpVector);
+	}
+	for (int32 i = 0; i < Num - 1; ++i)
+	{
+		const int32 a = i * 2, b = i * 2 + 1, c2 = i * 2 + 2, d = i * 2 + 3;
+		Tri.Add(a); Tri.Add(b); Tri.Add(c2);
+		Tri.Add(c2); Tri.Add(b); Tri.Add(d);
+		Tri.Add(a); Tri.Add(c2); Tri.Add(b);
+		Tri.Add(c2); Tri.Add(d); Tri.Add(b);
+	}
+	BladeTrail->CreateMeshSection_LinearColor(0, V, Tri, N, UV, Col, Tan, false);
+	if (TrailMID) BladeTrail->SetMaterial(0, TrailMID);
+}
+
+
+// =====================================================================================================================
+//  Ultimate choreography
+// =====================================================================================================================
+void AIVMechPawn::SetBodyOffset(const FVector& LocalOffset)
+{
+	BodyOffset = LocalOffset;
+	if (RigMesh) RigMesh->SetRelativeLocation(FVector(LocalOffset.X, LocalOffset.Y, -4100.f + LocalOffset.Z));
+}
+
+void AIVMechPawn::PlaySequence(const TArray<FName>& Poses, const TArray<float>& Durations)
+{
+	if (!bRigActive || !RigData.IsValid()) return;
+	ActionSteps.Reset();
+	for (int32 i = 0; i < Poses.Num(); ++i)
+		if (RigData->FindPose(Poses[i])) ActionSteps.Add({ Poses[i], Durations.IsValidIndex(i) ? Durations[i] : 0.5f });
+	if (ActionSteps.Num() == 0) return;
+	ActionIndex = 0;
+	ActionTimer = 0.f;
+	ActionFrom = FIVPoseAngles();
+}
+
+void AIVMechPawn::StartUltimateScript(AIVMechPawn* Victim, int32 Mode)
+{
+	if (!bRigActive || !Victim) return;
+	Ult = FUltScript();
+	Ult.bActive = true;
+	Ult.Victim = Victim;
+	Ult.Mode = Mode;
+	PlaySequence({ FName("quick_piston_l_windup"), FName("quick_piston_l_strike"), FName("guard_neutral"), FName("swing_up_r_windup"), FName("swing_down_r_commit"),
+		FName("swing_down_r_strike_end"), FName("swing_down_r_recovery"), FName("guard_neutral") },
+		{ 0.22f, 0.14f, 0.20f, 0.80f, 0.12f, 0.22f, 0.9f, 0.6f });
+	Victim->PlaySequence({ FName("guard_neutral"), FName("kneel"), FName("kneel") }, { 0.25f, 0.45f, 3.f });
+	if (SwordMID) SwordMID->SetScalarParameterValue(TEXT("Heat"), 1.6f);
+	IVAudio::Play3D(GetWorld(), TEXT("mech_servo_arm_windup"), GetActorLocation() + FVector(0, 0, 4000.f), 1.f, 0.8f);
+}
+
+void AIVMechPawn::UpdateUltimateScript(float Dt)
+{
+	if (!Ult.bActive) return;
+	Ult.T += Dt;
+	const float t = Ult.T;
+	AIVMechPawn* V = Ult.Victim.Get();
+	AIVFXManager* FX = AIVFXManager::Get(GetWorld());
+	// attacker: forward lunge + jump
+	float Z = 0.f, F = 0.f;
+	if (t >= 0.55f)
+	{
+		const float U = FMath::Clamp((t - 0.55f) / 1.07f, 0.f, 1.f);
+		F = 2300.f * (U * U * (3.f - 2.f * U));
+		Z = (t < 1.62f) ? 3500.f * FMath::Sin(U * PI) : 0.f;
+	}
+	SetBodyOffset(FVector(F, 0.f, Z));
+	// the opponent reels back from the punch
+	if (V && t >= 0.2f)
+	{
+		const float U = FMath::Clamp((t - 0.2f) / 0.5f, 0.f, 1.f);
+		V->SetBodyOffset(FVector(-650.f * (U * U * (3.f - 2.f * U)), 0.f, 0.f));
+		if (!Ult.bPushed)
+		{
+			Ult.bPushed = true;
+			if (FX)
+			{
+				const FVector P = V->GetZoneWorldLocation(iv::Zone::Torso);
+				FX->SpawnSparks(P, GetActorForwardVector() * -1.f, 140, 7000.f);
+				FX->SpawnDust(P, 1800.f, 18, 1.f);
+				FX->SpawnFlash(P, FLinearColor(1.f, 0.7f, 0.4f), 1.6e5f, 0.3f, 12000.f);
+			}
+			IVAudio::Play3D(GetWorld(), TEXT("hit_metal_contact_heavy"), V->GetActorLocation() + FVector(0, 0, 3500.f), 1.f);
+			IVAudio::Play3D(GetWorld(), TEXT("hit_lowfreq_thump_heavy"), V->GetActorLocation() + FVector(0, 0, 3500.f), 1.f);
+		}
+	}
+	// the chop lands at the top of the fall
+	if (!Ult.bImpact && t >= 1.58f)
+	{
+		Ult.bImpact = true;
+		if (V && FX)
+		{
+			const FVector Head = V->GetZoneWorldLocation(iv::Zone::Head);
+			FX->SpawnFlash(Head, FLinearColor(1.f, 0.85f, 0.6f), 4.0e5f, 0.5f, 22000.f);
+			FX->SpawnSparks(Head, FVector::UpVector, 300, 10000.f);
+			FX->SpawnDust(GetActorLocation() + GetActorForwardVector() * 2000.f, 4000.f, 40, 2.f);
+			IVAudio::Play3D(GetWorld(), TEXT("parry_clang"), Head, 1.f);
+			IVAudio::Play3D(GetWorld(), TEXT("mech_limb_sever"), Head, 1.f);
+			IVAudio::Play3D(GetWorld(), TEXT("env_distant_boom_01"), GetActorLocation(), 1.f);
+			if (V->IsLocallyControlled()) V->AddCockpitImpulse(0.f, 1.f, 2.f);
+			if (IsLocallyControlled()) AddCockpitImpulse(0.f, -1.f, 1.5f);
+			if (Ult.Mode == 1) V->SplitInHalves();
+			else if (Ult.Mode == 2) V->SeverOffArm();
+		}
+		UGameplayStatics::SetGlobalTimeDilation(this, 0.28f);
+	}
+	if (t > 2.1f) UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
+	if (t >= 3.3f)
+	{
+		// make the lunge permanent: move the actors, not just the mesh
+		Ult.bActive = false;
+		UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
+		AddActorWorldOffset(GetActorForwardVector() * F, false);
+		SetBodyOffset(FVector::ZeroVector);
+		if (V)
+		{
+			V->AddActorWorldOffset(-V->GetActorForwardVector() * 650.f, false);
+			V->SetBodyOffset(FVector::ZeroVector);
+		}
+		if (SwordMID) SwordMID->SetScalarParameterValue(TEXT("Heat"), 0.8f);
+	}
+}
+
+USkeletalMeshComponent* AIVMechPawn::MakeCloneRig(UMaterialInterface* Mat, TObjectPtr<UMaterialInstanceDynamic>& OutMID, bool bClip)
+{
+	if (!RigMesh || !RigMesh->GetSkeletalMeshAsset()) return nullptr;
+	USkeletalMeshComponent* C = NewObject<USkeletalMeshComponent>(this);
+	C->SetSkeletalMesh(RigMesh->GetSkeletalMeshAsset());
+	C->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	C->SetAnimInstanceClass(UIVRigAnimInstance::StaticClass());
+	C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	C->SetCastShadow(true);
+	C->SetBoundsScale(3.f);
+	C->bUpdateJointsFromAnimation = true;
+	C->RegisterComponent();
+	C->SetWorldTransform(RigMesh->GetComponentTransform());
+	C->InitAnim(true);
+	if (UIVRigAnimInstance* CI = Cast<UIVRigAnimInstance>(C->GetAnimInstance()))
+		if (RigAnim) CI->PoseLocal = RigAnim->PoseLocal;
+	UMaterialInterface* Base = bClip ? LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_MechHullClip.M_MechHullClip")) : Mat;
+	if (Base)
+	{
+		OutMID = UMaterialInstanceDynamic::Create(Base, this);
+		OutMID->SetVectorParameterValue(TEXT("Tint"), HullTint);
+		OutMID->SetVectorParameterValue(TEXT("Accent"), HullAccent);
+		for (int32 i = 0; i < C->GetNumMaterials(); ++i) C->SetMaterial(i, OutMID);
+	}
+	return C;
+}
+
+void AIVMechPawn::SplitInHalves()
+{
+	if (!RigMesh) return;
+	const FVector O = RigMesh->GetBoneLocation(FName(TEXT("torso")), EBoneSpaces::WorldSpace);
+	const FVector N = GetActorRightVector();
+	const FVector FeetPivot = FVector(O.X, O.Y, GetActorLocation().Z - 4100.f);
+	for (int32 s = 0; s < 2; ++s)
+	{
+		FDetached D;
+		D.MID = nullptr;
+		D.Comp = MakeCloneRig(nullptr, D.MID, true);
+		if (!D.Comp) continue;
+		const float Sd = s == 0 ? 1.f : -1.f;
+		D.Kind = 0;
+		D.T0 = D.Comp->GetComponentTransform();
+		D.Pivot = FeetPivot;
+		D.ClipO = O;
+		D.ClipN = N;
+		D.Spin = FVector(0.f, 0.f, 0.f);
+		D.Roll = Sd;                       // side
+		if (D.MID)
+		{
+			D.MID->SetVectorParameterValue(TEXT("ClipOrigin"), FLinearColor(O.X, O.Y, O.Z));
+			D.MID->SetVectorParameterValue(TEXT("ClipNormal"), FLinearColor(N.X, N.Y, N.Z));
+			D.MID->SetScalarParameterValue(TEXT("ClipSide"), Sd);
+		}
+		Detached.Add(D);
+	}
+	// the original body disappears; its sword drops
+	RigMesh->SetVisibility(false, true);
+	if (SwordMesh)
+	{
+		SwordMesh->SetVisibility(false);
+		if (UStaticMesh* SM = SwordMesh->GetStaticMesh())
+		{
+			UStaticMeshComponent* Drop = NewObject<UStaticMeshComponent>(this);
+			Drop->SetStaticMesh(SM);
+			Drop->SetMaterial(0, SwordMID);
+			Drop->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Drop->RegisterComponent();
+			Drop->SetWorldTransform(SwordMesh->GetComponentTransform());
+			// reuse the slot of a detached part: a rigid body with its own ballistic path
+			FDetached Sw;
+			Sw.Comp = nullptr;
+			Sw.Kind = 2;
+			Sw.T0 = SwordMesh->GetComponentTransform();
+			Sw.Vel = GetActorRightVector() * 600.f + FVector(0, 0, 500.f);
+			Sw.Spin = FVector(30.f, 80.f, 20.f);
+			Detached.Add(Sw);
+			SwordDrop = Drop;
+		}
+	}
+	if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
+	{
+		for (int32 i = 0; i < 9; ++i)
+		{
+			const FVector P = O + FVector(0, 0, (i - 3) * 800.f);
+			FX->SpawnFlame(P, 400.f, 3, 1.6f);
+			FX->SpawnSparks(P, N, 18, 5000.f);
+		}
+		FX->SpawnExplosion(O, 2.6f);
+	}
+}
+
+void AIVMechPawn::SeverOffArm()
+{
+	if (!RigMesh) return;
+	static const TCHAR* Others[] = { TEXT("root"), TEXT("pelvis"), TEXT("torso"), TEXT("head"), TEXT("reactor"), TEXT("shoulder_l"), TEXT("shoulder_r"), TEXT("upperarm_r"), TEXT("forearm_r"), TEXT("hand_r"),
+		TEXT("thigh_l"), TEXT("thigh_r"), TEXT("shin_l"), TEXT("shin_r"), TEXT("foot_l"), TEXT("foot_r") };
+	UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_MechHull.M_MechHull"));
+	FDetached D;
+	D.Comp = MakeCloneRig(Base, D.MID, false);
+	if (!D.Comp) return;
+	for (const TCHAR* B : Others) D.Comp->HideBoneByName(FName(B), PBO_None);
+	static const TCHAR* Arm[] = { TEXT("upperarm_l"), TEXT("forearm_l"), TEXT("hand_l") };
+	for (const TCHAR* B : Arm) RigMesh->HideBoneByName(FName(B), PBO_None);
+	D.Kind = 1;
+	D.bFollow = false;
+	D.T0 = D.Comp->GetComponentTransform();
+	const FVector ShoulderLoc = RigMesh->GetBoneLocation(FName(TEXT("upperarm_l")), EBoneSpaces::WorldSpace);
+	D.Vel = (-GetActorRightVector() * 1300.f + GetActorForwardVector() * 900.f + FVector(0, 0, 1700.f));
+	D.Spin = FVector(120.f, 40.f, 200.f);
+	D.Pivot = ShoulderLoc;
+	Detached.Add(D);
+	if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
+	{
+		FX->SpawnExplosion(ShoulderLoc, 2.2f);
+		FX->SpawnSparks(ShoulderLoc, -GetActorRightVector(), 220, 9000.f);
+		FX->SpawnFlame(ShoulderLoc, 500.f, 8, 1.8f);
+	}
+	IVAudio::Play3D(GetWorld(), TEXT("mech_limb_sever"), ShoulderLoc, 1.f);
+	ZoneStates[iv::Index(iv::Zone::ArmL)] = iv::ZoneState::Severed;
+	RefreshHullDamage();
+}
+
+void AIVMechPawn::ClearDetached()
+{
+	for (FDetached& D : Detached) if (D.Comp) D.Comp->DestroyComponent();
+	Detached.Reset();
+	if (SwordDrop) { SwordDrop->DestroyComponent(); SwordDrop = nullptr; }
+}
+
+void AIVMechPawn::UpdateDetached(float Dt)
+{
+	if (Detached.Num() == 0) return;
+	AIVEnvironment* Env = AIVEnvironment::Get(GetWorld());
+	AIVDistrict* Dist = Env ? Env->GetDistrict() : nullptr;
+	AIVFXManager* FX = AIVFXManager::Get(GetWorld());
+	for (FDetached& D : Detached)
+	{
+		D.T += Dt;
+		if (D.Kind == 0 && D.Comp)
+		{
+			// a half topples outward about the line of the feet, still playing the collapse of the pose
+			const float Sd = D.Roll;
+			const float U = FMath::Clamp(D.T / 1.8f, 0.f, 1.f);
+			const float Ang = Sd * (4.f + 74.f * U * U);
+			const FQuat Q(GetActorForwardVector(), FMath::DegreesToRadians(Ang));
+			FTransform Cur = D.T0;
+			const FVector Rel = D.T0.GetLocation() - D.Pivot;
+			Cur.SetLocation(D.Pivot + Q.RotateVector(Rel) + D.ClipN * Sd * (120.f + 700.f * U));
+			Cur.SetRotation(Q * D.T0.GetRotation());
+			D.Comp->SetWorldTransform(Cur);
+			if (UIVRigAnimInstance* CI = Cast<UIVRigAnimInstance>(D.Comp->GetAnimInstance())) if (RigAnim) CI->PoseLocal = RigAnim->PoseLocal;
+			const FTransform Delta = Cur * D.T0.Inverse();
+			if (D.MID)
+			{
+				const FVector O = Delta.TransformPosition(D.ClipO);
+				const FVector N = Delta.TransformVectorNoScale(D.ClipN);
+				D.MID->SetVectorParameterValue(TEXT("ClipOrigin"), FLinearColor(O.X, O.Y, O.Z));
+				D.MID->SetVectorParameterValue(TEXT("ClipNormal"), FLinearColor(N.X, N.Y, N.Z));
+			}
+			if (FX && FMath::FRand() < 0.5f && U < 0.95f) FX->SpawnFlame(Cur.GetLocation() + FVector(0, 0, FMath::FRandRange(500.f, 7000.f)), 300.f, 1, 1.2f);
+		}
+		else if (D.Kind == 1 && D.Comp)
+		{
+			if (!D.bRest)
+			{
+				D.Vel.Z -= 2600.f * Dt;
+				FTransform Cur = D.Comp->GetComponentTransform();
+				Cur.AddToTranslation(D.Vel * Dt);
+				Cur.SetRotation((FRotator(D.Spin.X, D.Spin.Z, D.Spin.Y) * Dt).Quaternion() * Cur.GetRotation());
+				const float Ground = Dist ? Dist->SampleHeightCm(Cur.GetLocation().X, Cur.GetLocation().Y) : -100000.f;
+				if (Cur.GetLocation().Z - 1500.f < Ground && D.Vel.Z < 0.f)
+				{
+					D.bRest = true;
+					if (FX) { FX->SpawnDust(Cur.GetLocation(), 2500.f, 24, 1.4f); FX->SpawnExplosion(Cur.GetLocation(), 1.1f); }
+					IVAudio::Play3D(GetWorld(), TEXT("env_distant_boom_01"), Cur.GetLocation(), 1.f);
+					Cur.SetLocation(FVector(Cur.GetLocation().X, Cur.GetLocation().Y, Ground + 1500.f));
+				}
+				D.Comp->SetWorldTransform(Cur);
+				if (FX && FMath::FRand() < 0.6f) FX->SpawnFlame(Cur.GetLocation(), 300.f, 1, 1.2f);
+				if (FX && FMath::FRand() < 0.4f) FX->SpawnSmoke(Cur.GetLocation(), 300.f, 1, 1.f);
+			}
+			else if (FX && FMath::FRand() < 0.15f)
+			{
+				FX->SpawnFlame(D.Comp->GetComponentLocation() + FVector(0, 0, 800.f), 400.f, 1, 1.0f);
+				FX->SpawnSmoke(D.Comp->GetComponentLocation() + FVector(0, 0, 900.f), 300.f, 1, 1.f);
+			}
+		}
+		else if (D.Kind == 2 && SwordDrop && !D.bRest)
+		{
+			D.Vel.Z -= 2600.f * Dt;
+			FTransform Cur = SwordDrop->GetComponentTransform();
+			Cur.AddToTranslation(D.Vel * Dt);
+			Cur.SetRotation((FRotator(D.Spin.X, D.Spin.Z, D.Spin.Y) * Dt).Quaternion() * Cur.GetRotation());
+			const float Ground = Dist ? Dist->SampleHeightCm(Cur.GetLocation().X, Cur.GetLocation().Y) : -100000.f;
+			if (Cur.GetLocation().Z < Ground + 400.f && D.Vel.Z < 0.f) { D.bRest = true; if (FX) FX->SpawnSparks(Cur.GetLocation(), FVector::UpVector, 60, 5000.f); }
+			else SwordDrop->SetWorldTransform(Cur);
+		}
+	}
 }

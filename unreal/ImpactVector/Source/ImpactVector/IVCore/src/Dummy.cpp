@@ -5,11 +5,11 @@ namespace iv {
 void Dummy::DefaultScript() {
   script_.clear();
   const int gap = tune::kDummyScriptGapTicks;
-  script_.push_back({gap, StrikeKind::Heavy, SwingSide::Up, Arm::R, 24});
-  script_.push_back({gap, StrikeKind::Heavy, SwingSide::Right, Arm::R, 24});
+  script_.push_back({gap, StrikeKind::Heavy, SwingSide::Up, Arm::R, tune::kWindupMinTicks + 6});
+  script_.push_back({gap, StrikeKind::Heavy, SwingSide::Right, Arm::R, tune::kWindupMinTicks + 6});
   script_.push_back({gap, StrikeKind::Quick, SwingSide::Up, Arm::L, 0});
-  script_.push_back({gap, StrikeKind::Heavy, SwingSide::Left, Arm::L, 24});
-  script_.push_back({gap, StrikeKind::Heavy, SwingSide::Down, Arm::R, 24});
+  script_.push_back({gap, StrikeKind::Heavy, SwingSide::Left, Arm::L, tune::kWindupMinTicks + 6});
+  script_.push_back({gap, StrikeKind::Heavy, SwingSide::Down, Arm::R, tune::kWindupMinTicks + 6});
 }
 
 void Dummy::Set(DummyMode m) {

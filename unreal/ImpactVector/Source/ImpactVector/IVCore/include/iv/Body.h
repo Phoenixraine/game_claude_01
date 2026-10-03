@@ -62,6 +62,8 @@ class Body {
   bool lost(Zone z) const { return state(z) >= ZoneState::Destroyed; }
   float Efficiency(Zone z) const;
   const Modifiers& modifiers() const { return mods_; }
+  // v3: fraction (0..1) of all armour + mechanism + system points that are left; the ultimate picks its variant by it.
+  float Integrity() const;
 
   // Number of limbs in Damaged or worse state (feeds heat from "damaged drives", pitch §10).
   int DamagedLimbs() const;

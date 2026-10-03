@@ -580,3 +580,21 @@ int32 AIVDistrict::BlastAt(const FVector& Center, float Radius, float Impulse)
 	if (bChanged) RebuildStaticInstances();
 	return Total;
 }
+
+
+bool AIVDistrict::FindBuildingNear(const FVector& From, const FVector& Dir, float MinD, float MaxD, FVector& OutBase, FVector& OutSize) const
+{
+	float Best = 1e12f;
+	bool bFound = false;
+	for (const FIVDistrictBuilding& B : Buildings)
+	{
+		if (B.bHero) continue;
+		if (B.bActive && B.Actor.IsValid() && B.Actor->IsMostlyGone()) continue;
+		const FVector To = B.Center - From;
+		const float D2 = To.Size2D() - 0.5f * FMath::Min(B.Size.X, B.Size.Y);
+		if (D2 < MinD || D2 > MaxD || B.Size.Z < 3500.f) continue;
+		if (FVector::DotProduct(To.GetSafeNormal2D(), Dir) < -0.25f) continue;
+		if (D2 < Best) { Best = D2; OutBase = FVector(B.Center.X, B.Center.Y, B.Center.Z - B.Size.Z * 0.5f); OutSize = B.Size; bFound = true; }
+	}
+	return bFound;
+}

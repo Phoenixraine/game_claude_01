@@ -95,8 +95,16 @@ void Duel::Step(const Input& a, const Input& b, const World& world) {
         has[i] = true;
       }
     }
+    // v3: blades that meet on the same line stop each other (one resolution for both strikes).
+    bool clashed = false;
+    for (int i = 0; i < 2; ++i) {
+      if (has[i] && d[i].outcome == Outcome::Clashed && !clashed) {
+        ApplyClash(i, world);
+        clashed = true;
+      }
+    }
     for (int i = 0; i < 2; ++i)
-      if (has[i]) Apply(i, d[i], world);
+      if (has[i] && d[i].outcome != Outcome::Clashed) Apply(i, d[i], world);
     for (int i = 0; i < 2; ++i)
       if (f_[i].firePending) ResolveWeapon(i, world);
     for (int i = 0; i < 2; ++i)
@@ -130,14 +138,25 @@ Duel::Decision Duel::Decide(int ai) const {
   }
   const bool grab = s.kind == StrikeKind::Grab;
 
+  // v3: two blades arrive within a few ticks of each other on the same line: they clash (double block).
+  if (s.kind == StrikeKind::Heavy && def.phase == Phase::Strike && def.strike.kind == StrikeKind::Heavy && !def.contactPending && !s.innerLine &&
+      def.TicksToContact() <= tune::kClashWindowTicks && SameLine(s.side, def.strike.side) && distance_ <= def.StrikeReach()) {
+    d.outcome = Outcome::Clashed;
+    return d;
+  }
+  if (s.kind == StrikeKind::Heavy && def.contactPending && def.strike.kind == StrikeKind::Heavy && SameLine(s.side, def.strike.side) && distance_ <= def.StrikeReach()) {
+    d.outcome = Outcome::Clashed;
+    return d;
+  }
+
   // pitch §7 "Перехват": the defender committed a strike just now, on a line that meets this one.
   if (!grab && def.phase == Phase::Strike && def.strike.kind != StrikeKind::Grab && def.strike.strikeTick >= 1 &&
       def.strike.strikeTick <= tune::kInterceptWindowTicks && IsInterceptLine(s.side, def.strike.side)) {
     d.outcome = Outcome::Intercepted;
     return d;
   }
-  // pitch §6 "Уклонение": gets out of straight strikes, but not wide swings or grabs.
-  if (!grab && def.Evading() && IsLinearSwing(s.side)) {
+  // v3 "Уклонение": the torso turn + half step gets out of lateral slashes; chops and rising cuts follow the mech; grabs too.
+  if (!grab && def.Evading() && IsLateralSwing(s.side)) {
     d.outcome = Outcome::Evaded;
     return d;
   }
@@ -185,6 +204,8 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
     case Outcome::Evaded:
       Emit(EventType::Evaded, ds, d.zone);
       atk.LoseStability(tune::kWhiffStability * 0.6f, actx);
+      def.counterTicks = tune::kCounterWindowTicks;   // v3: a clean dodge opens a counter-strike on the inner line
+      if (def.posture == Posture::Dodging) def.posture = Posture::Standing;   // ...and the mech is ready for it at once
       break;
     case Outcome::Parried:
     case Outcome::GrabParried:
@@ -253,6 +274,37 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
   atk.FinishStrike(d.outcome, actx);
 }
 
+void Duel::ApplyClash(int first, const World& w) {
+  Fighter& a = f_[first];
+  Fighter& b = f_[1 - first];
+  const StepContext actx = Ctx(first, w);
+  const StepContext bctx = Ctx(1 - first, w);
+  Emit(EventType::BladesClash, a.side(), Zone::Torso, Index(a.strike.side), Index(b.strike.side), distance_);
+  Emit(EventType::StrikeContact, a.side(), Zone::Torso, static_cast<int>(a.strike.kind), static_cast<int>(Outcome::Clashed), 0.f);
+  Emit(EventType::StrikeContact, b.side(), Zone::Torso, static_cast<int>(b.strike.kind), static_cast<int>(Outcome::Clashed), 0.f);
+  a.lastOwnOutcome = Outcome::Clashed;
+  b.lastOwnOutcome = Outcome::Clashed;
+  a.lastIncomingOutcome = Outcome::Clashed;
+  b.lastIncomingOutcome = Outcome::Clashed;
+  a.lastOwnTick = b.lastOwnTick = a.lastIncomingTick = b.lastIncomingTick = tick_;
+  a.ClashBreak(actx);
+  b.ClashBreak(bctx);
+  GainUltimate(first, tune::kUltGainClash, w);
+  GainUltimate(1 - first, tune::kUltGainClash, w);
+}
+
+HitReport Duel::ExternalHit(Side victim, Zone zone, float damage, float stability, int source, StatusKind status, int statusTicks) {
+  Fighter& v = f_[Index(victim)];
+  World w;
+  const StepContext vctx = Ctx(Index(victim), w);
+  const HitReport hr = v.TakeHit(zone, damage, StrikeKind::Heavy, stability, vctx);
+  Emit(EventType::ExternalHit, victim, zone, source, 0, hr.dealt);
+  EmitHit(v, Other(victim), zone, hr, stability, SwingSide::Down, false, false);
+  if (status != StatusKind::Count && statusTicks > 0) v.ApplyStatus(status, statusTicks, vctx);
+  if (!cinematic_.active) CheckEnd();
+  return hr;
+}
+
 void Duel::ResolveWeapon(int ai, const World& w) {
   Fighter& atk = f_[ai];
   Fighter& def = f_[1 - ai];
@@ -282,6 +334,14 @@ void Duel::ResolveWeapon(int ai, const World& w) {
     EmitHit(def, atk.side(), z, hr, stab, SwingSide::Up, false, false);
     if (hr.dealt > 0.f) GainUltimate(ai, tune::kUltGainHit + (hr.after >= ZoneState::Critical ? tune::kUltGainCriticalHit : 0.f), w);
   }
+  if (hits > 0) {   // v3: every long-cooldown weapon also does something besides damage
+    switch (kind) {
+      case WeaponKind::RailSpear: def.ApplyStatus(StatusKind::StrikeLock, tune::kStrikeLockTicks, dctx); break;
+      case WeaponKind::SuppressionRockets: def.ApplyStatus(StatusKind::Blind, tune::kBlindTicks, dctx); break;
+      case WeaponKind::PlasmaCannon: def.ApplyStatus(StatusKind::Burn, tune::kBurnTicks, dctx); break;
+      default: break;
+    }
+  }
   Emit(EventType::WeaponFired, atk.side(), atk.weaponTarget, hits, Index(kind));
   atk.FinishWeapon(actx);
   // v2: every heavy weapon cuts to an external camera; a hit target is left staggered afterwards.
@@ -297,13 +357,33 @@ void Duel::ResolveUltimate(int ai, const World& w) {
   if (z == Zone::Reactor && std::fabs(def.flank) < tune::kRearAngleDeg) z = Zone::Torso;
   atk.ConsumeUltimate();
   Emit(EventType::UltimateUsed, atk.side(), z);
-  const HitReport hr = def.TakeHit(z, tune::kUltimateDamage, StrikeKind::Heavy, tune::kUltimateStabilityHit, dctx);
-  EmitHit(def, atk.side(), z, hr, tune::kUltimateStabilityHit, SwingSide::Up, false, false);
+  // v3: punch under the chest (the target reels), jump, bring the blade down on the head.
+  // A weakened target is cut in half; a healthy one raises its off-hand arm and loses it (and with it the ultimate).
+  const float integrity = def.body.Integrity();
+  CinematicKind ck = CinematicKind::Ultimate;
+  if (integrity < tune::kUltimateKillFraction) {
+    Emit(EventType::UltimateFinisher, atk.side(), Zone::Torso);
+    const HitReport hr = def.TakeHit(Zone::Torso, 9999.f, StrikeKind::Heavy, 0.f, dctx);
+    EmitHit(def, atk.side(), Zone::Torso, hr, 0.f, SwingSide::Up, false, false);
+    ck = CinematicKind::UltimateBisect;
+  } else {
+    const HitReport h1 = def.TakeHit(z, tune::kUltimateDamage, StrikeKind::Heavy, tune::kUltimateStabilityHit, dctx);
+    EmitHit(def, atk.side(), z, h1, tune::kUltimateStabilityHit, SwingSide::Up, false, false);
+    if (!def.body.severed(Zone::ArmL)) {
+      def.TakeHit(Zone::ArmL, tune::kUltimateSeverDamage * 4.f, StrikeKind::Heavy, 0.f, dctx);   // destroyed...
+      const HitReport h2 = def.TakeHit(Zone::ArmL, tune::kUltimateSeverDamage, StrikeKind::Heavy, 0.f, dctx);   // ...and torn off
+      EmitHit(def, atk.side(), Zone::ArmL, h2, 0.f, SwingSide::Down, false, false);
+    }
+    def.ultimateLocked = true;
+    def.ultimate = 0.f;
+    Emit(EventType::UltimateSever, atk.side(), Zone::ArmL);
+    ck = CinematicKind::UltimateSever;
+  }
   atk.phase = Phase::Recovery;
   atk.phaseTicks = 0;
   atk.recoveryLen = tune::kHeavyRecoveryTicks;
   (void)actx;
-  StartCinematic(CinematicKind::Ultimate, atk.side(), tune::kUltimateCinematicTicks, true);
+  StartCinematic(ck, atk.side(), tune::kUltimateCinematicTicks, true);
 }
 
 void Duel::StartCinematic(CinematicKind k, Side who, int length, bool stun) {

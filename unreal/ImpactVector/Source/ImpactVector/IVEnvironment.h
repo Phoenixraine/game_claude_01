@@ -39,6 +39,7 @@ public:
 
 	/** Blast at a world point: opens up the buildings it touches and destroys cells. Returns cells destroyed. */
 	int32 BlastAt(const FVector& Center, float Radius, float Impulse);
+	bool FindScoopBuilding(const FVector& From, const FVector& Dir, FVector& OutBase, FVector& OutSize) const;
 
 	/** Test helper: cut the base of the nearest building ahead of From along Dir. */
 	int32 CollapseNearestAhead(const FVector& From, const FVector& Dir);

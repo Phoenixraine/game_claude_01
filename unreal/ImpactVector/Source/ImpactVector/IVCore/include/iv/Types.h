@@ -78,10 +78,13 @@ constexpr int Index(WeaponKind k) { return static_cast<int>(k); }
 enum class SystemId : uint8_t { Sensors, Power, Cooling, ArmL, ArmR, LegL, LegR, Weapon, Count };
 
 // v2: kind of the scripted external cut (CinematicBegin / CinematicEnd).
-enum class CinematicKind : uint8_t { None, Ultimate, RailSpear, SuppressionRockets, PlasmaCannon };
+enum class CinematicKind : uint8_t { None, Ultimate, RailSpear, SuppressionRockets, PlasmaCannon, UltimateBisect, UltimateSever };
 constexpr CinematicKind CinematicOf(WeaponKind k) {
   return k == WeaponKind::RailSpear ? CinematicKind::RailSpear : k == WeaponKind::SuppressionRockets ? CinematicKind::SuppressionRockets : CinematicKind::PlasmaCannon;
 }
+
+// v3: timed conditions laid on a fighter by weapons, debris and the ultimate.
+enum class StatusKind : uint8_t { Blind, StrikeLock, Burn, Count };
 
 // v2: training dummy behaviour (pitch tutorial, TASK-006 update).
 enum class DummyMode : uint8_t { Off, Passive, Scripted, BlockOnly };

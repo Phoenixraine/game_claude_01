@@ -16,8 +16,11 @@ class UCameraComponent;
 class UMaterialInstanceDynamic;
 class USkeletalMeshComponent;
 class UIVRigAnimInstance;
+class UProceduralMeshComponent;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FIVFootfallSignature, int32 /*Side: -1 left, +1 right*/, float /*Strength 0..1*/);
+class AIVMechPawn;
+DECLARE_MULTICAST_DELEGATE_TwoParams(FIVCrashSignature, AIVMechPawn*, float /*Strength 0..1*/);
 
 /** One articulated mech limb part: a joint pivot plus a grey-box mesh. */
 struct FIVJoint
@@ -60,10 +63,34 @@ public:
 	/** Tints all grey-box parts (used to differentiate the enemy). */
 	void SetBodyTint(const FLinearColor& Tint);
 	/** Skeletal mesh asset of this mech (set before BeginPlay); generated hulls get the M_MechHull material. */
-	FString RigAssetPath = TEXT("/Game/Mechs/Bastion/BASTION_01.BASTION_01");
-	bool bUseHullMaterial = false;
-	FLinearColor HullTint = FLinearColor(0.035f, 0.037f, 0.042f);
-	FLinearColor HullAccent = FLinearColor(0.55f, 0.02f, 0.015f);
+	FString RigAssetPath = TEXT("/Game/Mechs/Player/PLAYER_01.PLAYER_01");
+	bool bUseHullMaterial = true;
+	FLinearColor HullTint = FLinearColor(0.045f, 0.065f, 0.105f);
+	FLinearColor HullAccent = FLinearColor(0.85f, 0.26f, 0.025f);
+	FLinearColor HullGlow = FLinearColor(0.5f, 2.4f, 7.0f);
+	float HullAccentAmount = 1.3f;
+	/** Blade edge colour (cyan for the player, red for the enemy). */
+	FLinearColor SwordEdge = FLinearColor(0.35f, 1.4f, 3.0f);
+	FLinearColor LampColor = FLinearColor(0.75f, 0.88f, 1.f);
+	/** World-space ends of the blade (grip and tip) for trails, clashes and hit tests. */
+	void GetBladeSegment(FVector& OutBase, FVector& OutTip) const;
+	void SetSwordHeat(float Heat);
+	/** Weapon / debris status effects laid on this mech by the core (blind, strike lock, burn). */
+	void OnStatus(iv::StatusKind K, bool bOn, float Seconds);
+	float GetBlind01() const { return BlindTotal > 0.f ? FMath::Clamp(BlindLeft / BlindTotal, 0.f, 1.f) : 0.f; }
+	bool IsBurning() const { return bBurning; }
+	bool IsStrikeLocked() const { return bStrikeLocked; }
+	/** Chain of explosions on the loser, ending with a burning wreck. */
+	void StartDeathSequence();
+	/** Plays a custom list of poses on the upper body (names from the pose library, durations in seconds). */
+	void PlaySequence(const TArray<FName>& Poses, const TArray<float>& Durations);
+	/** Ultimate choreography: punch under the chest, jump, chop on the head. Mode 0 plain, 1 cut in half, 2 sever the off-hand arm. */
+	void StartUltimateScript(AIVMechPawn* Victim, int32 Mode);
+	bool IsUltimateScripted() const { return Ult.bActive; }
+	/** Fresh match: unhide limbs, clear damage visuals / statuses, stop all motion. */
+	void ResetForNewMatch();
+	void ResetMotion();
+	bool IsDying() const { return bDying; }
 	/** 0..1 visible battle damage (soot, embers) on the hull material. */
 	void SetHullDamage(float Amount);
 	/** Hide parts that would block the first-person view. */
@@ -88,6 +115,8 @@ public:
 	const iv::AnimState& GetCombatAnim() const { return CombatAnim; }
 
 	FIVFootfallSignature OnFootfall;
+	FIVCrashSignature OnCrash;
+	float CrashCooldown = 0.f;
 
 	// ---- tuning (cm, seconds, degrees) ----
 	float WalkSpeed = 650.f;          // ~6.5 m/s: a heavy stride
@@ -189,6 +218,57 @@ protected:
 	// ---- rigged mesh driven by the anim library
 	UPROPERTY() TObjectPtr<USkeletalMeshComponent> RigMesh;
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> HullMID;
+
+	// ---- head lamps (motivated key light on the opponent, volumetric beams in the fog)
+	UPROPERTY() TObjectPtr<class USpotLightComponent> HeadLamp[2];
+
+	// ---- ultimate choreography and the parts it tears off
+	struct FUltScript { bool bActive = false; float T = 0.f; TWeakObjectPtr<AIVMechPawn> Victim; int32 Mode = 0; bool bImpact = false; bool bPushed = false; } Ult;
+	struct FDetached
+	{
+		TObjectPtr<USkeletalMeshComponent> Comp;
+		TObjectPtr<UMaterialInstanceDynamic> MID;
+		FTransform T0;                 // component transform when it was cut loose
+		FVector Pivot = FVector::ZeroVector;
+		FVector Vel = FVector::ZeroVector;
+		FVector Spin = FVector::ZeroVector;   // deg/s
+		FVector ClipO = FVector::ZeroVector, ClipN = FVector::ZeroVector;
+		float T = 0.f, Roll = 0.f;
+		int32 Kind = 0;                // 0 half, 1 arm
+		bool bRest = false;
+		bool bFollow = true;
+	};
+	TArray<FDetached> Detached;
+	UPROPERTY() TObjectPtr<UStaticMeshComponent> SwordDrop;
+	FVector BodyOffset = FVector::ZeroVector;
+	void SetBodyOffset(const FVector& LocalOffset);
+	void UpdateUltimateScript(float Dt);
+	void UpdateDetached(float Dt);
+	void SplitInHalves();
+	void SeverOffArm();
+	void ClearDetached();
+	USkeletalMeshComponent* MakeCloneRig(UMaterialInterface* Mat, TObjectPtr<UMaterialInstanceDynamic>& OutMID, bool bClip);
+
+	// ---- status effects and damage visuals
+	float BlindLeft = 0.f, BlindTotal = 1.f;
+	bool bBurning = false, bStrikeLocked = false, bDying = false;
+	float DeathT = 0.f, FxAcc[iv::kZoneCount + 2] = {};
+	void UpdateDamageFX(float Dt);
+	void RefreshHullDamage();
+
+	// ---- blade trail (ribbon behind the swinging sword)
+	UPROPERTY() TObjectPtr<UProceduralMeshComponent> BladeTrail;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> TrailMID;
+	struct FTrailSample { FVector Mid, Tip; float Time; };
+	TArray<FTrailSample> TrailSamples;
+	FVector PrevTip = FVector::ZeroVector;
+	void UpdateBladeTrail(float Dt);
+
+	// ---- the duel sword (right hand)
+	UPROPERTY() TObjectPtr<UStaticMeshComponent> SwordMesh;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> SwordMID;
+	FQuat SwordRelRot = FQuat::Identity;
+	FVector SwordBladeDirLocal = FVector(0, 0, -1);   // blade direction in the hand bone's frame
 	UPROPERTY() TObjectPtr<UIVRigAnimInstance> RigAnim;
 	TSharedPtr<FIVRigData> RigData;
 	FIVRigDriver RigDriver;

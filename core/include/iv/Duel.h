@@ -65,6 +65,7 @@ class Duel {
   const CinematicState& cinematic() const { return cinematic_; }
   // v2 loadout and training dummy.
   void SetLoadout(Side s, WeaponKind k) { f_[Index(s)].SetLoadout(k); }
+  bool SelectWeapon(Side s, WeaponKind k) { return f_[Index(s)].SelectWeapon(k); }
   void SetDummy(Side s, DummyMode m) { dummy_[Index(s)].Set(m); }
   // v3: damage that comes from the world (thrown debris, a crash into a building, a fall). `source`: 0 debris, 1 crash, 2 fall.
   HitReport ExternalHit(Side victim, Zone zone, float damage, float stability, int source, StatusKind status = StatusKind::Count, int statusTicks = 0);

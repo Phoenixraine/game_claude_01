@@ -28,6 +28,22 @@ void AIVPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	bAuto = FParse::Param(FCommandLine::Get(), TEXT("IVAuto"));
+	{
+		FString S;
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVScript="), S, false))
+		{
+			TArray<FString> Items;
+			S.ParseIntoArray(Items, TEXT(";"));
+			for (const FString& It : Items)
+			{
+				FString L, R;
+				if (!It.Split(TEXT("@"), &L, &R)) continue;
+				FScriptCmd Cm; Cm.T = FCString::Atof(*R);
+				if (!L.Split(TEXT("="), &Cm.Name, &Cm.Arg)) Cm.Name = L;
+				ScriptCmd.Add(Cm);
+			}
+		}
+	}
 	SetInputMode(FInputModeGameOnly());
 	bShowMouseCursor = false;
 	if (AIVMechPawn* M = Mech())
@@ -123,6 +139,7 @@ iv::Zone AIVPlayerController::ZoneFromStick(const FVector2D& S)
 
 void AIVPlayerController::OnLook(const FInputActionValue& V)
 {
+	if (!bCombatEnabled) return;
 	const FVector2D L = V.Get<FVector2D>();
 	AIVMechPawn* M = Mech();
 	if (!M) return;
@@ -152,8 +169,37 @@ void AIVPlayerController::OnLook(const FInputActionValue& V)
 	}
 }
 
+void AIVPlayerController::RunScript(float Dt)
+{
+	if (ScriptCmd.Num() == 0) return;
+	ScriptTime += Dt;
+	AIVCombatDirector* Dir = GetDirector();
+	for (FScriptCmd& C : ScriptCmd)
+	{
+		if (C.bDone || ScriptTime < C.T) continue;
+		C.bDone = true;
+		FIVCombatInput* In = Dir ? &Dir->PlayerIn : nullptr;
+		if (C.Name == TEXT("strike")) bScriptStrike = C.Arg == TEXT("1");
+		else if (C.Name == TEXT("guard")) bScriptGuard = C.Arg == TEXT("1");
+		else if (C.Name == TEXT("stick"))
+		{
+			FString A, B;
+			if (C.Arg.Split(TEXT(","), &A, &B)) { ScriptStickVal = FVector2D(FCString::Atof(*A), FCString::Atof(*B)); bScriptStick = true; }
+			else bScriptStick = false;
+		}
+		else if (C.Name == TEXT("weapon")) ScriptWeapon = FCString::Atoi(*C.Arg);
+		else if (C.Name == TEXT("move")) { FString A, B; if (C.Arg.Split(TEXT(","), &A, &B)) MoveValue = FVector2D(FCString::Atof(*A), FCString::Atof(*B)); }
+		else if (In && C.Name == TEXT("dodge")) { In->bDodge = true; In->DodgeDir = FCString::Atoi(*C.Arg) < 0 ? -1 : 1; }
+		else if (In && C.Name == TEXT("scoop")) In->bScoop = true;
+		else if (In && C.Name == TEXT("ult")) In->bUltimate = true;
+		else if (In && C.Name == TEXT("cancel")) In->bCancel = true;
+		else if (C.Name == TEXT("key") && C.Arg == TEXT("enter")) { /* menus are driven by the flow through real keys only */ }
+	}
+}
+
 void AIVPlayerController::UpdateCombatInput(float Dt)
 {
+	RunScript(Dt);
 	AIVCombatDirector* Dir = GetDirector();
 	AIVMechPawn* M = Mech();
 	if (!Dir || !M) return;
@@ -161,8 +207,9 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 
 	const bool bPadStrike = GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.4f;
 	const bool bPadGuard = GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.4f;
-	const bool bStrikeDown = IsInputKeyDown(EKeys::LeftMouseButton) || bPadStrike;
-	const bool bGuardDown = IsInputKeyDown(EKeys::RightMouseButton) || bPadGuard;
+	const bool bStrikeDown = IsInputKeyDown(EKeys::LeftMouseButton) || bPadStrike || bScriptStrike;
+	const bool bGuardDown = IsInputKeyDown(EKeys::RightMouseButton) || bPadGuard || bScriptGuard;
+	if (bScriptStick) Stick = ScriptStickVal;
 
 	// gamepad right stick drives the combat vector while a trigger is down
 	if (bPadStrike || bPadGuard)
@@ -201,35 +248,54 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 	In.Footwork = Fwd > 0.4f ? iv::Footwork::StepIn : (Fwd < -0.4f ? iv::Footwork::StepBack : (FMath::Abs(Str) > 0.4f ? iv::Footwork::Turn : iv::Footwork::Hold));
 	In.Move = Fwd > 0.3f ? 1 : (Fwd < -0.3f ? -1 : 0);
 	if (FMath::Abs(Str) > 0.3f) LastStrafe = Str > 0.f ? 1 : -1;
-	In.DodgeDir = LastStrafe;
 
-	// ---- arm
-	if (WasInputKeyJustPressed(EKeys::Q) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder))
-	{
-		if (In.bStrikeHeld) In.bSwitchArm = true;
-		CurArm = (CurArm == iv::Arm::R) ? iv::Arm::L : iv::Arm::R;
-	}
-	In.Arm = CurArm;
+	// ---- arm: the heavy stroke is the sword hand (right); a tap is a jab with the left fist
+	In.Arm = In.bQuick ? iv::Arm::L : iv::Arm::R;
 
 	// ---- guard (LT / RMB)
 	In.bGuardHeld = bGuardDown;
 	if (bGuardDown && Stick.Size() > 0.4f) CurGuardSide = SideFromStick(Stick);
 	In.GuardSide = CurGuardSide;
-	In.bHardStance = bGuardDown && (IsInputKeyDown(EKeys::E) || IsInputKeyDown(EKeys::Gamepad_FaceButton_Top));
+	In.bHardStance = bGuardDown && (IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::Gamepad_DPad_Down));
 
-	// ---- edges
-	if (WasInputKeyJustPressed(EKeys::SpaceBar) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom)) In.bDodge = true;
+	// ---- sidesteps (beat lateral slashes only) and the other edges
+	if (WasInputKeyJustPressed(EKeys::Q) || WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder)) { In.bDodge = true; In.DodgeDir = -1; }
+	if (WasInputKeyJustPressed(EKeys::E) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) { In.bDodge = true; In.DodgeDir = 1; }
 	if (WasInputKeyJustPressed(EKeys::C) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) In.bCancel = true;
-	if (WasInputKeyJustPressed(EKeys::F) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left)) In.bGrab = true;
-	if (WasInputKeyJustPressed(EKeys::R) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) In.bReverse = true;
-	if (WasInputKeyJustPressed(EKeys::V) || WasInputKeyJustPressed(EKeys::Gamepad_RightThumbstick)) In.bUltimate = true;
-	In.bWeaponHeld = IsInputKeyDown(EKeys::G);
-	if (WasInputKeyJustPressed(EKeys::One))  { In.Priority = iv::EnergyPriority::Arms;   In.bSetPriority = true; }
-	if (WasInputKeyJustPressed(EKeys::Two))  { In.Priority = iv::EnergyPriority::Legs;   In.bSetPriority = true; }
-	if (WasInputKeyJustPressed(EKeys::Three)){ In.Priority = iv::EnergyPriority::Guard;  In.bSetPriority = true; }
-	if (WasInputKeyJustPressed(EKeys::Four)) { In.Priority = iv::EnergyPriority::Weapon; In.bSetPriority = true; }
+	if (WasInputKeyJustPressed(EKeys::G) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left)) In.bGrab = true;
+	if (WasInputKeyJustPressed(EKeys::R) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) In.bReverse = true;
+	if (WasInputKeyJustPressed(EKeys::V) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) In.bUltimate = true;
+	if (WasInputKeyJustPressed(EKeys::F) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom)) In.bScoop = true;
 
-	if (WasInputKeyJustPressed(EKeys::Tab) || WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder)) { bLockOn = !bLockOn; LockOffYaw = LockOffPitch = 0.f; }
+	// ---- long-cooldown abilities: press selects, hold charges, release fires
+	const bool bK1 = IsInputKeyDown(EKeys::One) || IsInputKeyDown(EKeys::Gamepad_DPad_Up);
+	const bool bK2 = IsInputKeyDown(EKeys::Two) || IsInputKeyDown(EKeys::Gamepad_DPad_Left);
+	const bool bK3 = IsInputKeyDown(EKeys::Three) || IsInputKeyDown(EKeys::Gamepad_DPad_Right);
+	if (WasInputKeyJustPressed(EKeys::One) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) In.WeaponSelect = 1;
+	if (WasInputKeyJustPressed(EKeys::Two) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) In.WeaponSelect = 0;
+	if (WasInputKeyJustPressed(EKeys::Three) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) In.WeaponSelect = 2;
+	In.bWeaponHeld = bK1 || bK2 || bK3 || ScriptWeapon >= 0;
+	if (ScriptWeapon >= 0 && In.WeaponSelect < 0) { static const int8 Map[3] = { 1, 0, 2 }; In.WeaponSelect = Map[FMath::Clamp(ScriptWeapon - 1, 0, 2)]; }
+	if (WasInputKeyJustPressed(EKeys::Up))    { In.Priority = iv::EnergyPriority::Arms;   In.bSetPriority = true; }
+	if (WasInputKeyJustPressed(EKeys::Left))  { In.Priority = iv::EnergyPriority::Legs;   In.bSetPriority = true; }
+	if (WasInputKeyJustPressed(EKeys::Down))  { In.Priority = iv::EnergyPriority::Guard;  In.bSetPriority = true; }
+	if (WasInputKeyJustPressed(EKeys::Right)) { In.Priority = iv::EnergyPriority::Weapon; In.bSetPriority = true; }
+
+	// ---- the drawn vector, kept for the HUD
+	if (bStrikeDown || bGuardDown)
+	{
+		if (!bStrikeWasDown && !bGuardWasDown) Trail.Reset();
+		if (Trail.Num() == 0 || FVector2D::Distance(Trail.Last(), Stick) > 0.015f) Trail.Add(Stick);
+		TrailAge = 0.f;
+	}
+	else
+	{
+		TrailAge += Dt;
+		if (TrailAge > 0.6f) Trail.Reset();
+	}
+	bGuardWasDown = bGuardDown;
+
+	if (WasInputKeyJustPressed(EKeys::Tab) || WasInputKeyJustPressed(EKeys::Gamepad_RightThumbstick)) { bLockOn = !bLockOn; LockOffYaw = LockOffPitch = 0.f; }
 	if (WasInputKeyJustPressed(EKeys::Enter) && Dir->IsMatchOver()) Dir->Restart();
 }
 
@@ -239,7 +305,7 @@ void AIVPlayerController::PlayerTick(float Dt)
 	AIVMechPawn* M = Mech();
 	if (!M) return;
 
-	FVector2D Move = MoveValue;
+	FVector2D Move = bCombatEnabled ? MoveValue : FVector2D::ZeroVector;
 	bool bSpr = bSprint;
 	if (bAuto)
 	{
@@ -253,7 +319,7 @@ void AIVPlayerController::PlayerTick(float Dt)
 	M->SetSprint(bSpr);
 
 	AIVCombatDirector* Dir = GetDirector();
-	if (Dir && !bAuto)
+	if (Dir && !bAuto && bCombatEnabled)
 	{
 		UpdateCombatInput(Dt);
 		if (bLockOn && Dir->GetDuel() && !Dir->IsMatchOver())
