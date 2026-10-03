@@ -69,14 +69,45 @@ AIVBuilding::AIVBuilding()
 	ISM->SetCollisionProfileName(TEXT("BlockAll"));
 }
 
-void AIVBuilding::Init(const FVector& Center, const FVector& InSize, UMaterialInterface* Mat, float CellSize)
+static bool PointInPoly(const FVector2D& P, const TArray<FVector2D>& Poly)
 {
+	bool In = false;
+	for (int32 i = 0, j = Poly.Num() - 1; i < Poly.Num(); j = i++)
+	{
+		if (((Poly[i].Y > P.Y) != (Poly[j].Y > P.Y)) && (P.X < (Poly[j].X - Poly[i].X) * (P.Y - Poly[i].Y) / (Poly[j].Y - Poly[i].Y) + Poly[i].X))
+			In = !In;
+	}
+	return In;
+}
+
+void AIVBuilding::Init(const FVector& Center, float YawDeg, const FVector& InSize, UMaterialInterface* Mat, float CellSize,
+	const TArray<FVector2D>& FootprintLocal, float HollowScale)
+{
+	SetActorLocationAndRotation(Center, FRotator(0.f, YawDeg, 0.f));
 	Size = InSize;
-	Origin = Center - InSize * 0.5f;
+	Origin = -InSize * 0.5f;
 	Dim = FIntVector(FMath::Max(1, FMath::RoundToInt(InSize.X / CellSize)), FMath::Max(1, FMath::RoundToInt(InSize.Y / CellSize)), FMath::Max(1, FMath::RoundToInt(InSize.Z / CellSize)));
 	CellSz = FVector(InSize.X / Dim.X, InSize.Y / Dim.Y, InSize.Z / Dim.Z);
 	Cells.Init(1, Dim.X * Dim.Y * Dim.Z);
-	Alive = Cells.Num();
+
+	if (FootprintLocal.Num() >= 3)
+	{
+		TArray<FVector2D> Inner;
+		if (HollowScale > 0.f) for (const FVector2D& P : FootprintLocal) Inner.Add(P * HollowScale);
+		for (int32 z = 0; z < Dim.Z; ++z)
+			for (int32 y = 0; y < Dim.Y; ++y)
+				for (int32 x = 0; x < Dim.X; ++x)
+				{
+					const FVector L = CellCenterLocal(x, y, z);
+					const FVector2D P(L.X, L.Y);
+					bool In = PointInPoly(P, FootprintLocal);
+					if (In && Inner.Num() >= 3 && PointInPoly(P, Inner)) In = false;
+					// ground floor must stay connected: keep the ring continuous even when hollow
+					if (!In) Cells[Idx(x, y, z)] = 0;
+				}
+	}
+	Alive = 0;
+	for (uint8 C : Cells) Alive += C;
 	Material = Mat;
 	if (Mat) ISM->SetMaterial(0, Mat);
 	RebuildInstances();
@@ -91,8 +122,8 @@ void AIVBuilding::RebuildInstances()
 	for (int32 z = 0; z < Dim.Z; ++z)
 		for (int32 y = 0; y < Dim.Y; ++y)
 			for (int32 x = 0; x < Dim.X; ++x)
-				if (Cells[Idx(x, y, z)]) T.Add(FTransform(FRotator::ZeroRotator, CellCenter(x, y, z), Scale));
-	ISM->AddInstances(T, false, true);
+				if (Cells[Idx(x, y, z)]) T.Add(FTransform(FRotator::ZeroRotator, CellCenterLocal(x, y, z), Scale));
+	ISM->AddInstances(T, false, false);
 }
 
 int32 AIVBuilding::ApplyBlast(const FVector& C, float Radius, float Impulse)
@@ -104,7 +135,7 @@ int32 AIVBuilding::ApplyBlast(const FVector& C, float Radius, float Impulse)
 			for (int32 x = 0; x < Dim.X; ++x)
 			{
 				if (!Cells[Idx(x, y, z)]) continue;
-				const FVector P = CellCenter(x, y, z);
+				const FVector P = CellCenterWorld(x, y, z);
 				// ragged crater edge
 				const float Jit = 0.82f + 0.18f * FMath::Frac(FMath::Sin(x * 12.9898f + y * 78.233f + z * 37.719f) * 43758.5453f);
 				if (FVector::Dist(P, C) <= Radius * Jit)
@@ -172,7 +203,7 @@ int32 AIVBuilding::ResolveSupport(const FVector& BlastCenter, float Impulse)
 		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
 		{
 			FVector Mean = FVector::ZeroVector;
-			for (const FIntVector& F : Falling) Mean += CellCenter(F.X, F.Y, F.Z);
+			for (const FIntVector& F : Falling) Mean += CellCenterWorld(F.X, F.Y, F.Z);
 			Mean /= Falling.Num();
 			FX->SpawnDust(Mean, FMath::Min(Size.X, Size.Y) * 0.6f, FMath::Clamp(Falling.Num() / 4, 8, 60), 1.4f);
 		}
@@ -191,21 +222,23 @@ void AIVBuilding::SpawnDebrisForCells(const TArray<FIntVector>& Cs, const FVecto
 	}
 	UWorld* W = GetWorld();
 	FRandomStream R(Cs.Num() * 7 + 13);
+	const FTransform Xf = GetActorTransform();
 	for (auto& KV : Groups)
 	{
 		if (AIVDebris::LiveCount >= GMaxDebris) break;
 		FBox B(ForceInit);
 		for (const FIntVector& C : KV.Value)
 		{
-			const FVector P = CellCenter(C.X, C.Y, C.Z);
+			const FVector P = CellCenterLocal(C.X, C.Y, C.Z);
 			B += P - CellSz * 0.5f;
 			B += P + CellSz * 0.5f;
 		}
 		FActorSpawnParameters Sp;
 		Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		AIVDebris* D = W->SpawnActor<AIVDebris>(B.GetCenter(), FRotator::ZeroRotator, Sp);
+		const FVector WorldCenter = Xf.TransformPosition(B.GetCenter());
+		AIVDebris* D = W->SpawnActor<AIVDebris>(WorldCenter, GetActorRotation(), Sp);
 		if (!D) continue;
-		const FVector Out = (B.GetCenter() - BlastCenter).GetSafeNormal();
+		const FVector Out = (WorldCenter - BlastCenter).GetSafeNormal();
 		D->Init(CubeMesh, Material, B.GetSize() * 0.97f, Out * Impulse * R.FRandRange(0.4f, 1.1f) + FVector(0, 0, Impulse * 0.25f), R.VRand() * R.FRandRange(10.f, 60.f));
 	}
 }

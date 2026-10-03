@@ -1,5 +1,6 @@
 // Destructible building: a voxel grid of cells with a simple structural-support solver.
 // Cells that lose support fall as physics debris (macro blocks of up to 2x2x2 cells).
+// Supports a yaw rotation and an arbitrary polygonal footprint (mask) so worldgen buildings map directly.
 // For hero buildings, TASK-009 supplies authored pre-fractured chunks that replace the cube cells.
 #pragma once
 
@@ -38,18 +39,20 @@ class IMPACTVECTOR_API AIVBuilding : public AActor
 public:
 	AIVBuilding();
 
-	/** Size is the full footprint+height in cm, Center is the building centre. CellSize is the nominal voxel edge. */
-	void Init(const FVector& Center, const FVector& Size, UMaterialInterface* Mat, float CellSize);
+	/** Center/YawDeg are world values; Size is the local bounding box (X along yaw, Y across, Z height) in cm.
+	 *  FootprintLocal (optional) is a polygon in local XY (cm, relative to Center); cells outside it are empty.
+	 *  HollowScale in (0,1) removes the inner part of the polygon (rings such as a stadium). */
+	void Init(const FVector& Center, float YawDeg, const FVector& Size, UMaterialInterface* Mat, float CellSize,
+		const TArray<FVector2D>& FootprintLocal = TArray<FVector2D>(), float HollowScale = 0.f);
 
 	/** Destroy cells inside the sphere, then resolve structural support. Returns number of cells destroyed in total. */
 	int32 ApplyBlast(const FVector& WorldCenter, float Radius, float Impulse);
 
 	int32 AliveCount() const { return Alive; }
-	FBox GetBounds() const { return FBox(Origin, Origin + Size); }
 
 private:
 	FIntVector Dim = FIntVector(1, 1, 1);
-	FVector Origin = FVector::ZeroVector;     // min corner
+	FVector Origin = FVector::ZeroVector;     // local min corner
 	FVector Size = FVector::OneVector;
 	FVector CellSz = FVector::OneVector;
 	TArray<uint8> Cells;                      // 1 = alive
@@ -60,8 +63,9 @@ private:
 	UPROPERTY() TObjectPtr<UStaticMesh> CubeMesh;
 
 	int32 Idx(int32 X, int32 Y, int32 Z) const { return (Z * Dim.Y + Y) * Dim.X + X; }
-	FVector CellCenter(int32 X, int32 Y, int32 Z) const { return Origin + FVector((X + 0.5f) * CellSz.X, (Y + 0.5f) * CellSz.Y, (Z + 0.5f) * CellSz.Z); }
+	FVector CellCenterLocal(int32 X, int32 Y, int32 Z) const { return Origin + FVector((X + 0.5f) * CellSz.X, (Y + 0.5f) * CellSz.Y, (Z + 0.5f) * CellSz.Z); }
+	FVector CellCenterWorld(int32 X, int32 Y, int32 Z) const { return GetActorTransform().TransformPosition(CellCenterLocal(X, Y, Z)); }
 	void RebuildInstances();
-	int32 ResolveSupport(const FVector& BlastCenter, float Impulse);
-	void SpawnDebrisForCells(const TArray<FIntVector>& Falling, const FVector& BlastCenter, float Impulse);
+	int32 ResolveSupport(const FVector& BlastCenterWorld, float Impulse);
+	void SpawnDebrisForCells(const TArray<FIntVector>& Falling, const FVector& BlastCenterWorld, float Impulse);
 };

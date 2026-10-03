@@ -13,6 +13,7 @@ class UPostProcessComponent;
 class UInstancedStaticMeshComponent;
 class UStaticMeshComponent;
 class AIVBuilding;
+class AIVDistrict;
 
 struct FIVBuildingDef
 {
@@ -42,6 +43,10 @@ public:
 	/** Test helper: cut the base of the nearest building ahead of From along Dir. */
 	int32 CollapseNearestAhead(const FVector& From, const FVector& Dir);
 
+private:
+	UPROPERTY() TObjectPtr<AIVDistrict> District;
+public:
+	AIVDistrict* GetDistrict() const { return District; }
 private:
 	TArray<FIVBuildingDef> Defs;
 	TArray<FTransform> PodiumTransforms;

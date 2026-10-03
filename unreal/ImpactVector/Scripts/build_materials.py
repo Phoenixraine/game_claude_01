@@ -118,6 +118,8 @@ def build_ground():
     base_col = vector(m, "BaseTint", (0.045, 0.047, 0.052, 1), -1200, 200)
     wet = scalar(m, "Wetness", 0.75, -1200, 350)
     scale = scalar(m, "NoiseScale", 900.0, -1200, 450)
+    vc = expr(m, unreal.MaterialExpressionVertexColor, -1200, 600)
+    use_vc = scalar(m, "UseVertexColor", 0.0, -1200, 750)
 
     common = """
 float2 p = WP.xy / Sc;
@@ -142,17 +144,21 @@ float puddle = smoothstep(0.52 - 0.25 * Wet, 0.62 - 0.2 * Wet, field);
     col = custom(m, common + """
 float3 dry = Base * (0.8 + 0.5 * n2);
 float3 wetc = Base * 0.45;
-return lerp(dry, wetc, puddle);
-""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["WP", "Base", "Wet", "Sc"], -700, 0, "ground_base")
-    wire_custom(col, [(wp, ""), (base_col, ""), (wet, ""), (scale, "")])
+float3 c = lerp(dry, wetc, puddle);
+float sand = VCa * UseVC;
+float3 sandc = VC * (0.75 + 0.5 * n2);
+return lerp(c, sandc, sand);
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["WP", "Base", "Wet", "Sc", "VC", "VCa", "UseVC"], -700, 0, "ground_base")
+    wire_custom(col, [(wp, ""), (base_col, ""), (wet, ""), (scale, ""), (vc, ""), (vc, "A"), (use_vc, "")])
     MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_BASE_COLOR)
 
     rough = custom(m, common + """
 float dryR = 0.65 + 0.25 * n2;
 float wetR = 0.04 + 0.1 * n2;
-return lerp(dryR, wetR, puddle);
-""", unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["WP", "Wet", "Sc"], -700, 300, "ground_rough")
-    wire_custom(rough, [(wp, ""), (wet, ""), (scale, "")])
+float r0 = lerp(dryR, wetR, puddle);
+return lerp(r0, 0.85, VCa * UseVC);
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["WP", "Wet", "Sc", "VCa", "UseVC"], -700, 300, "ground_rough")
+    wire_custom(rough, [(wp, ""), (wet, ""), (scale, ""), (vc, "A"), (use_vc, "")])
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
 
     spec = scalar(m, "Specular", 0.5, -700, 600)
@@ -294,6 +300,28 @@ float alpha = saturate(shape * (0.35 + 1.1 * n) - 0.12) * fadeIn * fadeOut;
     return m
 
 
+def build_propcolor():
+    """Generic instanced prop paint: colour comes from per-instance custom data (r, g, b)."""
+    m = make_material("M_PropColor")
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    r = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 0)
+    r.set_editor_property("data_index", 0)
+    g = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 120)
+    g.set_editor_property("data_index", 1)
+    b = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 240)
+    b.set_editor_property("data_index", 2)
+    c = custom(m, "return float3(R, G, B);", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["R", "G", "B"], -500, 100, "prop_color")
+    wire_custom(c, [(r, ""), (g, ""), (b, "")])
+    MEL.connect_material_property(c, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = scalar(m, "Roughness", 0.45, -500, 300)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    metal = scalar(m, "Metallic", 0.3, -500, 400)
+    MEL.connect_material_property(metal, "", unreal.MaterialProperty.MP_METALLIC)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 def build_spark():
     m = make_material("M_Spark")
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
@@ -305,7 +333,7 @@ def build_spark():
     return m
 
 
-for fn in (build_facade, build_ground, build_water, build_armor, build_puff, build_spark):
+for fn in (build_facade, build_ground, build_water, build_armor, build_puff, build_spark, build_propcolor):
     try:
         fn()
         unreal.log("IV material OK: %s" % fn.__name__)

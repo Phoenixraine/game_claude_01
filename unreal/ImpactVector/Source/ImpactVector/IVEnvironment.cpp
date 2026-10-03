@@ -12,6 +12,9 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Math/RandomStream.h"
 #include "IVBuilding.h"
+#include "IVDistrict.h"
+#include "Misc/Paths.h"
+#include "Misc/FileHelper.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
 
@@ -138,6 +141,19 @@ void AIVEnvironment::BeginPlay()
 		M->SetScalarParameterValue(TEXT("Glassiness"), 0.9f);
 		M->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.04f, 0.07f, 0.1f));
 	});
+	const FString JsonPath = FPaths::ProjectContentDir() / TEXT("Data/district.json");
+	const FString HeightPath = FPaths::ProjectContentDir() / TEXT("Data/heightmap.r16");
+	if (FPaths::FileExists(JsonPath) && FPaths::FileExists(HeightPath))
+	{
+		District = GetWorld()->SpawnActor<AIVDistrict>(FVector::ZeroVector, FRotator::ZeroRotator);
+		if (District && District->Load(JsonPath, HeightPath))
+		{
+			Ground->SetVisibility(false); Ground->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Sea->SetVisibility(false); Sea->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			return;
+		}
+		if (District) { District->Destroy(); District = nullptr; }
+	}
 	BuildCityBlockout();
 	RebuildStaticInstances();
 }
@@ -198,6 +214,7 @@ AIVEnvironment* AIVEnvironment::Get(UWorld* World)
 
 int32 AIVEnvironment::BlastAt(const FVector& Center, float Radius, float Impulse)
 {
+	if (District) return District->BlastAt(Center, Radius, Impulse);
 	int32 Total = 0;
 	bool bChanged = false;
 	for (FIVBuildingDef& D : Defs)
@@ -209,7 +226,7 @@ int32 AIVEnvironment::BlastAt(const FVector& Center, float Radius, float Impulse
 			AIVBuilding* Bld = GetWorld()->SpawnActor<AIVBuilding>(FVector::ZeroVector, FRotator::ZeroRotator);
 			if (!Bld) continue;
 			UMaterialInterface* M = (D.bGlass ? Glass : Concrete)->GetMaterial(0);
-			Bld->Init(D.Center, D.Size, M, 1100.f);
+			Bld->Init(D.Center, 0.f, D.Size, M, 1100.f);
 			D.Actor = Bld;
 			D.bActive = true;
 			bChanged = true;
@@ -222,6 +239,7 @@ int32 AIVEnvironment::BlastAt(const FVector& Center, float Radius, float Impulse
 
 int32 AIVEnvironment::CollapseNearestAhead(const FVector& From, const FVector& Dir)
 {
+	if (District) return District->BlastAt(From + Dir.GetSafeNormal2D() * 9000.f + FVector(0, 0, 1000.f), 2600.f, 1500.f);
 	int32 Best = INDEX_NONE;
 	float BestD = 1e9f;
 	const FVector D2 = Dir.GetSafeNormal2D();

@@ -3,6 +3,7 @@
 #include "IVPlayerController.h"
 #include "IVHUD.h"
 #include "IVEnvironment.h"
+#include "IVDistrict.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "Misc/CommandLine.h"
@@ -29,7 +30,22 @@ void AIVGameMode::StartPlay()
 
 	FActorSpawnParameters P;
 	P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	EnemyMech = W->SpawnActor<AIVMechPawn>(FVector(6000.f, 0.f, 4100.f), FRotator(0.f, 180.f, 0.f), P);
+	FVector EnemyLoc(6000.f, 0.f, 4100.f);
+	float EnemyYaw = 180.f;
+	FVector PlayerLoc(-24000.f, 0.f, 4100.f);
+	float PlayerYaw = 0.f;
+	bool bDistrict = false;
+	if (AIVEnvironment* Env = AIVEnvironment::Get(W))
+	{
+		if (AIVDistrict* Dist = Env->GetDistrict())
+		{
+			bDistrict = true;
+			FVector L; float Y;
+			if (Dist->GetPoi(TEXT("spawn_enemy"), L, Y)) { EnemyLoc = FVector(L.X, L.Y, Dist->SampleHeightCm(L.X, L.Y) + 4100.f); EnemyYaw = Y + 180.f; }
+			if (Dist->GetPoi(TEXT("spawn_player"), L, Y)) { PlayerLoc = FVector(L.X, L.Y, Dist->SampleHeightCm(L.X, L.Y) + 4100.f); PlayerYaw = Y; }
+		}
+	}
+	EnemyMech = W->SpawnActor<AIVMechPawn>(EnemyLoc, FRotator(0.f, EnemyYaw, 0.f), P);
 	if (EnemyMech)
 	{
 		EnemyMech->bAIControlled = true;
@@ -37,7 +53,7 @@ void AIVGameMode::StartPlay()
 	}
 
 	{
-		float StartX = -24000.f, StartY = 0.f, StartYaw = 0.f;
+		float StartX = PlayerLoc.X, StartY = PlayerLoc.Y, StartYaw = PlayerYaw;
 		FParse::Value(FCommandLine::Get(), TEXT("-IVX="), StartX);
 		FParse::Value(FCommandLine::Get(), TEXT("-IVY="), StartY);
 		FParse::Value(FCommandLine::Get(), TEXT("-IVYaw="), StartYaw);
@@ -45,7 +61,7 @@ void AIVGameMode::StartPlay()
 		{
 			if (APawn* Pawn = PC->GetPawn())
 			{
-				Pawn->SetActorLocationAndRotation(FVector(StartX, StartY, 4100.f), FRotator(0.f, StartYaw, 0.f), false, nullptr, ETeleportType::TeleportPhysics);
+				Pawn->SetActorLocationAndRotation(FVector(StartX, StartY, PlayerLoc.Z), FRotator(0.f, StartYaw, 0.f), false, nullptr, ETeleportType::TeleportPhysics);
 				float StartPitch = 0.f; FParse::Value(FCommandLine::Get(), TEXT("-IVPitch="), StartPitch);
 				if (AIVMechPawn* M = Cast<AIVMechPawn>(Pawn)) M->SetAim(StartYaw, StartPitch);
 			}
