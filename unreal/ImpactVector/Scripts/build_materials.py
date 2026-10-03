@@ -99,7 +99,14 @@ return lerp(0.82, 0.08 + 0.2 * hash, win * Gls);
     emis = custom(m, common + """
 float on = step(0.6, hash) * win * Lit;
 float3 warm = lerp(float3(1.0, 0.82, 0.55), float3(0.7, 0.85, 1.0), frac(hash * 13.0));
-return warm * on * 3.2;
+// neon signs: whole bands of a facade glow in saturated colours (Tokyo at night)
+float2 bid = floor(float2(h / 5.0, v / 7.0));
+float bh = frac(sin(dot(bid + Rnd * 11.0, float2(41.3, 97.1))) * 43758.5453);
+float band = step(0.93, bh) * win * (1.0 - roof);
+float cr = frac(bh * 37.0);
+float3 neon = cr < 0.25 ? float3(1.0, 0.1, 0.55) : (cr < 0.5 ? float3(0.1, 0.9, 1.0) : (cr < 0.75 ? float3(1.0, 0.45, 0.05) : float3(0.4, 1.0, 0.3)));
+float flick = 0.85 + 0.15 * sin(frac(bh * 91.0) * 40.0);
+return warm * on * 3.2 + neon * band * 9.0 * flick;
 """, unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["WP", "Nrm", "Rnd", "Spacing", "Lit"], -700, 650, "facade_emissive")
     wire_custom(emis, [(wp, ""), (nrm, ""), (rnd, ""), (spacing, ""), (lit, "")])
     MEL.connect_material_property(emis, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)

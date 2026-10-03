@@ -96,6 +96,7 @@ private:
 	float AiScoopTimer = 14.f;
 	float HitStop = 0.f;
 	void ApplyHitStop(float Seconds, float Dilation);
+	void BladeImpact(AIVMechPawn* A, AIVMechPawn* B, float Scale, bool bStop);
 
 	void StepOnce(bool bFirstOfFrame);
 	float ProximityBehind(AIVMechPawn* Pawn, AIVMechPawn* Other) const;

@@ -259,7 +259,7 @@ void AIVMechPawn::BeginPlay()
 		}
 	}
 
-	for (int32 i = 0; i < 2; ++i) if (HeadLamp[i]) { HeadLamp[i]->SetLightColor(LampColor); HeadLamp[i]->SetIntensity(bAIControlled ? 38000.f : 70000.f); HeadLamp[i]->SetVolumetricScatteringIntensity(bAIControlled ? 0.7f : 1.6f); if (bAIControlled) HeadLamp[i]->SetRelativeRotation(FRotator(-22.f, (i == 0 ? 14.f : -14.f), 0.f)); }
+	for (int32 i = 0; i < 2; ++i) if (HeadLamp[i]) { HeadLamp[i]->SetLightColor(LampColor); HeadLamp[i]->SetIntensity(70000.f * LampPower); HeadLamp[i]->SetVolumetricScatteringIntensity(1.6f * FMath::Sqrt(LampPower)); if (bLampsDown) HeadLamp[i]->SetRelativeRotation(FRotator(-30.f, (i == 0 ? 16.f : -16.f), 0.f)); }
 	SetupRig();
 	OnFootfall.AddLambda([this](int32 Side, float Strength)
 	{
@@ -1105,7 +1105,7 @@ void AIVMechPawn::OnLimbSevered(iv::Zone Z)
 		const FName Bone(*FString::Printf(TEXT("%s_%s"), bArm ? TEXT("forearm") : TEXT("shin"), Side < 0.f ? TEXT("l") : TEXT("r")));
 		RigMesh->HideBoneByName(Bone, PBO_None);
 	}
-	static UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static UStaticMesh* Cube = []{ UStaticMesh* M = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube")); if (M) M->AddToRoot(); return M; }();
 	FActorSpawnParameters Sp;
 	Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (AIVDebris* D = GetWorld()->SpawnActor<AIVDebris>(Loc, GetActorRotation(), Sp))
@@ -1123,7 +1123,7 @@ void AIVMechPawn::OnLimbSevered(iv::Zone Z)
 void AIVMechPawn::OnArmorPlateLost(iv::Zone Z, int32 Index, int32 Count)
 {
 	const FVector Loc = GetZoneWorldLocation(Z);
-	static UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static UStaticMesh* Cube = []{ UStaticMesh* M = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube")); if (M) M->AddToRoot(); return M; }();
 	FActorSpawnParameters Sp;
 	Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	FRandomStream R(Index * 131 + int32(Z) * 17 + 5);

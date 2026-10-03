@@ -30,3 +30,33 @@ private:
 	float DustAcc = 0.f;
 	TFunction<void(const FVector&)> OnImpact;
 };
+
+class UProceduralMeshComponent;
+class UMaterialInstanceDynamic;
+
+/** Visuals of the three long-cooldown weapons: a rail beam, a volley of six rockets, a plasma orb. Purely cosmetic: the core already decided the hits. */
+UCLASS()
+class IMPACTVECTOR_API AIVProjectile : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	AIVProjectile();
+	virtual void Tick(float Dt) override;
+
+	/** Kind: 0 rail beam, 1 rockets, 2 plasma. Target is re-read each tick while it moves; bHit false = the shot flies past. */
+	void Launch(int32 InKind, const FVector& InFrom, TWeakObjectPtr<AActor> InTarget, bool bInHit, float InDuration);
+
+private:
+	UPROPERTY() TObjectPtr<UProceduralMeshComponent> Beam;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> BeamMID;
+	int32 Kind = 0;
+	bool bHit = true;
+	FVector From = FVector::ZeroVector, To = FVector::ZeroVector;
+	TWeakObjectPtr<AActor> Target;
+	float T = 0.f, Duration = 1.f;
+	bool bDone = false;
+	struct FRocket { FVector Side; float Delay; float Wob; };
+	TArray<FRocket> Rockets;
+	void UpdateTarget();
+};

@@ -31,4 +31,5 @@ private:
 	float ActionAt = -1.f;
 	FName ActionName;
 	float Elapsed = 0.f;
+	float PerfAcc = 0.f, PerfMin = 1e9f; int32 PerfFrames = 0;
 };

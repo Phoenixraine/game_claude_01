@@ -314,6 +314,26 @@ void AIVCombatDirector::HitCity(const iv::Event& Ev)
 	}
 }
 
+void AIVCombatDirector::BladeImpact(AIVMechPawn* A, AIVMechPawn* B, float Scale, bool bStop)
+{
+	if (!A || !B) return;
+	FVector A0, A1, B0, B1;
+	A->GetBladeSegment(A0, A1);
+	B->GetBladeSegment(B0, B1);
+	FVector PA, PB;
+	FMath::SegmentDistToSegment(A0, A1, B0, B1, PA, PB);
+	const FVector At = (PA + PB) * 0.5f;
+	if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
+	{
+		FX->SpawnSparks(At, (A->GetActorForwardVector() - B->GetActorForwardVector()).GetSafeNormal() + FVector(0, 0, 0.6f), int32(260 * Scale), 9000.f);
+		FX->SpawnDust(At, 2000.f * Scale, int32(14 * Scale), 0.8f);
+		FX->SpawnFlash(At, FLinearColor(0.85f, 0.95f, 1.f), 2.0e5f * Scale, 0.22f, 12000.f);
+	}
+	A->SetSwordHeat(1.f);
+	B->SetSwordHeat(1.f);
+	if (bStop) ApplyHitStop(0.14f, 0.12f);
+}
+
 void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 {
 	using iv::EventType;
@@ -335,6 +355,8 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 	case EventType::ParrySuccess:
 	case EventType::InterceptSuccess:
 		if (Actor) Actor->OnDefenceEffect(Ev.type == EventType::ParrySuccess, Ev.type == EventType::InterceptSuccess);
+		// the swords really meet: sparks and a flash where the two blades are closest
+		BladeImpact(Actor, Other, Ev.type == EventType::Blocked ? 0.7f : 1.15f, Ev.type != EventType::Blocked);
 		break;
 	case EventType::ZoneState:
 		if (Actor) Actor->OnZoneState(Ev.zone, static_cast<iv::ZoneState>(Ev.a), static_cast<iv::ZoneState>(Ev.b));
@@ -376,12 +398,12 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 	case EventType::WeaponFired:
 		if (Actor && Other)
 		{
-			if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
+			FActorSpawnParameters Sp;
+			Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			if (AIVProjectile* Pj = GetWorld()->SpawnActor<AIVProjectile>(Actor->GetZoneWorldLocation(iv::Zone::ShoulderR), FRotator::ZeroRotator, Sp))
 			{
-				const FVector A = Actor->GetZoneWorldLocation(iv::Zone::ShoulderR);
-				const FVector T = Other->GetZoneWorldLocation(iv::Zone::Torso);
-				for (int32 i = 0; i < 24; ++i) FX->SpawnSparks(FMath::Lerp(A, T, i / 23.f), (T - A).GetSafeNormal(), 3, 2500.f);
-				if (Ev.a > 0) FX->SpawnDust(T, 3500.f, 20, 1.2f);
+				const int32 K = FMath::Clamp(Ev.b, 0, 2);   // WeaponKind: 0 rail, 1 rockets, 2 plasma
+				Pj->Launch(K == 0 ? 0 : (K == 1 ? 1 : 2), Actor->GetZoneWorldLocation(iv::Zone::ShoulderR), Other, Ev.a > 0, K == 0 ? 0.55f : (K == 1 ? 1.1f : 0.8f));
 			}
 		}
 		break;

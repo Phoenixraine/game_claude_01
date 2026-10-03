@@ -56,12 +56,14 @@ void AIVGameMode::StartPlay()
 		{
 			EnemyMech->RigAssetPath = TEXT("/Game/Mechs/Enemy/ENEMY_01.ENEMY_01");
 			EnemyMech->bUseHullMaterial = true;
-			EnemyMech->HullTint = FLinearColor(0.035f, 0.037f, 0.042f);
+			EnemyMech->HullTint = FLinearColor(0.075f, 0.078f, 0.088f);
 			EnemyMech->HullAccent = FLinearColor(0.55f, 0.02f, 0.015f);
 			EnemyMech->HullGlow = FLinearColor(4.5f, 0.2f, 0.05f);
 			EnemyMech->HullAccentAmount = 1.f;
 			EnemyMech->SwordEdge = FLinearColor(3.2f, 0.12f, 0.05f);
 			EnemyMech->LampColor = FLinearColor(1.f, 0.28f, 0.12f);
+			EnemyMech->LampPower = 0.12f;
+			EnemyMech->bLampsDown = true;
 		}
 		EnemyMech->FinishSpawning(FTransform(FRotator(0.f, EnemyYaw, 0.f), EnemyLoc));
 		EnemyMech->bAIControlled = true;
@@ -181,6 +183,14 @@ void AIVGameMode::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	Elapsed += Dt;
+	{	// frame-rate log every 10 s (find it with "IV perf" in the log)
+		PerfAcc += Dt; ++PerfFrames; PerfMin = FMath::Min(PerfMin, 1.f / FMath::Max(Dt, 1e-4f));
+		if (PerfAcc >= 10.f)
+		{
+			UE_LOG(LogTemp, Display, TEXT("IV perf: avg %.1f fps, worst frame %.1f fps"), PerfFrames / PerfAcc, PerfMin);
+			PerfAcc = 0.f; PerfFrames = 0; PerfMin = 1e9f;
+		}
+	}
 	if (PendingShots.IsValidIndex(ShotIndex) && Elapsed >= PendingShots[ShotIndex])
 	{
 		if (FScreenshotRequest::IsScreenshotRequested())

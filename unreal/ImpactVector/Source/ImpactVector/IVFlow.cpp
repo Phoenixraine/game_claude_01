@@ -197,7 +197,7 @@ void AIVGameFlow::EnterMenu()
 		Dir->Restart();
 		Dir->SetDummy(iv::DummyMode::Off);
 	}
-	PlaceMechs(0.f);
+	PlaceMechs(60.f);
 	SetBanner(TEXT(""), TEXT(""), 0.f);
 	EndDelay = -1.f;
 	StopBattleMusic();
@@ -235,7 +235,7 @@ void AIVGameFlow::EnterDuel()
 		Dir->Restart();
 		Dir->SetDummy(iv::DummyMode::Off);
 	}
-	PlaceMechs(0.f);
+	PlaceMechs(60.f);
 	const TCHAR* StyleNames[6] = { TEXT("Контрбойцовщик"), TEXT("Громила"), TEXT("Охотник на конечности"), TEXT("Обманщик"), TEXT("Стрелок"), TEXT("Борец") };
 	SetBanner(TEXT("ДУЭЛЬ"), FString::Printf(TEXT("Противник: %s  ·  %s"), StyleNames[NextStyle % 6], kDifficulty[FMath::Clamp(Difficulty, 0, 2)]), 3.2f);
 	++NextStyle;
@@ -393,7 +393,7 @@ void AIVGameFlow::Tick(float Dt)
 		if (Dir->IsMatchOver() && Dir->GetSecondsSinceEnd() > 6.f)
 		{
 			Dir->Restart();
-			PlaceMechs(0.f);
+			PlaceMechs(60.f);
 		}
 		break;
 	case EIVFlowState::Tutorial:

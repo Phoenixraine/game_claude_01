@@ -297,7 +297,7 @@ void AIVFXManager::SpawnFlash(const FVector& Center, const FLinearColor& Color, 
 		if (Flashes[i].Age > Oldest) { Oldest = Flashes[i].Age; Slot = i; }
 	}
 	FIVFlash& F = Flashes[Slot];
-	F.Pos = Center; F.Color = Color; F.Intensity = Candela; F.Life = Seconds; F.Age = 0.f; F.Radius = Radius;
+	F.Pos = Center; F.Color = Color; F.Intensity = Candela * 0.28f; F.Life = Seconds; F.Age = 0.f; F.Radius = Radius;
 }
 
 void AIVFXManager::SpawnExplosion(const FVector& Center, float Scale)

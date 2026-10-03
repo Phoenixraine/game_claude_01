@@ -72,6 +72,8 @@ public:
 	/** Blade edge colour (cyan for the player, red for the enemy). */
 	FLinearColor SwordEdge = FLinearColor(0.35f, 1.4f, 3.0f);
 	FLinearColor LampColor = FLinearColor(0.75f, 0.88f, 1.f);
+	float LampPower = 1.f;       // 1 = the player's key light, small values for the opponent's rim lamps
+	bool bLampsDown = false;     // aim the lamps at the ground instead of at the opponent
 	/** World-space ends of the blade (grip and tip) for trails, clashes and hit tests. */
 	void GetBladeSegment(FVector& OutBase, FVector& OutTip) const;
 	void SetSwordHeat(float Heat);

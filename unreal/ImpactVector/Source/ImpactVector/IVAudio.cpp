@@ -35,6 +35,7 @@ namespace IVAudio
 	{
 		if (TObjectPtr<USoundBase>* F = GCache.Find(Id)) return *F;
 		USoundBase* S = LoadObject<USoundBase>(nullptr, *FString::Printf(TEXT("/Game/Audio/%s.%s"), *Id, *Id));
+		if (S) S->AddToRoot();   // the cache is a plain global: without this the garbage collector frees the waves after a minute
 		GCache.Add(Id, S);
 		return S;
 	}
