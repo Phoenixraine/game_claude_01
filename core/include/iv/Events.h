@@ -16,6 +16,7 @@ enum class EventType : uint8_t {
   CancelCheap,       // B before the commit point
   EmergencyBrake,    // B after the commit point
   Feint,             // a: feint count so far
+  Interrupted,       // a windup/strike was broken by a hit (pitch §5.3)
   StrikeContact,     // a: StrikeKind, b: Outcome
   Hit,               // zone: zone hit, value: damage dealt
   Blocked,           // value: damage after block

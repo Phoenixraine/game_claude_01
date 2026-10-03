@@ -50,6 +50,7 @@ constexpr float kRearAngleDeg = 100.f;
 constexpr float kStabilityMax = 100.f;                 // pitch §10 Стабильность
 constexpr float kStabilityRegenPerTick = 0.12f;        // pitch §10, scaled by leg condition
 constexpr int kStaggerTicks = MsToTicks(700);          // pitch §10 "сильный stagger"
+constexpr float kStaggerHoldStability = 20.f;          // stability while staggered; reaching 0 again -> knockdown
 constexpr float kStaggerResetStability = 35.f;         // stability after a stagger ends
 constexpr int kKnockdownTicks = MsToTicks(2200);       // pitch §10 "полностью опрокидывается"
 constexpr float kKnockdownResetStability = 55.f;
@@ -64,7 +65,7 @@ constexpr float kHeatOverheatAt = 97.f;                // pitch §10 "риск �
 constexpr float kHeatLeakCoolingMult = 0.25f;          // cooling left while the coolant leaks
 constexpr float kHeatMinPerformance = 0.65f;           // pitch §10 "замедление, снижение силы" at max heat
 constexpr float kDamagedDriveHeatPerTick = 0.006f;     // pitch §10 "работа повреждённых приводов", per Damaged+ limb
-constexpr float kHeavyChargeHeatPerTick = 0.05f;       // pitch §10 "заряженные атаки"
+constexpr float kHeavyChargeHeatPerTick = 0.09f;       // pitch §10 "заряженные атаки"
 constexpr float kHeavyReleaseHeat = 2.0f;
 constexpr float kFeintHeat = 4.5f;                     // pitch §8 "Частые финты накапливают тепло"
 constexpr float kEmergencyBrakeHeat = 9.f;             // pitch §5.2 (4) "аварийное торможение ... накопит тепло"
@@ -123,8 +124,14 @@ constexpr float kPlantRecoveryMult[5] = {1.0f, 1.0f, 1.3f, 1.0f, 0.7f};
 constexpr float kPlantStabilityCost[5] = {0.f, 3.f, 8.f, 2.f, 0.f};      // pitch §5.2 п.3
 constexpr float kStepInMinStability = 40.f;            // below this a StepIn becomes Overextended
 constexpr float kTurnAngleDeg = 25.f;                  // pitch §11 "Спина и ноги не всегда направлены туда же"
-constexpr float kNaturalTargetMult = 1.0f;             // pitch §5.2: swing/target pairs that follow the arm's path
-constexpr float kUnnaturalTargetMult = 0.8f;
+constexpr float kUnnaturalTargetMult = 0.8f;           // pitch §5.2: swing/target pair that does not follow the arm's path
+// Natural targets per swing family, bitmask over Zone (bit = Index(Zone)). pitch §5.2 (2).
+constexpr uint16_t kNaturalTargets[4] = {
+    0b000011111,  // Up:    Head, Torso, Reactor, ShoulderL/R
+    0b001111111,  // Left:  everything above the hips
+    0b001111111,  // Right: everything above the hips
+    0b111100010,  // Down:  Torso, ArmL/R, LegL/R
+};
 
 // pitch §5.4: post-strike pose and its economy.
 constexpr int kPoseReturnTicks = MsToTicks(500);       // extra windup needed when the pose forbids the swing
@@ -154,7 +161,6 @@ constexpr int kMaxReverseReplies = 2;                  // pitch §7: "макси
 constexpr float kBlockDamageMult = 0.25f;              // pitch §6: block "сильно снижает прямой урон"
 constexpr float kBlockStabilityFactor = 0.7f;          // pitch §6: "всё равно уменьшает стабильность"
 constexpr float kBlockArmLoad = 0.18f;                 // pitch §6: "нагружает блокирующую руку" (share of damage)
-constexpr float kBlockArmorWear = 0.35f;               // pitch §6: "может повредить броню" (share of damage)
 constexpr float kGuardEnergyPerTick = 0.03f;           // pitch §6: passive guard must not be free
 constexpr float kParryEnergy = 4.f;
 constexpr float kParryStabilityHit = 38.f;             // pitch §6: attacker's tempo breaks
@@ -163,6 +169,13 @@ constexpr int kCounterWindowTicks = MsToTicks(500);    // pitch §6: "корот
 constexpr float kInterceptEnergy = 8.f;                // pitch §7
 constexpr float kInterceptArmDamage = 0.55f;           // pitch §7: share of strike damage that hits the intercepted arm
 constexpr float kInterceptStabilityHit = 22.f;
+// Counter lines that can intercept each attack, bitmask over SwingSide (pitch §7 "Перехват").
+constexpr uint8_t kInterceptLines[4] = {
+    0b0111,  // against Up:    Up, Left, Right
+    0b0011,  // against Left:  Up, Left
+    0b0101,  // against Right: Up, Right
+    0b1110,  // against Down:  Left, Right, Down
+};
 constexpr int kInterceptedRecoveryTicks = MsToTicks(700);
 constexpr float kReverseEnergyBase = 6.f;              // pitch §7: cost grows with depth
 constexpr float kReverseDamage = 12.f;
@@ -181,7 +194,7 @@ constexpr int kDodgeEvadeTicks = MsToTicks(260);       // pitch §6 "Уклон�
 constexpr int kDodgeStabilizeTicks = MsToTicks(500);   // pitch §6: "должен стабилизироваться"
 constexpr float kDodgeStability = 10.f;
 constexpr float kDodgeEnergy = 5.f;
-constexpr float kDodgeFlankDeg = 55.f;                 // pitch §6 "зайти к повреждённому боку"
+constexpr float kDodgeFlankDeg = 70.f;                 // pitch §6 "зайти к повреждённому боку"
 constexpr float kFlankTurnDegPerTick = 0.7f;           // pitch §11: how fast a mech re-faces its opponent
 
 // ---------------------------------------------------------------- clinch (pitch §7)
@@ -209,6 +222,7 @@ constexpr float kWeaponDamage = 70.f;                  // pitch §13: "спос�
 constexpr float kWeaponMinDistance = 18.f;
 constexpr float kWeaponBlockMult = 0.55f;
 constexpr float kWeaponBaseAccuracy = 0.8f;
+constexpr int kWeaponRecoveryTicks = MsToTicks(1200);  // pitch §13: the shoulder launcher is slow to close again
 
 // ---------------------------------------------------------------- movement (pitch §11)
 constexpr float kMoveSpeedPerTick = 0.09f;             // distance units per tick at full leg condition
