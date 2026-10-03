@@ -1,11 +1,12 @@
 // Headless duel simulator: AI vs AI over every archetype pair x difficulty x seed.
 //
-//   ivsim [--seeds N] [--difficulty easy|normal|hard|all] [--seed-base S] [--pair A:B]
+//   ivsim [--seeds N] [--difficulty easy|normal|hard|all] [--seed-base S] [--pair A:B] [--boarding]
 //         [--duels duels.csv] [--events events.csv] [--markdown report.md] [--quiet]
 //
 // --duels   one CSV row per duel (result, length, counts)
 // --events  every event of every duel (large; use with a small --seeds)
 // --markdown the summary tables used by docs/BALANCE_REPORT.md
+// --boarding boarding balance (TASK-017): player bots with different hacking / swing skill against every archetype x difficulty (docs/BOARDING_BALANCE.md)
 #include <algorithm>
 #include <cstdarg>
 #include <cstdio>
@@ -15,6 +16,7 @@
 #include <vector>
 
 #include "iv/Ai.h"
+#include "iv/Boarding.h"
 #include "iv/Duel.h"
 
 using namespace iv;
@@ -26,7 +28,7 @@ struct Totals {
   int draws = 0;
   double ticks = 0;
   std::vector<double> lengths;
-  int reasons[7] = {};
+  int reasons[8] = {};
   int severed = 0;
   int duelsWithSever = 0;
   int contacts = 0;
@@ -93,6 +95,228 @@ void Out(const char* fmt, ...) {
   va_end(ap);
 }
 
+
+// ------------------------------------------------------------------------------------------------ boarding mode (TASK-017)
+
+// A player bot: how well it plays the hack and how fast it answers the enemy hand.
+struct SkillBot {
+  const char* name;
+  int hackDelay;        // ticks between the window opening and the press (reaction + hand)
+  float stray;          // chance per tick of a stray press (nerves)
+  int swingReaction;    // ticks from the telegraph to the swing attempt
+  float swingMiss;      // chance that the bot never answers a given swat
+};
+const SkillBot kBots[] = {{"perfect", 0, 0.f, 20, 0.f}, {"good", 4, 0.0015f, 24, 0.03f}, {"average", 7, 0.004f, 36, 0.12f}, {"poor", 10, 0.010f, 52, 0.30f}};
+
+enum class Policy { Never, Spam, Periodic };
+
+struct BoardStats {
+  int duels = 0, aWins = 0, bWins = 0, draws = 0;
+  double ticks = 0;
+  int boardings = 0, success = 0, hackFail = 0, timeout = 0, smashed = 0, aborted = 0, swats = 0, swatsAnswered = 0, smashedAfterPress = 0;
+  double blastDamage = 0, hackDifficulty = 0, quality = 0;
+  int hacks = 0, denied = 0;
+};
+
+struct BotDriver {
+  const SkillBot* bot;
+  Rng rng;
+  int pending = -1;
+  bool wantsPrev = false;
+  bool answered = false;
+  bool willAnswer = true;
+  bool pressedInWindow = false;
+  int swatSeen = -1;
+  explicit BotDriver(const SkillBot* b, uint64_t seed) : bot(b), rng(seed, 0x424f54ULL) {}
+
+  void Decide(const Boarding& bd, BoardingInput* bi) {
+    if (bd.phase() == BoardPhase::Hacking) {
+      const bool w = bd.hack().WantsConfirm();
+      if (w && !wantsPrev) pending = bot->hackDelay > 0 ? std::max(1, bot->hackDelay + static_cast<int>(rng.Below(5)) - 2) : 0;   // human jitter: +-2 ticks
+      wantsPrev = w;
+      if (pending > 0) --pending;
+      else if (pending == 0) {
+        bi->hack.confirm = true;
+        pending = -1;
+      }
+      if (rng.Chance(bot->stray)) bi->hack.confirm = true;
+    } else {
+      wantsPrev = false;
+      pending = -1;
+    }
+    if (bd.swatActive()) {
+      const int total = tune::kSwatWindupTicks[0];   // only used to detect a fresh swat below
+      (void)total;
+      if (swatSeen != bd.swatsThisBoarding() * 1000 + static_cast<int>(bd.swatShoulder())) {
+        swatSeen = bd.swatsThisBoarding() * 1000 + static_cast<int>(bd.swatShoulder());
+        willAnswer = !rng.Chance(bot->swingMiss);
+        answered = false;
+        reactionLeft = bot->swingReaction;
+      }
+      if (reactionLeft > 0) --reactionLeft;
+      if (willAnswer && !answered && reactionLeft == 0 && bd.phase() != BoardPhase::HookSwing && bd.swatTicksToImpact() <= tune::kSwingWindowTicks - 3 &&
+          bd.swatTicksToImpact() >= tune::kSwingMinTicks + 3) {
+        bi->swing = true;
+        answered = true;
+        pressedInWindow = true;
+      }
+    } else {
+      swatSeen = -1;
+      pressedInWindow = false;
+    }
+  }
+  int reactionLeft = 0;
+};
+
+void RunBoardingMode(int seeds, uint64_t seedBase, int diffMask) {
+  Out("# Boarding balance (`ivsim --boarding`)\n\n");
+  Out("Player (side A): fencing AI Counterpuncher/Normal + a boarding bot; enemy (side B): every archetype x difficulty. %d seeds per cell.\n", seeds);
+  Out("The hack is the stub rule set of TASK-017 (TASK-018 replaces it), so the success numbers must be re-measured after that task.\n\n");
+
+  struct Cell { BoardStats s[4][3]; };           // [bot][difficulty]
+  static Cell byArch[kArchetypeCount];
+  BoardStats policyStats[3][4];                   // [policy][bot]: aggregated over everything
+
+  auto runOne = [&](Policy pol, const SkillBot& bot, Archetype arch, Difficulty diff, uint64_t seed, BoardStats* out, BoardStats* out2) {
+    Duel duel(seed, true);
+    duel.set_time_limit(tune::kMatchTimeLimitTicks);
+    Ai fence(Archetype::Counterpuncher, Difficulty::Normal, seed * 2 + 1);
+    Ai foe(arch, diff, seed * 2 + 2);
+    BoardingConfig cfg;
+    cfg.owner = Side::A;
+    cfg.enemyArchetype = arch;
+    cfg.enemyDifficulty = diff;
+    cfg.seed = seed ^ 0x55aa;
+    Boarding bd(cfg);
+    BotDriver drv(&bot, seed ^ 0x77);
+    int sinceLast = 1 << 20;
+    int anomaly = 0;
+    bool lastPressedInWindow = false;
+    while (!duel.result().over) {
+      Input ia = fence.Decide(MakeObservation(duel, Side::A));
+      ia = bd.Filter(duel, ia);
+      const Input ib = foe.Decide(MakeObservation(duel, Side::B));
+      duel.Step(ia, ib);
+      BoardingInput bi;
+      bi.shoulder = (seed & 1) ? Arm::L : Arm::R;
+      if (pol == Policy::Spam) bi.start = !bd.Active() && bd.cooldownLeft() == 0;
+      else if (pol == Policy::Periodic) bi.start = !bd.Active() && bd.cooldownLeft() == 0 && sinceLast >= 90 * kTickHz;
+      if (!duel.cinematic().active) drv.Decide(bd, &bi);   // inputs during an external cut are lost (the boarding is frozen too)
+      lastPressedInWindow = drv.pressedInWindow;
+      const bool wasActive = bd.Active();
+      bd.Step(duel, bi);
+      if (bd.phase() == BoardPhase::Smashed && drv.answered) ++anomaly;
+      if (!wasActive && bd.Active()) sinceLast = 0;
+      else ++sinceLast;
+      (void)lastPressedInWindow;
+    }
+    BoardStats* both[2] = {out, out2};
+    for (BoardStats* t : both) {
+      if (!t) continue;
+      ++t->duels;
+      t->ticks += duel.tick();
+      t->smashedAfterPress += anomaly;
+      const MatchResult& r = duel.result();
+      if (r.draw) ++t->draws;
+      else if (r.loser == Side::A) ++t->bWins;
+      else ++t->aWins;
+      for (const Event& e : duel.log().events()) {
+        switch (e.type) {
+          case EventType::BoardingEnded:
+            ++t->boardings;
+            if (e.a == static_cast<int>(BoardingOutcome::Success)) ++t->success;
+            else if (e.a == static_cast<int>(BoardingOutcome::HackFailed)) ++t->hackFail;
+            else if (e.a == static_cast<int>(BoardingOutcome::HackTimeout)) ++t->timeout;
+            else if (e.a == static_cast<int>(BoardingOutcome::Smashed)) ++t->smashed;
+            else if (e.a == static_cast<int>(BoardingOutcome::Aborted)) ++t->aborted;
+            break;
+          case EventType::BoardingSwatTelegraph: ++t->swats; break;
+          case EventType::BoardingSwingOk: ++t->swatsAnswered; break;
+          case EventType::BoardingBlast: t->blastDamage += static_cast<double>(e.value); break;
+          case EventType::HackStarted: t->hackDifficulty += e.a; ++t->hacks; break;
+          case EventType::BoardingDenied: ++t->denied; break;
+          case EventType::HackResultEvt: t->quality += static_cast<double>(e.value); break;
+          default: break;
+        }
+      }
+    }
+  };
+
+  // 1) success by skill and difficulty, boarding every time it is allowed (Spam) - the pure mini-game numbers
+  for (int b = 0; b < 4; ++b)
+    for (int a = 0; a < kArchetypeCount; ++a)
+      for (int d = 0; d < kDifficultyCount; ++d) {
+        if (!((diffMask >> d) & 1)) continue;
+        for (int s = 0; s < seeds; ++s) {
+          const uint64_t seed = seedBase + static_cast<uint64_t>(s) * 7919u + static_cast<uint64_t>(a * 131 + d * 17 + b);
+          runOne(Policy::Spam, kBots[b], static_cast<Archetype>(a), static_cast<Difficulty>(d), seed, &byArch[a].s[b][d], &policyStats[1][b]);
+        }
+      }
+  // 2) the same fights with the policies Never / Periodic (the strategy comparison uses the good bot)
+  for (int pol = 0; pol < 3; ++pol) {
+    if (pol == 1) continue;
+    for (int b = 0; b < 4; ++b) {
+      if (pol == 0 && b > 0) continue;
+      for (int a = 0; a < kArchetypeCount; ++a)
+        for (int d = 0; d < kDifficultyCount; ++d) {
+          if (!((diffMask >> d) & 1)) continue;
+          for (int s = 0; s < seeds; ++s) {
+            const uint64_t seed = seedBase + static_cast<uint64_t>(s) * 7919u + static_cast<uint64_t>(a * 131 + d * 17 + b);
+            runOne(static_cast<Policy>(pol), kBots[b], static_cast<Archetype>(a), static_cast<Difficulty>(d), seed, nullptr, &policyStats[pol][b]);
+          }
+        }
+    }
+  }
+
+  auto pct = [](int a, int b) { return b ? 100.0 * a / b : 0.0; };
+  Out("## Boarding outcomes by bot skill (boarding whenever allowed)\n\n");
+  Out("| Bot | Boardings | Success | Hack failed | Timeout | Smashed (died) | Swats answered | Avg grenade dmg | Avg hack difficulty | Avg quality of wins |\n|---|---|---|---|---|---|---|---|---|---|\n");
+  for (int b = 0; b < 4; ++b) {
+    const BoardStats& t = policyStats[1][b];
+    Out("| %s | %d | %.1f%% | %.1f%% | %.1f%% | %.1f%% | %.0f%% of %d | %.1f | %.2f | %.2f |\n", kBots[b].name, t.boardings, pct(t.success, t.boardings),
+        pct(t.hackFail, t.boardings), pct(t.timeout, t.boardings), pct(t.smashed, t.boardings), pct(t.swatsAnswered, t.swats), t.swats,
+        t.success ? t.blastDamage / t.success : 0.0, t.hacks ? t.hackDifficulty / t.hacks : 0.0, t.success ? t.quality / t.success : 0.0);
+  }
+  Out("\n## Success rate of the good bot by enemy archetype and difficulty\n\n| Enemy | Easy | Normal | Hard |\n|---|---|---|---|\n");
+  for (int a = 0; a < kArchetypeCount; ++a) {
+    Out("| %s |", Name(static_cast<Archetype>(a)));
+    for (int d = 0; d < kDifficultyCount; ++d) {
+      const BoardStats& t = byArch[a].s[1][d];
+      Out(" %.0f%% (smashed %.0f%%, n=%d) |", pct(t.success, t.boardings), pct(t.smashed, t.boardings), t.boardings);
+    }
+    Out("\n");
+  }
+  Out("\n## Success rate by bot and enemy difficulty\n\n| Bot | Easy | Normal | Hard |\n|---|---|---|---|\n");
+  for (int b = 0; b < 4; ++b) {
+    Out("| %s |", kBots[b].name);
+    for (int d = 0; d < kDifficultyCount; ++d) {
+      BoardStats t;
+      for (int a = 0; a < kArchetypeCount; ++a) {
+        const BoardStats& u = byArch[a].s[b][d];
+        t.boardings += u.boardings;
+        t.success += u.success;
+      }
+      Out(" %.1f%% (n=%d) |", pct(t.success, t.boardings), t.boardings);
+    }
+    Out("\n");
+  }
+  Out("\n## Strategies: win rate of the player (side A) over all archetype x difficulty cells\n\n");
+  Out("| Strategy | Duels | Player wins | Enemy wins | Draws | Mean minutes | Boardings per duel |\n|---|---|---|---|---|---|---|\n");
+  const char* kPolNames[3] = {"fencer only (never boards)", "boards whenever allowed", "boards every 90 s"};
+  for (int pol = 0; pol < 3; ++pol) {
+    for (int b = 0; b < 4; ++b) {
+      if (pol == 0 && b > 0) continue;
+      const BoardStats& t = policyStats[pol][b];
+      if (t.duels == 0) continue;
+      Out("| %s%s%s | %d | %.1f%% | %.1f%% | %.1f%% | %.2f | %.2f |\n", kPolNames[pol], pol == 0 ? "" : ", bot ", pol == 0 ? "" : kBots[b].name, t.duels,
+          pct(t.aWins, t.duels), pct(t.bWins, t.duels), pct(t.draws, t.duels), t.ticks / t.duels / (kTickHz * 60.0), static_cast<double>(t.boardings) / t.duels);
+    }
+  }
+  int anomalies = 0;
+  for (int b = 0; b < 4; ++b) anomalies += policyStats[1][b].smashedAfterPress;
+  Out("\nSmashed although the swing was pressed inside the window: %d (must be 0).\n", anomalies);
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -104,6 +328,7 @@ int main(int argc, char** argv) {
   const char* mdPath = nullptr;
   bool quiet = false;
   bool hasPair = false;
+  bool boardingMode = false;
   Archetype pairA = Archetype::Counterpuncher, pairB = Archetype::Counterpuncher;
 
   for (int i = 1; i < argc; ++i) {
@@ -121,6 +346,7 @@ int main(int argc, char** argv) {
     else if (!std::strcmp(a, "--events")) eventsPath = next();
     else if (!std::strcmp(a, "--markdown")) mdPath = next();
     else if (!std::strcmp(a, "--quiet")) quiet = true;
+    else if (!std::strcmp(a, "--boarding")) boardingMode = true;
     else if (!std::strcmp(a, "--pair")) {
       std::string p = next();
       const size_t c = p.find(':');
@@ -133,6 +359,14 @@ int main(int argc, char** argv) {
       std::fprintf(stderr, "unknown argument %s\n", a);
       return 2;
     }
+  }
+
+  if (boardingMode) {
+    g_md = mdPath ? std::fopen(mdPath, "w") : nullptr;
+    g_quiet = quiet;
+    RunBoardingMode(seeds, seedBase, diffMask);
+    if (g_md) std::fclose(g_md);
+    return 0;
   }
 
   FILE* duelsFile = duelsPath ? std::fopen(duelsPath, "w") : nullptr;
@@ -247,7 +481,7 @@ int main(int argc, char** argv) {
     }
 
     Out("\nEnd reasons: ");
-    for (int r = 1; r < 7; ++r) Out("%s %.1f%%%s", Name(static_cast<EndReason>(r)), 100.0 * t.reasons[r] / t.duels, r < 6 ? ", " : "\n");
+    for (int r = 1; r < 8; ++r) Out("%s %.1f%%%s", Name(static_cast<EndReason>(r)), 100.0 * t.reasons[r] / t.duels, r < 7 ? ", " : "\n");
 
     Out("\nSevered limbs: %d in %d duels (%.1f%% of duels, %.2f per duel)\n", t.severed, t.duelsWithSever, 100.0 * t.duelsWithSever / t.duels,
         static_cast<double>(t.severed) / t.duels);

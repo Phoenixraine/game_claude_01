@@ -19,6 +19,8 @@
 | `iv/Anim.h` | **v2** `AnimState`, `MakeAnimState(fighter)` — состояние для процедурной анимации |
 | `iv/Dummy.h` | **v2** тренировочный манекен (`DummyMode`) |
 | `iv/Rng.h` | PCG32 с сидом |
+| `iv/Boarding.h` | **v4** абордаж: `Boarding`, `BoardPhase`, `BoardingInput` (см. §7a) |
+| `iv/HackGame.h` | **v4** логика мини-игры взлома люка (в TASK-017 — минимальная, TASK-018 расширяет) |
 
 Сборка и проверка с нуля:
 
@@ -218,6 +220,109 @@ void FixedTick60Hz(const Input& playerInput, const World& world) {   // вызы
 `Duel::SetDummy(Side, DummyMode)`: `Passive` — не действует; `Scripted` — повторяет сценарий атак (`Dummy::SetScript`; по умолчанию 5 ударов: вверх, вправо, быстрый, влево, вниз);
 `BlockOnly` — только поднимает блок на видимый сектор замаха игрока после человеческой задержки (`kDummyReactionTicks`) и сам не атакует.
 Манекен не проигрывает: при условии конца боя он «чинится» и урок продолжается. Ввод, поданный в `Step` за сторону манекена, игнорируется.
+
+## 7a. v4: абордаж (TASK-017, STATUS §6B)
+
+Одна кнопка: пилот вылезает из кабины, стреляет крюком в плечо врага, садится у люка рядом со стыком плеча и руки, взламывает люк мини-игрой на время
+(`HackGame`), бросает гранату и улетает; граната взрывает эту часть меха. Враг может «прихлопнуть» пилота рукой по плечу — надо вовремя перелететь на другое плечо.
+Всё — правила и тайминги: Unreal проигрывает анимации по событиям. Сторона симметрична (`Side::A`/`Side::B`); ИИ абордаж пока **запрещён** (`tune::kAiBoardingEnabled = false`,
+`BoardingConfig::ownerIsAi` → отказ `AiDisabled`).
+
+### Подключение (3 строки в игровой цикл)
+
+```cpp
+iv::Boarding boarding(cfg);                        // BoardingConfig{owner, enemyArchetype, enemyDifficulty, seed, swatChanceMult}
+// каждый тик 1/60 с:
+Input a = boarding.Filter(duel, playerInput);      // ДО Duel::Step: пока пилот снаружи, вместо ввода игрока — защитный автопилот
+duel.Step(a, b, world);
+boarding.Step(duel, boardingInput);                // ПОСЛЕ Duel::Step: BoardingInput{start, swing, shoulder, hack}
+```
+
+`BoardingInput`: `start` (ребро, кнопка абордажа), `swing` (ребро, «перелететь на другое плечо»), `shoulder` (желаемый бок люка), `hack` (`HackInput`, пробрасывается в мини-игру).
+Пока `Boarding::Active()`, у `Fighter` игрока включён `autopilot`: `Duel::Step` отбрасывает **любые** атакующие вводы (`strikeHeld, quick, toGrab, switchArm, reverse, weaponHeld, ultimate`),
+`Boarding::Filter` подставляет блок/уклонение от оборонительного `Ai` (Counterpuncher/Easy: слабее живого игрока), а мех получает больше урона (`kAutopilotDamageMult`).
+Во время внешней вставки (`Duel::cinematic().active`) абордаж **заморожен** вместе с боем.
+
+### Состояния (`BoardPhase`) и переходы
+
+```
+Idle ──start──▶ ClimbOut ▶ OnShoulder ▶ HookLaunch ▶ HookFlight ▶ Landing ▶ Hacking ──Success──▶ GrenadeThrow ▶ Escape ▶ WatchBlast ▶ ClimbIn ▶ Done
+                                                          │  ▲          │  ▲       │                                          (взрыв в WatchBlast)
+                                          swat (посл. 30 %) │  │          │  │       ├──Fail / Timeout / «назад» ──▶ ReturnHook ▶ ClimbIn ▶ Done
+                                                          ▼  │          ▼  │       │
+                                                          HookSwing ◀────┴──┴───────┘ (swing в окне, прогресс × kSwingKeepProgress)
+ swat без нажатия в окне ──▶ Smashed ──▶ MatchEnd{PilotLost}
+```
+
+| Фаза | Длительность (`Tuning.h`) | Что играть |
+|---|---|---|
+| `ClimbOut` | `kBoardClimbOutTicks` 2,2 с | пилот вылезает из люка сбоку, камера внешняя |
+| `OnShoulder` | `kBoardOnShoulderTicks` 0,7 с | встаёт на плечо своего меха |
+| `HookLaunch` | `kBoardHookLaunchTicks` 0,6 с | выстрел крюка-кошки из наручного гарпуна (`HookFired`) |
+| `HookFlight` | `kBoardHookFlightTicks` 1,4 с | полёт к плечу врага; **последние 30 %** — враг уже может замахнуться |
+| `Landing` | `kBoardLandingTicks` 0,8 с | посадка у люка (`HookLanded`); `kSwatGraceTicks` 1,5 с после посадки замахов нет |
+| `Hacking` | открытая (лимит у `HackGame`, 25–60 с) | мини-игра на весь экран (`HackStarted`, `HackProgress`, `HackResultEvt`) |
+| `GrenadeThrow` | 1,1 с | бросок гранаты в люк (`GrenadeThrown`) |
+| `Escape` | 1,5 с | пилот взлетает на крюке прочь |
+| `WatchBlast` | 2,2 с, взрыв через `kBoardBlastDelayTicks` 0,9 с | камера смотрит на врага; в момент взрыва `Duel::ExternalHit(source = 3)` + `BoardingBlast` |
+| `ReturnHook` | 1,5 с | провал/таймаут/отступление: назад по крюку |
+| `ClimbIn` | 1,8 с | посадка в свой мех, управление возвращается |
+| `HookSwing` | `kBoardHookSwingTicks` 0,9 с | перелёт на другое плечо (значение добавлено в конец enum) |
+| `Smashed` | — | пилот раздавлен: `BoardingSmashed`, `MatchEnd{PilotLost}`; конец матча |
+| `Done` | — | заход завершён (`BoardingEnded.a = BoardingOutcome`), кулдаун `kBoardCooldownTicks` 60 с (75 с после неудачи) |
+
+Старт отказывается кодом `BoardingDenied` (событие `BoardingDenied.a`, поле `Boarding::lastDenied()`): `AlreadyActive, MatchOver, Clinch, Busy` (идёт замах/удар/заряд орудия/ультимейт), `Stunned`, `Cinematic`,
+`Cooldown`, `NoEnergy` (< `kBoardEnergyCost` 25), `NoStability` (< `kBoardMinStability` 35), `NoTarget` (оба плеча врага `Destroyed`), `AiDisabled`.
+Если выбранное плечо уничтожено — люк на противоположном; если плечо уничтожают во время захода, пилот перелетает на другое (при потере обоих — `ReturnHook`).
+
+### Помеха: «замах по плечу» (swat)
+
+Враг (ИИ) в `HookFlight` (последние 30 %), `Landing` (после `kSwatGraceTicks`) и `Hacking` раз в `kSwatCheckTicks` (0,5 с) решает замахнуться: шанс `kSwatChance[сложность] × kSwatArchetypeMult[архетип] × swatChanceMult`,
+не чаще `kSwatCooldownTicks`, не более `kMaxSwatsPerBoarding` (2) за заход; бьёт **противоположной** рукой — нет руки (`Destroyed/Severed`), нет замаха по этому плечу.
+Телеграф: `BoardingSwatTelegraph{a = плечо (0 L / 1 R), b = тиков до удара}` — на экране «камера врага» в углу. Телеграф `kSwatWindupTicks`: Easy 1,2 с, Normal 0,9 с, Hard 0,65 с.
+
+| Момент нажатия `swing` (до удара) | Результат |
+|---|---|
+| первые `kSwatReadyTicks` (0,2 с) после телеграфа | игнорируется (замах ещё не виден) |
+| дальше окна: больше `kSwingWindowTicks` (0,7 с) | **рано**: пилот перелетает, но враг «подстраивается» один раз (`BoardingSwatAdjusted`, новый телеграф на новом плече); повторное раннее нажатие игнорируется |
+| `[kSwingMinTicks … kSwingWindowTicks]` (0,15…0,7 с) | **успех**: `BoardingSwingOk`, `HookSwing` 0,9 с, прогресс взлома `× kSwingKeepProgress` (0,5), `HackGame::Reroll`; удар приходит на пустое плечо (`BoardingSwatImpact.a = 0`) |
+| позже `kSwingMinTicks` | **поздно**: игнорируется → `BoardingSwatImpact.a = 1` → `Smashed` |
+| успех, но второго плеча нет | та же кнопка = **отступление** по крюку (`ReturnHook`, взлом провален, пилот жив) |
+
+Смерть при нажатии внутри окна невозможна (проверяет тест и `ivsim --boarding`).
+
+### События (добавлены в конец `EventType`, порядок прежних — контракт)
+
+| Событие | Поля |
+|---|---|
+| `BoardingStarted` | `a` = плечо (0 L / 1 R) |
+| `BoardingPhase` | `a` = `BoardPhase`, `b` = длительность в тиках (0 — открытая) |
+| `BoardingDenied` | `a` = `BoardingDenied` |
+| `HookFired` / `HookLanded` | `a` = плечо |
+| `HackStarted` | `a` = сложность 1..10, `b` = лимит в тиках |
+| `HackProgress` | `value` = прогресс 0..1 (при изменении ≥ 5 %) |
+| `HackResultEvt` | `a` = `HackState` (Success/Fail/Timeout), `value` = quality 0..1 |
+| `BoardingSwatTelegraph` | `a` = плечо, `b` = тиков до удара, `value` = номер замаха |
+| `BoardingSwingOk` | `a` = новое плечо, `value` = сохранённый прогресс |
+| `BoardingSwatAdjusted` | `a` = новое плечо, `b` = тиков до удара |
+| `BoardingSwatImpact` | `a` = 1 пилот на плече (раздавлен) / 0 промах, `b` = плечо |
+| `BoardingShock` | удар по пустому меху: `value` = потерянное время взлома (`kBoardShockSeconds` 0,8 с, не более `kBoardMaxShocks` раз) |
+| `BoardingSmashed` | пилот раздавлен (затем `MatchEnd` с `EndReason::PilotLost`) |
+| `GrenadeThrown` | — |
+| `BoardingBlast` | `zone` = поражённая зона (плечо; если оно уничтожено — рука), `value` = нанесено |
+| `BoardingEnded` | `a` = `BoardingOutcome` (`Success, HackFailed, HackTimeout, Smashed, Aborted`) |
+
+Граната: `Duel::ExternalHit(..., source = kGrenadeSource = 3, StatusKind::Burn, kGrenadeBurnTicks)`; урон `kGrenadeDamageMin…kGrenadeDamageMax` (27…38 ≈ 1,5…2,2 тяжёлых удара) по `quality` взлома.
+`ExternalHit.a`: 0 обломок, 1 удар о здание, 2 падение, **3 граната**.
+
+### Изменения в остальном ядре (контракт)
+- `EndReason::PilotLost` добавлен в конец; `Name(EndReason)` знает его.
+- `Duel::ForceEnd(loser, reason)` — завершить матч снаружи (используется абордажем).
+- `Fighter::autopilot` / `set_autopilot()`; `Fighter::TakeHit` умножает урон на `kAutopilotDamageMult` (1,8) только при `autopilot`.
+- `HackGame` (`iv/HackGame.h`) — **минимальная** реализация «синхронизации сигнала» для тестов абордажа; TASK-018 заменяет внутренности на трёхслойную игру, сохраняя интерфейс
+  (`Start, Step, Reroll, AddPenalty, state, progress, mistakes, ticksLeft, quality, DifficultyFor`).
+- `Boarding::Hash()` — хэш состояния для теста детерминизма (равный сид и ввод → равные хэш истории событий и хэш абордажа).
+- Баланс — `docs/BOARDING_BALANCE.md` (`ivsim --boarding`).
 
 ## 8. Подключение в Unreal (план для локальной стороны)
 

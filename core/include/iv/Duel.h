@@ -70,6 +70,8 @@ class Duel {
   // v3: damage that comes from the world (thrown debris, a crash into a building, a fall). `source`: 0 debris, 1 crash, 2 fall.
   HitReport ExternalHit(Side victim, Zone zone, float damage, float stability, int source, StatusKind status = StatusKind::Count, int statusTicks = 0);
   Dummy& dummy(Side s) { return dummy_[Index(s)]; }
+  // v4: ends the match from outside (boarding: the pilot was crushed). No-op once the match is over.
+  void ForceEnd(Side loser, EndReason reason);
   EventLog& log() { return log_; }
   const EventLog& log() const { return log_; }
   // Headless sims: end the match as a draw after this many ticks (0 = no limit).
