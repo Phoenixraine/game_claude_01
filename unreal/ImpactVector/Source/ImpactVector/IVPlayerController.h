@@ -28,11 +28,13 @@ private:
 	UPROPERTY() TObjectPtr<UInputAction> MoveAction;
 	UPROPERTY() TObjectPtr<UInputAction> LookAction;
 	UPROPERTY() TObjectPtr<UInputAction> SprintAction;
+	UPROPERTY() TObjectPtr<UInputAction> FireAction;
 
 	void OnMove(const FInputActionValue& V) { MoveValue = V.Get<FVector2D>(); }
 	void OnMoveEnd(const FInputActionValue&) { MoveValue = FVector2D::ZeroVector; }
 	void OnLook(const FInputActionValue& V);
 	void OnSprint(const FInputActionValue& V) { bSprint = V.Get<bool>(); }
+	void OnFire(const FInputActionValue&);
 
 	AIVMechPawn* Mech() const;
 

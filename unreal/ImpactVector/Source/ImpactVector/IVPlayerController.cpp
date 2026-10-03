@@ -53,6 +53,11 @@ void AIVPlayerController::SetupInputComponent()
 	Mapping->MapKey(LookAction, EKeys::Mouse2D);
 	Mapping->MapKey(LookAction, EKeys::Gamepad_Right2D);
 
+	FireAction = NewObject<UInputAction>(this, TEXT("IA_Fire"));
+	FireAction->ValueType = EInputActionValueType::Boolean;
+	Mapping->MapKey(FireAction, EKeys::LeftMouseButton);
+	Mapping->MapKey(FireAction, EKeys::Gamepad_RightTrigger);
+
 	Mapping->MapKey(SprintAction, EKeys::LeftShift);
 	Mapping->MapKey(SprintAction, EKeys::Gamepad_LeftThumbstick);
 
@@ -65,6 +70,7 @@ void AIVPlayerController::SetupInputComponent()
 		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnMove);
 		EIC->BindAction(MoveAction, ETriggerEvent::Completed, this, &AIVPlayerController::OnMoveEnd);
 		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnLook);
+		EIC->BindAction(FireAction, ETriggerEvent::Started, this, &AIVPlayerController::OnFire);
 		EIC->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnSprint);
 		EIC->BindAction(SprintAction, ETriggerEvent::Completed, this, &AIVPlayerController::OnSprint);
 	}
@@ -110,4 +116,9 @@ void AIVPlayerController::PlayerTick(float Dt)
 	{
 		M->AddAim(LookStick.X * StickLookRate * Dt, LookStick.Y * StickLookRate * Dt);
 	}
+}
+
+void AIVPlayerController::OnFire(const FInputActionValue&)
+{
+	if (AIVMechPawn* M = Mech()) M->DebugBlast();
 }

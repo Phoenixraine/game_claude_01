@@ -246,7 +246,66 @@ col = lerp(col, float3(0.05, 0.045, 0.04), Wear * 0.25 * frac(h * 91.0) * step(0
     return m
 
 
-for fn in (build_facade, build_ground, build_water, build_armor):
+def build_puff():
+    """Soft dust/smoke sprite: procedural radial noise, per-instance age/seed from custom data."""
+    m = make_material("M_Puff")
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("two_sided", True)
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    uv = expr(m, unreal.MaterialExpressionTextureCoordinate, -1200, 0)
+    age = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 150)
+    age.set_editor_property("data_index", 0)
+    seed = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 300)
+    seed.set_editor_property("data_index", 1)
+    bright = scalar(m, "Brightness", 0.55, -1200, 450)
+    code = """
+float2 q = (UV - 0.5) * 2.0;
+float r = length(q);
+float sd = Seed * 91.7;
+float2 p = q * 2.2 + sd;
+float n = 0.0, a = 0.5;
+for (int i = 0; i < 4; i++)
+{
+    float2 ip = floor(p), fp = frac(p);
+    float2 u = fp * fp * (3.0 - 2.0 * fp);
+    float h00 = frac(sin(dot(ip, float2(127.1, 311.7))) * 43758.5453);
+    float h10 = frac(sin(dot(ip + float2(1,0), float2(127.1, 311.7))) * 43758.5453);
+    float h01 = frac(sin(dot(ip + float2(0,1), float2(127.1, 311.7))) * 43758.5453);
+    float h11 = frac(sin(dot(ip + float2(1,1), float2(127.1, 311.7))) * 43758.5453);
+    n += a * lerp(lerp(h00, h10, u.x), lerp(h01, h11, u.x), u.y);
+    p *= 2.03; a *= 0.5;
+}
+float shape = saturate(1.0 - r);
+shape = shape * shape * (3.0 - 2.0 * shape);
+float fadeIn = saturate(Age * 14.0);
+float fadeOut = pow(saturate(1.0 - Age), 1.6);
+float alpha = saturate(shape * (0.35 + 1.1 * n) - 0.12) * fadeIn * fadeOut;
+"""
+    op = custom(m, code + "return alpha * 0.85;", unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["UV", "Age", "Seed"], -700, 0, "puff_alpha")
+    wire_custom(op, [(uv, ""), (age, ""), (seed, "")])
+    col = custom(m, "float3 c = lerp(float3(0.62, 0.6, 0.57), float3(0.28, 0.27, 0.27), frac(Seed * 7.13)); return c * B;",
+                 unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["Seed", "B"], -700, 250, "puff_color")
+    wire_custom(col, [(seed, ""), (bright, "")])
+    MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+def build_spark():
+    m = make_material("M_Spark")
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    c = vector(m, "Color", (14.0, 5.0, 1.2, 1), -700, 0)
+    MEL.connect_material_property(c, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+for fn in (build_facade, build_ground, build_water, build_armor, build_puff, build_spark):
     try:
         fn()
         unreal.log("IV material OK: %s" % fn.__name__)

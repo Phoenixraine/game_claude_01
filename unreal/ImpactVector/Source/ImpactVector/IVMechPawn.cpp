@@ -10,6 +10,8 @@
 #include "UObject/ConstructorHelpers.h"
 #include "HAL/IConsoleManager.h"
 #include "EngineUtils.h"
+#include "IVEnvironment.h"
+#include "IVFXManager.h"
 
 static TAutoConsoleVariable<int32> CVarIVCam(TEXT("iv.Cam"), 0,
 	TEXT("0 = cockpit, 1 = chase, 2 = side, 3 = front orbit, 4 = both mechs from the side"), ECVF_Default);
@@ -384,4 +386,23 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 		Look = (Mid - From).Rotation();
 	}
 	Camera->SetWorldLocationAndRotation(From, Look);
+}
+
+void AIVMechPawn::DebugBlast(float Radius, float Impulse)
+{
+	const FVector From = Camera->GetComponentLocation();
+	const FVector Dir = Camera->GetForwardVector();
+	FHitResult Hit;
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(IVBlast), false, this);
+	const FVector To = From + Dir * 250000.f;
+	if (GetWorld()->LineTraceSingleByChannel(Hit, From, To, ECC_Visibility, Q) || GetWorld()->LineTraceSingleByChannel(Hit, From, To, ECC_WorldStatic, Q))
+	{
+		const FVector P = Hit.ImpactPoint;
+		if (AIVEnvironment* Env = AIVEnvironment::Get(GetWorld())) Env->BlastAt(P, Radius, Impulse);
+		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
+		{
+			FX->SpawnSparks(P, Hit.ImpactNormal, 40, 6000.f);
+			FX->SpawnDust(P, Radius, 14, 0.8f);
+		}
+	}
 }

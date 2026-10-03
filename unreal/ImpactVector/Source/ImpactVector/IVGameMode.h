@@ -24,5 +24,9 @@ private:
 	TArray<float> PendingShots;
 	int32 ShotIndex = 0;
 	float QuitAt = -1.f;
+	float BlastAt = -1.f;
+	int32 BlastsLeft = 0;
+	float NextBlast = 0.f;
+	float CollapseAt = -1.f;
 	float Elapsed = 0.f;
 };

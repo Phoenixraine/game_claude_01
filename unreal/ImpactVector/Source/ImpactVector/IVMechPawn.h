@@ -38,6 +38,8 @@ public:
 	void SetAim(float YawDeg, float PitchDeg) { AimYaw = YawDeg; AimPitch = FMath::Clamp(PitchDeg, -35.f, 30.f); }
 	void AddAim(float DeltaYaw, float DeltaPitch) { SetAim(AimYaw + DeltaYaw, AimPitch + DeltaPitch); }
 	void SetSprint(bool bInSprint) { bSprint = bInSprint; }
+	/** Prototype weapon: blast at the point under the crosshair. Replaced by the combat system. */
+	void DebugBlast(float Radius = 2400.f, float Impulse = 1800.f);
 
 	float GetAimYaw() const { return AimYaw; }
 	float GetAimPitch() const { return AimPitch; }

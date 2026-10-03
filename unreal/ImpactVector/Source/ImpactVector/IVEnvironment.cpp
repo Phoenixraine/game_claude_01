@@ -11,6 +11,9 @@
 #include "Engine/StaticMesh.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Math/RandomStream.h"
+#include "IVBuilding.h"
+#include "EngineUtils.h"
+#include "Engine/World.h"
 
 AIVEnvironment::AIVEnvironment()
 {
@@ -136,6 +139,7 @@ void AIVEnvironment::BeginPlay()
 		M->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.04f, 0.07f, 0.1f));
 	});
 	BuildCityBlockout();
+	RebuildStaticInstances();
 }
 
 void AIVEnvironment::BuildCityBlockout()
@@ -159,12 +163,79 @@ void AIVEnvironment::BuildCityBlockout()
 					if (C.X < -9000.f && C.X > -60000.f) continue;   // plaza on the shore
 					const float H = R.FRandRange(4500.f, 22000.f) * (R.FRand() < 0.15f ? 1.6f : 1.f);
 					const float Wx = W * R.FRandRange(0.7f, 1.f), Wy = W * R.FRandRange(0.7f, 1.f);
-					const FTransform T(FRotator::ZeroRotator, FVector(C.X, C.Y, H * 0.5f), FVector(Wx / 100.f, Wy / 100.f, H / 100.f));
-					(R.FRand() < 0.4f ? Glass : Concrete)->AddInstance(T);
-					// podium
-					Concrete->AddInstance(FTransform(FRotator::ZeroRotator, FVector(C.X, C.Y, 600.f), FVector(Wx * 1.08f / 100.f, Wy * 1.08f / 100.f, 12.f)));
+					FIVBuildingDef D;
+					D.Center = FVector(C.X, C.Y, H * 0.5f);
+					D.Size = FVector(Wx, Wy, H);
+					D.bGlass = R.FRand() < 0.4f;
+					Defs.Add(D);
+					PodiumTransforms.Add(FTransform(FRotator::ZeroRotator, FVector(C.X, C.Y, 600.f), FVector(Wx * 1.08f / 100.f, Wy * 1.08f / 100.f, 12.f)));
 				}
 			}
 		}
 	}
+}
+
+void AIVEnvironment::RebuildStaticInstances()
+{
+	Concrete->ClearInstances();
+	Glass->ClearInstances();
+	TArray<FTransform> C, G;
+	for (const FIVBuildingDef& D : Defs)
+	{
+		if (D.bActive) continue;
+		(D.bGlass ? G : C).Add(FTransform(FRotator::ZeroRotator, D.Center, D.Size / 100.f));
+	}
+	C.Append(PodiumTransforms);
+	Concrete->AddInstances(C, false, true);
+	Glass->AddInstances(G, false, true);
+}
+
+AIVEnvironment* AIVEnvironment::Get(UWorld* World)
+{
+	for (TActorIterator<AIVEnvironment> It(World); It; ++It) return *It;
+	return nullptr;
+}
+
+int32 AIVEnvironment::BlastAt(const FVector& Center, float Radius, float Impulse)
+{
+	int32 Total = 0;
+	bool bChanged = false;
+	for (FIVBuildingDef& D : Defs)
+	{
+		const FBox B = FBox::BuildAABB(D.Center, D.Size * 0.5f).ExpandBy(Radius);
+		if (!B.IsInside(Center)) continue;
+		if (!D.bActive)
+		{
+			AIVBuilding* Bld = GetWorld()->SpawnActor<AIVBuilding>(FVector::ZeroVector, FRotator::ZeroRotator);
+			if (!Bld) continue;
+			UMaterialInterface* M = (D.bGlass ? Glass : Concrete)->GetMaterial(0);
+			Bld->Init(D.Center, D.Size, M, 1100.f);
+			D.Actor = Bld;
+			D.bActive = true;
+			bChanged = true;
+		}
+		if (AIVBuilding* Bld = D.Actor.Get()) Total += Bld->ApplyBlast(Center, Radius, Impulse);
+	}
+	if (bChanged) RebuildStaticInstances();
+	return Total;
+}
+
+int32 AIVEnvironment::CollapseNearestAhead(const FVector& From, const FVector& Dir)
+{
+	int32 Best = INDEX_NONE;
+	float BestD = 1e9f;
+	const FVector D2 = Dir.GetSafeNormal2D();
+	for (int32 i = 0; i < Defs.Num(); ++i)
+	{
+		const FVector To = Defs[i].Center - From;
+		const float Dist = To.Size2D();
+		if (Dist < 4000.f || Dist > 60000.f) continue;
+		if (FVector::DotProduct(To.GetSafeNormal2D(), D2) < 0.9f) continue;
+		if (Dist < BestD) { BestD = Dist; Best = i; }
+	}
+	if (Best == INDEX_NONE) return 0;
+	const FIVBuildingDef& B = Defs[Best];
+	const FVector BaseCenter(B.Center.X, B.Center.Y, 1000.f);
+	const float R = FMath::Max(B.Size.X, B.Size.Y) * 0.78f;
+	return BlastAt(BaseCenter, R, 1500.f);
 }
