@@ -252,6 +252,78 @@ col = lerp(col, float3(0.05, 0.045, 0.04), Wear * 0.25 * frac(h * 91.0) * step(0
     return m
 
 
+def build_mechhull():
+    """Hull of the generated mechs (skeletal mesh): dark painted metal, rest-pose procedural panels/grime (UV0 = rest XY/82+.5,
+    UV1.x = rest Z/82), vertex colour R = convexity (edge wear), G = ambient occlusion, B = zone, A = emissive mask."""
+    m = make_material("M_MechHull")
+    m.set_editor_property("used_with_skeletal_mesh", True)
+    m.set_editor_property("used_with_morph_targets", True)
+    uva = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 0)
+    uva.set_editor_property("coordinate_index", 0)
+    uvb = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 120)
+    uvb.set_editor_property("coordinate_index", 1)
+    vc = expr(m, unreal.MaterialExpressionVertexColor, -1500, 260)
+    tint = vector(m, "Tint", (0.035, 0.037, 0.042, 1), -1500, 420)
+    accent = vector(m, "Accent", (0.55, 0.02, 0.015, 1), -1500, 540)
+    glow = vector(m, "Glow", (7.0, 0.35, 0.09, 1), -1500, 660)
+    wear = scalar(m, "Wear", 0.8, -1500, 780)
+    dmg = scalar(m, "Damage", 0.0, -1500, 880)
+    accamt = scalar(m, "AccentAmount", 1.0, -1500, 980)
+    names = ["UVA", "UVB", "VC", "VCA", "Tint", "Accent", "Glow", "Wear", "Damage", "AccAmt"]
+    srcs = [(uva, ""), (uvb, ""), (vc, ""), (vc, "A"), (tint, ""), (accent, ""), (glow, ""), (wear, ""), (dmg, ""), (accamt, "")]
+    common = """
+float3 P = float3(UVA.x - 0.5, UVA.y - 0.5, UVB.x) * 82.0;
+float conv = VC.r, ao = VC.g, em = VCA;
+float n = 0.0, a = 0.5; float3 p = P * 0.33;
+for (int i = 0; i < 4; i++)
+{
+    float3 ip = floor(p), fp = frac(p);
+    float3 u = fp * fp * (3.0 - 2.0 * fp);
+    float3 k = float3(127.1, 311.7, 74.7);
+    float c000 = frac(sin(dot(ip, k)) * 43758.5453);
+    float c100 = frac(sin(dot(ip + float3(1,0,0), k)) * 43758.5453);
+    float c010 = frac(sin(dot(ip + float3(0,1,0), k)) * 43758.5453);
+    float c110 = frac(sin(dot(ip + float3(1,1,0), k)) * 43758.5453);
+    float c001 = frac(sin(dot(ip + float3(0,0,1), k)) * 43758.5453);
+    float c101 = frac(sin(dot(ip + float3(1,0,1), k)) * 43758.5453);
+    float c011 = frac(sin(dot(ip + float3(0,1,1), k)) * 43758.5453);
+    float c111 = frac(sin(dot(ip + float3(1,1,1), k)) * 43758.5453);
+    n += a * lerp(lerp(lerp(c000, c100, u.x), lerp(c010, c110, u.x), u.y), lerp(lerp(c001, c101, u.x), lerp(c011, c111, u.x), u.y), u.z);
+    p *= 2.07; a *= 0.5;
+}
+float3 q = P / 3.1;
+float3 gq = abs(frac(q) - 0.5);
+float pl = smoothstep(0.465, 0.495, max(max(gq.x, gq.y), gq.z));
+float fine = frac(sin(dot(floor(P * 6.0), float3(12.9898, 78.233, 37.719))) * 43758.5453);
+float edge = saturate((conv - 0.7) * 5.0) * saturate(0.35 + 1.3 * n) * Wear;
+float s = frac((P.x * 0.45 + P.z * 0.55) * 0.23 + n * 0.5);
+float band = smoothstep(0.80, 0.83, s) * smoothstep(0.96, 0.93, s) * smoothstep(0.35, 0.55, n) * AccAmt;
+float soot = smoothstep(1.0 - Damage * 0.95, 1.0, n * 1.25 + 0.15 * (1.0 - ao));
+float3 paint = Tint * (0.7 + 0.7 * n) * (1.0 - 0.45 * pl);
+paint = lerp(paint, Accent * (0.6 + 0.8 * fine), band);
+float3 metal = float3(0.30, 0.29, 0.28) * (0.8 + 0.3 * fine);
+float3 col = lerp(paint, metal, edge);
+col *= lerp(0.4, 1.0, ao);
+col = lerp(col, float3(0.012, 0.011, 0.01), soot);
+"""
+    t = unreal.CustomMaterialOutputType
+    base = custom(m, common + "return col;", t.CMOT_FLOAT3, names, -900, 0, "hull_base")
+    wire_custom(base, srcs)
+    MEL.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = custom(m, common + "return clamp(lerp(0.52, 0.28, edge) + 0.18 * pl + 0.22 * soot + 0.12 * (n - 0.4), 0.2, 0.95);", t.CMOT_FLOAT1, names, -900, 300, "hull_rough")
+    wire_custom(rough, srcs)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    met = custom(m, common + "return saturate(0.25 + 0.75 * edge) * (1.0 - soot);", t.CMOT_FLOAT1, names, -900, 600, "hull_metal")
+    wire_custom(met, srcs)
+    MEL.connect_material_property(met, "", unreal.MaterialProperty.MP_METALLIC)
+    emi = custom(m, common + "float ember = step(0.93, n) * step(0.45, Damage) * saturate(Damage * 2.0 - 0.7) * (0.5 + fine); return Glow * (em * (0.7 + 0.3 * n) + ember * 0.5);", t.CMOT_FLOAT3, names, -900, 900, "hull_emissive")
+    wire_custom(emi, srcs)
+    MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 def build_puff():
     """Soft dust/smoke sprite: procedural radial noise, per-instance age/seed from custom data."""
     m = make_material("M_Puff")
@@ -333,7 +405,7 @@ def build_spark():
     return m
 
 
-for fn in (build_facade, build_ground, build_water, build_armor, build_puff, build_spark, build_propcolor):
+for fn in (build_facade, build_ground, build_water, build_armor, build_mechhull, build_puff, build_spark, build_propcolor):
     try:
         fn()
         unreal.log("IV material OK: %s" % fn.__name__)

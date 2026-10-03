@@ -460,7 +460,7 @@ void AIVMechPawn::DebugBlast(float Radius, float Impulse)
 // ---------------------------------------------------------------------------------------------------------------
 void AIVMechPawn::SetupRig()
 {
-	USkeletalMesh* SM = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Mechs/Bastion/BASTION_01.BASTION_01"));
+	USkeletalMesh* SM = LoadObject<USkeletalMesh>(nullptr, *RigAssetPath);
 	if (!SM) return;
 	static TSharedPtr<FIVRigData> Shared;
 	if (!Shared.IsValid())
@@ -477,6 +477,16 @@ void AIVMechPawn::SetupRig()
 	RigData = Shared;
 	if (!RigDriver.Init(SM)) return;
 	RigMesh->SetSkeletalMesh(SM);
+	if (bUseHullMaterial)
+	{
+		if (UMaterialInterface* HM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_MechHull.M_MechHull")))
+		{
+			HullMID = UMaterialInstanceDynamic::Create(HM, this);
+			HullMID->SetVectorParameterValue(TEXT("Tint"), HullTint);
+			HullMID->SetVectorParameterValue(TEXT("Accent"), HullAccent);
+			for (int32 i = 0; i < RigMesh->GetNumMaterials(); ++i) RigMesh->SetMaterial(i, HullMID);
+		}
+	}
 	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoAnim")))
 	{
 		RigMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -503,6 +513,11 @@ void AIVMechPawn::SetupRig()
 			UE_LOG(LogTemp, Display, TEXT("IV rig local[%d]: %s"), i, *RigAnim->PoseLocal[i].ToHumanReadableString());
 	}
 	UE_LOG(LogTemp, Display, TEXT("IV rig active: %d poses, %d clips, %d bones"), RigData->Poses.Num(), RigData->Clips.Num(), RigDriver.NumBones());
+}
+
+void AIVMechPawn::SetHullDamage(float Amount)
+{
+	if (HullMID) HullMID->SetScalarParameterValue(TEXT("Damage"), FMath::Clamp(Amount, 0.f, 1.f));
 }
 
 void AIVMechPawn::PlayAction(FName Action, float Speed)

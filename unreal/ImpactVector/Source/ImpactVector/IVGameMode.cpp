@@ -47,9 +47,15 @@ void AIVGameMode::StartPlay()
 			if (Dist->GetPoi(TEXT("spawn_player"), L, Y)) { PlayerLoc = FVector(L.X, L.Y, Dist->SampleHeightCm(L.X, L.Y) + 4100.f); PlayerYaw = Y; }
 		}
 	}
-	EnemyMech = W->SpawnActor<AIVMechPawn>(EnemyLoc, FRotator(0.f, EnemyYaw, 0.f), P);
+	EnemyMech = W->SpawnActorDeferred<AIVMechPawn>(AIVMechPawn::StaticClass(), FTransform(FRotator(0.f, EnemyYaw, 0.f), EnemyLoc), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (EnemyMech)
 	{
+		if (!FParse::Param(FCommandLine::Get(), TEXT("IVOldEnemy")))
+		{
+			EnemyMech->RigAssetPath = TEXT("/Game/Mechs/Enemy/ENEMY_01.ENEMY_01");
+			EnemyMech->bUseHullMaterial = true;
+		}
+		EnemyMech->FinishSpawning(FTransform(FRotator(0.f, EnemyYaw, 0.f), EnemyLoc));
 		EnemyMech->bAIControlled = true;
 		EnemyMech->SetBodyTint(FLinearColor(0.9f, 0.45f, 0.4f));
 	}

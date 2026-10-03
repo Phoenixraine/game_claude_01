@@ -59,6 +59,13 @@ public:
 
 	/** Tints all grey-box parts (used to differentiate the enemy). */
 	void SetBodyTint(const FLinearColor& Tint);
+	/** Skeletal mesh asset of this mech (set before BeginPlay); generated hulls get the M_MechHull material. */
+	FString RigAssetPath = TEXT("/Game/Mechs/Bastion/BASTION_01.BASTION_01");
+	bool bUseHullMaterial = false;
+	FLinearColor HullTint = FLinearColor(0.035f, 0.037f, 0.042f);
+	FLinearColor HullAccent = FLinearColor(0.55f, 0.02f, 0.015f);
+	/** 0..1 visible battle damage (soot, embers) on the hull material. */
+	void SetHullDamage(float Amount);
 	/** Hide parts that would block the first-person view. */
 	void SetFirstPersonView(bool bFirstPerson);
 
@@ -161,6 +168,7 @@ protected:
 
 	// ---- rigged mesh driven by the anim library
 	UPROPERTY() TObjectPtr<USkeletalMeshComponent> RigMesh;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> HullMID;
 	UPROPERTY() TObjectPtr<UIVRigAnimInstance> RigAnim;
 	TSharedPtr<FIVRigData> RigData;
 	FIVRigDriver RigDriver;
