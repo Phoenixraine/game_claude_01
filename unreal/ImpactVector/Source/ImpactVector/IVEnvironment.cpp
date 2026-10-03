@@ -17,6 +17,9 @@
 #include "Misc/FileHelper.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
+#include "IVRain.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 AIVEnvironment::AIVEnvironment()
 {
@@ -30,12 +33,22 @@ AIVEnvironment::AIVEnvironment()
 
 	Sun = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("Sun"));
 	Sun->SetupAttachment(Root);
-	Sun->SetRelativeRotation(FRotator(-28.f, 215.f, 0.f));
-	Sun->SetIntensity(7.f);
-	Sun->SetLightColor(FLinearColor(0.78f, 0.87f, 1.0f).ToFColor(true));
+	Sun->SetRelativeRotation(FRotator(5.f, 215.f, 0.f));   // just under the horizon: deep blue twilight sky
+	Sun->SetIntensity(3.f);
+	Sun->SetLightColor(FLinearColor(0.62f, 0.72f, 1.0f).ToFColor(true));
 	Sun->SetAtmosphereSunLight(true);
 	Sun->SetMobility(EComponentMobility::Movable);
 	Sun->SetCastShadows(true);
+
+	Moon = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("Moon"));
+	Moon->SetupAttachment(Root);
+	Moon->SetRelativeRotation(FRotator(-38.f, 140.f, 0.f));
+	Moon->SetIntensity(2.6f);
+	Moon->SetLightColor(FLinearColor(0.55f, 0.66f, 1.0f).ToFColor(true));
+	Moon->SetMobility(EComponentMobility::Movable);
+	Moon->SetCastShadows(true);
+	Moon->SetVolumetricScatteringIntensity(3.f);
+	Moon->SetAtmosphereSunLight(false);
 
 	Atmosphere = CreateDefaultSubobject<USkyAtmosphereComponent>(TEXT("Atmosphere"));
 	Atmosphere->SetupAttachment(Root);
@@ -44,15 +57,18 @@ AIVEnvironment::AIVEnvironment()
 	SkyLight->SetupAttachment(Root);
 	SkyLight->SetMobility(EComponentMobility::Movable);
 	SkyLight->bRealTimeCapture = true;
-	SkyLight->SetIntensity(1.4f);
+	SkyLight->SetIntensity(1.6f);
 
 	Fog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("Fog"));
 	Fog->SetupAttachment(Root);
-	Fog->SetFogDensity(0.012f);
-	Fog->SetFogHeightFalloff(0.08f);
+	Fog->SetFogDensity(0.14f);
+	Fog->SetFogHeightFalloff(0.012f);
 	Fog->SetVolumetricFog(true);
-	Fog->SetFogInscatteringColor(FLinearColor(0.42f, 0.5f, 0.6f));
-	Fog->SetStartDistance(20000.f);
+	Fog->SetVolumetricFogDistance(30000.f);
+	Fog->SetFogInscatteringColor(FLinearColor(0.10f, 0.13f, 0.19f));
+	Fog->SkyAtmosphereAmbientContributionColorScale = FLinearColor(0.12f, 0.16f, 0.26f);
+	Fog->SetFogMaxOpacity(1.f);
+	Fog->SetStartDistance(0.f);
 
 	Clouds = CreateDefaultSubobject<UVolumetricCloudComponent>(TEXT("Clouds"));
 	Clouds->SetupAttachment(Root);
@@ -65,8 +81,8 @@ AIVEnvironment::AIVEnvironment()
 	FPostProcessSettings& S = PostProcess->Settings;
 	S.bOverride_AutoExposureMethod = true;
 	S.AutoExposureMethod = EAutoExposureMethod::AEM_Histogram;
-	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 0.6f;
-	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 3.f;
+	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 3.0f;
+	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 3.0f;
 	S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.4f;
 	S.bOverride_BloomIntensity = true; S.BloomIntensity = 0.45f;
 	S.bOverride_VignetteIntensity = true; S.VignetteIntensity = 0.45f;
@@ -107,6 +123,17 @@ void AIVEnvironment::OnConstruction(const FTransform&)
 void AIVEnvironment::BeginPlay()
 {
 	Super::BeginPlay();
+	{	// weather overrides for tuning: -IVFog= -IVFogFall= -IVSun= -IVSunPitch= -IVSky= ; -IVNoRain
+		float V = 0.f;
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVFog="), V)) Fog->SetFogDensity(V);
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVFogFall="), V)) Fog->SetFogHeightFalloff(V);
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVSun="), V)) Moon->SetIntensity(V);
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVSunPitch="), V)) Moon->SetRelativeRotation(FRotator(V, 140.f, 0.f));
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVSky="), V)) SkyLight->SetIntensity(V);
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVExp="), V)) { FPostProcessSettings& PS = PostProcess->Settings; PS.AutoExposureMinBrightness = V; PS.AutoExposureMaxBrightness = V; }
+		Clouds->SetVisibility(false);
+		if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoRain"))) GetWorld()->SpawnActor<AIVRain>(FVector::ZeroVector, FRotator::ZeroRotator);
+	}
 	UMaterialInterface* Fallback = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
 	UMaterialInterface* Facade = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_BuildingFacade.M_BuildingFacade"));
 	UMaterialInterface* GroundM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_WetGround.M_WetGround"));

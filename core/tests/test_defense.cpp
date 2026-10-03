@@ -207,7 +207,7 @@ IV_TEST(Defense, HardStanceDrainsEnergyAndRootsTheMech) {
   IV_CHECK_EQ(r.Count(EventType::HardStanceOff), 1);
 }
 
-IV_TEST(Defense, DodgeAvoidsStraightStrikesButNotWideSwings) {
+IV_TEST(Defense, DodgeAvoidsLateralSlashesButNotChopsFromAbove) {
   auto run = [](SwingSide side) {
     Rig r;
     r.StartHeavyA(side, Zone::Torso);
@@ -217,8 +217,10 @@ IV_TEST(Defense, DodgeAvoidsStraightStrikesButNotWideSwings) {
     r.StepUntil([&] { return r.Count(EventType::StrikeContact) > 0; }, 100);
     return r.LastOutcome(Side::A);
   };
-  IV_CHECK_EQ(run(SwingSide::Up), static_cast<int>(Outcome::Evaded));
-  IV_CHECK_EQ(run(SwingSide::Left), static_cast<int>(Outcome::Hit));  // pitch §6: vulnerable to wide strikes
+  IV_CHECK_EQ(run(SwingSide::Left), static_cast<int>(Outcome::Evaded));   // v3: the torso turn + half step beats a lateral slash
+  IV_CHECK_EQ(run(SwingSide::Right), static_cast<int>(Outcome::Evaded));
+  IV_CHECK_EQ(run(SwingSide::Up), static_cast<int>(Outcome::Hit));        // ...but not a chop from above
+  IV_CHECK_EQ(run(SwingSide::Down), static_cast<int>(Outcome::Hit));
 }
 
 IV_TEST(Defense, DodgeNeedsTimingAndLeavesTheMechExposedAfterwards) {
@@ -295,7 +297,7 @@ IV_TEST(Defense, InterceptWindowHasTheConfiguredWidthAndIsPunished) {
   }
   IV_CHECK(intercepted >= 1);
   IV_CHECK(intercepted <= tune::kInterceptWindowTicks);  // pitch §7: "перехват 90-140 мс"
-  IV_CHECK(hitsOnDefender >= 10);
+  IV_CHECK(hitsOnDefender >= 1);   // a mistimed counter means a near-full hit (the longer v3 swing leaves fewer such timings)
 }
 
 IV_TEST(Defense, InterceptOnTheWrongLineDoesNotWork) {

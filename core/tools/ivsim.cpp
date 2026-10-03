@@ -31,7 +31,7 @@ struct Totals {
   int duelsWithSever = 0;
   int contacts = 0;
   int aimed[kZoneCount] = {};
-  int outcomes[9] = {};
+  int outcomes[10] = {};
   int wins[kArchetypeCount] = {};
   int losses[kArchetypeCount] = {};
   int drawsBy[kArchetypeCount] = {};
@@ -55,7 +55,7 @@ struct Totals {
   int hitEvents = 0;
 };
 
-const char* kOutcomeNames[9] = {"Hit", "Blocked", "Parried", "Evaded", "Intercepted", "Whiff", "HardStanceBlocked", "Grabbed", "GrabParried"};
+const char* kOutcomeNames[10] = {"Hit", "Blocked", "Parried", "Evaded", "Intercepted", "Whiff", "HardStanceBlocked", "Grabbed", "GrabParried", "Clashed"};
 
 bool ParseArchetype(const char* s, Archetype* out) {
   for (int i = 0; i < kArchetypeCount; ++i) {
@@ -256,7 +256,7 @@ int main(int argc, char** argv) {
     for (int z = 0; z < kZoneCount; ++z) Out("%s %.1f%%%s", Name(static_cast<Zone>(z)), t.contacts ? 100.0 * t.aimed[z] / t.contacts : 0.0, z < kZoneCount - 1 ? ", " : "\n");
 
     Out("\nContact outcomes: ");
-    for (int o = 0; o < 9; ++o) Out("%s %.1f%%%s", kOutcomeNames[o], t.contacts ? 100.0 * t.outcomes[o] / t.contacts : 0.0, o < 8 ? ", " : "\n");
+    for (int o = 0; o < 10; ++o) Out("%s %.1f%%%s", kOutcomeNames[o], t.contacts ? 100.0 * t.outcomes[o] / t.contacts : 0.0, o < 9 ? ", " : "\n");
     const int defended = t.outcomes[1] + t.outcomes[2] + t.outcomes[3] + t.outcomes[4] + t.outcomes[6] + t.outcomes[8];
     Out("\nDefences (block, hard stance, parry, dodge, intercept, grab parry): %d of %d contacts. Parry share of defences %.1f%%, intercept share %.1f%%, "
         "dodge share %.1f%%, plain block share %.1f%%.\n",

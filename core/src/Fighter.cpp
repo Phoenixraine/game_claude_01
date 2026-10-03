@@ -67,6 +67,8 @@ void Fighter::Reset() {
   ultimate = 0.f;
   ultimatePending = false;
   protectedTicks = 0;
+  stunImmune = blindTicks = strikeLockTicks = burnTicks = 0;
+  ultimateLocked = false;
   lastHitTick = -100000;
   lastOwnOutcome = lastIncomingOutcome = Outcome::Whiff;
   lastOwnTarget = lastIncomingZone = Zone::Torso;
@@ -152,6 +154,18 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
   proximity = ctx.proximity;
   lastMove = in.move;
   if (protectedTicks > 0) --protectedTicks;
+  if (stunImmune > 0) --stunImmune;
+  if (blindTicks > 0 && --blindTicks == 0) Emit(ctx, EventType::StatusEnded, Zone::Head, static_cast<int>(StatusKind::Blind));
+  if (strikeLockTicks > 0 && --strikeLockTicks == 0) Emit(ctx, EventType::StatusEnded, Zone::ArmR, static_cast<int>(StatusKind::StrikeLock));
+  if (burnTicks > 0) {
+    res.AddHeat(tune::kBurnHeatPerTick);
+    if (burnTicks % tune::kBurnPeriodTicks == 0) {
+      const DamageResult bd = body.ApplyDamage(Zone::Torso, tune::kBurnDamage, StrikeKind::Quick);
+      Emit(ctx, EventType::BurnTick, Zone::Torso, 0, 0, bd.dealt);
+      if (bd.before != bd.after) Emit(ctx, EventType::ZoneState, Zone::Torso, static_cast<int>(bd.after), static_cast<int>(bd.before));
+    }
+    if (--burnTicks == 0) Emit(ctx, EventType::StatusEnded, Zone::Torso, static_cast<int>(StatusKind::Burn));
+  }
   if (weaponCooldown > 0 && --weaponCooldown == 0) Emit(ctx, EventType::WeaponReady, Zone::ShoulderR, Index(weapon));
 
   if (in.setPriority && res.RequestPriority(in.priority)) Emit(ctx, EventType::EnergyFlow, Zone::Torso, static_cast<int>(in.priority));
@@ -161,6 +175,7 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
       if (++postureTicks >= tune::kStaggerTicks) {
         posture = Posture::Standing;
         res.stability = std::max(res.stability, tune::kStaggerResetStability);
+        stunImmune = tune::kStunImmuneTicks;
         Emit(ctx, EventType::StaggerEnd);
       }
       break;
@@ -168,6 +183,7 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
       if (++postureTicks >= tune::kKnockdownTicks) {
         posture = Posture::Standing;
         res.stability = std::max(res.stability, tune::kKnockdownResetStability);
+        stunImmune = tune::kStunImmuneAfterKnockdownTicks;
         Emit(ctx, EventType::GotUp);
       }
       break;
@@ -185,7 +201,7 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
         if (in.dodge) {
           TryDodge(in, ctx);
         }
-        if (posture == Posture::Standing && phase == Phase::Idle && !weaponCharging && !in.weaponHeld) {
+        if (posture == Posture::Standing && phase == Phase::Idle && !weaponCharging && !in.weaponHeld && strikeLockTicks == 0) {
           if (in.quick) BeginStrike(in, StrikeKind::Quick, ctx);
           else if (in.toGrab && !in.strikeHeld) BeginStrike(in, StrikeKind::Grab, ctx);
           else if (in.strikeHeld) BeginStrike(in, StrikeKind::Heavy, ctx);
@@ -212,7 +228,7 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
         break;
     }
     HandleWeapon(in, ctx);
-    if (in.ultimate && UltimateReady() && !weaponCharging && (phase == Phase::Idle || phase == Phase::Recovery)) {
+    if (in.ultimate && UltimateReady() && !ultimateLocked && !weaponCharging && (phase == Phase::Idle || phase == Phase::Recovery)) {
       ultimatePending = true;
       ultimateTarget = in.target;
     }
@@ -613,6 +629,10 @@ void Fighter::EnterKnockdown(const StepContext& ctx) {
 }
 
 void Fighter::LoseStability(float amount, const StepContext& ctx) {
+  if (stunImmune > 0 && (posture == Posture::Standing || posture == Posture::Dodging)) {   // v3: no chained stun
+    if (amount > 0.f) res.stability = std::max(std::min(res.stability, tune::kStunImmuneFloor), res.stability - amount);
+    return;
+  }
   if (!res.LoseStability(amount)) return;
   if (posture == Posture::Staggered) EnterKnockdown(ctx);
   else if (posture == Posture::Standing || posture == Posture::Dodging) EnterStagger(ctx);
@@ -683,6 +703,35 @@ HitReport Fighter::TakeHit(Zone zone, float damage, StrikeKind kind, float stabi
   r.staggered = before != Posture::Staggered && posture == Posture::Staggered;
   r.knockedDown = before != Posture::KnockedDown && posture == Posture::KnockedDown;
   return r;
+}
+
+void Fighter::ApplyStatus(StatusKind k, int ticks, const StepContext& ctx) {
+  switch (k) {
+    case StatusKind::Blind: blindTicks = std::max(blindTicks, ticks); break;
+    case StatusKind::StrikeLock:
+      strikeLockTicks = std::max(strikeLockTicks, ticks);
+      if (phase == Phase::Windup || phase == Phase::Strike) Interrupt(tune::kInterruptedRecoveryTicks, ctx);
+      break;
+    case StatusKind::Burn: burnTicks = std::max(burnTicks, ticks); break;
+    default: return;
+  }
+  Emit(ctx, EventType::StatusApplied, k == StatusKind::Blind ? Zone::Head : Zone::Torso, static_cast<int>(k), ticks);
+}
+
+void Fighter::ClashBreak(const StepContext& ctx) {
+  const bool wasStriking = phase == Phase::Windup || phase == Phase::Strike || phase == Phase::Contact;
+  if (wasStriking) {
+    const int a = Index(strike.arm);
+    pose[a] = PoseAfter(strike.kind, strike.side);
+    poseIdle[a] = 0;
+  }
+  phase = Phase::Recovery;
+  phaseTicks = 0;
+  recoveryLen = tune::kClashRecoveryTicks;
+  contactPending = false;
+  contactResolved = false;
+  res.AddHeat(tune::kClashHeat);
+  LoseStability(tune::kClashStability, ctx);
 }
 
 void Fighter::EnterClinch() {

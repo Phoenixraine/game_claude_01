@@ -38,7 +38,7 @@ target_link_libraries(iv_tests PRIVATE ivcore)
 target_compile_options(iv_tests PRIVATE ${IV_FLAGS})
 
 # One ctest entry per module so a failure points at the module (filter = "Module.").
-foreach(module IN ITEMS Body Resources Strike Defense Ai Determinism Sim Weapons Ultimate Presentation Anim Dummy)
+foreach(module IN ITEMS Body Resources Strike Defense Ai Determinism Sim Weapons Ultimate Presentation Anim Dummy Clash Dodge Stun Status External)
   add_test(NAME ${module} COMMAND iv_tests "${module}.")
 endforeach()
 add_test(NAME Example COMMAND iv_example)

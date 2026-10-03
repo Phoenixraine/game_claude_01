@@ -66,6 +66,8 @@ class Duel {
   // v2 loadout and training dummy.
   void SetLoadout(Side s, WeaponKind k) { f_[Index(s)].SetLoadout(k); }
   void SetDummy(Side s, DummyMode m) { dummy_[Index(s)].Set(m); }
+  // v3: damage that comes from the world (thrown debris, a crash into a building, a fall). `source`: 0 debris, 1 crash, 2 fall.
+  HitReport ExternalHit(Side victim, Zone zone, float damage, float stability, int source, StatusKind status = StatusKind::Count, int statusTicks = 0);
   Dummy& dummy(Side s) { return dummy_[Index(s)]; }
   EventLog& log() { return log_; }
   const EventLog& log() const { return log_; }
@@ -82,6 +84,7 @@ class Duel {
   StepContext Ctx(int i, const World& w) const;
   Decision Decide(int atk) const;
   void Apply(int atk, const Decision& d, const World& w);
+  void ApplyClash(int first, const World& w);
   void ResolveWeapon(int atk, const World& w);
   void StepChain(const Input* const* in, const World& w);
   void TryReply(int who, const Input& in, const World& w);

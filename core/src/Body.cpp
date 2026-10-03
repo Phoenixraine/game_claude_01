@@ -121,6 +121,16 @@ void Body::Recompute() {
   mods_ = m;
 }
 
+float Body::Integrity() const {
+  float have = 0.f, all = 0.f;
+  for (int z = 0; z < kZoneCount; ++z) {
+    const float w = tune::kZoneDamageMult[z];
+    have += w * (zone_[z].layer[0] + zone_[z].layer[1] + zone_[z].layer[2]);
+    all += w * (tune::kArmorMax[z] + tune::kMechanismMax[z] + tune::kSystemMax[z]);
+  }
+  return all > 0.f ? have / all : 0.f;
+}
+
 int Body::DamagedLimbs() const {
   int n = 0;
   const Zone limbs[] = {Zone::ArmL, Zone::ArmR, Zone::LegL, Zone::LegR};

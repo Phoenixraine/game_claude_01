@@ -50,6 +50,7 @@ enum class Outcome : uint8_t {
   HardStanceBlocked,
   Grabbed,
   GrabParried,
+  Clashed,      // v3: two blades met on the same line; both strikes stopped
 };
 
 // Per-tick data handed to a Fighter by whoever owns the world (Duel or the game layer).
@@ -127,6 +128,11 @@ class Fighter {
   bool LegsLocked() const { return weaponCharging && WeaponProf().locksLegs; }
   void ForceStagger(const StepContext& ctx) { if (posture == Posture::Standing || posture == Posture::Dodging) EnterStagger(ctx); }
   void ConsumeUltimate() { ultimate = 0.f; ultimatePending = false; }
+  // v3
+  void ApplyStatus(StatusKind k, int ticks, const StepContext& ctx);
+  bool Blind() const { return blindTicks > 0; }
+  // Two blades met: the strike (or windup) is dropped into a long recovery.
+  void ClashBreak(const StepContext& ctx);
 
   // ---- queries ---------------------------------------------------------------------------
   Side side() const { return side_; }
@@ -178,6 +184,11 @@ class Fighter {
   bool ultimatePending = false; // the ultimate button was accepted this tick; Duel resolves it
   Zone ultimateTarget = Zone::Torso;
   int protectedTicks = 0;       // v2: invulnerable after an external cut
+  int stunImmune = 0;           // v3: ticks during which new stability loss cannot stagger again
+  int blindTicks = 0;           // v3 status: sensors blinded (rockets, thrown debris)
+  int strikeLockTicks = 0;      // v3 status: cannot start strikes (rail spear)
+  int burnTicks = 0;            // v3 status: burning (plasma)
+  bool ultimateLocked = false;  // v3: the off-hand arm was cut off, the ultimate is gone
   Tick lastHitTick = -100000;
   // Bookkeeping the pilot can feel or see; feeds the AI observation (never the opponent's intent).
   Outcome lastOwnOutcome = Outcome::Whiff;       // result of this fighter's last strike
@@ -213,8 +224,14 @@ class Fighter {
 ArmPose PoseAfter(StrikeKind kind, SwingSide side);
 // Lines a counter may take against a given attack (pitch §7 "Перехват").
 bool IsInterceptLine(SwingSide attack, SwingSide counter);
-// Dodging gets out of the way of straight strikes only; wide swings still catch a sidestep (pitch §6).
+// v3 rule: the torso-turn + half-step dodge gets out of the way of lateral slashes only; a chop from above or a rising cut follows the mech.
+inline bool IsLateralSwing(SwingSide s) { return s == SwingSide::Left || s == SwingSide::Right; }
 inline bool IsLinearSwing(SwingSide s) { return s == SwingSide::Up || s == SwingSide::Down; }
+// v3: two strikes meet if they come along the same line in the world: Up/Up, Down/Down, or opposite screen sides (Left/Right).
+inline bool SameLine(SwingSide a, SwingSide b) {
+  if (a == SwingSide::Up || a == SwingSide::Down) return a == b;
+  return b == SwingSide::Left || b == SwingSide::Right ? a != b : false;
+}
 // Zone of the blocking arm that takes the load (pitch §6 "нагружает блокирующую руку").
 Zone GuardZone(SwingSide s);
 // The arm that does the blocking for a given sector.

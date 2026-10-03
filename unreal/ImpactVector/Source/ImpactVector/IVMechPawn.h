@@ -120,6 +120,26 @@ protected:
 	USceneComponent* AddPivot(USceneComponent* Parent, const FName& Name, const FVector& Location);
 	void BuildBody();
 	void BuildCockpit();
+	void UpdateCockpitArms(float Dt);
+
+	/** Pilot-scale arm rig in the cockpit (two-bone chain from a wall anchor to a glove that follows the mech hand). */
+	struct FCockpitArm
+	{
+		UStaticMeshComponent* Upper = nullptr;
+		UStaticMeshComponent* Fore = nullptr;
+		UStaticMeshComponent* Glove = nullptr;
+		FVector NeutralRel = FVector::ZeroVector;
+		FQuat NeutralRot = FQuat::Identity;
+		bool bHaveNeutral = false;
+		FVector Smoothed = FVector::ZeroVector;
+		FQuat SmoothedRot = FQuat::Identity;
+	};
+	FCockpitArm CockpitArm[2];   // 0 = left, 1 = right
+	UPROPERTY() TObjectPtr<UStaticMeshComponent> CockpitShellMesh;
+	UPROPERTY() TObjectPtr<UStaticMeshComponent> CockpitGlassMesh;
+	UPROPERTY() TArray<TObjectPtr<class UPointLightComponent>> CockpitLights;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> CockpitMID;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> GlassMID;
 
 	void UpdateLocomotion(float Dt);
 	void UpdateRig(float Dt);

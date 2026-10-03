@@ -241,9 +241,9 @@ IV_TEST(Ultimate, FullGaugeTriggersTheCinematicAndConsumesTheGauge) {
   IV_CHECK_EQ(r.Count(EventType::UltimateUsed), 1);
   IV_CHECK_EQ(r.A().ultimate, 0.f);
   IV_CHECK(r.duel.cinematic().active);
-  IV_CHECK(r.duel.cinematic().kind == CinematicKind::Ultimate);
+  IV_CHECK(r.duel.cinematic().kind == CinematicKind::UltimateSever || r.duel.cinematic().kind == CinematicKind::UltimateBisect);
   const Event* b = Find(r, EventType::CinematicBegin);
-  IV_CHECK(b != nullptr && b->a == static_cast<int>(CinematicKind::Ultimate) && b->b == tune::kUltimateCinematicTicks);
+  IV_CHECK(b != nullptr && (b->a == static_cast<int>(CinematicKind::UltimateSever) || b->a == static_cast<int>(CinematicKind::UltimateBisect)) && b->b == tune::kUltimateCinematicTicks);
   IV_CHECK(TotalHp(r.B()) < before - 20.f);
   IV_CHECK(Find(r, EventType::HitEvent) != nullptr);
 }
@@ -399,6 +399,9 @@ IV_TEST(Presentation, StaggerBeginAndEndAreBalancedAndKnockdownFollowsASecondCol
   IV_CHECK_EQ(r.Count(EventType::StaggerBegin), 1);
   r.Step(tune::kStaggerTicks + 2);
   IV_CHECK_EQ(r.Count(EventType::StaggerEnd), 1);
+  r.A().LoseStability(500.f, ctx);                      // v3: right after a stagger the mech shrugs off more stability loss
+  IV_CHECK_EQ(r.Count(EventType::StaggerBegin), 1);
+  r.Step(tune::kStunImmuneTicks + 2);
   r.A().LoseStability(500.f, ctx);
   r.A().LoseStability(500.f, ctx);
   IV_CHECK_EQ(r.Count(EventType::Knockdown), 1);
@@ -638,6 +641,7 @@ IV_TEST(Dummy, BlockOnlyDummyRaisesTheRightGuardAfterAHumanReactionTime) {
   r.Step(10);
   IV_CHECK(r.B().guard.held);
   IV_CHECK(r.B().guard.side == SwingSide::Right);
+  r.Step(tune::kWindupMinTicks);   // keep winding up until a release is legal
   r.a.strikeHeld = false;
   r.StepUntil([&] { return r.Count(EventType::StrikeContact) > 0; });
   IV_CHECK(r.LastOutcome(Side::A) == static_cast<int>(Outcome::Blocked) || r.LastOutcome(Side::A) == static_cast<int>(Outcome::Parried));

@@ -46,6 +46,8 @@ struct SelfView {
   uint8_t allowedSides[2] = {0b1111, 0b1111};  // own arms: which swing families still work
   bool canGrab = true;
   bool windupReady = false;    // own heavy windup has reached its minimum length
+  bool blinded = false;        // v3: rockets / debris in the sensors: the opponent's swing sector cannot be read
+  bool strikeLocked = false;   // v3: arm actuators jammed
 };
 
 // What can be seen or heard of the opponent. Deliberately has no target zone, no windup duration,

@@ -20,6 +20,7 @@
 #include "IVFXManager.h"
 #include "IVBuilding.h"
 #include "IVAudio.h"
+#include "Components/PointLightComponent.h"
 
 static TAutoConsoleVariable<int32> CVarIVCam(TEXT("iv.Cam"), 0,
 	TEXT("0 = cockpit, 1 = chase, 2 = side, 3 = front orbit, 4 = both mechs from the side"), ECVF_Default);
@@ -135,24 +136,50 @@ void AIVMechPawn::BuildCockpit()
 
 	CockpitSway = AddPivot(Camera, TEXT("CockpitSway"), FVector::ZeroVector);
 
-	auto CP = [this](const TCHAR* Name, FVector Size, FVector Loc, FRotator Rot = FRotator::ZeroRotator)
+	auto CM = [this](const TCHAR* Name, const TCHAR* Path, bool bSolid) -> UStaticMeshComponent*
 	{
-		UStaticMeshComponent* M = AddBlock(CockpitSway, Name, Size, Loc, FLinearColor::Black);
-		M->SetRelativeRotation(Rot);
-		AllMeshes.Remove(M);   // cockpit parts are not tinted with the body
-		CockpitMeshes.Add(M);
+		UStaticMeshComponent* M = CreateDefaultSubobject<UStaticMeshComponent>(Name);
+		M->SetupAttachment(CockpitSway);
+		ConstructorHelpers::FObjectFinder<UStaticMesh> F(Path);
+		if (F.Succeeded()) M->SetStaticMesh(F.Object);
+		M->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		M->SetCastShadow(false);
 		M->SetOnlyOwnerSee(true);
+		M->bAffectDynamicIndirectLighting = false;
+		M->SetLightingChannels(false, true, false);   // cockpit lights live on channel 1 only
+		CockpitMeshes.Add(M);
+		return M;
 	};
-	// grey-box cockpit until TASK-003 lands: dash slab, pillars, top bar, control frames and grips
-	CP(TEXT("Cockpit_Dash"), FVector(60, 150, 14), FVector(55, 0, -42), FRotator(-12, 0, 0));
-	CP(TEXT("Cockpit_PillarL"), FVector(16, 10, 150), FVector(48, -92, 0), FRotator(0, 0, 8));
-	CP(TEXT("Cockpit_PillarR"), FVector(16, 10, 150), FVector(48, 92, 0), FRotator(0, 0, -8));
-	CP(TEXT("Cockpit_Top"), FVector(30, 190, 10), FVector(45, 0, 52), FRotator(8, 0, 0));
-	CP(TEXT("Cockpit_FrameL"), FVector(28, 22, 18), FVector(42, -52, -34));
-	CP(TEXT("Cockpit_FrameR"), FVector(28, 22, 18), FVector(42, 52, -34));
-	CP(TEXT("Cockpit_GripL"), FVector(8, 8, 26), FVector(36, -52, -22), FRotator(-15, 0, 0));
-	CP(TEXT("Cockpit_GripR"), FVector(8, 8, 26), FVector(36, 52, -22), FRotator(-15, 0, 0));
+	CockpitShellMesh = CM(TEXT("CockpitShell"), TEXT("/Game/Cockpit/SM_Cockpit_Shell.SM_Cockpit_Shell"), true);
+	CockpitGlassMesh = CM(TEXT("CockpitGlass"), TEXT("/Game/Cockpit/SM_Cockpit_Glass.SM_Cockpit_Glass"), false);
+	for (int32 i = 0; i < 2; ++i)
+	{
+		const FString S = (i == 0) ? TEXT("L") : TEXT("R");
+		CockpitArm[i].Upper = CM(*(TEXT("RigUpper") + S), TEXT("/Game/Cockpit/SM_Rig_Upper.SM_Rig_Upper"), true);
+		CockpitArm[i].Fore = CM(*(TEXT("RigFore") + S), TEXT("/Game/Cockpit/SM_Rig_Fore.SM_Rig_Fore"), true);
+		CockpitArm[i].Glove = CM(*(TEXT("RigGlove") + S), TEXT("/Game/Cockpit/SM_Rig_Glove.SM_Rig_Glove"), true);
+	}
+	struct FLamp { const TCHAR* N; FVector P; FLinearColor C; float I; float R; };
+	const FLamp Lamps[] = {
+		{ TEXT("LampDash"), FVector(20, 0, 14), FLinearColor(0.15f, 0.85f, 1.f), 7.f, 190.f },
+		{ TEXT("LampLeft"), FVector(40, -120, -20), FLinearColor(1.f, 0.4f, 0.1f), 5.f, 170.f },
+		{ TEXT("LampRight"), FVector(40, 120, -20), FLinearColor(1.f, 0.4f, 0.1f), 5.f, 170.f },
+		{ TEXT("LampTop"), FVector(10, 0, 62), FLinearColor(0.6f, 0.75f, 1.f), 6.f, 220.f },
+	};
+	for (const FLamp& L : Lamps)
+	{
+		UPointLightComponent* PL = CreateDefaultSubobject<UPointLightComponent>(L.N);
+		PL->SetupAttachment(CockpitSway);
+		PL->SetRelativeLocation(L.P);
+		PL->SetLightColor(L.C);
+		PL->SetIntensityUnits(ELightUnits::Candelas);
+		PL->SetIntensity(L.I);
+		PL->SetAttenuationRadius(L.R);
+		PL->SetCastShadows(false);
+		PL->SetLightingChannels(false, true, false);
+		PL->SetSourceRadius(6.f);
+		CockpitLights.Add(PL);
+	}
 }
 
 void AIVMechPawn::BeginPlay()
@@ -177,7 +204,20 @@ void AIVMechPawn::BeginPlay()
 		if (N.Contains(TEXT("forearm")) || N.Contains(TEXT("shin"))) C = FLinearColor(0.30f, 0.32f, 0.34f);
 		MakeMID(M, C);
 	}
-	for (UStaticMeshComponent* M : CockpitMeshes) MakeMID(M, FLinearColor(0.02f, 0.022f, 0.026f));
+	{
+		UMaterialInterface* CockM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Cockpit.M_Cockpit"));
+		UMaterialInterface* GlassM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_CockpitGlass.M_CockpitGlass"));
+		if (CockM)
+		{
+			CockpitMID = UMaterialInstanceDynamic::Create(CockM, this);
+			for (UStaticMeshComponent* M : CockpitMeshes) if (M != CockpitGlassMesh) M->SetMaterial(0, CockpitMID);
+		}
+		if (GlassM && CockpitGlassMesh)
+		{
+			GlassMID = UMaterialInstanceDynamic::Create(GlassM, this);
+			CockpitGlassMesh->SetMaterial(0, GlassMID);
+		}
+	}
 
 	SetupRig();
 	OnFootfall.AddLambda([this](int32 Side, float Strength)
@@ -234,7 +274,7 @@ void AIVMechPawn::Tick(float Dt)
 	if (bAIControlled && !bExternalControl) UpdateAI(Dt);
 	UpdateLocomotion(Dt);
 	if (bRigActive) UpdateRig(Dt); else UpdateGait(Dt);
-	if (IsLocallyControlled() || GetIVCam() != 0) UpdateCockpitCamera(Dt);
+	if (IsLocallyControlled() || GetIVCam() != 0) { UpdateCockpitCamera(Dt); UpdateCockpitArms(Dt); }
 }
 
 void AIVMechPawn::UpdateAI(float Dt)
@@ -354,6 +394,70 @@ void AIVMechPawn::UpdateGait(float Dt)
 	PelvisPivot->SetRelativeLocation(FVector(0, 0, 200.f + PelvisBob));
 	PelvisPivot->SetRelativeRotation(FRotator(0, 0, 2.2f * A * FMath::Sin(GaitPhase * kTwoPi)));
 }
+
+void AIVMechPawn::UpdateCockpitArms(float Dt)
+{
+	if (!Camera || !CockpitArm[0].Upper) return;
+	const FTransform CamT = CockpitSway->GetComponentTransform();   // children use this frame
+	const float L1 = 55.f, L2 = 55.f;
+	for (int32 i = 0; i < 2; ++i)
+	{
+		FCockpitArm& A = CockpitArm[i];
+		const float Sd = (i == 0) ? -1.f : 1.f;           // UE: left = -Y
+		const FVector Anchor(15.f, Sd * 100.f, -72.f);
+		const FVector Rest(88.f, Sd * 70.f, -16.f);
+		FVector Tgt = Rest;
+		FQuat GloveRot = FQuat::Identity;
+		if (bRigActive && RigMesh)
+		{
+			const FName HandBone = (i == 0) ? FName(TEXT("hand_l")) : FName(TEXT("hand_r"));
+			const FVector HandW = RigMesh->GetBoneLocation(HandBone, EBoneSpaces::WorldSpace);
+			const FQuat HandQ = RigMesh->GetBoneQuaternion(HandBone, EBoneSpaces::WorldSpace);
+			const FVector Rel = CamT.InverseTransformPosition(HandW);
+			const FQuat RelQ = CamT.GetRotation().Inverse() * HandQ;
+			if (!A.bHaveNeutral)
+			{
+				A.NeutralRel = Rel; A.NeutralRot = RelQ; A.bHaveNeutral = true;
+				A.Smoothed = Rest; A.SmoothedRot = FQuat::Identity;
+			}
+			const float K = 0.0105f;
+			FVector D = (Rel - A.NeutralRel) * K;
+			D.X = FMath::Clamp(D.X, -40.f, 55.f);
+			D.Y = FMath::Clamp(D.Y * 0.8f, -35.f, 35.f);
+			D.Z = FMath::Clamp(D.Z, -28.f, 38.f);
+			Tgt = Rest + D;
+			FQuat Delta = RelQ * A.NeutralRot.Inverse();
+			Delta.Normalize();
+			GloveRot = FQuat::Slerp(FQuat::Identity, Delta, 0.55f);
+		}
+		const float Kf = 1.f - FMath::Exp(-Dt * 22.f);
+		A.Smoothed = FMath::Lerp(A.Smoothed, Tgt, Kf);
+		A.SmoothedRot = FQuat::Slerp(A.SmoothedRot, GloveRot, Kf);
+
+		// two-bone IK from the wall anchor to the wrist
+		FVector ToT = A.Smoothed - Anchor;
+		float Dist = FMath::Clamp(ToT.Size(), FMath::Abs(L1 - L2) + 4.f, L1 + L2 - 1.f);
+		const FVector Dir = ToT.GetSafeNormal();
+		const FVector Pole = FVector(-0.1f, Sd * 0.55f, -1.f).GetSafeNormal();   // elbow drops outward/down
+		FVector PoleOrtho = (Pole - Dir * FVector::DotProduct(Pole, Dir)).GetSafeNormal();
+		const float Aa = (L1 * L1 - L2 * L2 + Dist * Dist) / (2.f * Dist);
+		const float Hh = FMath::Sqrt(FMath::Max(L1 * L1 - Aa * Aa, 0.f));
+		const FVector Elbow = Anchor + Dir * Aa + PoleOrtho * Hh;
+		const FVector Wrist = Anchor + Dir * Dist;
+		const FVector Up(0.f, Sd * 0.25f, 1.f);
+		const FVector Sc(1.f, -Sd * -1.f * (i == 0 ? 1.f : -1.f), 1.f);
+		auto Place = [&](UStaticMeshComponent* M, const FVector& P, const FQuat& Q)
+		{
+			M->SetRelativeLocationAndRotation(P, Q);
+			M->SetRelativeScale3D(FVector(1.f, (i == 0) ? 1.f : -1.f, 1.f));
+		};
+		Place(A.Upper, Anchor, FRotationMatrix::MakeFromXZ((Elbow - Anchor).GetSafeNormal(), Up).ToQuat());
+		Place(A.Fore, Elbow, FRotationMatrix::MakeFromXZ((Wrist - Elbow).GetSafeNormal(), Up).ToQuat());
+		const FQuat Base = FRotationMatrix::MakeFromXZ((Wrist - Elbow).GetSafeNormal(), Up).ToQuat();
+		Place(A.Glove, Wrist, A.SmoothedRot * Base);
+	}
+}
+
 
 void AIVMechPawn::UpdateCockpitCamera(float Dt)
 {

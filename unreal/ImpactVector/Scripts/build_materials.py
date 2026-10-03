@@ -66,7 +66,7 @@ def build_facade():
     tint = vector(m, "Tint", (0.22, 0.23, 0.25, 1), -1200, 450)
     glass = vector(m, "GlassColor", (0.025, 0.04, 0.06, 1), -1200, 600)
     spacing = scalar(m, "WindowSpacing", 400.0, -1200, 750)
-    lit = scalar(m, "LitAmount", 0.0, -1200, 850)
+    lit = scalar(m, "LitAmount", 1.0, -1200, 850)
     glassiness = scalar(m, "Glassiness", 0.55, -1200, 950)
 
     common = """
@@ -97,9 +97,9 @@ return lerp(0.82, 0.08 + 0.2 * hash, win * Gls);
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
 
     emis = custom(m, common + """
-float on = step(0.82, hash) * win * Lit;
+float on = step(0.6, hash) * win * Lit;
 float3 warm = lerp(float3(1.0, 0.82, 0.55), float3(0.7, 0.85, 1.0), frac(hash * 13.0));
-return warm * on * 6.0;
+return warm * on * 3.2;
 """, unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["WP", "Nrm", "Rnd", "Spacing", "Lit"], -700, 650, "facade_emissive")
     wire_custom(emis, [(wp, ""), (nrm, ""), (rnd, ""), (spacing, ""), (lit, "")])
     MEL.connect_material_property(emis, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
@@ -324,6 +324,197 @@ col = lerp(col, float3(0.012, 0.011, 0.01), soot);
     return m
 
 
+def build_rain():
+    """Rain streaks: every instance wraps around the camera inside a box and falls, all in the vertex shader (no CPU cost)."""
+    m = make_material("M_Rain")
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("two_sided", True)
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    obj = expr(m, unreal.MaterialExpressionObjectPositionWS, -1400, 0)
+    cam = expr(m, unreal.MaterialExpressionCameraPositionWS, -1400, 120)
+    tm = expr(m, unreal.MaterialExpressionTime, -1400, 240)
+    speed = scalar(m, "Speed", 3200.0, -1400, 480)
+    wind = scalar(m, "Wind", 700.0, -1400, 580)
+    boxh = scalar(m, "BoxXY", 18000.0, -1400, 680)
+    boxv = scalar(m, "BoxZ", 12000.0, -1400, 780)
+    names = ["P0", "Cam", "T", "Speed", "Wind", "BX", "BZ"]
+    srcs = [(obj, ""), (cam, ""), (tm, ""), (speed, ""), (wind, ""), (boxh, ""), (boxv, "")]
+    code_pos = """
+float3 R = P0 - Cam;
+R.z -= Speed * T;
+R.x += Wind * T;
+float3 box = float3(BX, BX, BZ);
+R = R + box * 0.5;
+R = R - box * floor(R / box);
+R = R - box * 0.5;
+float3 newP = Cam + R;
+"""
+    t = unreal.CustomMaterialOutputType
+    wpo = custom(m, code_pos + "return newP - P0;", t.CMOT_FLOAT3, names, -900, 0, "rain_wpo")
+    wire_custom(wpo, srcs)
+    MEL.connect_material_property(wpo, "", unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
+    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(500.0, 2600.0, d) * (1.0 - smoothstep(6000.0, 9000.0, d)); return 0.26 * fade;",
+                t.CMOT_FLOAT1, names, -900, 300, "rain_opacity")
+    wire_custom(op, srcs)
+    MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
+    col = vector(m, "Color", (0.55, 0.62, 0.72, 1), -900, 600)
+    MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+def build_cockpit():
+    """Cockpit interior: procedural by material class (UV1.y, see art/cockpit/build_cockpit.py) and local position."""
+    m = make_material("M_Cockpit")
+    uv0 = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 0)
+    uv0.set_editor_property("coordinate_index", 0)
+    uv1 = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 120)
+    uv1.set_editor_property("coordinate_index", 1)
+    tm = expr(m, unreal.MaterialExpressionTime, -1500, 240)
+    power = scalar(m, "Power", 1.0, -1500, 360)
+    alert = scalar(m, "Alert", 0.0, -1500, 460)
+    wet = scalar(m, "Wet", 0.5, -1500, 560)
+    dmg = scalar(m, "Damage", 0.0, -1500, 660)
+    names = ["A", "Bq", "T", "Power", "Alert", "Wet", "Damage"]
+    srcs = [(uv0, ""), (uv1, ""), (tm, ""), (power, ""), (alert, ""), (wet, ""), (dmg, "")]
+    common = """
+float3 P = float3((A.x - 0.5) * 2.0, (0.5 - A.y) * 2.0, (Bq.x - 0.5) * 2.0);
+float cls = 1.0 - Bq.y;
+float c0 = step(-0.5, cls) * step(cls, 0.5);
+float c1 = step(0.5, cls) * step(cls, 1.5);
+float c2 = step(1.5, cls) * step(cls, 2.5);
+float c3 = step(2.5, cls) * step(cls, 3.5);
+float c4 = step(3.5, cls) * step(cls, 4.5);
+float c5 = step(4.5, cls) * step(cls, 5.5);
+float c6 = step(5.5, cls) * step(cls, 6.5);
+float c7 = step(6.5, cls);
+float n = 0.0, a = 0.5; float3 p = P * 9.0;
+for (int i = 0; i < 4; i++)
+{
+    float3 ip = floor(p), fp = frac(p);
+    float3 u = fp * fp * (3.0 - 2.0 * fp);
+    float3 k = float3(127.1, 311.7, 74.7);
+    float c000 = frac(sin(dot(ip, k)) * 43758.5453);
+    float c100 = frac(sin(dot(ip + float3(1,0,0), k)) * 43758.5453);
+    float c010 = frac(sin(dot(ip + float3(0,1,0), k)) * 43758.5453);
+    float c110 = frac(sin(dot(ip + float3(1,1,0), k)) * 43758.5453);
+    float c001 = frac(sin(dot(ip + float3(0,0,1), k)) * 43758.5453);
+    float c101 = frac(sin(dot(ip + float3(1,0,1), k)) * 43758.5453);
+    float c011 = frac(sin(dot(ip + float3(0,1,1), k)) * 43758.5453);
+    float c111 = frac(sin(dot(ip + float3(1,1,1), k)) * 43758.5453);
+    n += a * lerp(lerp(lerp(c000, c100, u.x), lerp(c010, c110, u.x), u.y), lerp(lerp(c001, c101, u.x), lerp(c011, c111, u.x), u.y), u.z);
+    p *= 2.13; a *= 0.5;
+}
+float fine = frac(sin(dot(floor(P * 90.0), float3(12.9898, 78.233, 37.719))) * 43758.5453);
+float cell = frac(sin(dot(floor(P * 38.0), float3(91.7, 37.3, 11.1))) * 43758.5453);
+float scan = 0.55 + 0.45 * sin(P.z * 700.0 - T * 6.0);
+float grid = step(0.93, frac(P.y * 22.0)) + step(0.93, frac(P.z * 22.0));
+float blink = step(0.5, frac(T * (0.4 + cell * 1.3) + cell * 9.0));
+float wear = smoothstep(0.62, 0.78, n) * (0.6 + 0.4 * fine);
+float streak = smoothstep(0.55, 0.9, frac(sin(floor(P.y * 140.0) * 91.7) * 437.5)) * smoothstep(0.35, 0.8, n);
+"""
+    t = unreal.CustomMaterialOutputType
+    base = custom(m, common + """
+float3 dark = float3(0.022, 0.024, 0.027) * (0.7 + 0.8 * n);
+dark = lerp(dark, float3(0.12, 0.12, 0.125), wear * 0.7);
+float3 grey = lerp(float3(0.14, 0.15, 0.165) * (0.7 + 0.6 * n), float3(0.27, 0.27, 0.27), wear);
+float3 org = lerp(float3(0.33, 0.085, 0.006) * (0.75 + 0.5 * n), float3(0.16, 0.13, 0.1), smoothstep(0.7, 0.85, n));
+float3 rub = float3(0.010, 0.010, 0.012) * (0.7 + 0.6 * fine);
+float3 col = dark * c0 + grey * c1 + org * c2 + rub * c3 + float3(0.005, 0.01, 0.012) * c4 + float3(0.02, 0.01, 0.005) * c5 + float3(0.0, 0.0, 0.0) * c6 + float3(0.02, 0.0, 0.0) * c7;
+col *= (1.0 - 0.35 * streak * Wet);
+col = lerp(col, col * 0.3, Damage * smoothstep(0.5, 0.9, n));
+return col;
+""", t.CMOT_FLOAT3, names, -900, 0, "cockpit_base")
+    wire_custom(base, srcs)
+    MEL.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = custom(m, common + """
+float r = c0 * (0.38 + 0.3 * wear) + c1 * (0.5 + 0.35 * wear) + c2 * 0.5 + c3 * 0.92 + c4 * 0.15 + c5 * 0.3 + c6 * 0.05 + c7 * 0.3;
+r = lerp(r, 0.12, Wet * 0.5 * streak * (1.0 - c3));
+return clamp(r, 0.04, 0.98);
+""", t.CMOT_FLOAT1, names, -900, 300, "cockpit_rough")
+    wire_custom(rough, srcs)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    metal = custom(m, common + "return c0 * 0.85 + c1 * (0.2 + 0.7 * wear) + c2 * 0.15 + c4 * 0.1;", t.CMOT_FLOAT1, names, -900, 600, "cockpit_metal")
+    wire_custom(metal, srcs)
+    MEL.connect_material_property(metal, "", unreal.MaterialProperty.MP_METALLIC)
+    emi = custom(m, common + """
+float3 cyan = float3(0.0, 0.9, 1.25) * (0.35 + 0.65 * scan) * (0.6 + 0.4 * grid + 0.5 * step(0.8, n));
+float3 org = float3(1.0, 0.33, 0.04) * (0.55 + 0.45 * blink);
+float3 red = float3(1.0, 0.03, 0.02) * (0.4 + 0.6 * blink) * (1.0 + 2.0 * Alert);
+float flick = Power * (0.92 + 0.08 * sin(T * 53.0)) * (1.0 - Damage * step(0.6, frac(T * 7.0 + cell)));
+return (c4 * cyan * 1.8 + c5 * org * 3.0 + c7 * red * 3.0) * flick + c2 * float3(0.4, 0.05, 0.0) * Alert * 0.2;
+""", t.CMOT_FLOAT3, names, -900, 900, "cockpit_emissive")
+    wire_custom(emi, srcs)
+    MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+def build_cockpit_glass():
+    """Canopy glass seen from inside: rain drops (refractive lens bumps) + running streaks; mostly clear."""
+    m = make_material("M_CockpitGlass")
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    m.set_editor_property("two_sided", True)
+    m.set_editor_property("refraction_method", unreal.RefractionMode.RM_PIXEL_NORMAL_OFFSET)
+    uv0 = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 0)
+    uv0.set_editor_property("coordinate_index", 0)
+    uv1 = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 120)
+    uv1.set_editor_property("coordinate_index", 1)
+    tm = expr(m, unreal.MaterialExpressionTime, -1500, 240)
+    rain = scalar(m, "Rain", 1.0, -1500, 360)
+    crack = scalar(m, "Crack", 0.0, -1500, 460)
+    names = ["A", "Bq", "T", "Rain", "Crack"]
+    srcs = [(uv0, ""), (uv1, ""), (tm, ""), (rain, ""), (crack, "")]
+    common = """
+float2 g = float2((0.5 - A.y) * 2.0, (Bq.x - 0.5) * 2.0);      // lateral, height (m)
+float2 q = g / 0.05;
+float2 id = floor(q), f = frac(q);
+float best = 9.0; float2 bo = float2(0, 0); float br = 0.1;
+for (int j = -1; j <= 1; j++)
+for (int i = -1; i <= 1; i++)
+{
+    float2 cid = id + float2(i, j);
+    float h1 = frac(sin(dot(cid, float2(127.1, 311.7))) * 43758.5453);
+    float h2 = frac(sin(dot(cid, float2(269.5, 183.3))) * 43758.5453);
+    float h3 = frac(sin(dot(cid, float2(419.2, 371.9))) * 43758.5453);
+    float2 pos = float2(i, j) + float2(h1, h2);
+    float rad = 0.07 + 0.22 * h3 * h3;
+    float on = step(0.5 + 0.4 * (1.0 - Rain), h3);
+    float2 d = pos - f;
+    float dl = length(d) / rad;
+    if (on > 0.5 && dl < best) { best = dl; bo = d / rad; br = rad; }
+}
+float inside = step(best, 1.0);
+float cap = sqrt(saturate(1.0 - best * best));
+float3 nrm = float3(-bo * (1.0 - cap) * 1.4 * inside, 1.0);
+float sx = frac(sin(floor(g.x * 55.0) * 91.7) * 437.5);
+float sy = frac(g.y * 3.0 + sx * 7.0 - T * (0.02 + 0.05 * sx));
+float run = step(0.82, sx) * smoothstep(0.0, 0.2, sy) * smoothstep(0.6, 0.2, sy) * Rain;
+"""
+    t = unreal.CustomMaterialOutputType
+    nrmn = custom(m, common + "return normalize(float3(nrm.xy + float2(0, 0.35) * run, nrm.z));", t.CMOT_FLOAT3, names, -900, 0, "glass_normal")
+    wire_custom(nrmn, srcs)
+    MEL.connect_material_property(nrmn, "", unreal.MaterialProperty.MP_NORMAL)
+    op = custom(m, common + "return saturate(0.025 + inside * (0.10 + 0.35 * (1.0 - cap)) + run * 0.12 + Crack);", t.CMOT_FLOAT1, names, -900, 300, "glass_opacity")
+    wire_custom(op, srcs)
+    MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
+    bc = vector(m, "Tint", (0.01, 0.02, 0.03, 1), -900, 500)
+    MEL.connect_material_property(bc, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = scalar(m, "Roughness", 0.04, -900, 600)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    spec = scalar(m, "Specular", 0.9, -900, 700)
+    MEL.connect_material_property(spec, "", unreal.MaterialProperty.MP_SPECULAR)
+    ior = custom(m, common + "return lerp(1.0, 1.33, saturate(inside + run * 0.6));", t.CMOT_FLOAT1, names, -900, 800, "glass_ior")
+    wire_custom(ior, srcs)
+    MEL.connect_material_property(ior, "", unreal.MaterialProperty.MP_REFRACTION)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 def build_puff():
     """Soft dust/smoke sprite: procedural radial noise, per-instance age/seed from custom data."""
     m = make_material("M_Puff")
@@ -405,7 +596,7 @@ def build_spark():
     return m
 
 
-for fn in (build_facade, build_ground, build_water, build_armor, build_mechhull, build_puff, build_spark, build_propcolor):
+for fn in (build_facade, build_ground, build_water, build_armor, build_mechhull, build_rain, build_cockpit, build_cockpit_glass, build_puff, build_spark, build_propcolor):
     try:
         fn()
         unreal.log("IV material OK: %s" % fn.__name__)

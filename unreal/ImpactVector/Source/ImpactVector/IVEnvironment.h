@@ -54,6 +54,7 @@ private:
 
 	UPROPERTY() TObjectPtr<USceneComponent> Root;
 	UPROPERTY() TObjectPtr<UDirectionalLightComponent> Sun;
+	UPROPERTY() TObjectPtr<UDirectionalLightComponent> Moon;
 	UPROPERTY() TObjectPtr<USkyAtmosphereComponent> Atmosphere;
 	UPROPERTY() TObjectPtr<USkyLightComponent> SkyLight;
 	UPROPERTY() TObjectPtr<UExponentialHeightFogComponent> Fog;
