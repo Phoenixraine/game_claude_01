@@ -1,3 +1,15 @@
 build/
 build-*/
 *.csv.tmp
+tools/
+*.msi
+*.exe
+.vscode/
+.idea/
+Saved/
+Intermediate/
+Binaries/
+DerivedDataCache/
+unreal/ImpactVector/Content/Developers/
+unreal/ImpactVector/Saved/
+unreal/ImpactVector/Content/Data/

@@ -1,0 +1,280 @@
+{
+ "poses": {
+  "type": "object",
+  "required": [
+   "version",
+   "convention",
+   "bones",
+   "limits_deg",
+   "poses",
+   "transitions"
+  ],
+  "properties": {
+   "version": {
+    "type": "integer"
+   },
+   "convention": {
+    "type": "string"
+   },
+   "bones": {
+    "type": "array",
+    "items": {
+     "type": "string"
+    }
+   },
+   "limits_deg": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "object"
+    }
+   },
+   "poses": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "object",
+     "required": [
+      "name",
+      "group",
+      "joints",
+      "root_pos",
+      "com",
+      "feet"
+     ],
+     "properties": {
+      "name": {
+       "type": "string"
+      },
+      "group": {
+       "type": "string"
+      },
+      "joints": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {
+         "type": "number"
+        }
+       }
+      },
+      "root_pos": {
+       "type": "array",
+       "minItems": 3,
+       "maxItems": 3,
+       "items": {
+        "type": "number"
+       }
+      },
+      "com": {
+       "type": "array",
+       "minItems": 3,
+       "maxItems": 3,
+       "items": {
+        "type": "number"
+       }
+      },
+      "feet": {
+       "type": "object",
+       "required": [
+        "l",
+        "r"
+       ],
+       "additionalProperties": {
+        "type": "object",
+        "required": [
+         "ankle",
+         "heel",
+         "toe",
+         "ground"
+        ],
+        "properties": {
+         "ankle": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+           "type": "number"
+          }
+         },
+         "heel": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+           "type": "number"
+          }
+         },
+         "toe": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+           "type": "number"
+          }
+         },
+         "ground": {
+          "type": "boolean"
+         }
+        }
+       }
+      }
+     }
+    }
+   },
+   "transitions": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ },
+ "locomotion": {
+  "type": "object",
+  "required": [
+   "version",
+   "fps",
+   "bone_order",
+   "gaits",
+   "clips"
+  ],
+  "properties": {
+   "version": {
+    "type": "integer"
+   },
+   "fps": {
+    "type": "integer",
+    "minimum": 1
+   },
+   "bone_order": {
+    "type": "array",
+    "items": {
+     "type": "string"
+    }
+   },
+   "gaits": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "object",
+     "required": [
+      "step_length_m",
+      "step_period_s",
+      "speed_mps",
+      "pelvis_height_m"
+     ]
+    }
+   },
+   "clips": {
+    "type": "array",
+    "items": {
+     "type": "object",
+     "required": [
+      "name",
+      "fps",
+      "gait",
+      "duration_s",
+      "frames",
+      "plants"
+     ],
+     "properties": {
+      "frames": {
+       "type": "array",
+       "minItems": 2,
+       "items": {
+        "type": "object",
+        "required": [
+         "t",
+         "root",
+         "j",
+         "contact",
+         "ankle_l",
+         "ankle_r"
+        ],
+        "properties": {
+         "t": {
+          "type": "number"
+         },
+         "root": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+           "type": "number"
+          }
+         },
+         "j": {
+          "type": "array",
+          "items": {
+           "type": "number"
+          }
+         },
+         "contact": {
+          "type": "array",
+          "items": {
+           "type": "boolean"
+          },
+          "minItems": 2,
+          "maxItems": 2
+         },
+         "ankle_l": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+           "type": "number"
+          }
+         },
+         "ankle_r": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+           "type": "number"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "curves": {
+  "type": "object",
+  "required": [
+   "version",
+   "easings",
+   "swing_timing",
+   "spring",
+   "shake"
+  ],
+  "properties": {
+   "version": {
+    "type": "integer"
+   },
+   "easings": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "array",
+     "items": {
+      "type": "number"
+     }
+    }
+   },
+   "swing_timing": {
+    "type": "object"
+   },
+   "spring": {
+    "type": "object"
+   },
+   "shake": {
+    "type": "object"
+   }
+  }
+ }
+}
