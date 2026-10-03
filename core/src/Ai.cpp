@@ -174,23 +174,23 @@ struct Style {
 
 const Style kStyles[kArchetypeCount] = {
     // Counterpuncher: waits, punishes mistakes (pitch §20).
-    {0.0025f, 30.f, 22.f, 0.65f, 0.02f, 0.10f, 0.f, 80, 10, {0.10f, 0.35f, 0.05f, 0.10f, 0.10f, 0.10f, 0.10f, 0.05f, 0.05f},
-     {0.35f, 0.25f, 0.05f, 0.30f, 0.f}, 0.85f, EnergyPriority::Guard, false, 0.9f, 0.4f, false, 0.f},
+    {0.0025f, 30.0f, 22.0f, 0.65f, 0.025f, 0.07f, 0.0f, 80, 10, {0.1f, 0.35f, 0.05f, 0.1f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f},
+     {0.35f, 0.25f, 0.04f, 0.375f, 0.0f}, 0.85f, EnergyPriority::Guard, false, 0.9f, 0.4f, false, 0.0f},
     // Breaker: pushes the centre and the space (pitch §20 "Разрушитель").
-    {0.013f, 3.f, 18.f, 0.85f, 0.03f, 0.05f, 0.f, 45, 25, {0.10f, 0.50f, 0.10f, 0.08f, 0.08f, 0.04f, 0.04f, 0.03f, 0.03f},
-     {0.55f, 0.10f, 0.10f, 0.10f, 0.15f}, 0.35f, EnergyPriority::Arms, true, 0.4f, 0.9f, false, 0.f},
+    {0.013f, 2.7f, 18.0f, 0.85f, 0.0262f, 0.05f, 0.0f, 45, 25, {0.1f, 0.5f, 0.1f, 0.08f, 0.08f, 0.04f, 0.04f, 0.03f, 0.03f},
+     {0.44f, 0.1f, 0.1f, 0.196f, 0.1875f}, 0.315f, EnergyPriority::Arms, true, 0.392f, 0.9f, false, 0.0f},
     // LimbHunter: arms and legs first (pitch §20 "Охотник за конечностями").
-    {0.012f, 3.f, 20.f, 0.55f, 0.04f, 0.12f, 0.f, 50, 15, {0.05f, 0.14f, 0.02f, 0.13f, 0.13f, 0.17f, 0.17f, 0.09f, 0.09f},
-     {0.40f, 0.20f, 0.25f, 0.15f, 0.f}, 0.5f, EnergyPriority::Arms, false, 0.5f, 0.7f, false, 0.004f},
+    {0.0105f, 3.0f, 20.0f, 0.6875f, 0.04f, 0.105f, 0.0f, 50, 15, {0.05f, 0.14f, 0.02f, 0.13f, 0.13f, 0.17f, 0.17f, 0.09f, 0.09f},
+     {0.5544f, 0.2f, 0.25f, 0.15f, 0.0931f}, 0.5f, EnergyPriority::Arms, false, 0.5f, 0.616f, false, 0.004f},
     // Trickster: feints and delays (pitch §20 "Обманщик").
-    {0.016f, 3.f, 20.f, 0.50f, 0.08f, 0.55f, 0.f, 40, 15, {0.12f, 0.25f, 0.05f, 0.12f, 0.12f, 0.12f, 0.12f, 0.05f, 0.05f},
-     {0.30f, 0.15f, 0.35f, 0.20f, 0.f}, 0.4f, EnergyPriority::Legs, false, 0.6f, 0.6f, false, 0.012f},
+    {0.0176f, 3.0f, 20.0f, 0.45f, 0.08f, 0.55f, 0.0f, 40, 15, {0.12f, 0.25f, 0.05f, 0.12f, 0.12f, 0.12f, 0.12f, 0.05f, 0.05f},
+     {0.336f, 0.12f, 0.245f, 0.2f, 0.0f}, 0.32f, EnergyPriority::Legs, false, 0.6f, 1.0f, false, 0.0132f},
     // Gunner: keeps the range and prepares the weapon (pitch §20 "Стрелок").
-    {0.010f, 3.f, 70.f, 0.50f, 0.f, 0.05f, 0.03f, 60, 10, {0.10f, 0.35f, 0.05f, 0.10f, 0.10f, 0.10f, 0.10f, 0.05f, 0.05f},
-     {0.50f, 0.10f, 0.35f, 0.05f, 0.f}, 0.4f, EnergyPriority::Weapon, false, 0.3f, 0.3f, true, 0.f},
+    {0.01f, 5.25f, 70.0f, 0.5f, 0.1009f, 0.05f, 0.03f, 66, 10, {0.1f, 0.35f, 0.05f, 0.1f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f},
+     {0.4f, 0.1f, 0.35f, 0.05f, 0.0f}, 0.36f, EnergyPriority::Weapon, false, 0.3f, 0.24f, true, 0.05f},
     // Grappler: closes the gap and looks for the grab (pitch §20 "Борец").
-    {0.014f, 3.f, 10.f, 0.45f, 0.30f, 0.15f, 0.f, 45, 15, {0.05f, 0.30f, 0.05f, 0.08f, 0.08f, 0.14f, 0.14f, 0.08f, 0.08f},
-     {0.30f, 0.10f, 0.05f, 0.15f, 0.40f}, 0.5f, EnergyPriority::Legs, true, 0.5f, 0.9f, false, 0.004f},
+    {0.014f, 3.0f, 10.0f, 0.45f, 0.24f, 0.105f, 0.0f, 45, 15, {0.05f, 0.3f, 0.05f, 0.08f, 0.08f, 0.14f, 0.14f, 0.08f, 0.08f},
+     {0.3f, 0.1f, 0.056f, 0.15f, 0.4f}, 0.5f, EnergyPriority::Legs, true, 0.56f, 0.8f, false, 0.004f},
 };
 
 SwingSide SideFromIndex(int i) { return static_cast<SwingSide>(i); }

@@ -545,3 +545,12 @@ IV_TEST(Defense, GuardEnergyPriorityLowersDamageTakenAndBlocksAreNotFree) {
   idle.Step(120);
   IV_CHECK(idle.B().res.energy < e0 + 120 * tune::kEnergyRegenPerTick - 1.f);
 }
+
+// The pitch gives the defence windows in milliseconds; the tick values must stay inside those ranges (60 Hz => 16.7 ms/tick).
+IV_TEST(Defense, WindowsStayInsideThePitchRangesInMilliseconds) {
+  const auto ms = [](int ticks) { return ticks * 1000.0 / kTickHz; };
+  IV_CHECK(ms(tune::kParryWindowTicks) >= 140.0 && ms(tune::kParryWindowTicks) <= 200.0);          // pitch §6
+  IV_CHECK(ms(tune::kInterceptWindowTicks) >= 90.0 && ms(tune::kInterceptWindowTicks) <= 140.0);   // pitch §6 / §7
+  IV_CHECK(ms(tune::kReverseWindowTicks[0]) >= 70.0 && ms(tune::kReverseWindowTicks[0]) <= 110.0);  // pitch §6
+  IV_CHECK(ms(tune::kReverseWindowTicks[1]) >= 70.0 && ms(tune::kReverseWindowTicks[1]) <= 110.0);
+}

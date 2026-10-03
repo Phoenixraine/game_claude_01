@@ -106,7 +106,7 @@ constexpr int kEmergencyBrakeRecoveryTicks = MsToTicks(500);
 constexpr float kEmergencyBrakeStability = 14.f;       // pitch §5.2 (4) "потеряет стабильность"
 constexpr int kInterruptedRecoveryTicks = MsToTicks(500);  // windup broken by a hit (pitch §5.3 "перебивают")
 
-constexpr float kHeavyDamage = 10.5f;                   // pitch §5.2 base damage of a heavy strike
+constexpr float kHeavyDamage = 13.125f;                   // pitch §5.2 base damage of a heavy strike
 constexpr float kChargeDamageBonus = 1.0f;             // pitch §5.2: full charge doubles the damage
 constexpr float kQuickDamage = 2.5f;                    // pitch §5.3 "наносят небольшой урон"
 constexpr float kInnerLineDamageMult = 1.0f;           // pitch §7 counter strikes
@@ -156,18 +156,18 @@ constexpr int kMaxFeintsBeforePenalty = 2;             // beyond this each feint
 constexpr int kBlockRaiseTicks = MsToTicks(400);       // pitch §6: "безопасный блок 350-450 мс"
 constexpr int kParryWindowTicks = MsToTicks(170);      // pitch §6: "парирование 140-200 мс"
 constexpr int kInterceptWindowTicks = MsToTicks(115);  // pitch §7 / §6: "перехват 90-140 мс"
-constexpr int kReverseWindowTicks[2] = {MsToTicks(110), MsToTicks(80)};  // pitch §6: "ответ на контратаку 70-110 мс"
+constexpr int kReverseWindowTicks[2] = {MsToTicks(100), MsToTicks(80)};  // pitch §6: "ответ на контратаку 70-110 мс" (6 and 5 ticks)
 constexpr int kMaxReverseReplies = 2;                  // pitch §7: "максимум 2 ответа", then clinch
 constexpr float kBlockDamageMult = 0.25f;              // pitch §6: block "сильно снижает прямой урон"
 constexpr float kBlockStabilityFactor = 0.7f;          // pitch §6: "всё равно уменьшает стабильность"
 constexpr float kBlockArmLoad = 0.18f;                 // pitch §6: "нагружает блокирующую руку" (share of damage)
 constexpr float kGuardEnergyPerTick = 0.03f;           // pitch §6: passive guard must not be free
 constexpr float kParryEnergy = 4.f;
-constexpr float kParryStabilityHit = 24.f;             // pitch §6: attacker's tempo breaks
+constexpr float kParryStabilityHit = 24.0f;             // pitch §6: attacker's tempo breaks
 constexpr int kParryRecoveryBonusTicks = MsToTicks(500);
 constexpr int kCounterWindowTicks = MsToTicks(400);    // pitch §6: "короткое окно контратаки"
 constexpr float kInterceptEnergy = 8.f;                // pitch §7
-constexpr float kInterceptArmDamage = 0.35f;           // pitch §7: share of strike damage that hits the intercepted arm
+constexpr float kInterceptArmDamage = 0.4375f;           // pitch §7: share of strike damage that hits the intercepted arm
 constexpr float kInterceptStabilityHit = 14.f;
 // Counter lines that can intercept each attack, bitmask over SwingSide (pitch §7 "Перехват").
 constexpr uint8_t kInterceptLines[4] = {
@@ -212,13 +212,13 @@ constexpr float kWallSlamProximity = 0.5f;
 constexpr float kWallSlamDamage = 14.f;
 
 // ---------------------------------------------------------------- grab (pitch §12)
-constexpr float kGrabStability = 32.f;
+constexpr float kGrabStability = 35.2f;
 constexpr float kGrabHeat = 3.f;
 constexpr float kGrabDamage = 10.f;
 
 // ---------------------------------------------------------------- weapon (pitch §13)
 constexpr int kWeaponChargeTicks = MsToTicks(1800);    // pitch §13: "Удерживать цель несколько секунд"
-constexpr float kWeaponDamage = 40.f;                  // pitch §13: "способно пробить броню или разрушить сустав"
+constexpr float kWeaponDamage = 40.0f;                  // pitch §13: "способно пробить броню или разрушить сустав"
 constexpr float kWeaponMinDistance = 18.f;
 constexpr float kWeaponBlockMult = 0.55f;
 constexpr float kWeaponBaseAccuracy = 0.8f;
