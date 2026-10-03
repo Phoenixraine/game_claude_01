@@ -11,7 +11,8 @@
 
 ## Области и задачи (папки не пересекаются)
 Общий план: `docs/PLAN.md`. Каждая задача — файл в `docs/tasks/`, работать **только** в своей папке:
-`core/` (TASK-001), `art/mech/` (002), `art/cockpit/` (003), `worldgen/` (004), `audio/` (005), `data/` + `docs/ux/` (006), `anim/` (007), `art/textures/` (008), `art/city_kit/` (009), `ui/` (010), `art/hangar/` (011), `art/mech_variants/` (012), `art/mech_v2/` (013), `music/` (014), `worldgen/` v2 (015), `art/shards/` (016). **Художественный курс: `docs/art/DESIGN_BIBLE.md`.**
+`core/` (TASK-001), `art/mech/` (002), `art/cockpit/` (003), `worldgen/` (004), `audio/` (005), `data/` + `docs/ux/` (006), `anim/` (007), `art/textures/` (008), `art/city_kit/` (009), `ui/` (010), `art/hangar/` (011), `art/mech_variants/` (012), `art/mech_v2/` (013), `music/` (014), `worldgen/` v2 (015), `art/shards/` (016), `core/`+`data/hack/` (017, 018, 024), `worldgen/` (019), `art/cockpit_v2/` (020), `ui/glass_hud/` (021), `data/damage_fx/` (022), `anim/v2/` (023), `art/mech_detail/` (025). **Художественный курс: `docs/art/DESIGN_BIBLE.md`.**
+**Начинать с `docs/STATUS.md` (состояние и TODO) и `docs/CLOUD_PROMPT_2.md` (раунд 2 облачных задач).**
 
 ## Правила
 - Не трогать каталоги вне области задачи (см. `docs/tasks/`). Не коммитить бинарники > 5 МБ и `node_modules`.
