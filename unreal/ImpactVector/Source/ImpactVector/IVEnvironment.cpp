@@ -1,0 +1,147 @@
+#include "IVEnvironment.h"
+#include "Components/DirectionalLightComponent.h"
+#include "Components/SkyAtmosphereComponent.h"
+#include "Components/SkyLightComponent.h"
+#include "Components/ExponentialHeightFogComponent.h"
+#include "Components/VolumetricCloudComponent.h"
+#include "Components/PostProcessComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Engine/StaticMesh.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Math/RandomStream.h"
+
+AIVEnvironment::AIVEnvironment()
+{
+	PrimaryActorTick.bCanEverTick = false;
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeF(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MatF(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	RootComponent = Root;
+
+	Sun = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("Sun"));
+	Sun->SetupAttachment(Root);
+	Sun->SetRelativeRotation(FRotator(-28.f, 215.f, 0.f));
+	Sun->SetIntensity(7.f);
+	Sun->SetLightColor(FLinearColor(0.78f, 0.87f, 1.0f).ToFColor(true));
+	Sun->SetAtmosphereSunLight(true);
+	Sun->SetMobility(EComponentMobility::Movable);
+	Sun->SetCastShadows(true);
+
+	Atmosphere = CreateDefaultSubobject<USkyAtmosphereComponent>(TEXT("Atmosphere"));
+	Atmosphere->SetupAttachment(Root);
+
+	SkyLight = CreateDefaultSubobject<USkyLightComponent>(TEXT("SkyLight"));
+	SkyLight->SetupAttachment(Root);
+	SkyLight->SetMobility(EComponentMobility::Movable);
+	SkyLight->bRealTimeCapture = true;
+	SkyLight->SetIntensity(1.4f);
+
+	Fog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("Fog"));
+	Fog->SetupAttachment(Root);
+	Fog->SetFogDensity(0.012f);
+	Fog->SetFogHeightFalloff(0.08f);
+	Fog->SetVolumetricFog(true);
+	Fog->SetFogInscatteringColor(FLinearColor(0.42f, 0.5f, 0.6f));
+	Fog->SetStartDistance(20000.f);
+
+	Clouds = CreateDefaultSubobject<UVolumetricCloudComponent>(TEXT("Clouds"));
+	Clouds->SetupAttachment(Root);
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> CloudMat(TEXT("/Engine/EngineSky/VolumetricClouds/m_SimpleVolumetricCloud_Inst.m_SimpleVolumetricCloud_Inst"));
+	if (CloudMat.Succeeded()) Clouds->SetMaterial(CloudMat.Object);
+
+	PostProcess = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcess"));
+	PostProcess->SetupAttachment(Root);
+	PostProcess->bUnbound = true;
+	FPostProcessSettings& S = PostProcess->Settings;
+	S.bOverride_AutoExposureMethod = true;
+	S.AutoExposureMethod = EAutoExposureMethod::AEM_Histogram;
+	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 0.6f;
+	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 3.f;
+	S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.4f;
+	S.bOverride_BloomIntensity = true; S.BloomIntensity = 0.45f;
+	S.bOverride_VignetteIntensity = true; S.VignetteIntensity = 0.45f;
+	S.bOverride_FilmGrainIntensity = true; S.FilmGrainIntensity = 0.08f;
+	S.bOverride_DynamicGlobalIlluminationMethod = true; S.DynamicGlobalIlluminationMethod = EDynamicGlobalIlluminationMethod::Lumen;
+	S.bOverride_ReflectionMethod = true; S.ReflectionMethod = EReflectionMethod::Lumen;
+	S.bOverride_ColorSaturation = true; S.ColorSaturation = FVector4(0.9f, 0.95f, 1.0f, 1.0f);
+
+	auto MakeSlab = [&](const TCHAR* Name) {
+		UStaticMeshComponent* M = CreateDefaultSubobject<UStaticMeshComponent>(Name);
+		M->SetupAttachment(Root);
+		M->SetStaticMesh(CubeF.Object);
+		return M;
+	};
+	Ground = MakeSlab(TEXT("Ground"));
+	Ground->SetRelativeLocation(FVector(0, 0, -100));
+	Ground->SetRelativeScale3D(FVector(3000.f, 3000.f, 2.f));
+	Ground->SetCollisionProfileName(TEXT("BlockAll"));
+	Sea = MakeSlab(TEXT("Sea"));
+	Sea->SetRelativeLocation(FVector(-120000.f, 0, -3000));
+	Sea->SetRelativeScale3D(FVector(1200.f, 3000.f, 2.f));
+	Sea->SetCollisionProfileName(TEXT("BlockAll"));
+
+	Concrete = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Concrete"));
+	Concrete->SetupAttachment(Root);
+	Concrete->SetStaticMesh(CubeF.Object);
+	Concrete->SetCollisionProfileName(TEXT("BlockAll"));
+	Glass = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Glass"));
+	Glass->SetupAttachment(Root);
+	Glass->SetStaticMesh(CubeF.Object);
+	Glass->SetCollisionProfileName(TEXT("BlockAll"));
+}
+
+void AIVEnvironment::OnConstruction(const FTransform&)
+{
+}
+
+void AIVEnvironment::BeginPlay()
+{
+	Super::BeginPlay();
+	static UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	auto Tint = [this](UPrimitiveComponent* C, const FLinearColor& Col, int32 Idx = 0) {
+		if (!Base) return;
+		UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(Base, this);
+		M->SetVectorParameterValue(TEXT("Color"), Col);
+		C->SetMaterial(Idx, M);
+	};
+	Tint(Ground, FLinearColor(0.06f, 0.065f, 0.07f));
+	Tint(Sea, FLinearColor(0.012f, 0.03f, 0.05f));
+	Tint(Concrete, FLinearColor(0.2f, 0.21f, 0.22f));
+	Tint(Glass, FLinearColor(0.04f, 0.07f, 0.1f));
+	BuildCityBlockout();
+}
+
+void AIVEnvironment::BuildCityBlockout()
+{
+	FRandomStream R(1337);
+	const float Block = 26000.f, Street = 9000.f;
+	const float Lot = Block - Street;
+	for (int32 bx = -2; bx <= 6; ++bx)
+	{
+		for (int32 by = -5; by <= 5; ++by)
+		{
+			const FVector2D Origin(bx * Block, by * Block);
+			// keep the central avenue (y within +-7500) free for the duel
+			for (int32 sx = 0; sx < 2; ++sx)
+			{
+				for (int32 sy = 0; sy < 2; ++sy)
+				{
+					const float W = Lot * 0.5f - 600.f;
+					const FVector2D C = Origin + FVector2D((sx - 0.5f) * (Lot * 0.5f), (sy - 0.5f) * (Lot * 0.5f));
+					if (FMath::Abs(C.Y) < 7500.f + W * 0.5f) continue;
+					if (C.X < -9000.f && C.X > -60000.f) continue;   // plaza on the shore
+					const float H = R.FRandRange(4500.f, 22000.f) * (R.FRand() < 0.15f ? 1.6f : 1.f);
+					const float Wx = W * R.FRandRange(0.7f, 1.f), Wy = W * R.FRandRange(0.7f, 1.f);
+					const FTransform T(FRotator::ZeroRotator, FVector(C.X, C.Y, H * 0.5f), FVector(Wx / 100.f, Wy / 100.f, H / 100.f));
+					(R.FRand() < 0.4f ? Glass : Concrete)->AddInstance(T);
+					// podium
+					Concrete->AddInstance(FTransform(FRotator::ZeroRotator, FVector(C.X, C.Y, 600.f), FVector(Wx * 1.08f / 100.f, Wy * 1.08f / 100.f, 12.f)));
+				}
+			}
+		}
+	}
+}

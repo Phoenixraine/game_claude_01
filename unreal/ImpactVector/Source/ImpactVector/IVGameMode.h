@@ -1,0 +1,28 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/GameModeBase.h"
+#include "IVGameMode.generated.h"
+
+class AIVMechPawn;
+
+/** Combat Lab game mode: spawns the environment, the player mech and an enemy mech.
+ *  Command line (for automated captures):  -IVCam=N  -IVShots=t1,t2,..  -IVQuit=seconds  -IVAuto=1 */
+UCLASS()
+class IMPACTVECTOR_API AIVGameMode : public AGameModeBase
+{
+	GENERATED_BODY()
+
+public:
+	AIVGameMode();
+	virtual void StartPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+
+	UPROPERTY() TObjectPtr<AIVMechPawn> EnemyMech;
+
+private:
+	TArray<float> PendingShots;
+	int32 ShotIndex = 0;
+	float QuitAt = -1.f;
+	float Elapsed = 0.f;
+};
