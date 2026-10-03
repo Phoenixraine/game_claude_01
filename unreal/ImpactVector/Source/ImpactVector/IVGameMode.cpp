@@ -5,6 +5,7 @@
 #include "IVEnvironment.h"
 #include "IVDistrict.h"
 #include "IVCombat.h"
+#include "IVAudio.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "Misc/CommandLine.h"
@@ -98,6 +99,17 @@ void AIVGameMode::StartPlay()
 				}
 			}
 		}
+	}
+
+	// ambience beds (2D loops)
+	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoAudio")))
+	{
+		IVAudio::StartLoop2D(W, TEXT("env_rain_loop"), 0.35f);
+		IVAudio::StartLoop2D(W, TEXT("env_wind_loop_city"), 0.30f);
+		IVAudio::StartLoop2D(W, TEXT("env_siren_distant_loop"), 0.12f);
+		IVAudio::StartLoop2D(W, TEXT("env_water_loop_sea"), 0.18f);
+		IVAudio::StartLoop2D(W, TEXT("cockpit_reactor_loop"), 0.30f);
+		IVAudio::StartLoop2D(W, TEXT("cockpit_breath_loop"), 0.15f);
 	}
 
 	FString Value;

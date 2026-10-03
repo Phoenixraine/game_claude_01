@@ -19,6 +19,7 @@
 #include "IVEnvironment.h"
 #include "IVFXManager.h"
 #include "IVBuilding.h"
+#include "IVAudio.h"
 
 static TAutoConsoleVariable<int32> CVarIVCam(TEXT("iv.Cam"), 0,
 	TEXT("0 = cockpit, 1 = chase, 2 = side, 3 = front orbit, 4 = both mechs from the side"), ECVF_Default);
@@ -179,6 +180,14 @@ void AIVMechPawn::BeginPlay()
 	for (UStaticMeshComponent* M : CockpitMeshes) MakeMID(M, FLinearColor(0.02f, 0.022f, 0.026f));
 
 	SetupRig();
+	OnFootfall.AddLambda([this](int32 Side, float Strength)
+	{
+		const FVector Foot = (bRigActive && RigMesh) ? RigMesh->GetBoneLocation(Side < 0 ? FName(TEXT("foot_l")) : FName(TEXT("foot_r")), EBoneSpaces::WorldSpace) : GetActorLocation();
+		const bool bWater = Foot.Z < -50.f;
+		IVAudio::Play3D(GetWorld(), bWater ? IVAudio::Variant(TEXT("mech_step_water_"), 2) : IVAudio::Variant(TEXT("mech_step_heavy_"), 4), Foot, FMath::Clamp(0.55f + 0.5f * Strength, 0.4f, 1.1f), FMath::RandRange(0.9f, 1.05f));
+		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) FX->SpawnDust(Foot, 900.f, int32(2 + 4 * Strength), 0.35f);
+		if (IsLocallyControlled()) AddCockpitImpulse(0.f, -1.f, 0.22f * Strength);
+	});
 
 	AimYaw = GetActorRotation().Yaw;
 	CamPos = GetEyeLocation();

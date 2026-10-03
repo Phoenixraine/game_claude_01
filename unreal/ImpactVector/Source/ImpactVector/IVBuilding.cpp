@@ -1,5 +1,6 @@
 #include "IVBuilding.h"
 #include "IVFXManager.h"
+#include "IVAudio.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -156,6 +157,13 @@ int32 AIVBuilding::ApplyBlast(const FVector& C, float Radius, float Impulse)
 	{
 		FX->SpawnDust(C, Radius * 1.2f, FMath::Clamp(Killed / 3, 6, 40));
 		FX->SpawnSparks(C, FVector::UpVector, 20, 5000.f);
+	}
+	IVAudio::Play3D(GetWorld(), TEXT("env_glass_shatter_big"), C, 0.9f);
+	if (Extra > 6)
+	{
+		IVAudio::Play3D(GetWorld(), TEXT("env_building_collapse_start"), C, 1.f);
+		IVAudio::Play3DDelayed(GetWorld(), TEXT("env_building_collapse_mid"), C, 1.2f, 1.f);
+		IVAudio::Play3DDelayed(GetWorld(), TEXT("env_building_collapse_end"), C, 4.f, 1.f);
 	}
 	return Killed + Extra;
 }

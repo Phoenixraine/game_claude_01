@@ -78,5 +78,7 @@ private:
 	void StepOnce(bool bFirstOfFrame);
 	float ProximityBehind(AIVMechPawn* Pawn, AIVMechPawn* Other) const;
 	void Dispatch(const iv::Event& E);
+	void PlayEventSound(const iv::Event& E);
+	void HitCity(const iv::Event& E);
 	AIVMechPawn* PawnOf(iv::Side S) const;
 };

@@ -1,6 +1,8 @@
 #include "IVCombat.h"
 #include "IVMechPawn.h"
 #include "IVFXManager.h"
+#include "IVAudio.h"
+#include "IVEnvironment.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -186,6 +188,103 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 	Duel->log().Clear();
 }
 
+void AIVCombatDirector::PlayEventSound(const iv::Event& Ev)
+{
+	using iv::EventType;
+	UWorld* W = GetWorld();
+	AIVMechPawn* Actor = PawnOf(Ev.actor);
+	const bool bPlayerActor = (Ev.actor == iv::Side::A);
+	const FVector At = Actor ? Actor->GetZoneWorldLocation(Ev.zone) : FVector::ZeroVector;
+	switch (Ev.type)
+	{
+	case EventType::WindupStarted:
+		if (Actor) IVAudio::Play3D(W, TEXT("mech_servo_arm_windup"), At, 0.9f, FMath::RandRange(0.92f, 1.05f));
+		break;
+	case EventType::Committed:
+		if (Actor) IVAudio::Play3D(W, TEXT("mech_servo_arm_strike"), Actor->GetActorLocation() + FVector(0, 0, 4000.f), 1.f, FMath::RandRange(0.95f, 1.05f));
+		break;
+	case EventType::EmergencyBrake:
+	case EventType::Dodge:
+		if (Actor) IVAudio::Play3D(W, TEXT("mech_hydraulic_release"), Actor->GetActorLocation() + FVector(0, 0, 1500.f), 1.f);
+		break;
+	case EventType::HitEvent:
+	{
+		iv::HitInfo H;
+		if (!iv::DecodeHit(Ev, &H) || !PawnOf(iv::Other(H.attacker))) break;
+		AIVMechPawn* Def = PawnOf(iv::Other(H.attacker));
+		const FVector Loc = Def->GetZoneWorldLocation(H.zone);
+		const bool bHeavy = H.damage > 18.f;
+		IVAudio::Play3D(W, bHeavy ? TEXT("hit_metal_contact_heavy") : TEXT("hit_metal_contact_light"), Loc, H.wasBlocked ? 0.6f : 1.f);
+		IVAudio::Play3D(W, bHeavy ? TEXT("hit_lowfreq_thump_heavy") : TEXT("hit_lowfreq_thump_light"), Loc, 1.f);
+		if (!H.wasBlocked) IVAudio::Play3D(W, IVAudio::Variant(TEXT("hit_deform_"), 3), Loc, 0.8f);
+		IVAudio::Play3DDelayed(W, IVAudio::Variant(TEXT("hit_debris_delay_"), 3), Loc, 0.5f, 0.7f);
+		if (Def->IsLocallyControlled())
+		{
+			IVAudio::Play2D(W, bHeavy ? TEXT("hit_cockpit_rumble_heavy") : TEXT("hit_cockpit_rumble_light"), H.wasBlocked ? 0.5f : 0.9f);
+			IVAudio::Play2D(W, TEXT("hit_compensator_kick"), 0.5f);
+		}
+		break;
+	}
+	case EventType::Blocked: if (Actor) IVAudio::Play3D(W, TEXT("block_impact"), At, 1.f); break;
+	case EventType::ParrySuccess: if (Actor) IVAudio::Play3D(W, TEXT("parry_clang"), At, 1.f); break;
+	case EventType::InterceptSuccess: if (Actor) IVAudio::Play3D(W, TEXT("intercept_clash"), At, 1.f); break;
+	case EventType::EnergyShift: case EventType::EnergyFlow:
+		if (bPlayerActor) IVAudio::Play2D(W, TEXT("mech_power_shift"), 0.7f);
+		else if (Actor) IVAudio::Play3D(W, TEXT("mech_power_shift"), Actor->GetActorLocation() + FVector(0, 0, 4500.f), 0.8f);
+		break;
+	case EventType::HeatWarning: if (bPlayerActor) IVAudio::Play2D(W, TEXT("cockpit_alarm_warning"), 0.8f); break;
+	case EventType::SystemFailure:
+		if (bPlayerActor) { IVAudio::Play2D(W, TEXT("cockpit_alarm_critical"), 0.9f); IVAudio::Play2D(W, IVAudio::Variant(TEXT("cockpit_spark_"), 4), 0.9f); }
+		break;
+	case EventType::ZoneState:
+		if (Ev.a >= int32(iv::ZoneState::Damaged) && Ev.b < int32(iv::ZoneState::Damaged) && Actor)
+		{
+			IVAudio::Play3D(W, IVAudio::Variant(TEXT("mech_joint_creak_"), 3), At, 0.9f);
+			if (bPlayerActor) IVAudio::Play2D(W, IVAudio::Variant(TEXT("cockpit_spark_"), 4), 0.8f);
+		}
+		break;
+	case EventType::ArmorPlateLost: if (Actor) IVAudio::Play3D(W, TEXT("mech_armor_plate_tear"), At, 1.f); break;
+	case EventType::LimbSevered:
+		if (Actor) IVAudio::Play3D(W, TEXT("mech_limb_sever"), At, 1.f);
+		if (bPlayerActor) IVAudio::Play2D(W, TEXT("cockpit_panel_burst"), 1.f);
+		break;
+	case EventType::Knockdown: if (Actor) IVAudio::Play3D(W, TEXT("env_distant_boom_01"), Actor->GetActorLocation(), 1.f); break;
+	case EventType::HardStanceOn: if (Actor) IVAudio::Play3D(W, TEXT("mech_stabilizer_whine"), Actor->GetActorLocation() + FVector(0, 0, 2000.f), 0.8f); break;
+	case EventType::WeaponCharging: if (Actor) IVAudio::Play3D(W, TEXT("mech_weapon_charge_peak"), Actor->GetZoneWorldLocation(iv::Zone::ShoulderR), 0.9f); break;
+	case EventType::WeaponFired: if (Actor) IVAudio::Play3D(W, TEXT("mech_weapon_fire"), Actor->GetZoneWorldLocation(iv::Zone::ShoulderR), 1.f); break;
+	case EventType::CinematicBegin: IVAudio::Play2D(W, TEXT("mus_commit_hit"), 0.9f); break;
+	case EventType::UltimateReady: if (bPlayerActor) IVAudio::Play2D(W, TEXT("cockpit_hud_lock"), 0.9f); break;
+	case EventType::Clinch: if (Actor) IVAudio::Play3D(W, TEXT("intercept_clash"), Actor->GetActorLocation() + FVector(0, 0, 3000.f), 0.9f); break;
+	case EventType::StaggerBegin: if (bPlayerActor) IVAudio::Play2D(W, TEXT("cockpit_harness_creak"), 0.9f); break;
+	default: break;
+	}
+}
+
+void AIVCombatDirector::HitCity(const iv::Event& Ev)
+{
+	// A missed strike (or a wall slam) lands on whatever stands behind the opponent: buildings take real damage.
+	AIVMechPawn* Attacker = PawnOf(Ev.actor);
+	AIVMechPawn* Target = PawnOf(iv::Other(Ev.actor));
+	if (!Attacker || !Target) return;
+	AIVEnvironment* Env = AIVEnvironment::Get(GetWorld());
+	if (!Env) return;
+	const FVector Dir = (Target->GetActorLocation() - Attacker->GetActorLocation()).GetSafeNormal2D();
+	const FVector From = Attacker->GetActorLocation() + FVector(0, 0, 3200.f);
+	FHitResult Hit;
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(IVCityHit), false, Attacker);
+	Q.AddIgnoredActor(Target);
+	const FVector Side = FVector::CrossProduct(Dir, FVector::UpVector).GetSafeNormal();
+	const FVector To = From + (Dir + Side * (Ev.zone == iv::Zone::ArmL ? -0.45f : 0.45f)).GetSafeNormal() * 11000.f;
+	if (GetWorld()->LineTraceSingleByChannel(Hit, From, To, ECC_WorldStatic, Q) && Hit.Distance < 10500.f)
+	{
+		const float R = Ev.type == iv::EventType::WallSlam ? 3800.f : 2600.f;
+		Env->BlastAt(Hit.ImpactPoint, R, 1700.f);
+		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) FX->SpawnSparks(Hit.ImpactPoint, Hit.ImpactNormal, 40, 5000.f);
+		IVAudio::Play3D(GetWorld(), TEXT("env_concrete_crumble"), Hit.ImpactPoint, 1.f);
+		if (Attacker->IsLocallyControlled()) Attacker->AddCockpitImpulse(0.f, 0.f, 0.5f);
+	}
+}
+
 void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 {
 	using iv::EventType;
@@ -253,5 +352,7 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 	default:
 		break;
 	}
+	PlayEventSound(Ev);
+	if (Ev.type == EventType::Whiff || Ev.type == EventType::WallSlam) HitCity(Ev);
 	OnEvent.Broadcast(Ev);
 }
