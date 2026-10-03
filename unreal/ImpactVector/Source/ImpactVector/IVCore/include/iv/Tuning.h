@@ -106,7 +106,7 @@ constexpr int kEmergencyBrakeRecoveryTicks = MsToTicks(500);
 constexpr float kEmergencyBrakeStability = 14.f;       // pitch §5.2 (4) "потеряет стабильность"
 constexpr int kInterruptedRecoveryTicks = MsToTicks(500);  // windup broken by a hit (pitch §5.3 "перебивают")
 
-constexpr float kHeavyDamage = 13.125f;                   // pitch §5.2 base damage of a heavy strike
+constexpr float kHeavyDamage = 17.5f;                     // pitch §5.2 base damage of a heavy strike
 constexpr float kChargeDamageBonus = 1.0f;             // pitch §5.2: full charge doubles the damage
 constexpr float kQuickDamage = 2.5f;                    // pitch §5.3 "наносят небольшой урон"
 constexpr float kInnerLineDamageMult = 1.0f;           // pitch §7 counter strikes

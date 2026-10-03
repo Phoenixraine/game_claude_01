@@ -236,6 +236,12 @@ void AIVGameFlow::EnterDuel()
 		Dir->SetDummy(iv::DummyMode::Off);
 	}
 	PlaceMechs(60.f);
+	if (Dir && Dir->GetMutableDuel())   // test hooks for automated captures
+	{
+		if (FParse::Param(FCommandLine::Get(), TEXT("IVHurtEnemy")))
+			for (int32 z = 0; z < iv::kZoneCount; ++z) Dir->GetMutableDuel()->fighter(iv::Side::B).body.ApplyDamage(static_cast<iv::Zone>(z), z == int32(iv::Zone::Reactor) ? 120.f : (z == int32(iv::Zone::Torso) ? 300.f : 125.f), iv::StrikeKind::Quick);
+		if (FParse::Param(FCommandLine::Get(), TEXT("IVFullUlt"))) Dir->FillUltimate(iv::Side::A);
+	}
 	const TCHAR* StyleNames[6] = { TEXT("Контрбойцовщик"), TEXT("Громила"), TEXT("Охотник на конечности"), TEXT("Обманщик"), TEXT("Стрелок"), TEXT("Борец") };
 	SetBanner(TEXT("ДУЭЛЬ"), FString::Printf(TEXT("Противник: %s  ·  %s"), StyleNames[NextStyle % 6], kDifficulty[FMath::Clamp(Difficulty, 0, 2)]), 3.2f);
 	++NextStyle;
@@ -271,7 +277,7 @@ void AIVGameFlow::BeginStep(int32 Index)
 	if (S.Dummy == iv::DummyMode::Scripted) Dir->SetDummyScript(S.Script);
 	if (S.bFullUltimate) Dir->FillUltimate(iv::Side::A);
 	if (FParse::Param(FCommandLine::Get(), TEXT("IVHurtEnemy")) && Dir->GetMutableDuel())
-		for (int32 z = 0; z < iv::kZoneCount; ++z) Dir->GetMutableDuel()->fighter(iv::Side::B).body.ApplyDamage(static_cast<iv::Zone>(z), 150.f, iv::StrikeKind::Quick);
+		for (int32 z = 0; z < iv::kZoneCount; ++z) Dir->GetMutableDuel()->fighter(iv::Side::B).body.ApplyDamage(static_cast<iv::Zone>(z), z == int32(iv::Zone::Reactor) ? 120.f : (z == int32(iv::Zone::Torso) ? 300.f : 125.f), iv::StrikeKind::Quick);
 	if (S.Goal != ETutGoal::Walk && Dir->GetDuel() && Dir->GetDuel()->distance() > 40.f) PlaceMechs(26.f);
 }
 
