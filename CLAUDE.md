@@ -11,7 +11,7 @@
 
 ## Области и задачи (папки не пересекаются)
 Общий план: `docs/PLAN.md`. Каждая задача — файл в `docs/tasks/`, работать **только** в своей папке:
-`core/` (TASK-001), `art/mech/` (002), `art/cockpit/` (003), `worldgen/` (004), `audio/` (005), `data/` + `docs/ux/` (006), `anim/` (007), `art/textures/` (008), `art/city_kit/` (009), `ui/` (010), `art/hangar/` (011), `art/mech_variants/` (012).
+`core/` (TASK-001), `art/mech/` (002), `art/cockpit/` (003), `worldgen/` (004), `audio/` (005), `data/` + `docs/ux/` (006), `anim/` (007), `art/textures/` (008), `art/city_kit/` (009), `ui/` (010), `art/hangar/` (011), `art/mech_variants/` (012), `art/mech_v2/` (013), `music/` (014), `worldgen/` v2 (015), `art/shards/` (016). **Художественный курс: `docs/art/DESIGN_BIBLE.md`.**
 
 ## Правила
 - Не трогать каталоги вне области задачи (см. `docs/tasks/`). Не коммитить бинарники > 5 МБ и `node_modules`.

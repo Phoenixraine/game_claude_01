@@ -83,3 +83,12 @@
 - Не добавлять зависимости от Unreal, Boost, сторонних тест-фреймворков (сеть может быть недоступна).
 - Не писать графику, UI, аудио, физику здания/мира — это делается на локальной стороне в Unreal.
 - Не менять `CLAUDE.md`, `docs/pitch/`, `game/`.
+
+---
+## ОБНОВЛЕНИЕ v2 (приоритет: **это задача №1 — без неё игра не станет игрой**)
+- Игра **только от первого лица** (внутри меха). Добавьте в ядро **орудия с большой перезарядкой** и **ультимейт**: шкала ультимейта, накопление (за успешные парирования/перехваты/попадания по критическим зонам, за получение урона в меньшей степени), состояние `Cinematic` — события `CinematicBegin{kind, duration_ticks}` / `CinematicEnd`,
+  на время которых бой переходит на фиксированный сценарий (игрок защищён или противник оглушён — параметры в `Tuning.h`), чтобы Unreal показал внешний ракурс. Орудия: `RailSpear` (долгая зарядка, фиксация ног), `SuppressionRockets` (боезапас), `PlasmaCannon` (перегрев).
+- События для презентации (чтобы Unreal показывал анимации, звук, VFX, повреждения кабины): `HitEvent{attacker, zone, layer, severity, direction, damage, stability_damage, was_blocked, was_parried}`, `LimbSevered{zone}`, `ArmorPlateLost{zone, index}`, `ReactorBreach`, `StaggerBegin/End`, `Knockdown`, `Clinch`, `ParrySuccess`, `InterceptSuccess`, `ReverseChain{step}`, `EnergyShift{from,to}`, `HeatWarning`, `SystemFailure{system}`.
+- Состояния для **анимации** (`AnimState`): текущая фаза удара (`Windup/Commit/Strike/Contact/Recovery`), нормализованный прогресс 0–1, тип/сторона/рука/цель удара, поза рук (`ArmPose`) — чтобы процедурная анимация из `anim/` была точной. Состояние ног: `FootPlant`, перенос веса.
+- Режим **тренировочного манекена** (`DummyMode`): цель не атакует / атакует по сценарию / реагирует только на блок — нужен для обучения (см. TASK-006 обновление).
+- Добавьте CI-шаг на `clang++ -std=c++17 -fno-exceptions -fno-rtti -Wall -Wextra -Werror`; код должен собираться MSVC (без расширений GCC).
