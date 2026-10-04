@@ -267,6 +267,7 @@ void AIVMechPawn::BeginPlay()
 		{
 			GlassMID = UMaterialInstanceDynamic::Create(GlassM, this);
 			CockpitGlassMesh->SetMaterial(0, GlassMID);
+			if (FParse::Param(FCommandLine::Get(), TEXT("IVNoGlass"))) CockpitGlassMesh->SetVisibility(false);
 			if (FParse::Param(FCommandLine::Get(), TEXT("IVCrackDemo")))
 			{
 				GlassCrack = 0.6f;
@@ -278,7 +279,7 @@ void AIVMechPawn::BeginPlay()
 		}
 	}
 
-	for (int32 i = 0; i < 2; ++i) if (HeadLamp[i]) { HeadLamp[i]->SetLightColor(LampColor); HeadLamp[i]->SetIntensity(70000.f * LampPower); HeadLamp[i]->SetVolumetricScatteringIntensity(1.6f * FMath::Sqrt(LampPower)); if (bLampsDown) HeadLamp[i]->SetRelativeRotation(FRotator(-30.f, (i == 0 ? 16.f : -16.f), 0.f)); }
+	for (int32 i = 0; i < 2; ++i) if (HeadLamp[i]) { HeadLamp[i]->SetLightColor(LampColor); HeadLamp[i]->SetIntensity(70000.f * LampPower); HeadLamp[i]->SetVolumetricScatteringIntensity(0.55f * FMath::Sqrt(LampPower)); if (bLampsDown) HeadLamp[i]->SetRelativeRotation(FRotator(-30.f, (i == 0 ? 16.f : -16.f), 0.f)); }
 	SetupRig();
 	OnFootfall.AddLambda([this](int32 Side, float Strength)
 	{
@@ -327,7 +328,7 @@ void AIVMechPawn::SetPlayerLamps(bool bOn)
 	{
 		HeadLamp[i]->SetLightColor(LampColor);
 		HeadLamp[i]->SetIntensity(70000.f * LampPower);
-		HeadLamp[i]->SetVolumetricScatteringIntensity(1.6f * FMath::Sqrt(LampPower));
+		HeadLamp[i]->SetVolumetricScatteringIntensity(0.55f * FMath::Sqrt(LampPower));
 		HeadLamp[i]->SetRelativeRotation(bOn ? FRotator(-13.f, (i == 0 ? 5.f : -5.f), 0.f) : FRotator(-30.f, (i == 0 ? 16.f : -16.f), 0.f));
 	}
 }

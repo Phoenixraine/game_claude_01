@@ -687,11 +687,11 @@ for (int si = 0; si < 14; si++)
     nrmn = custom(m, common + "return normalize(float3(nrm.xy + float2(0, 0.35) * run, nrm.z));", t.CMOT_FLOAT3, names, -900, 0, "glass_normal")
     wire_custom(nrmn, srcs)
     MEL.connect_material_property(nrmn, "", unreal.MaterialProperty.MP_NORMAL)
-    op = custom(m, common + "return saturate(0.025 + inside * (0.10 + 0.35 * (1.0 - cap)) + run * 0.12 + web * 0.9);", t.CMOT_FLOAT1, names, -900, 300, "glass_opacity")
+    op = custom(m, common + "return saturate(0.02 + inside * (0.03 + 0.3 * pow(1.0 - cap, 2.0)) + run * 0.08 + web * 0.9);", t.CMOT_FLOAT1, names, -900, 300, "glass_opacity")
     wire_custom(op, srcs)
     MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
     tint = vector(m, "Tint", (0.01, 0.02, 0.03, 1), -1500, 560)
-    bc = custom(m, common + "return Tint + web * float3(1.4, 1.6, 1.8);", t.CMOT_FLOAT3, names + ["Tint"], -900, 500, "glass_base")
+    bc = custom(m, common + "return Tint + inside * pow(1.0 - cap, 1.5) * float3(0.35, 0.4, 0.5) + web * float3(1.4, 1.6, 1.8);", t.CMOT_FLOAT3, names + ["Tint"], -900, 500, "glass_base")
     wire_custom(bc, srcs + [(tint, "")])
     MEL.connect_material_property(bc, "", unreal.MaterialProperty.MP_BASE_COLOR)
     rough = scalar(m, "Roughness", 0.04, -900, 600)
@@ -1362,9 +1362,9 @@ for (int L = 0; L < 4; L++)
     float fx = frac(p.x * 5.0);
     float h1 = frac(sin(col * 12.9898 + L * 7.1) * 43758.5453);
     float h2 = frac(sin(col * 78.233 + L * 3.3) * 43758.5453);
-    float y = frac(q.y * (1.6 + 0.25 * L) + T * spd * (0.7 + 0.5 * h2) + h1 * 9.0);
+    float y = frac(q.y * (1.6 + 0.25 * L) - T * spd * (0.7 + 0.5 * h2) + h1 * 9.0);   // screen y grows downwards: the pattern falls
     float streak = smoothstep(0.0, len, y) * (1.0 - smoothstep(len * 0.5, len, y));
-    streak = pow(saturate(1.0 - y / len), 1.6) * step(y, len);
+    streak = pow(saturate(y / len), 1.6) * step(y, len);   // bright head at the lower end, tail above
     float thin = 1.0 - smoothstep(0.0, 0.16 - 0.025 * L, abs(fx - 0.5));
     float on = step(h2, 0.42 + 0.1 * L);
     lum += streak * thin * on * (0.35 + 0.25 * L);

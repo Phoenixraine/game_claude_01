@@ -22,10 +22,13 @@
 #include "IVDistrict.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
+#include "IVAudio.h"
 
 AIVEnvironment::AIVEnvironment()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeF(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MatF(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
@@ -63,15 +66,18 @@ AIVEnvironment::AIVEnvironment()
 
 	Fog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("Fog"));
 	Fog->SetupAttachment(Root);
-	Fog->SetFogDensity(0.085f);
+	Fog->SetFogDensity(0.07f);
 	Fog->SetFogHeightFalloff(0.012f);
 	Fog->SetVolumetricFog(true);
 	Fog->SetVolumetricFogDistance(30000.f);
+	Fog->VolumetricFogAlbedo = FColor(70, 78, 105);          // dark mist: it picks up the neon without turning milky
+	Fog->VolumetricFogExtinctionScale = 0.8f;
+	Fog->VolumetricFogScatteringDistribution = 0.35f;
 	Fog->SetFogInscatteringColor(FLinearColor(0.07f, 0.06f, 0.13f));
 	Fog->SkyAtmosphereAmbientContributionColorScale = FLinearColor(0.12f, 0.16f, 0.26f);
 	Fog->SetFogMaxOpacity(1.f);
 	// a second, low and dense layer: ground mist that lets the street surface read as soft shapes and catches the neon
-	Fog->SecondFogData.FogDensity = 0.16f;
+	Fog->SecondFogData.FogDensity = 0.12f;
 	Fog->SecondFogData.FogHeightFalloff = 0.035f;
 	Fog->SecondFogData.FogHeightOffset = 200.f;
 	Fog->SetStartDistance(0.f);
@@ -131,8 +137,8 @@ void AIVEnvironment::ApplySettings(float FogMul, float EV, float Neon, float Blo
 {
 	if (Fog)
 	{
-		Fog->SetFogDensity(0.085f * FogMul);
-		Fog->SecondFogData.FogDensity = 0.16f * FogMul;
+		Fog->SetFogDensity(0.07f * FogMul);
+		Fog->SecondFogData.FogDensity = 0.12f * FogMul;
 		Fog->MarkRenderStateDirty();
 	}
 	if (PostProcess)
@@ -154,6 +160,8 @@ void AIVEnvironment::OnConstruction(const FTransform&)
 void AIVEnvironment::BeginPlay()
 {
 	Super::BeginPlay();
+	bStorm = !FParse::Param(FCommandLine::Get(), TEXT("IVNoStorm"));
+	if (FParse::Param(FCommandLine::Get(), TEXT("IVStormNow"))) { StormClock = 1.5f; ExplClock = 2.5f; }
 	{	// weather overrides for tuning: -IVFog= -IVFogFall= -IVSun= -IVSunPitch= -IVSky= ; -IVNoRain
 		float V = 0.f;
 		if (FParse::Value(FCommandLine::Get(), TEXT("-IVFog="), V)) Fog->SetFogDensity(V);
@@ -325,4 +333,79 @@ bool AIVEnvironment::FindScoopBuilding(const FVector& From, const FVector& Dir, 
 {
 	if (District) return District->FindBuildingNear(From, Dir, 1500.f, 17000.f, OutBase, OutSize);
 	return false;
+}
+
+
+// ---------------------------------------------------------------------------------------------------------- storm
+void AIVEnvironment::Tick(float Dt)
+{
+	Super::Tick(Dt);
+	if (!bStorm) return;
+	if (Moon) { if (MoonBase <= 0.f) MoonBase = Moon->Intensity; }
+	StormClock -= Dt;
+	ExplClock -= Dt;
+	if (StormClock <= 0.f) { Lightning(); StormClock = FMath::FRandRange(6.f, 16.f); }
+	if (ExplClock <= 0.f) { DistantExplosion(); ExplClock = FMath::FRandRange(9.f, 24.f); }
+	if (BoltT >= 0.f)
+	{
+		BoltT += Dt;
+		// two or three quick pulses with a decaying afterglow
+		static const float Starts[3] = { 0.f, 0.11f, 0.30f };
+		static const float Amps[3] = { 1.f, 0.7f, 0.9f };
+		float L = 0.f;
+		for (int32 i = 0; i < 3; ++i) if (BoltT >= Starts[i]) L = FMath::Max(L, Amps[i] * FMath::Exp(-(BoltT - Starts[i]) * 16.f));
+		L *= BoltAmp;
+		if (Moon) Moon->SetIntensity(MoonBase + 26.f * L);
+		if (PostProcess) { PostProcess->Settings.bOverride_AutoExposureBias = true; PostProcess->Settings.AutoExposureBias = EvBase + 2.2f * L; }
+		if (SkyLight) SkyLight->SetIntensity(SkyBase * (1.f + 7.f * L));
+		if (BoltT > 1.1f)
+		{
+			BoltT = -1.f;
+			if (Moon) Moon->SetIntensity(MoonBase);
+			if (SkyLight) SkyLight->SetIntensity(SkyBase);
+			if (PostProcess) PostProcess->Settings.AutoExposureBias = EvBase;
+		}
+	}
+	for (int32 i = Delayed.Num() - 1; i >= 0; --i)
+	{
+		Delayed[i].T -= Dt;
+		if (Delayed[i].T > 0.f) continue;
+		const FDelayed D = Delayed[i];
+		Delayed.RemoveAt(i);
+		if (D.Kind == 0) IVAudio::Play2D(GetWorld(), TEXT("env_distant_boom_0") + FString::FromInt(FMath::RandRange(1, 3)), 0.85f, FMath::FRandRange(0.55f, 0.8f));
+		else if (D.Kind == 1)
+		{
+			IVAudio::Play2D(GetWorld(), TEXT("env_distant_boom_0") + FString::FromInt(FMath::RandRange(1, 3)), 0.6f, FMath::FRandRange(0.8f, 1.05f));
+		}
+	}
+}
+
+void AIVEnvironment::Lightning()
+{
+	if (BoltT >= 0.f) return;
+	BoltT = 0.f;
+	if (PostProcess) EvBase = PostProcess->Settings.AutoExposureBias;
+	BoltAmp = FMath::FRandRange(0.6f, 1.f);
+	UE_LOG(LogTemp, Display, TEXT("IV lightning at t=%.2f"), GetWorld()->GetTimeSeconds());
+	if (Moon)
+	{
+		MoonBase = Moon->Intensity > 20.f ? 2.6f : Moon->Intensity;
+		Moon->SetWorldRotation(FRotator(FMath::FRandRange(-72.f, -40.f), FMath::FRandRange(0.f, 360.f), 0.f));
+	}
+	Delayed.Add({ FMath::FRandRange(0.4f, 3.2f), 0, FVector::ZeroVector });
+}
+
+void AIVEnvironment::DistantExplosion()
+{
+	APlayerCameraManager* PCM = UGameplayStatics::GetPlayerCameraManager(this, 0);
+	if (!PCM) return;
+	const FVector C = PCM->GetCameraLocation();
+	const float Ang = FMath::FRandRange(0.f, 360.f), Dist = FMath::FRandRange(45000.f, 90000.f);
+	const FVector P = C + FRotator(0.f, Ang, 0.f).Vector() * Dist + FVector(0, 0, FMath::FRandRange(2000.f, 12000.f));
+	if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
+	{
+		FX->SpawnExplosion(P, 14.f);
+		FX->SpawnFlash(P, FLinearColor(1.f, 0.5f, 0.2f), 4.0e7f, 0.9f, 80000.f);
+	}
+	Delayed.Add({ Dist / 34000.f, 1, P });
 }

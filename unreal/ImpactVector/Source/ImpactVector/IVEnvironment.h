@@ -34,6 +34,10 @@ public:
 	AIVEnvironment();
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float Dt) override;
+	/** Test helper / console: strike now. */
+	void Lightning();
+	void DistantExplosion();
 
 	static AIVEnvironment* Get(UWorld* World);
 	/** Fog / exposure / neon / bloom / motion blur / rain amount / ground mist from the player's settings. */
@@ -70,4 +74,10 @@ private:
 
 	void BuildCityBlockout();
 	UPROPERTY() TObjectPtr<AActor> RainActor;
+	// storm: lightning pulses lift the moon and sky light for a moment; thunder and far-off blasts follow with a delay
+	float StormClock = 5.f, ExplClock = 11.f, BoltT = -1.f, BoltAmp = 1.f, BoltDelay = 0.f;
+	float MoonBase = 2.6f, SkyBase = 0.8f, EvBase = 0.f;
+	bool bStorm = true;
+	struct FDelayed { float T; int32 Kind; FVector P; };
+	TArray<FDelayed> Delayed;
 };
