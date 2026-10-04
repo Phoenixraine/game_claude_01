@@ -70,9 +70,12 @@ AIVDistrict::AIVDistrict()
 	TreeTrunks = ISM(TEXT("TreeTrunks"), CylMesh, false);
 	TreeCrowns = ISM(TEXT("TreeCrowns"), SphereMesh, false);
 	Lamps = ISM(TEXT("Lamps"), CylMesh, false);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ConeF(TEXT("/Engine/BasicShapes/Cone.Cone"));
+	Glow = ISM(TEXT("Glow"), CubeMesh, false);
+	Cones = ISM(TEXT("Cones"), ConeF.Object, false);
 	Containers = ISM(TEXT("Containers"), CubeMesh, true);
 	Chimneys = ISM(TEXT("Chimneys"), CylMesh, true);
-	for (UInstancedStaticMeshComponent* C : { Cars.Get(), TreeTrunks.Get(), TreeCrowns.Get(), Lamps.Get(), Containers.Get() })
+	for (UInstancedStaticMeshComponent* C : { Cars.Get(), TreeTrunks.Get(), TreeCrowns.Get(), Lamps.Get(), Containers.Get(), Glow.Get(), Cones.Get() })
 	{
 		C->NumCustomDataFloats = 3;
 	}
@@ -202,11 +205,13 @@ bool AIVDistrict::Load(const FString& JsonPath, const FString& HeightPath)
 	if (UMaterialInstanceDynamic* Tr = MakeMID(TEXT("/Game/Materials/M_Trim.M_Trim"), Fb)) { TrimBox->SetMaterial(0, Tr); TrimBall->SetMaterial(0, Tr); }
 	if (UMaterialInstanceDynamic* Prop = MakeMID(TEXT("/Game/Materials/M_PropColor.M_PropColor"), Fb))
 	{
-		for (UInstancedStaticMeshComponent* C : { Cars.Get(), TreeTrunks.Get(), TreeCrowns.Get(), Lamps.Get() })
+		for (UInstancedStaticMeshComponent* C : { Cars.Get(), TreeTrunks.Get(), TreeCrowns.Get(), Lamps.Get(), Cones.Get() })
 		{
 			C->SetMaterial(0, Prop);
 		}
 	}
+	if (UMaterialInstanceDynamic* Gl = MakeMID(TEXT("/Game/Materials/M_PropGlow.M_PropGlow"), Fb)) Glow->SetMaterial(0, Gl);
+	Glow->SetCastShadow(false);
 
 	// POIs
 	for (const TSharedPtr<FJsonValue>& V : Rootj->GetArrayField(TEXT("pois")))
@@ -218,6 +223,7 @@ bool AIVDistrict::Load(const FString& JsonPath, const FString& HeightPath)
 		Pois.Add(O->GetStringField(TEXT("id")), TPair<FVector, float>(Loc, YawToUE(float(Yd))));
 	}
 
+	bArena = Rootj->HasField(TEXT("arena"));
 	BuildTerrain();
 	BuildRoads(Rootj->GetArrayField(TEXT("roads")));
 	BuildBuildings(Rootj->GetArrayField(TEXT("buildings")));
@@ -244,9 +250,10 @@ void AIVDistrict::BuildTerrain()
 	UMaterialInstanceDynamic* GroundM = MakeMID(TEXT("/Game/Materials/M_WetGround.M_WetGround"), nullptr);
 	if (GroundM)
 	{
-		GroundM->SetVectorParameterValue(TEXT("BaseTint"), FLinearColor(0.11f, 0.115f, 0.12f));
-		GroundM->SetScalarParameterValue(TEXT("Wetness"), 0.35f);
-		GroundM->SetScalarParameterValue(TEXT("UseVertexColor"), 1.f);
+		GroundM->SetVectorParameterValue(TEXT("BaseTint"), bArena ? FLinearColor(0.05f, 0.052f, 0.06f) : FLinearColor(0.11f, 0.115f, 0.12f));
+		GroundM->SetScalarParameterValue(TEXT("Wetness"), bArena ? 0.55f : 0.35f);
+		GroundM->SetScalarParameterValue(TEXT("UseVertexColor"), bArena ? 0.f : 1.f);
+		GroundM->SetScalarParameterValue(TEXT("Layout"), bArena ? 1.f : 0.f);
 		Terrain->SetMaterial(0, GroundM);
 	}
 
@@ -539,6 +546,11 @@ void AIVDistrict::BuildHeroStatics(const TSharedPtr<FJsonObject>& B)
 
 void AIVDistrict::BuildProps(const TArray<TSharedPtr<FJsonValue>>& PropsJson)
 {
+	// Street furniture and traffic are assembled from boxes, cylinders and spheres (paint ISMs) plus glowing parts (Glow ISM). All sizes in cm,
+	// local frame: +X forward (the way a car drives / a kiosk faces), +Y right, Z up from the ground.
+	static const FLinearColor Neon[] = { FLinearColor(1.f, 0.12f, 0.45f), FLinearColor(0.08f, 0.85f, 1.f), FLinearColor(1.f, 0.6f, 0.08f), FLinearColor(0.2f, 1.f, 0.4f), FLinearColor(0.6f, 0.3f, 1.f) };
+	static const FLinearColor Cloth[] = { FLinearColor(0.02f, 0.02f, 0.025f), FLinearColor(0.05f, 0.05f, 0.07f), FLinearColor(0.12f, 0.03f, 0.03f), FLinearColor(0.03f, 0.07f, 0.12f), FLinearColor(0.1f, 0.1f, 0.1f), FLinearColor(0.15f, 0.12f, 0.04f) };
+	const FLinearColor Dark(0.015f, 0.016f, 0.02f), Conc(0.2f, 0.2f, 0.215f), GlassC(0.008f, 0.012f, 0.018f);
 	int32 Seed = 0;
 	for (const TSharedPtr<FJsonValue>& PV : PropsJson)
 	{
@@ -549,31 +561,166 @@ void AIVDistrict::BuildProps(const TArray<TSharedPtr<FJsonValue>>& PropsJson)
 		const float Yaw = YawToUE(float(P->HasField(TEXT("yaw_deg")) ? P->GetNumberField(TEXT("yaw_deg")) : 0.0));
 		const FString Var = P->HasField(TEXT("variant")) ? P->GetStringField(TEXT("variant")) : FString();
 		++Seed;
+		FRandomStream Rs(Seed * 7919 + 13);
+		const FQuat Q = FRotator(0, Yaw, 0).Quaternion();
 		auto SetCol = [](UInstancedStaticMeshComponent* C, int32 Index, const FLinearColor& Col)
 		{
 			C->SetCustomDataValue(Index, 0, Col.R, false);
 			C->SetCustomDataValue(Index, 1, Col.G, false);
 			C->SetCustomDataValue(Index, 2, Col.B, false);
 		};
+		// one part: component, local centre (relative to the ground point), full size, colour, extra local rotation
+		auto Part = [&](UInstancedStaticMeshComponent* C, const FVector& Local, const FVector& Size, const FLinearColor& Col, float LYaw = 0.f, float LPitch = 0.f, float LRoll = 0.f)
+		{
+			const FQuat Qp = Q * FRotator(LPitch, LYaw, LRoll).Quaternion();
+			const int32 I = C->AddInstance(FTransform(Qp, Loc + Q.RotateVector(Local), Size / 100.f));
+			SetCol(C, I, Col);
+		};
+		const FLinearColor Accent = Neon[Rs.RandRange(0, 4)];
 		if (Kind == TEXT("car"))
 		{
 			const FVector S = CarSize(Var);
-			const int32 I = Cars->AddInstance(FTransform(FRotator(0, Yaw, 0), Loc + FVector(0, 0, S.Z * 0.5f + 20.f), S / 100.f));
-			SetCol(Cars, I, CarColor(Var, Seed * 7919));
+			const FLinearColor Body = CarColor(Var, Seed * 7919);
+			const float H0 = 28.f;
+			const bool bBig = (Var == TEXT("bus") || Var == TEXT("truck") || Var == TEXT("van"));
+			if (bBig)
+			{
+				Part(Cars, FVector(0, 0, H0 + (S.Z - H0) * 0.5f), FVector(S.X, S.Y, S.Z - H0), Body);
+				if (Var == TEXT("truck")) Part(Cars, FVector(S.X * 0.36f, 0, H0 + (S.Z - H0) * 0.2f), FVector(S.X * 0.28f, S.Y * 1.02f, (S.Z - H0) * 0.42f), GlassC);
+				else Part(Cars, FVector(0, 0, H0 + (S.Z - H0) * 0.68f), FVector(S.X * 0.94f, S.Y * 1.012f, (S.Z - H0) * 0.3f), GlassC);
+				if (Var == TEXT("bus")) Part(Glow, FVector(S.X * 0.5f, 0, S.Z * 0.9f), FVector(8, S.Y * 0.5f, 22), FLinearColor(1.f, 0.55f, 0.1f));
+			}
+			else
+			{
+				Part(Cars, FVector(0, 0, H0 + S.Z * 0.25f), FVector(S.X, S.Y, S.Z * 0.5f), Body);
+				Part(Cars, FVector(-S.X * 0.06f, 0, H0 + S.Z * 0.5f + S.Z * 0.2f), FVector(S.X * 0.52f, S.Y * 0.9f, S.Z * 0.42f), GlassC);
+				Part(Cars, FVector(-S.X * 0.06f, 0, H0 + S.Z * 0.5f + S.Z * 0.42f), FVector(S.X * 0.5f, S.Y * 0.88f, 6.f), Body);
+				if (Var == TEXT("taxi")) Part(Glow, FVector(-S.X * 0.06f, 0, H0 + S.Z * 0.5f + S.Z * 0.42f + 14.f), FVector(55, 28, 16), FLinearColor(1.f, 0.7f, 0.1f));
+			}
+			for (int32 sx = -1; sx <= 1; sx += 2)
+				for (int32 sy = -1; sy <= 1; sy += 2)
+					Part(Lamps, FVector(sx * S.X * 0.32f, sy * S.Y * 0.47f, 38.f), FVector(76, 76, 28), Dark, 0.f, 0.f, 90.f);
+			for (int32 sy = -1; sy <= 1; sy += 2)
+			{
+				Part(Glow, FVector(S.X * 0.5f, sy * S.Y * 0.3f, H0 + S.Z * 0.28f), FVector(10, S.Y * 0.22f, 16), FLinearColor(1.f, 0.93f, 0.75f));
+				Part(Glow, FVector(-S.X * 0.5f, sy * S.Y * 0.3f, H0 + S.Z * 0.3f), FVector(10, S.Y * 0.22f, 14), FLinearColor(1.f, 0.03f, 0.02f));
+			}
 		}
 		else if (Kind == TEXT("tree"))
 		{
-			const float H = 420.f + 60.f * (Seed % 5);
-			const int32 I = TreeTrunks->AddInstance(FTransform(FRotator::ZeroRotator, Loc + FVector(0, 0, H * 0.5f), FVector(0.55f, 0.55f, H / 100.f)));
-			SetCol(TreeTrunks, I, FLinearColor(0.07f, 0.045f, 0.03f));
-			const float CR = 520.f + 50.f * (Seed % 4);
-			const int32 J = TreeCrowns->AddInstance(FTransform(FRotator::ZeroRotator, Loc + FVector(0, 0, H + CR * 0.35f), FVector(CR / 100.f, CR / 100.f, CR * 0.85f / 100.f)));
-			SetCol(TreeCrowns, J, FLinearColor(0.025f + 0.01f * (Seed % 3), 0.07f + 0.015f * (Seed % 4), 0.03f));
+			const float H = 380.f + 60.f * (Seed % 5);
+			Part(Lamps, FVector(0, 0, 25), FVector(150, 150, 50), Conc);                           // planter
+			Part(TreeTrunks, FVector(0, 0, H * 0.5f), FVector(55, 55, H), FLinearColor(0.06f, 0.04f, 0.03f));
+			const FLinearColor Leaf(0.02f + 0.01f * (Seed % 3), 0.07f + 0.02f * (Seed % 4), 0.035f);
+			for (int32 k = 0; k < 4; ++k)
+			{
+				const float R = 260.f + 60.f * Rs.FRand();
+				Part(TreeCrowns, FVector(Rs.FRandRange(-120.f, 120.f), Rs.FRandRange(-120.f, 120.f), H + 120.f + Rs.FRandRange(-60.f, 160.f)), FVector(R, R, R * 0.8f), Leaf * Rs.FRandRange(0.8f, 1.3f));
+			}
+			if (Seed % 3 == 0) Part(Glow, FVector(0, 0, 60), FVector(190, 190, 6), Accent * 0.5f);   // uplight ring
 		}
 		else if (Kind == TEXT("lamp"))
 		{
-			const int32 I = Lamps->AddInstance(FTransform(FRotator::ZeroRotator, Loc + FVector(0, 0, 450.f), FVector(0.28f, 0.28f, 9.f)));
-			SetCol(Lamps, I, FLinearColor(0.08f, 0.085f, 0.09f));
+			Part(Lamps, FVector(0, 0, 450), FVector(28, 28, 900), Dark);
+			Part(Cars, FVector(110, 0, 893), FVector(230, 16, 16), Dark);
+			Part(Glow, FVector(215, 0, 878), FVector(110, 46, 10), (Seed % 2) ? FLinearColor(1.f, 0.62f, 0.3f) : FLinearColor(0.45f, 0.85f, 1.f));
+		}
+		else if (Kind == TEXT("barrier"))
+		{
+			Part(Cars, FVector(0, 0, 47), FVector(300, 70, 95), Conc);
+			Part(Cars, FVector(0, 0, 80), FVector(302, 72, 16), FLinearColor(0.9f, 0.3f, 0.02f));
+			if (Seed % 2) Part(Glow, FVector(140, 0, 106), FVector(24, 24, 18), FLinearColor(1.f, 0.55f, 0.05f));
+		}
+		else if (Kind == TEXT("cone"))
+		{
+			Part(Cones, FVector(0, 0, 35), FVector(42, 42, 70), FLinearColor(0.9f, 0.22f, 0.02f));
+		}
+		else if (Kind == TEXT("dumpster"))
+		{
+			Part(Cars, FVector(0, 0, 68), FVector(240, 110, 116), Seed % 2 ? FLinearColor(0.03f, 0.12f, 0.06f) : FLinearColor(0.03f, 0.06f, 0.16f));
+			Part(Cars, FVector(0, 0, 130), FVector(246, 116, 10), Dark);
+		}
+		else if (Kind == TEXT("kiosk"))
+		{
+			Part(Cars, FVector(0, 0, 125), FVector(300, 260, 250), Cloth[Seed % 6] * 2.f);
+			Part(Cars, FVector(0, 0, 255), FVector(330, 290, 12), Dark);
+			Part(Cars, FVector(190, 0, 225), FVector(110, 280, 10), Accent * 0.35f, 0.f, 14.f);                     // awning
+			Part(Glow, FVector(152, 0, 150), FVector(6, 240, 90), Accent);                                          // lit window
+			Part(Glow, FVector(100, 0, 287), FVector(8, 220, 40), Neon[(Seed + 2) % 5]);                            // roof sign
+		}
+		else if (Kind == TEXT("busstop"))
+		{
+			for (int32 sy = -1; sy <= 1; sy += 2) Part(Lamps, FVector(0, sy * 160.f, 130), FVector(10, 10, 260), Dark);
+			Part(Cars, FVector(0, 0, 264), FVector(150, 380, 10), Dark);
+			Part(Cars, FVector(-62, 0, 140), FVector(4, 340, 210), GlassC);
+			Part(Glow, FVector(-58, 0, 150), FVector(5, 300, 180), Accent * 0.9f);
+			Part(Cars, FVector(-25, 0, 45), FVector(45, 300, 8), Dark);
+		}
+		else if (Kind == TEXT("vending"))
+		{
+			Part(Cars, FVector(0, 0, 95), FVector(90, 80, 190), Cloth[Seed % 6] * 2.f);
+			Part(Glow, FVector(46, 0, 105), FVector(4, 66, 150), Accent);
+		}
+		else if (Kind == TEXT("hydrant"))
+		{
+			Part(Lamps, FVector(0, 0, 35), FVector(34, 34, 70), FLinearColor(0.5f, 0.03f, 0.02f));
+			Part(Lamps, FVector(0, 0, 76), FVector(44, 44, 12), FLinearColor(0.45f, 0.03f, 0.02f));
+		}
+		else if (Kind == TEXT("bollard"))
+		{
+			Part(Lamps, FVector(0, 0, 45), FVector(28, 28, 90), Conc);
+			Part(Glow, FVector(0, 0, 92), FVector(30, 30, 5), Accent);
+		}
+		else if (Kind == TEXT("bench"))
+		{
+			Part(Cars, FVector(0, 0, 45), FVector(180, 50, 8), FLinearColor(0.1f, 0.06f, 0.03f));
+			Part(Cars, FVector(-22, 0, 72), FVector(6, 180, 40), FLinearColor(0.1f, 0.06f, 0.03f));
+			for (int32 sy = -1; sy <= 1; sy += 2) Part(Cars, FVector(0, sy * 70.f, 22), FVector(36, 8, 44), Dark);
+		}
+		else if (Kind == TEXT("crate"))
+		{
+			Part(Cars, FVector(0, 0, 45), FVector(95, 95, 90), FLinearColor(0.18f, 0.1f, 0.05f));
+			if (Seed % 2) Part(Cars, FVector(Rs.FRandRange(-10.f, 10.f), 0, 135), FVector(80, 80, 80), FLinearColor(0.15f, 0.09f, 0.045f), Rs.FRandRange(-25.f, 25.f));
+		}
+		else if (Kind == TEXT("person"))
+		{
+			const FLinearColor Coat = Cloth[Seed % 6];
+			Part(Lamps, FVector(0, 0, 90), FVector(46, 46, 140), Coat);
+			Part(TreeCrowns, FVector(0, 0, 178), FVector(30, 30, 32), FLinearColor(0.18f, 0.12f, 0.09f));
+			if (Rs.FRand() < 0.72f)
+			{
+				Part(Lamps, FVector(0, 0, 215), FVector(3, 3, 80), Dark);
+				Part(TreeCrowns, FVector(0, 0, 250), FVector(160, 160, 34), Neon[Seed % 5] * 0.55f);
+			}
+		}
+		else if (Kind == TEXT("stall"))
+		{
+			Part(Cars, FVector(0, 0, 45), FVector(150, 300, 90), Cloth[Seed % 6] * 2.5f);
+			Part(Cars, FVector(0, 0, 255), FVector(210, 340, 10), Accent * 0.4f, 0.f, 0.f, 0.f);
+			Part(Cars, FVector(0, 0, 262), FVector(210, 330, 6), (Seed % 2) ? FLinearColor(0.9f, 0.9f, 0.9f) * 0.25f : Accent * 0.25f);
+			for (int32 sx = -1; sx <= 1; sx += 2)
+				for (int32 sy = -1; sy <= 1; sy += 2) Part(Lamps, FVector(sx * 90.f, sy * 160.f, 125), FVector(8, 8, 250), Dark);
+			Part(Glow, FVector(40, 0, 245), FVector(110, 280, 5), FLinearColor(1.f, 0.72f, 0.4f));                  // lamp strip under the awning
+			Part(Glow, FVector(76, 0, 110), FVector(4, 270, 30), Accent);                                           // goods
+		}
+		else if (Kind == TEXT("trafficlight"))
+		{
+			Part(Lamps, FVector(0, 0, 300), FVector(25, 25, 600), Dark);
+			Part(Cars, FVector(210, 0, 590), FVector(420, 18, 18), Dark);
+			Part(Cars, FVector(380, 0, 540), FVector(40, 36, 120), Dark);
+			const int32 On = Seed % 3;
+			const FLinearColor Lc[3] = { FLinearColor(1.f, 0.02f, 0.02f), FLinearColor(1.f, 0.6f, 0.02f), FLinearColor(0.05f, 1.f, 0.2f) };
+			for (int32 k = 0; k < 3; ++k) Part(Glow, FVector(401, 0, 575 - 35 * k), FVector(6, 26, 26), Lc[k] * (k == On ? 1.f : 0.04f));
+		}
+		else if (Kind == TEXT("trash"))
+		{
+			for (int32 k = 0; k < 4; ++k) Part(Cars, FVector(Rs.FRandRange(-90.f, 90.f), Rs.FRandRange(-60.f, 60.f), 18), FVector(Rs.FRandRange(30.f, 55.f), Rs.FRandRange(30.f, 55.f), Rs.FRandRange(25.f, 40.f)), FLinearColor(0.012f, 0.012f, 0.015f), Rs.FRandRange(0.f, 90.f));
+			Part(Lamps, FVector(120, 0, 45), FVector(55, 55, 90), Conc * 0.8f);
+		}
+		else if (Kind == TEXT("sign"))
+		{
+			Part(Lamps, FVector(0, 0, 150), FVector(10, 10, 300), Dark);
+			Part(Glow, FVector(6, 0, 280), FVector(5, 90, 90), (Seed % 2) ? FLinearColor(0.1f, 0.4f, 1.f) : FLinearColor(1.f, 0.15f, 0.1f));
 		}
 	}
 }

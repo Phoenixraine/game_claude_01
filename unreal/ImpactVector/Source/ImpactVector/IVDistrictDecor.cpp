@@ -71,7 +71,7 @@ void AIVDistrict::RebuildDeco()
 
 void AIVDistrict::ApplyDrawDistance(float Cm)
 {
-	UInstancedStaticMeshComponent* Comps[] = { Concrete, Glass, Hero, Cars, TreeTrunks, TreeCrowns, Lamps, Containers, Chimneys, Signs, TrimBox, TrimBall, ConcCyl, ExtraGlass, ExtraConc };
+	UInstancedStaticMeshComponent* Comps[] = { Concrete, Glass, Hero, Cars, TreeTrunks, TreeCrowns, Lamps, Glow, Cones, Containers, Chimneys, Signs, TrimBox, TrimBall, ConcCyl, ExtraGlass, ExtraConc };
 	for (UInstancedStaticMeshComponent* I : Comps)
 		if (I) { I->SetCullDistances(int32(Cm * 0.85f), int32(Cm)); I->bUseAsOccluder = false; }
 	for (FIVNeonLight& L : NeonLights) if (L.L) { L.L->MaxDrawDistance = Cm * 0.9f; L.L->MaxDistanceFadeRange = Cm * 0.2f; }

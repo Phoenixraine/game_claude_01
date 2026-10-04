@@ -281,36 +281,117 @@ def outer_city():
 
 outer_city()
 
-# ------------------------------------------------------------------ props: lamps, cars, a few trees, rows of lanterns
+# ------------------------------------------------------------------ props: a lived-in boulevard
+def addp(kind, x, y, yaw=0.0, variant=None):
+    p = {"id": "%s_%d" % (kind, len(props)), "kind": kind, "pos": [round(x, 2), round(y, 2), 0.0], "yaw_deg": round(yaw, 1)}
+    if variant:
+        p["variant"] = variant
+    props.append(p)
+
+
 def lamp_line(x0, y0, x1, y1, step):
     n = max(1, int(math.hypot(x1 - x0, y1 - y0) / step))
     for i in range(n + 1):
         t = i / n
-        props.append({"id": "lamp_%d" % len(props), "kind": "lamp", "pos": [round(x0 + (x1 - x0) * t, 2), round(y0 + (y1 - y0) * t, 2), 0.0], "yaw_deg": 0})
+        addp("lamp", x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 0 if x0 < 0 else 180)
 
 
-lamp_line(-110, 230, -110, 560, 38)
-lamp_line(110, 230, 110, 560, 38)
+CAR_KINDS = ["sedan", "taxi", "sedan", "van", "suv", "bus", "truck", "sedan", "taxi", "suv"]
+
+# street lamps on both pavements of the plaza, bollards along the kerb, trees in planters
+for sx in (-1, 1):
+    lamp_line(sx * 111.0, 224, sx * 111.0, 566, 22)
+    for k in range(0, 60):
+        addp("bollard", sx * 108.8, 222 + k * 5.8, 0)
+    for k in range(14):
+        addp("tree", sx * R.uniform(114, 119), 232 + k * 24 + R.uniform(-4, 4))
 for sx in (-24, 24):
     lamp_line(sx, STREET_Y0 + 5, sx, STREET_Y1, 30)
-for i in range(240):
-    # parked / stopped cars on the avenues
-    ax = R.choice([-150.0, 150.0, 0.0])
-    if ax == 0.0:
-        x, y = R.uniform(-60, 60), R.uniform(150, 215)
-        yaw = R.choice([0, 180])
-    else:
-        x, y = ax + R.uniform(-24, 24), R.uniform(Y0 + 20, 1100)
-        yaw = R.choice([90, 270])
-    if PLAZA[2] < y < PLAZA[3] and abs(x) < 125:
+
+# traffic on the boulevard: six lanes each way; the middle stays fairly empty for the duel, the outer lanes carry stopped traffic
+for lane in range(-9, 9):
+    lx = lane * 12.0 + 6.0
+    if abs(lx) < 4:
         continue
-    props.append({"id": "car_%04d" % i, "kind": "car", "pos": [round(x, 1), round(y, 1), 0.0], "yaw_deg": yaw, "variant": R.choice(["sedan", "taxi", "sedan", "van", "suv", "bus", "truck"])})
-for i in range(110):
-    x = R.choice([-1, 1]) * R.uniform(20, 110)
-    y = R.uniform(240, 560)
-    if abs(x) < 100 and R.random() < 0.7:
-        continue
-    props.append({"id": "tree_%d" % i, "kind": "tree", "pos": [round(x, 1), round(y, 1), 0.0], "yaw_deg": 0})
+    y = 232.0 + R.uniform(0, 12)
+    dens = 0.1 if abs(lx) < 30 else 0.55
+    while y < 556:
+        if R.random() < dens:
+            addp("car", lx + R.uniform(-1.2, 1.2), y, 90 if lx > 0 else 270, R.choice(CAR_KINDS))
+        y += R.uniform(9, 24)
+# the crossing avenue: a traffic jam, bumper to bumper
+for lane_y, yaw in ((158.0, 0), (170.0, 0), (194.0, 180), (206.0, 180)):
+    x = -640.0
+    while x < 640:
+        if abs(x) > 12 or R.random() < 0.5:
+            if R.random() < 0.62:
+                addp("car", x, lane_y + R.uniform(-1, 1), yaw, R.choice(CAR_KINDS))
+        x += R.uniform(8, 16)
+# the old outer avenues
+for i in range(120):
+    ax = R.choice([-150.0, 150.0])
+    x, y = ax + R.uniform(-24, 24), R.uniform(Y0 + 20, 1100)
+    addp("car", x, y, R.choice([90, 270]), R.choice(CAR_KINDS))
+
+# pedestrians (most under neon umbrellas) on the zebra crossings, the pavements and the pedestrian street
+for zy in (221.0, 569.0):
+    for i in range(34):
+        addp("person", R.uniform(-104, 104), zy + R.uniform(-5, 5), R.uniform(0, 360))
+for sx in (-1, 1):
+    for i in range(55):
+        addp("person", sx * R.uniform(110, 120), R.uniform(224, 566), R.uniform(0, 360))
+for i in range(120):
+    addp("person", R.uniform(-5.5, 5.5), R.uniform(STREET_Y0 + 5, STREET_Y1 - 5), R.uniform(0, 360))
+for i in range(30):
+    addp("person", R.uniform(-120, 120), R.uniform(152, 213), R.uniform(0, 360))
+
+# pavement furniture
+for sx in (-1, 1):
+    face = 180 if sx > 0 else 0
+    for y in (260.0, 340.0, 470.0, 540.0):
+        addp("busstop", sx * 113.5, y + R.uniform(-8, 8), face)
+    for k in range(7):
+        addp("kiosk", sx * 117.0, 240 + k * 48 + R.uniform(-6, 6), face, None)
+    for k in range(24):
+        y = 225 + k * 14.2
+        addp(R.choice(["vending", "hydrant", "bench", "trash", "sign", "vending", "trash"]), sx * R.uniform(111.5, 119.0), y + R.uniform(-3, 3), face)
+    # zebra-crossing traffic lights
+    for zy in (232.0, 558.0):
+        addp("trafficlight", sx * 107.0, zy, 180 if sx > 0 else 0, str(R.randint(0, 2)))
+# construction site in one corner of the plaza: barriers, cones, crates, a dumpster
+cx0, cx1, cy0, cy1 = 56.0, 98.0, 500.0, 548.0
+for t in range(int((cx1 - cx0) / 3.2) + 1):
+    addp("barrier", cx0 + t * 3.2, cy0, 0)
+    addp("barrier", cx0 + t * 3.2, cy1, 0)
+for t in range(int((cy1 - cy0) / 3.2) + 1):
+    addp("barrier", cx0, cy0 + t * 3.2, 90)
+    addp("barrier", cx1, cy0 + t * 3.2, 90)
+for i in range(26):
+    addp("cone", R.uniform(cx0 - 6, cx1 + 6), R.uniform(cy0 - 6, cy1 + 6), 0)
+for i in range(18):
+    addp("crate", R.uniform(cx0 + 3, cx1 - 3), R.uniform(cy0 + 3, cy1 - 3), R.uniform(0, 360))
+for i in range(3):
+    addp("dumpster", R.uniform(cx0 + 5, cx1 - 5), R.uniform(cy0 + 4, cy1 - 4), R.uniform(0, 360))
+# a second, smaller roadworks fence on the opposite side
+for t in range(10):
+    addp("barrier", -90.0 + t * 3.2, 262.0, 0)
+for i in range(12):
+    addp("cone", R.uniform(-92, -58), R.uniform(255, 268), 0)
+# the pedestrian street: market stalls on both sides, crates and rubbish behind them
+y = STREET_Y0 + 10
+while y < STREET_Y1 - 6:
+    for sx in (-1, 1):
+        addp("stall", sx * 6.4, y + R.uniform(-1, 1), 0 if sx < 0 else 180)
+        if R.random() < 0.5:
+            addp("crate", sx * 8.2, y + R.uniform(-3, 3), R.uniform(0, 360))
+    y += 7.5
+for i in range(30):
+    addp("trash", R.choice([-1, 1]) * R.uniform(7.6, 8.6), R.uniform(STREET_Y0, STREET_Y1), R.uniform(0, 360))
+# dumpsters and rubbish at the foot of the buildings that line the plaza and the avenue
+for i in range(40):
+    addp(R.choice(["dumpster", "trash", "crate", "hydrant"]), R.choice([-1, 1]) * R.uniform(122, 130), R.uniform(222, 570), R.uniform(0, 360))
+for i in range(40):
+    addp(R.choice(["dumpster", "trash", "crate"]), R.uniform(-400, 400), R.choice([149.0, 216.0]) + R.uniform(-2, 2), R.uniform(0, 360))
 
 # overhead cross-street lantern/wire lines along the street (rendered by the loader as emissive beads)
 strings = []

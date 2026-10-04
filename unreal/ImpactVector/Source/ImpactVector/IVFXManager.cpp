@@ -302,7 +302,7 @@ void AIVFXManager::SpawnDust(const FVector& Center, float Radius, int32 Count, f
 	}
 }
 
-void AIVFXManager::SpawnSparks(const FVector& Center, const FVector& Normal, int32 Count, float Speed)
+void AIVFXManager::SpawnSparks(const FVector& Center, const FVector& Normal, int32 Count, float Speed, float Scale)
 {
 	for (int32 i = 0; i < Count && Sparks.Num() < MaxSparks; ++i)
 	{
@@ -311,7 +311,7 @@ void AIVFXManager::SpawnSparks(const FVector& Center, const FVector& Normal, int
 		const FVector Dir = (Normal + Rng.VRand() * 0.9f).GetSafeNormal();
 		S.Vel = Dir * Speed * Rng.FRandRange(0.3f, 1.f);
 		S.Life = Rng.FRandRange(0.4f, 1.2f);
-		S.Len = Rng.FRandRange(60.f, 220.f);
+		S.Len = Rng.FRandRange(60.f, 220.f) * Scale;
 		Sparks.Add(S);
 	}
 }
@@ -466,7 +466,7 @@ void AIVFXManager::Tick(float Dt)
 		{
 			const FVector Dir = S.Vel.GetSafeNormal();
 			const float Fade = 1.f - S.Age / S.Life;
-			T.Add(FTransform(FRotationMatrix::MakeFromX(Dir).ToQuat(), S.Pos, FVector(S.Len / 100.f, 0.035f, 0.035f) * (0.4f + 0.6f * Fade)));
+			T.Add(FTransform(FRotationMatrix::MakeFromX(Dir).ToQuat(), S.Pos, FVector(S.Len / 100.f, 0.035f * FMath::Max(1.f, S.Len / 150.f), 0.035f * FMath::Max(1.f, S.Len / 150.f)) * (0.4f + 0.6f * Fade)));
 		}
 		if (SparkISM->GetInstanceCount() != T.Num())
 		{

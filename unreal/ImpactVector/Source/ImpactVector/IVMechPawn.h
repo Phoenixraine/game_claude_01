@@ -266,6 +266,10 @@ protected:
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> PlateMID;
 	void UpdateBladeContact(float Dt, FIVPoseAngles& Pose);
 	float BladeBlock = 0.f, BladeBlockHold = 0.f;
+	float ContactSparkCool = 0.f, ContactSoundCool = 0.f;
+	bool bWasTouching = false;
+	/** Sparks, flash and clang where the blade meets the other blade (bBlade) or the other body. */
+	void EmitContactSparks(const FVector& At, bool bBlade, float Strength);
 TMap<FName, FVector> CombatVel;       // joint velocities of the spring-driven combat pose (weight and follow-through)
 float SwingWeightPitch = 0.f, SwingWeightYaw = 0.f, PelvisDip = 0.f;
 	TWeakObjectPtr<AIVMechPawn> OtherMechCache;

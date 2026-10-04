@@ -73,7 +73,7 @@ public:
 
 	/** Big expanding dust/smoke cloud (building collapse, impacts). */
 	void SpawnDust(const FVector& Center, float Radius, int32 Count, float Strength = 1.f);
-	void SpawnSparks(const FVector& Center, const FVector& Normal, int32 Count, float Speed = 4000.f);
+	void SpawnSparks(const FVector& Center, const FVector& Normal, int32 Count, float Speed = 4000.f, float Scale = 1.f);
 	/** Dark smoke column / cloud (burning wrecks). */
 	void SpawnSmoke(const FVector& Center, float Radius, int32 Count, float Strength = 1.f);
 	/** Licking flames rising from a point (one call = a few sprites; call repeatedly for a burning zone). */

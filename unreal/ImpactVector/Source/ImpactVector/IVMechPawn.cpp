@@ -76,7 +76,7 @@ AIVMechPawn::AIVMechPawn()
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sword"));
 	SwordMesh->SetupAttachment(RigMesh);
 	{
-		static ConstructorHelpers::FObjectFinder<UStaticMesh> SwordF(TEXT("/Game/Weapons/SM_Sword.SM_Sword"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SwordF(TEXT("/Game/Weapons/SM_ArmBlade.SM_ArmBlade"));
 		if (SwordF.Succeeded()) SwordMesh->SetStaticMesh(SwordF.Object);
 	}
 	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -850,7 +850,7 @@ void AIVMechPawn::SetupRig()
 		SwordMesh->AttachToComponent(RigMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("hand_r")));
 		// the imported bones carry a uniform rest scale of 100: compensate so the sword keeps its size
 		SwordMesh->SetRelativeLocationAndRotation(SwordBladeDirLocal * 5.2f, SwordRelRot);
-		SwordMesh->SetRelativeScale3D(FVector(0.01f, 0.0175f, 0.02f));   // a broad, heavy blade
+		SwordMesh->SetRelativeScale3D(FVector(0.01f, 0.015f, 0.015f));   // arm blade: the bracer housing has to fit the forearm
 		if (UMaterialInterface* SM2 = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Sword.M_Sword")))
 		{
 			SwordMID = UMaterialInstanceDynamic::Create(SM2, this);
@@ -862,6 +862,7 @@ void AIVMechPawn::SetupRig()
 		{
 			TrailMID = UMaterialInstanceDynamic::Create(TM, this);
 			TrailMID->SetVectorParameterValue(TEXT("EdgeColor"), SwordEdge);
+			TrailMID->SetScalarParameterValue(TEXT("Gain"), 0.55f);
 			BladeTrail->SetMaterial(0, TrailMID);
 		}
 		SwordMesh->SetVisibility(true);
@@ -1517,6 +1518,18 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 		if (const FIVPoseAngles* B = P(FString::Printf(TEXT("block_%s"), SideName(S.guardSide)))) Target = *B;
 	}
 
+	// one-armed swings: while the blade arm (right) strikes, the off hand stays down in its guard position (it only rises for a parry rocket)
+	if (S.phase != iv::Phase::Idle && (S.kind == iv::StrikeKind::Heavy || S.kind == iv::StrikeKind::Lunge || S.kind == iv::StrikeKind::AirChop))
+	{
+		const FIVPoseAngles* Rest = P(TEXT("guard_neutral"));
+		for (const TCHAR* N : { TEXT("shoulder_l"), TEXT("upperarm_l"), TEXT("forearm_l"), TEXT("hand_l") })
+		{
+			const FName B(N);
+			FVector* T = Target.Joint.Find(B);
+			const FVector* G = Rest ? Rest->Joint.Find(B) : nullptr;
+			if (T && G) *T = *G;
+		}
+	}
 	if (S.posture == iv::Posture::Airborne || S.posture == iv::Posture::Sliding) bLegs = true;
 	// smooth towards the target (fast, but never a pop) and merge into the locomotion pose
 	if (!bCombatPoseInit) { CombatPose = *Guard; bCombatPoseInit = true; }
@@ -1702,11 +1715,11 @@ void AIVMechPawn::UpdateBladeTrail(float Dt)
 	FVector B, T;
 	GetBladeSegment(B, T);
 	const float Now = GetWorld()->GetTimeSeconds();
-	const FVector Mid = B + (T - B) * 0.3f;
+	const FVector Mid = B + (T - B) * 0.55f;   // only the outer part of the blade paints the ribbon
 	const float TipSpeed = PrevTip.IsZero() ? 0.f : (T - PrevTip).Size() / FMath::Max(Dt, 1e-3f);
 	PrevTip = T;
 	// record only while the blade really moves (a swing): the trail then fades out on its own
-	const float Life = 0.30f;
+	const float Life = 0.16f;
 	if (TipSpeed > 1800.f) TrailSamples.Add({ Mid, T, Now });
 	while (TrailSamples.Num() > 0 && Now - TrailSamples[0].Time > Life) TrailSamples.RemoveAt(0);
 	if (TrailSamples.Num() < 2)
@@ -2252,6 +2265,8 @@ void AIVMechPawn::UpdateBladeContact(float Dt, FIVPoseAngles& Pose)
 	GetBladeSegment(B0, T0);
 	const FVector Bm = B0 + (T0 - B0) * 0.12f;
 	float Pen = 0.f;
+	FVector ContactAt = FVector::ZeroVector;
+	float BodyPen = 0.f, BladePen = 0.f;
 	if (O && O->RigMesh && O->bRigActive)
 	{
 		struct FCap { const TCHAR* A; const TCHAR* B; float R; };
@@ -2266,7 +2281,9 @@ void AIVMechPawn::UpdateBladeContact(float Dt, FIVPoseAngles& Pose)
 			const FVector Bp = O->RigMesh->GetBoneLocation(FName(K.B), EBoneSpaces::WorldSpace);
 			FVector P1, P2;
 			FMath::SegmentDistToSegment(Bm, T0, A, Bp, P1, P2);
-			Pen = FMath::Max(Pen, K.R - (P1 - P2).Size());
+			const float D = K.R - (P1 - P2).Size();
+			if (D > BodyPen) { BodyPen = D; ContactAt = P1; }
+			Pen = FMath::Max(Pen, D);
 		}
 	}
 	// the opponent's blade: the two swords meet and stop each other instead of passing through
@@ -2280,8 +2297,8 @@ void AIVMechPawn::UpdateBladeContact(float Dt, FIVPoseAngles& Pose)
 		if (Dd < 330.f)
 		{
 			Pen = FMath::Max(Pen, 330.f - Dd + 40.f);
-			if (BladeBlock < 0.35f && Pen > 60.f && CombatAnim.phase != iv::Phase::Idle)
-				if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) if (FMath::FRand() < 0.4f) FX->SpawnSparks((P1 + P2) * 0.5f, FVector::UpVector, 6, 4500.f);
+			BladePen = 330.f - Dd;
+			ContactAt = (P1 + P2) * 0.5f;
 		}
 	}
 	// the city: a trace along the blade
@@ -2291,6 +2308,20 @@ void AIVMechPawn::UpdateBladeContact(float Dt, FIVPoseAngles& Pose)
 		if (O) Q.AddIgnoredActor(O);
 		if (GetWorld()->LineTraceSingleByChannel(Hit, Bm, T0, ECC_WorldStatic, Q))
 			Pen = FMath::Max(Pen, (1.f - Hit.Time) * (T0 - Bm).Size() * 0.5f + 60.f);
+	}
+	// sparks + flash + clang while the steel is touching (only one of the two pawns reports a blade-blade clash)
+	{
+		ContactSparkCool -= Dt; ContactSoundCool -= Dt;
+		const bool bFighting = CombatAnim.phase != iv::Phase::Idle || (O && O->CombatAnim.phase != iv::Phase::Idle);
+		const bool bBlade = BladePen > 10.f && (!O || this < O);
+		const bool bBody = BodyPen > 10.f && CombatAnim.phase != iv::Phase::Idle;
+		const bool bTouch = bFighting && (bBlade || bBody);
+		if (bTouch)
+		{
+			const float Str = FMath::Clamp(FMath::Max(BladePen, BodyPen) / 200.f, 0.4f, 1.6f);
+			if (!bWasTouching || ContactSparkCool <= 0.f) { EmitContactSparks(ContactAt, bBlade, bWasTouching ? 0.45f * Str : Str); ContactSparkCool = 0.05f; }
+		}
+		bWasTouching = bTouch;
 	}
 	const bool bStriking = CombatAnim.phase == iv::Phase::Strike || CombatAnim.phase == iv::Phase::Contact;
 	if (Pen > 20.f && CombatAnim.phase != iv::Phase::Idle)
@@ -2391,4 +2422,22 @@ void AIVMechPawn::BuildPlates()
 		Add(TEXT("Armor_Cap"), BSn, ZL, Bone(BSn) + Fw * 260.f, Up, Fw, FVector(10.f, 10.f, 10.f));
 	}
 	UE_LOG(LogTemp, Display, TEXT("IV plates: %d"), Plates.Num());
+}
+
+
+void AIVMechPawn::EmitContactSparks(const FVector& At, bool bBlade, float Strength)
+{
+	UWorld* W = GetWorld();
+	if (AIVFXManager* FX = AIVFXManager::Get(W))
+	{
+		const FVector Out = (At - GetActorLocation()).GetSafeNormal2D();
+		FX->SpawnSparks(At, (Out + FVector(0, 0, 0.5f)).GetSafeNormal(), FMath::RoundToInt(10.f + 14.f * Strength), 6500.f + 3500.f * Strength, 3.f);
+		FX->SpawnSparks(At, FVector::UpVector, FMath::RoundToInt(4.f * Strength), 4000.f, 2.f);
+		FX->SpawnFlash(At, bBlade ? FLinearColor(1.f, 0.82f, 0.5f) : FLinearColor(1.f, 0.55f, 0.25f), 5.0e5f * Strength, 0.12f, 9000.f);
+	}
+	if (ContactSoundCool <= 0.f)
+	{
+		IVAudio::Play3D(W, bBlade ? TEXT("parry_clang") : TEXT("hit_metal_contact_light"), At, FMath::Clamp(0.5f + 0.4f * Strength, 0.4f, 1.f), FMath::RandRange(0.9f, 1.15f));
+		ContactSoundCool = 0.28f;
+	}
 }

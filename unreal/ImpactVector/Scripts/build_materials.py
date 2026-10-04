@@ -152,24 +152,74 @@ float n2 = lerp(lerp(a2, b2, u2.x), lerp(c2, d2, u2.x), u2.y);
 float field = n1 * 0.65 + n2 * 0.35;
 float puddle = smoothstep(0.52 - 0.25 * Wet, 0.62 - 0.2 * Wet, field);
 """
-    col = custom(m, common + """
+    # street layout of the duel arena (district metres: x east, y north; Unreal X = y*100, Y = x*100): a six-lane boulevard (the plaza) with lane
+    # dashes, a double yellow centre line, zebra crossings and stop bars, pavements with kerbs and tiles, an east-west avenue, a cobbled
+    # pedestrian street and manholes. Everything is painted here, in world space, so it costs nothing.
+    lay = """
+float xm = WP.y * 0.01, ym = WP.x * 0.01, ax = abs(xm);
+float Lw = step(0.5, Lay);
+float inY = step(215.0, ym) * step(ym, 575.0);
+float plaza = step(ax, 108.0) * inY;
+float swk = step(108.0, ax) * step(ax, 121.0) * inY;
+float ave = step(150.0, ym) * step(ym, 215.0);
+float strt = step(ax, 9.5) * step(575.0, ym) * step(ym, 1000.0);
+float walk = saturate(swk + strt) * Lw;
+float2 tp = float2(xm, ym) / 1.2;
+float2 tf = abs(frac(tp) - 0.5);
+float joint = step(0.465, max(tf.x, tf.y));
+float tileVar = frac(sin(dot(floor(tp), float2(12.9, 78.2))) * 43758.5);
+float3 walkCol = lerp(float3(0.09, 0.095, 0.11), float3(0.19, 0.2, 0.22), tileVar) * (1.0 - 0.6 * joint);
+walkCol = lerp(walkCol, walkCol * float3(1.3, 1.0, 0.8) * 0.8, strt);
+float curb = (1.0 - smoothstep(0.0, 0.35, abs(ax - 108.0))) * inY * Lw;
+float dash = step(frac(ym / 9.0), 0.5);
+float laneX = abs(frac(xm / 12.0 + 0.5) - 0.5) * 12.0;
+float laneLine = (1.0 - smoothstep(0.10, 0.17, laneX)) * dash * plaza * step(1.0, ax);
+float yellow = (1.0 - smoothstep(0.10, 0.17, abs(ax - 0.28))) * plaza;
+float edgeLn = (1.0 - smoothstep(0.12, 0.2, abs(ax - 106.0))) * inY;
+float zZone = step(ax, 106.0) * (step(215.0, ym) * step(ym, 227.0) + step(563.0, ym) * step(ym, 575.0));
+float zebra = zZone * step(frac(xm / 2.6), 0.55);
+float stopBar = step(ax, 106.0) * (step(228.0, ym) * step(ym, 229.0) + step(561.0, ym) * step(ym, 562.0));
+float aveDash = step(frac(xm / 9.0), 0.5);
+float aveYel = (1.0 - smoothstep(0.1, 0.17, abs(ym - 182.5))) * ave * aveDash;
+float aveEdge = ((1.0 - smoothstep(0.12, 0.2, abs(ym - 151.5))) + (1.0 - smoothstep(0.12, 0.2, abs(ym - 213.5)))) * ave;
+float whiteM = saturate(laneLine + edgeLn + zebra + stopBar + aveEdge) * Lw;
+float yellowM = saturate(yellow + aveYel) * Lw;
+float2 mc = float2(xm, ym) / 37.0;
+float2 mi = floor(mc), mf = frac(mc);
+float2 mh = float2(frac(sin(dot(mi, float2(12.9, 78.2))) * 43758.5), frac(sin(dot(mi, float2(39.3, 11.1))) * 43758.5));
+float md = length((mf - (0.2 + 0.6 * mh)) * 37.0);
+float hole = (1.0 - smoothstep(0.5, 0.56, md)) * Lw * (1.0 - walk);
+float holeRim = smoothstep(0.5, 0.54, md) * (1.0 - smoothstep(0.58, 0.64, md)) * Lw * (1.0 - walk);
+float paintM = saturate(whiteM + yellowM + curb);
+"""
+    col = custom(m, common + lay + """
 float3 dry = Base * (0.8 + 0.5 * n2);
 float3 wetc = Base * 0.45;
 float3 cc = lerp(dry, wetc, puddle);
+cc = lerp(cc, walkCol * (1.0 - 0.45 * puddle), walk);
+cc = lerp(cc, float3(0.3, 0.3, 0.32), curb * 0.8);
+float wear = 0.55 + 0.45 * n2;
+cc = lerp(cc, float3(0.5, 0.51, 0.54) * (1.0 - 0.4 * puddle), whiteM * wear);
+cc = lerp(cc, float3(0.62, 0.42, 0.04), yellowM * wear);
+cc = lerp(cc, cc * 0.3, hole);
+cc = lerp(cc, float3(0.12, 0.12, 0.13), holeRim);
 float sand = VCa * UseVC;
 float3 sandc = VC * (0.75 + 0.5 * n2);
 return lerp(cc, sandc, sand);
-""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["WP", "Base", "Wet", "Sc", "VC", "VCa", "UseVC"], -700, 0, "ground_base")
-    wire_custom(col, [(wp, ""), (base_col, ""), (wet, ""), (scale, ""), (vc, ""), (vc, "A"), (use_vc, "")])
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["WP", "Base", "Wet", "Sc", "VC", "VCa", "UseVC", "Lay"], -700, 0, "ground_base")
+    layp = scalar(m, "Layout", 0.0, -1200, 1000)
+    wire_custom(col, [(wp, ""), (base_col, ""), (wet, ""), (scale, ""), (vc, ""), (vc, "A"), (use_vc, ""), (layp, "")])
     MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_BASE_COLOR)
 
-    rough = custom(m, common + """
+    rough = custom(m, common + lay + """
 float dryR = 0.65 + 0.25 * n2;
 float wetR = 0.04 + 0.1 * n2;
 float r0 = lerp(dryR, wetR, puddle);
+r0 = lerp(r0, lerp(0.6, 0.12, puddle), walk);
+r0 = lerp(r0, 0.7, saturate(whiteM + yellowM) * 0.8);
 return lerp(r0, 0.85, VCa * UseVC);
-""", unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["WP", "Wet", "Sc", "VCa", "UseVC"], -700, 300, "ground_rough")
-    wire_custom(rough, [(wp, ""), (wet, ""), (scale, ""), (vc, "A"), (use_vc, "")])
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["WP", "Wet", "Sc", "VCa", "UseVC", "Lay"], -700, 300, "ground_rough")
+    wire_custom(rough, [(wp, ""), (wet, ""), (scale, ""), (vc, "A"), (use_vc, ""), (layp, "")])
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
 
     tmg = expr(m, unreal.MaterialExpressionTime, -1200, 900)
@@ -866,6 +916,25 @@ def build_propcolor():
     return m
 
 
+def build_propglow():
+    """Glowing instanced prop parts (lamp heads, light bars, shop panels): colour from per-instance custom data, times Intensity."""
+    m = make_material("M_PropGlow")
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    r = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 0)
+    r.set_editor_property("data_index", 0)
+    g = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 120)
+    g.set_editor_property("data_index", 1)
+    b = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 240)
+    b.set_editor_property("data_index", 2)
+    inten = scalar(m, "Intensity", 6.0, -900, 360)
+    c = custom(m, "return float3(R, G, B) * I;", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["R", "G", "B", "I"], -500, 100, "prop_glow")
+    wire_custom(c, [(r, ""), (g, ""), (b, ""), (inten, "")])
+    MEL.connect_material_property(c, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 def build_spark():
     m = make_material("M_Spark")
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
@@ -1314,7 +1383,7 @@ return col;
 
 
 ALL = [build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor,
-       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive, build_growth, build_rain_pp]
+       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive, build_growth, build_rain_pp, build_propglow]
 import os
 _only = [x for x in os.environ.get("IV_ONLY", "").split(",") if x]
 for fn in ALL:

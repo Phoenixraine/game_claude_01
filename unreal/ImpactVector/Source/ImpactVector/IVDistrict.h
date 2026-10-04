@@ -74,6 +74,7 @@ public:
 
 private:
 	bool bLoaded = false;
+	bool bArena = false;   // the duel arena: streets painted by the ground material, no beach sand
 	int32 Res = 0;
 	TArray<uint16> Heights;
 	double XMin = -800, YMin = -400, CellM = 1.5873;
@@ -92,6 +93,8 @@ private:
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> TreeTrunks;
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> TreeCrowns;
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Lamps;
+	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Glow;    // emissive prop parts (lamp heads, shop panels, tail lights)
+	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Cones;
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Containers;
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Chimneys;
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Signs;       // neon signs (M_NeonSign)
