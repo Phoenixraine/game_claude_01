@@ -477,6 +477,7 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 	case EventType::Blocked:
 	case EventType::ParrySuccess:
 	case EventType::InterceptSuccess:
+		if (Ev.type == EventType::ParrySuccess) FireParryRockets(Ev.actor);
 		if (Actor) Actor->OnDefenceEffect(Ev.type == EventType::ParrySuccess, Ev.type == EventType::InterceptSuccess);
 		// the swords really meet: sparks and a flash where the two blades are closest
 		BladeImpact(Actor, Other, Ev.type == EventType::Blocked ? 0.7f : 1.15f, Ev.type != EventType::Blocked);
@@ -491,7 +492,12 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 		if (Actor) Actor->OnArmorPlateLost(Ev.zone, Ev.a, Ev.b);
 		break;
 	case EventType::Dodge:
-		if (Actor) Actor->AddVelocityImpulse(Actor->GetActorRightVector() * (Ev.a >= 0 ? 1.f : -1.f) * 1400.f);
+		if (Actor)
+		{
+			// a sideways step BACK, away from the opponent, with the body kept upright
+			const FVector Away = Other ? (Actor->GetActorLocation() - Other->GetActorLocation()).GetSafeNormal2D() : -Actor->GetActorForwardVector();
+			Actor->AddVelocityImpulse(Actor->GetActorRightVector() * (Ev.a >= 0 ? 1.f : -1.f) * 1250.f + Away * 900.f);
+		}
 		break;
 	case EventType::Knockdown:
 		if (Actor)
@@ -906,4 +912,34 @@ void AIVCombatDirector::UpdateBoardingPresentation(float Dt)
 	BoardCamAt = FMath::VInterpTo(BoardCamAt, At, Dt, 7.f);
 	bBoardCamOn = true;
 	P->SetBoardCam(true, BoardCamFrom, BoardCamAt, Fov);
+}
+
+
+// A clean parry: the blades bind, the off hand swings up and a rocket salvo hits the attacker (extra damage + a stagger on top of the parry's own).
+void AIVCombatDirector::FireParryRockets(iv::Side Defender)
+{
+	AIVMechPawn* Def = PawnOf(Defender);
+	AIVMechPawn* Atk = PawnOf(iv::Other(Defender));
+	if (!Def || !Atk || !Duel.IsValid() || Duel->result().over) return;
+	UE_LOG(LogTemp, Display, TEXT("IV parry rockets by side %d at %.1f s"), int32(Defender), GetWorld()->GetTimeSeconds());
+	Def->StartRocketArm();
+	if (Def->IsLocallyControlled()) Def->AddCockpitImpulse(0.f, 0.f, 0.6f);
+	TWeakObjectPtr<AIVCombatDirector> Self(this);
+	const iv::Side Victim = iv::Other(Defender);
+	FTimerHandle H;
+	GetWorldTimerManager().SetTimer(H, FTimerDelegate::CreateLambda([Self, Def = TWeakObjectPtr<AIVMechPawn>(Def), Atk = TWeakObjectPtr<AIVMechPawn>(Atk), Victim]()
+	{
+		if (!Self.IsValid() || !Def.IsValid() || !Atk.IsValid() || !Self->Duel.IsValid() || Self->Duel->result().over) return;
+		FActorSpawnParameters Sp;
+		Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		const FVector From = Def->GetZoneWorldLocation(iv::Zone::ArmL) + FVector(0, 0, 200.f);
+		if (AIVProjectile* Pj = Self->GetWorld()->SpawnActor<AIVProjectile>(From, FRotator::ZeroRotator, Sp)) Pj->Launch(1, From, Atk, true, 0.55f);
+		IVAudio::Play3D(Self->GetWorld(), TEXT("env_missile_incoming"), From, 1.f, 1.2f);
+	}), 0.28f, false);
+	FTimerHandle H2;
+	GetWorldTimerManager().SetTimer(H2, FTimerDelegate::CreateLambda([Self, Victim]()
+	{
+		if (!Self.IsValid() || !Self->Duel.IsValid() || Self->Duel->result().over) return;
+		Self->Duel->ExternalHit(Victim, iv::Zone::Torso, 7.f, 10.f, 4);
+	}), 0.9f, false);
 }

@@ -16,6 +16,7 @@ struct AnimState {
   Arm arm = Arm::R;
   Zone target = Zone::Torso;
   float charge = 0.f;                   // 0..1 extra hold beyond the minimum windup (more power)
+  int contactTicks = -1;                // v6: estimated ticks until this strike reaches the target (-1 = not released yet / unknown); the defender's parry window is the last kParryWindowTicks of it
   // Arms and legs.
   ArmPose pose[2] = {ArmPose::Neutral, ArmPose::Neutral};
   FootPlant footPlant = FootPlant::Planted;

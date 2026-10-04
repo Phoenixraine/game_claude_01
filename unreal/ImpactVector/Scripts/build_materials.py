@@ -1263,8 +1263,58 @@ float beat = 0.55 + 0.45 * sin(T * (2.0 + 2.5 * Pulse) + n * 9.0);
     return m
 
 
+def build_rain_pp():
+    """Screen-space rain: three parallax layers of thin falling streaks drawn over the whole picture (post process, before tonemapping)."""
+    m = make_material("M_RainPP")
+    m.set_editor_property("material_domain", unreal.MaterialDomain.MD_POST_PROCESS)
+    m.set_editor_property("blendable_location", unreal.BlendableLocation.BL_SCENE_COLOR_BEFORE_BLOOM)
+    uv = expr(m, unreal.MaterialExpressionTextureCoordinate, -1200, 0)
+    tm = expr(m, unreal.MaterialExpressionTime, -1200, 120)
+    sc = expr(m, unreal.MaterialExpressionSceneTexture, -1200, 240)
+    sc.set_editor_property("scene_texture_id", unreal.SceneTextureId.PPI_POST_PROCESS_INPUT0)
+    vs = expr(m, unreal.MaterialExpressionViewProperty, -1200, 360)
+    vs.set_editor_property("property", unreal.MaterialExposedViewProperty.MEVP_VIEW_SIZE)
+    sd = expr(m, unreal.MaterialExpressionSceneTexture, -1200, 440)
+    sd.set_editor_property("scene_texture_id", unreal.SceneTextureId.PPI_SCENE_DEPTH)
+    amount = scalar(m, "Amount", 0.8, -1200, 560)
+    code = """
+float2 q = UV;
+float asp = VS.x / VS.y;
+float3 rain = 0;
+float lum = 0;
+for (int L = 0; L < 4; L++)
+{
+    float sc = 55.0 + 38.0 * L;                 // columns across the screen
+    float spd = 1.7 + 0.6 * L;
+    float len = 0.07 + 0.015 * L;
+    float2 p = float2(q.x * asp * sc * 0.18, q.y * 1.0);
+    p.x += q.y * 0.35 * (1.0 + 0.2 * L);        // wind slant
+    float col = floor(p.x * 5.0);
+    float fx = frac(p.x * 5.0);
+    float h1 = frac(sin(col * 12.9898 + L * 7.1) * 43758.5453);
+    float h2 = frac(sin(col * 78.233 + L * 3.3) * 43758.5453);
+    float y = frac(q.y * (1.6 + 0.25 * L) + T * spd * (0.7 + 0.5 * h2) + h1 * 9.0);
+    float streak = smoothstep(0.0, len, y) * (1.0 - smoothstep(len * 0.5, len, y));
+    streak = pow(saturate(1.0 - y / len), 1.6) * step(y, len);
+    float thin = 1.0 - smoothstep(0.0, 0.16 - 0.025 * L, abs(fx - 0.5));
+    float on = step(h2, 0.42 + 0.1 * L);
+    lum += streak * thin * on * (0.35 + 0.25 * L);
+}
+float inWorld = smoothstep(350.0, 1400.0, D.x);   // keep the cockpit interior dry
+float3 col = SC + float3(0.55, 0.66, 0.85) * lum * Amt * 0.55 * inWorld;
+return col;
+"""
+    t = unreal.CustomMaterialOutputType
+    out = custom(m, code, t.CMOT_FLOAT3, ["UV", "T", "SC", "VS", "Amt", "D"], -700, 100, "rain_pp")
+    wire_custom(out, [(uv, ""), (tm, ""), (sc, ""), (vs, ""), (amount, ""), (sd, "")])
+    MEL.connect_material_property(out, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 ALL = [build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor,
-       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive, build_growth]
+       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive, build_growth, build_rain_pp]
 import os
 _only = [x for x in os.environ.get("IV_ONLY", "").split(",") if x]
 for fn in ALL:

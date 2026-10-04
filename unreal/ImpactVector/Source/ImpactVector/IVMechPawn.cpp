@@ -1421,22 +1421,25 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 	}
 	else if (S.posture == iv::Posture::Dodging)
 	{
-		// a dodge is a TURN, not a lean: the whole body swings round to the side like a man looking over his shoulder, one leg sweeps out to take
-		// the weight, the head stays locked on the opponent
+		// a dodge is a side-step BACK: the body stays upright and square to the opponent (no lean, no torso twist); only the legs work.
+		// the lead leg reaches out, the trailing leg follows, the whole mech slides away along the ground (impulse in the director).
 		bLegs = true;
-		const float Sg = (S.lateralShift < 0.f) ? 1.f : -1.f;           // +z turns the mech towards its left
+		const float Sg = (S.lateralShift < 0.f) ? 1.f : -1.f;           // which side we leave to
 		const float U = FMath::Clamp(S.postureProgress, 0.f, 1.f);
-		const float W = (U < 0.32f) ? Ease(U / 0.32f) : (U < 0.68f ? 1.f : 1.f - Ease((U - 0.68f) / 0.32f));
-		Target.RootRotDeg.Z = Sg * 62.f * W;
-		Target.RootPosM.Z -= 0.05f * W;
-		if (FVector* T = Target.Joint.Find(FName(TEXT("torso")))) { T->Z += Sg * 16.f * W; T->X = 7.f * W; }
-		if (FVector* H2 = Target.Joint.Find(FName(TEXT("head")))) H2->Z -= Sg * 52.f * W;
+		const float W = (U < 0.3f) ? Ease(U / 0.3f) : (U < 0.7f ? 1.f : 1.f - Ease((U - 0.7f) / 0.3f));
+		const float Step = FMath::Sin(U * 3.14159f);
+		Target.RootPosM.Z -= 0.06f * W;
 		const TCHAR* Lead = Sg > 0.f ? TEXT("thigh_l") : TEXT("thigh_r");
 		const TCHAR* LeadShin = Sg > 0.f ? TEXT("shin_l") : TEXT("shin_r");
+		const TCHAR* LeadFoot = Sg > 0.f ? TEXT("foot_l") : TEXT("foot_r");
 		const TCHAR* Trail = Sg > 0.f ? TEXT("thigh_r") : TEXT("thigh_l");
-		if (FVector* T1 = Target.Joint.Find(FName(Lead))) { T1->X -= 34.f * W; T1->Y += Sg * -22.f * W; T1->Z += Sg * 8.f * W; }
-		if (FVector* T2 = Target.Joint.Find(FName(LeadShin))) T2->X += 28.f * W;
-		if (FVector* T3 = Target.Joint.Find(FName(Trail))) { T3->X += 6.f * W; T3->Y += Sg * 10.f * W; }
+		const TCHAR* TrailShin = Sg > 0.f ? TEXT("shin_r") : TEXT("shin_l");
+		if (FVector* T1 = Target.Joint.Find(FName(Lead))) { T1->X -= 26.f * Step; T1->Y += Sg * -24.f * Step; }
+		if (FVector* T2 = Target.Joint.Find(FName(LeadShin))) T2->X += 34.f * Step;
+		if (FVector* T3 = Target.Joint.Find(FName(LeadFoot))) T3->X -= 10.f * Step;
+		if (FVector* T4 = Target.Joint.Find(FName(Trail))) { T4->X -= 10.f * W; T4->Y += Sg * 8.f * W; }
+		if (FVector* T5 = Target.Joint.Find(FName(TrailShin))) T5->X += 14.f * W;
+		if (FVector* T6 = Target.Joint.Find(FName(TEXT("pelvis")))) T6->Z += Sg * 0.f;
 	}
 	else if (S.posture == iv::Posture::Clinched)
 	{
@@ -1591,6 +1594,22 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 		Pose.RootRotDeg = FMath::Lerp(Pose.RootRotDeg, CombatPose.RootRotDeg, LegW);
 	}
 
+	// off-hand rocket salvo after a parry: the left arm punches out and holds, the launcher fires, then it drops back
+	if (RocketArmT > 0.f)
+	{
+		RocketArmT += Dt;
+		const float U = RocketArmT / 0.9f;
+		const float Wt = U < 0.25f ? Ease(U / 0.25f) : (U < 0.7f ? 1.f : FMath::Max(0.f, 1.f - Ease((U - 0.7f) / 0.3f)));
+		if (const FIVPoseAngles* Rk = P(TEXT("quick_piston_l_strike")))
+			for (const TCHAR* N : { TEXT("shoulder_l"), TEXT("upperarm_l"), TEXT("forearm_l"), TEXT("hand_l") })
+			{
+				const FName B(N);
+				const FVector* Tg = Rk->Joint.Find(B);
+				FVector* Cur = Pose.Joint.Find(B);
+				if (Tg && Cur) *Cur = FMath::Lerp(*Cur, *Tg, Wt);
+			}
+		if (U >= 1.f) RocketArmT = 0.f;
+	}
 	// hit kick: torso recoil on top of everything, decays quickly
 	HitKick *= FMath::Exp(-7.f * Dt);
 	if (FVector* T = Pose.Joint.Find(FName(TEXT("torso")))) *T += HitKick;

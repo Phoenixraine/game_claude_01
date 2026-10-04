@@ -164,6 +164,7 @@ void AIVHUD::DrawHUD()
 		}
 		DrawGlassInfographics(FA, FB, Me, Sx, Fd);
 		DrawSpecials(Dir, MySide, PC, Me, Sx);
+		DrawParryWindow(Dir, MySide, Sx);
 		DrawBreakdown(Dir, MySide, PC, Sx);
 		if (PC && PC->IsRepairing()) DrawRepair(PC, FA, Sx);
 		// the sensors are blinded: dust / glare over the glass
@@ -866,6 +867,41 @@ void AIVHUD::DrawSettings(AIVGameFlow* Flow)
 	Text(TEXT("W / S — выбор   ·   A / D — изменить (Shift — быстрее)   ·   Q / E — вкладка   ·   R — сбросить всё   ·   Esc — назад"), W * 0.5f, H - 30.f * Sx, A(kWhite, 0.55f), 0.75f * Sx, 1, 1);
 }
 
+void AIVHUD::DrawParryWindow(AIVCombatDirector* Dir, iv::Side MySide, float Sx)
+{
+	if (!Dir || !Dir->GetDuel() || Dir->IsMatchOver()) return;
+	const iv::AnimState& O = Dir->GetAnim(iv::Other(MySide));
+	if ((O.phase != iv::Phase::Windup && O.phase != iv::Phase::Strike) || O.contactTicks < 0) return;
+	if (O.kind != iv::StrikeKind::Heavy && O.kind != iv::StrikeKind::Quick) return;
+	const float CX = Canvas->ClipX * 0.5f, CY = Canvas->ClipY * 0.5f;
+	const int32 Win = iv::tune::kParryWindowTicks;
+	const int32 Ct = O.contactTicks;
+	const float R0 = 62.f * Sx, R1 = 150.f * Sx;
+	const float U = FMath::Clamp(float(Ct) / 50.f, 0.f, 1.f);
+	const float R = FMath::Lerp(R0, R1, U);
+	const bool bIn = Ct <= Win;
+	const FLinearColor C = bIn ? kGreen : kYellow;
+	// target ring (where the window is) and the closing ring
+	for (int32 k = 0; k < 48; ++k)
+	{
+		const float a0 = 6.2831853f * k / 48.f, a1 = 6.2831853f * (k + 1) / 48.f;
+		DrawLine(CX + FMath::Cos(a0) * R0, CY + FMath::Sin(a0) * R0, CX + FMath::Cos(a1) * R0, CY + FMath::Sin(a1) * R0, A(kGreen, 0.55f), 3.f);
+		DrawLine(CX + FMath::Cos(a0) * R, CY + FMath::Sin(a0) * R, CX + FMath::Cos(a1) * R, CY + FMath::Sin(a1) * R, A(C, bIn ? 0.95f : 0.7f), bIn ? 6.f : 3.f);
+	}
+	// where to draw the block: an arrow in the swing's direction
+	FVector2D D(0, 0);
+	switch (O.side) { case iv::SwingSide::Up: D = FVector2D(0, -1); break; case iv::SwingSide::Down: D = FVector2D(0, 1); break; case iv::SwingSide::Left: D = FVector2D(-1, 0); break; default: D = FVector2D(1, 0); break; }
+	const FVector2D Pt(CX + D.X * R0 * 1.0f, CY + D.Y * R0 * 1.0f), Tp(CX + D.X * (R0 + 56.f * Sx), CY + D.Y * (R0 + 56.f * Sx));
+	DrawLine(Pt.X, Pt.Y, Tp.X, Tp.Y, A(kGreen, 0.95f), 6.f);
+	const FVector2D Nn(-D.Y, D.X);
+	DrawLine(Tp.X, Tp.Y, Tp.X - D.X * 18.f + Nn.X * 12.f, Tp.Y - D.Y * 18.f + Nn.Y * 12.f, A(kGreen, 0.95f), 5.f);
+	DrawLine(Tp.X, Tp.Y, Tp.X - D.X * 18.f - Nn.X * 12.f, Tp.Y - D.Y * 18.f - Nn.Y * 12.f, A(kGreen, 0.95f), 5.f);
+	static const TCHAR* Names[4] = { TEXT("ВЕРХ"), TEXT("ВЛЕВО"), TEXT("ВПРАВО"), TEXT("НИЗ") };
+	const FString Msg = bIn ? TEXT("БЛОК СЕЙЧАС!") : FString::Printf(TEXT("УДАР %s — ПКМ + ЧЕРТИ %s"), Names[iv::Index(O.side)], Names[iv::Index(O.side)]);
+	Text(Msg, CX, CY + R1 + 22.f * Sx, A(C, 0.95f), (bIn ? 1.3f : 0.85f) * Sx, 2, 1);
+	Text(FString::Printf(TEXT("%d мс"), int32(Ct * 1000 / iv::kTickHz)), CX, CY - 10.f, A(C, 0.9f), 0.9f * Sx, 1, 1);
+}
+
 void AIVHUD::DrawJoin(AIVGameFlow* Flow)
 {
 	const float W = Canvas->ClipX, H = Canvas->ClipY;
@@ -945,17 +981,46 @@ void AIVHUD::DrawTrail(AIVPlayerController* PC)
 			Text(Names[i], CX + D.X * R * 0.72f, CY - D.Y * R * 0.72f - 8.f, A(kCyan, 0.32f), 0.6f, 0, 1);
 		}
 	}
-	// the stroke itself: thick soft pass + bright core, widening towards the head of the stroke
-	for (int32 i = 1; i < T.Num(); ++i)
+	// the stroke itself: a smoothed (Catmull-Rom) ribbon with a wide soft glow, a bright core and a hot tip; red-orange for a strike, green-cyan for a block
 	{
-		const FVector2D a = P(T[i - 1]), b = P(T[i]);
-		const float K = float(i) / float(T.Num());
-		DrawLine(a.X, a.Y, b.X, b.Y, A(kCyan, 0.22f * Fade), 9.f * K + 2.f);
-		DrawLine(a.X, a.Y, b.X, b.Y, A(kWhite, (0.35f + 0.65f * K) * Fade), 2.f + 2.f * K);
+		const bool bGd = PC->IsTrailGuard();
+		const FLinearColor Glow = bGd ? FLinearColor(0.1f, 0.9f, 0.55f) : FLinearColor(1.f, 0.35f, 0.08f);
+		const FLinearColor Core = bGd ? FLinearColor(0.75f, 1.f, 0.9f) : FLinearColor(1.f, 0.9f, 0.6f);
+		TArray<FVector2D> Pts;
+		const int32 N = T.Num();
+		for (int32 i = 0; i + 1 < N; ++i)
+		{
+			const FVector2D P0 = T[FMath::Max(i - 1, 0)], P1 = T[i], P2 = T[i + 1], P3 = T[FMath::Min(i + 2, N - 1)];
+			for (int32 k = 0; k < 4; ++k)
+			{
+				const float u = k / 4.f, u2 = u * u, u3 = u2 * u;
+				Pts.Add(0.5f * ((2.f * P1) + (-P0 + P2) * u + (2.f * P0 - 5.f * P1 + 4.f * P2 - P3) * u2 + (-P0 + 3.f * P1 - 3.f * P2 + P3) * u3));
+			}
+		}
+		Pts.Add(T.Last());
+		const int32 M = Pts.Num();
+		for (int32 i = 1; i < M; ++i)
+		{
+			const FVector2D a = P(Pts[i - 1]), b = P(Pts[i]);
+			const float K = float(i) / float(M);
+			const float Wd = 3.f + 7.f * K * K;
+			DrawLine(a.X, a.Y, b.X, b.Y, A(Glow, 0.10f * Fade), Wd * 2.8f);
+			DrawLine(a.X, a.Y, b.X, b.Y, A(Glow, 0.35f * Fade), Wd * 1.35f);
+			DrawLine(a.X, a.Y, b.X, b.Y, A(Core, (0.45f + 0.55f * K) * Fade), Wd * 0.45f);
+		}
+		const FVector2D Tip = P(T.Last());
+		for (int32 g = 3; g >= 1; --g) DrawRect(A(Glow, 0.16f * Fade * (4 - g)), Tip.X - 7.f * g, Tip.Y - 7.f * g, 14.f * g, 14.f * g);
+		DrawRect(A(Core, Fade), Tip.X - 5.f, Tip.Y - 5.f, 10.f, 10.f);
+		// arrow head along the last segment
+		if (M > 3)
+		{
+			const FVector2D d = (P(Pts[M - 1]) - P(Pts[M - 4])).GetSafeNormal();
+			const FVector2D n(-d.Y, d.X);
+			DrawLine(Tip.X, Tip.Y, Tip.X - d.X * 22.f + n.X * 11.f, Tip.Y - d.Y * 22.f + n.Y * 11.f, A(Core, Fade), 3.f);
+			DrawLine(Tip.X, Tip.Y, Tip.X - d.X * 22.f - n.X * 11.f, Tip.Y - d.Y * 22.f - n.Y * 11.f, A(Core, Fade), 3.f);
+		}
+		Text(bGd ? TEXT("БЛОК") : TEXT("УДАР"), CX, CY + R + 16.f, A(Glow, 0.9f * Fade), 0.8f, 1, 1);
 	}
-	const FVector2D Tip = P(T.Last());
-	DrawRect(A(kWhite, Fade), Tip.X - 4.f, Tip.Y - 4.f, 8.f, 8.f);
-	DrawRect(A(kCyan, 0.35f * Fade), Tip.X - 9.f, Tip.Y - 9.f, 18.f, 18.f);
 }
 
 // ------------------------------------------------------------------------------------------------------- diagrams

@@ -56,8 +56,10 @@ public:
 	bool IsStrikeDown() const { return bStrikeWasDown; }
 	/** The path drawn with the mouse / right stick while a strike or guard button is held (virtual stick units, -1..1), for the HUD. */
 	const TArray<FVector2D>& GetTrail() const { return Trail; }
-	float GetTrailFade() const { return FMath::Clamp(1.f - TrailAge / 0.6f, 0.f, 1.f); }
+	float GetTrailFade() const { return FMath::Clamp(1.f - TrailAge / 1.1f, 0.f, 1.f); }
 	bool IsTrailLive() const { return bStrikeWasDown || bGuardWasDown; }
+	bool IsTrailGuard() const { return bTrailGuard; }
+	bool bTrailGuard = false;
 	iv::SwingSide GetTrailSide() const { return CurSide; }
 
 private:

@@ -60,7 +60,7 @@ IV_TEST(Clash, StrikesFarApartInTimeDoNotClash) {
   IV_CHECK_EQ(r.Count(EventType::BladesClash), 0);
 }
 
-IV_TEST(Dodge, EvadingALateralSlashOpensACounterWindow) {
+IV_TEST(Dodge, EvadingALateralSlashDoesNotOpenACounterWindow) {
   Rig r(1, 18.f);
   r.StartHeavyA(SwingSide::Right, Zone::Torso);
   r.StepUntil([&] { return r.A().TicksToContact() == 8; });
@@ -68,12 +68,12 @@ IV_TEST(Dodge, EvadingALateralSlashOpensACounterWindow) {
   r.b.dodgeDir = -1;
   r.StepUntil([&] { return r.Count(EventType::StrikeContact) > 0; }, 100);
   IV_CHECK_EQ(r.LastOutcome(Side::A), static_cast<int>(Outcome::Evaded));
-  IV_CHECK(r.B().counterTicks > 0);
-  // B answers inside the window: the counter travels the inner line.
+  // v6: the dodge only saves the mech: no counter window, a strike right after is an ordinary one
+  IV_CHECK_EQ(r.B().counterTicks, 0);
   r.b.quick = true;
   r.b.side = SwingSide::Up;
   r.Step();
-  IV_CHECK(r.B().strike.innerLine);
+  IV_CHECK(!r.B().strike.innerLine);
 }
 
 IV_TEST(Dodge, ChopsFromAboveAndRisingCutsFollowTheDodge) {

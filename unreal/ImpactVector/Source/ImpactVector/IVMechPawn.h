@@ -102,6 +102,8 @@ public:
 	void SetFirstPersonView(bool bFirstPerson);
 	/** Re-reads the player's settings (field of view, shake, infection...). */
 	void ApplySettings();
+	/** The off hand raises and launches a rocket salvo (after a parry): drives the left-arm pose overlay. */
+	void StartRocketArm() { RocketArmT = 0.001f; }
 
 	// ---- combat presentation (driven by AIVCombatDirector) ----
 	void SetCombatAnim(const iv::AnimState& S) { CombatAnim = S; bCombat = true; }
@@ -211,6 +213,7 @@ protected:
 	FVector2D MoveIntent = FVector2D::ZeroVector;
 	FVector Velocity = FVector::ZeroVector;
 	float AimYaw = 0.f, AimPitch = 0.f;
+	float RocketArmT = 0.f;
 	float SetFov = 98.f, SetShake = 1.f, SetMinSep = 5000.f;
 	float TorsoYawRel = 0.f;
 	bool bSprint = false;

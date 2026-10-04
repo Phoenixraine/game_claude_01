@@ -32,6 +32,7 @@ private:
 	void DrawMenu(AIVGameFlow* Flow);
 	void DrawJoin(AIVGameFlow* Flow);
 	void DrawSettings(AIVGameFlow* Flow);
+	void DrawParryWindow(class AIVCombatDirector* Dir, iv::Side MySide, float Sx);
 	void DrawTutorial(AIVGameFlow* Flow);
 	void DrawTrail(AIVPlayerController* PC);
 	void DrawMechDiagram(const iv::Fighter& F, float X, float Y, float S, bool bFront);

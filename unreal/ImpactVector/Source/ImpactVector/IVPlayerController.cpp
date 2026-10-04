@@ -208,6 +208,7 @@ void AIVPlayerController::RunScript(float Dt)
 		else if (In && C.Name == TEXT("dodge")) { In->bDodge = true; In->DodgeDir = FCString::Atoi(*C.Arg) < 0 ? -1 : 1; }
 		else if (In && C.Name == TEXT("scoop")) In->bScoop = true;
 		else if (In && C.Name == TEXT("board")) In->bBoard = true;
+		else if (Dir && C.Name == TEXT("rocket")) Dir->FireParryRockets(MySide);
 		else if (In && C.Name == TEXT("ult")) In->bUltimate = true;
 		else if (In && C.Name == TEXT("cancel")) In->bCancel = true;
 		else if (C.Name == TEXT("lunge")) bScriptLunge = C.Arg == TEXT("1");
@@ -360,11 +361,12 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 		if (!bStrikeWasDown && !bGuardWasDown) Trail.Reset();
 		if (Trail.Num() == 0 || FVector2D::Distance(Trail.Last(), Stick) > 0.015f) Trail.Add(Stick);
 		TrailAge = 0.f;
+		bTrailGuard = bGuardDown && !bStrikeDown;
 	}
 	else
 	{
 		TrailAge += Dt;
-		if (TrailAge > 0.6f) Trail.Reset();
+		if (TrailAge > 1.1f) Trail.Reset();
 	}
 	bGuardWasDown = bGuardDown;
 

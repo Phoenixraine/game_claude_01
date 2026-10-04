@@ -262,8 +262,7 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
     case Outcome::Evaded:
       Emit(EventType::Evaded, ds, d.zone);
       atk.LoseStability(tune::kWhiffStability * 0.6f, actx);
-      def.counterTicks = tune::kCounterWindowTicks;   // v3: a clean dodge opens a counter-strike on the inner line
-      if (def.posture == Posture::Dodging) def.posture = Posture::Standing;   // ...and the mech is ready for it at once
+      // v6: a dodge only saves the mech; it does NOT open a counter (the mech must finish the side-step and settle first)
       break;
     case Outcome::Parried:
     case Outcome::GrabParried:

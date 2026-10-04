@@ -66,6 +66,8 @@ public:
 	void HealFighter(iv::Side S);
 	void FillUltimate(iv::Side S);
 	void SetDummyScript(int32 Which);
+	/** After a clean parry: the defender's off hand launches a rocket salvo at the attacker. */
+	void FireParryRockets(iv::Side Defender);
 
 	/** Tear a chunk off the nearest building and throw it into the opponent's face (blinds, hurts). Cooldown applies. */
 	void TryScoop(iv::Side S);

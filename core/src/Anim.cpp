@@ -39,11 +39,13 @@ AnimState MakeAnimState(const Fighter& f) {
       a.committed = f.strike.released;
       // before the release: how far the minimum windup has come; after it: the commit delay
       a.progress = f.strike.released ? Ratio(f.strike.sinceRelease, f.strike.commitDelay) : Ratio(f.strike.held, f.strike.minHold);
+      if (f.strike.released) a.contactTicks = std::max(0, f.strike.commitDelay - f.strike.sinceRelease) + std::max(f.strike.strikeLen, 1);
       a.charge = Unit(static_cast<float>(f.strike.charge) / static_cast<float>(tune::kWindupMaxChargeTicks));
       break;
     case Phase::Strike:
       a.committed = true;
       a.progress = Ratio(f.strike.strikeTick, f.strike.strikeLen);
+      a.contactTicks = std::max(0, f.strike.strikeLen - f.strike.strikeTick);
       a.charge = Unit(static_cast<float>(f.strike.charge) / static_cast<float>(tune::kWindupMaxChargeTicks));
       break;
     case Phase::Contact:

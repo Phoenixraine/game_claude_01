@@ -6,6 +6,7 @@
 
 class UInstancedStaticMeshComponent;
 class UMaterialInstanceDynamic;
+class UPostProcessComponent;
 
 /** Rain: thousands of streak instances that wrap around the camera in the vertex shader (M_Rain). The actor follows the camera in
  *  whole box steps so the instances always surround the view. */
@@ -18,9 +19,12 @@ public:
 	virtual void Tick(float Dt) override;
 	virtual void BeginPlay() override;
 	void SetAmount(float A);
-	int32 Count = 30000;
+	int32 Count = 9000;
 	float BoxXY = 14000.f, BoxZ = 9000.f;
 private:
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> ISM;
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> RainMID;
+	/** Screen-space layer (M_RainPP): dense, thin, constant falling drops over the whole picture. */
+	UPROPERTY() TObjectPtr<UPostProcessComponent> RainPP;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> RainPPMID;
 };
