@@ -462,44 +462,126 @@ void AIVHUD::DrawRepair(AIVPlayerController* PC, const iv::Fighter& F, float Sx)
 void AIVHUD::DrawMenu(AIVGameFlow* Flow)
 {
 	const float W = Canvas->ClipX, H = Canvas->ClipY;
-	// letterbox + side gradient so the fight behind stays visible
-	DrawRect(FLinearColor(0, 0, 0, 0.78f), 0, 0, W, H * 0.09f);
-	DrawRect(FLinearColor(0, 0, 0, 0.78f), 0, H * 0.91f, W, H * 0.09f);
-	for (int32 i = 0; i < 28; ++i)
+	const float Sx = FMath::Clamp(W / 1600.f, 0.6f, 1.6f);
+	const float Tm = GetWorld()->GetTimeSeconds();
+	// dark gradient on the left so the text reads, the duel behind stays visible on the right
+	for (int32 i = 0; i < 40; ++i)
 	{
-		const float T = float(i) / 28.f;
-		DrawRect(FLinearColor(0.01f, 0.02f, 0.05f, 0.72f * (1.f - T) * (1.f - T)), W * 0.5f * T * 0.62f, H * 0.09f, W * 0.5f * 0.62f / 28.f + 1.f, H * 0.82f);
+		const float T = float(i) / 40.f;
+		const float X0 = FMath::FloorToFloat(W * 0.62f * i / 40.f), X1 = FMath::FloorToFloat(W * 0.62f * (i + 1) / 40.f);
+		DrawRect(FLinearColor(0.004f, 0.01f, 0.03f, 0.86f * FMath::Pow(1.f - T, 2.2f)), X0, 0, X1 - X0, H);
 	}
-	const float X = W * 0.07f;
-	float Y = H * 0.22f;
-	const float Sx = W / 1600.f;
-	// title with a glowing outline
+	// vignette bands top / bottom
+	for (int32 i = 0; i < 10; ++i)
+	{
+		const float K = 0.5f * FMath::Pow(1.f - float(i) / 10.f, 2.f);
+		const float Y0 = FMath::FloorToFloat(H * 0.12f * i / 10.f), Y1 = FMath::FloorToFloat(H * 0.12f * (i + 1) / 10.f);
+		DrawRect(FLinearColor(0.f, 0.f, 0.02f, K), 0, Y0, W, Y1 - Y0);
+		DrawRect(FLinearColor(0.f, 0.f, 0.02f, K), 0, H - Y1, W, Y1 - Y0);
+	}
+	// slow scanline sweep
+	{
+		const float Sy = FMath::Frac(Tm * 0.07f) * H;
+		DrawRect(A(kCyan, 0.035f), 0, Sy, W * 0.7f, 70.f * Sx);
+	}
+	const float X = W * 0.065f;
+	float Y = H * 0.12f;
+	// corner brackets
+	{
+		const float M = 26.f * Sx, L = 46.f * Sx;
+		const FLinearColor Cc = A(kCyan, 0.8f);
+		DrawLine(M, M, M + L, M, Cc, 2.f); DrawLine(M, M, M, M + L, Cc, 2.f);
+		DrawLine(W - M, M, W - M - L, M, Cc, 2.f); DrawLine(W - M, M, W - M, M + L, Cc, 2.f);
+		DrawLine(M, H - M, M + L, H - M, Cc, 2.f); DrawLine(M, H - M, M, H - M - L, Cc, 2.f);
+		DrawLine(W - M, H - M, W - M - L, H - M, Cc, 2.f); DrawLine(W - M, H - M, W - M, H - M - L, Cc, 2.f);
+	}
+	// header strip
+	Text(TEXT("МЕХ-ДУЭЛЬ  //  ТОКИО-ЗАЛИВ  //  КАНАЛ 07"), X, Y - 40.f * Sx, A(kCyan, 0.75f), 0.85f * Sx, 1);
+	Text(FString::Printf(TEXT("%02d:%02d"), int32(Tm / 60.f) % 60, int32(Tm) % 60), W - X, Y - 40.f * Sx, A(kCyan, 0.6f), 0.85f * Sx, 1, 2);
+	// title: chromatic split + glow
 	const FString Title = TEXT("IMPACT VECTOR");
-	for (int32 k = 0; k < 6; ++k)
+	const float Gl = 0.5f + 0.5f * FMath::Sin(Tm * 1.7f);
+	for (int32 k = 0; k < 7; ++k)
 	{
-		const float A0 = 0.07f * (6 - k);
-		Text(Title, X + k * 0.8f, Y + k * 0.8f, A(kCyan, A0), 4.3f * Sx, 2);
-		Text(Title, X - k * 0.8f, Y - k * 0.8f, A(kCyan, A0), 4.3f * Sx, 2);
+		const float A0 = 0.05f * (7 - k) * (0.7f + 0.3f * Gl);
+		Text(Title, X + k * 0.9f, Y + k * 0.9f, A(kCyan, A0), 4.6f * Sx, 2);
+		Text(Title, X - k * 0.9f, Y - k * 0.9f, A(kCyan, A0), 4.6f * Sx, 2);
 	}
-	Text(Title, X, Y, kWhite, 4.3f * Sx, 2);
-	DrawLine(X, Y + 112.f * Sx, X + 640.f * Sx, Y + 112.f * Sx, A(kCyan, 0.8f), 2.f);
-	Text(TEXT("ДУЭЛЬ ГИГАНТСКИХ МЕХОВ  ·  ТОКИО  ·  ТУМАН И ДОЖДЬ"), X, Y + 124.f * Sx, A(kCyan, 0.85f), 1.2f * Sx, 1);
-	Y = H * 0.50f;
+	const float Gj = (FMath::Frac(Tm * 0.37f) < 0.03f) ? 6.f * Sx : 0.f;   // rare glitch
+	Text(Title, X - 3.f * Sx - Gj, Y, A(kRed, 0.55f), 4.6f * Sx, 2);
+	Text(Title, X + 3.f * Sx + Gj, Y, A(FLinearColor(0.1f, 0.5f, 1.f), 0.55f), 4.6f * Sx, 2);
+	Text(Title, X, Y, kWhite, 4.6f * Sx, 2);
+	// accent slash under the title
+	const float Ly = Y + 116.f * Sx;
+	DrawLine(X, Ly, X + 700.f * Sx, Ly, A(kCyan, 0.9f), 2.f);
+	DrawLine(X + 700.f * Sx, Ly, X + 740.f * Sx, Ly - 18.f * Sx, A(kCyan, 0.9f), 2.f);
+	DrawRect(A(kOrange, 0.95f), X, Ly + 6.f * Sx, 120.f * Sx, 4.f * Sx);
+	Text(TEXT("ДУЭЛЬ ГИГАНТСКИХ МЕХОВ  ·  ТУМАН  ·  ДОЖДЬ  ·  НЕОН"), X, Ly + 18.f * Sx, A(kCyan, 0.9f), 1.05f * Sx, 1);
+
+	// items
 	const TArray<FString> Items = Flow->GetMenuItems();
+	const int32 Sel = Flow->GetMenuIndex();
+	const float Y0 = H * 0.43f, Step = 62.f * Sx, IW = 660.f * Sx, IH = 50.f * Sx;
+	static float SelY = 0.f;
+	SelY = FMath::FInterpTo(SelY, Sel * Step, GetWorld()->GetDeltaSeconds(), 14.f);
+	{
+		const float By = Y0 + SelY;
+		for (int32 i = 0; i < 18; ++i)   // soft horizontal fade of the highlight
+		{
+			const float T = float(i) / 18.f;
+			const float Hx0 = FMath::FloorToFloat(X - 18.f * Sx + IW * i / 18.f), Hx1 = FMath::FloorToFloat(X - 18.f * Sx + IW * (i + 1) / 18.f);
+			DrawRect(A(kCyan, (0.2f + 0.05f * Pulse(2.f)) * (1.f - T * T)), Hx0, By - 4.f * Sx, Hx1 - Hx0, IH);
+		}
+		DrawRect(kCyan, X - 18.f * Sx, By - 4.f * Sx, 5.f * Sx, IH);
+		DrawRect(A(kWhite, 0.5f), X - 18.f * Sx, By - 4.f * Sx, IW * 0.5f, 1.5f);
+	}
 	for (int32 i = 0; i < Items.Num(); ++i)
 	{
-		const bool bSel = i == Flow->GetMenuIndex();
-		const float Yy = Y + i * 78.f * Sx;
-		if (bSel)
+		const bool bSel = i == Sel;
+		const float Yy = Y0 + i * Step;
+		Text(FString::Printf(TEXT("%02d"), i + 1), X + 2.f * Sx, Yy + 8.f * Sx, A(bSel ? kCyan : kCyanDim, bSel ? 1.f : 0.7f), 1.0f * Sx, 1);
+		Text(Items[i], X + 56.f * Sx, Yy, bSel ? kWhite : A(kWhite, 0.55f), 1.85f * Sx, 2);
+		const FString V = Flow->GetMenuValue(i);
+		if (!V.IsEmpty())
 		{
-			DrawRect(A(kCyan, 0.16f + 0.06f * Pulse(2.f)), X - 14.f, Yy - 6.f, 560.f * Sx, 56.f * Sx);
-			DrawLine(X - 14.f, Yy - 6.f, X - 14.f, Yy + 50.f * Sx, kCyan, 4.f);
-			Text(TEXT("▶"), X + 4.f, Yy + 2.f, kCyan, 1.7f * Sx, 2);
+			const float Vx = X + IW - 40.f * Sx;
+			float Vw = 0.f, Vh = 0.f;
+			GetTextSize(V, Vw, Vh, GEngine->GetMediumFont(), 1.05f * Sx);
+			Text(V, Vx, Yy + 8.f * Sx, bSel ? kOrange : A(kOrange, 0.5f), 1.05f * Sx, 1, 2);
+			if (bSel && (i == 0 || i == 3))
+			{
+				Text(TEXT("<"), Vx - Vw - 18.f * Sx, Yy + 6.f * Sx, A(kCyan, 0.6f + 0.4f * Pulse(3.f)), 1.2f * Sx, 2, 2);
+				Text(TEXT(">"), Vx + 14.f * Sx, Yy + 6.f * Sx, A(kCyan, 0.6f + 0.4f * Pulse(3.f)), 1.2f * Sx, 2, 0);
+			}
 		}
-		Text(Items[i], X + 54.f, Yy, bSel ? kWhite : A(kWhite, 0.55f), 1.9f * Sx, 2);
 	}
-	Text(TEXT("W / S — выбор    ·    A / D — сложность    ·    Enter — старт    ·    Esc — в меню из боя"), X, H * 0.91f - 34.f, A(kWhite, 0.65f), 0.95f * Sx, 1);
-	Text(TEXT("Клавиатура + мышь или геймпад"), X, H * 0.91f - 12.f, A(kCyan, 0.55f), 0.8f * Sx, 0);
+
+	// description panel (bottom right)
+	{
+		const float PW = 470.f * Sx, PH = 200.f * Sx, PX = W - PW - 60.f * Sx, PY = H * 0.62f;
+		Panel(PX, PY, PW, PH, FLinearColor(0.f, 0.03f, 0.06f, 0.72f), A(kCyan, 0.7f));
+		DrawRect(A(kCyan, 0.16f), PX, PY, PW, 30.f * Sx);
+		Text(FString::Printf(TEXT("РЕЖИМ  ·  %02d / %02d"), Sel + 1, Items.Num()), PX + 14.f * Sx, PY + 6.f * Sx, A(kCyan, 1.f), 0.9f * Sx, 1);
+		Text(Items.IsValidIndex(Sel) ? Items[Sel] : FString(), PX + 14.f * Sx, PY + 44.f * Sx, kWhite, 1.4f * Sx, 2);
+		Wrap(Flow->GetMenuHint(Sel), PX + 14.f * Sx, PY + 90.f * Sx, PW - 28.f * Sx, A(kWhite, 0.85f), 0.82f * Sx, 24.f * Sx);
+	}
+
+	// key chips
+	{
+		struct FKey { const TCHAR* K; const TCHAR* L; };
+		const FKey Keys[4] = { { TEXT("W / S"), TEXT("ВЫБОР") }, { TEXT("A / D"), TEXT("ИЗМЕНИТЬ") }, { TEXT("ENTER"), TEXT("ЗАПУСК") }, { TEXT("ESC"), TEXT("МЕНЮ ИЗ БОЯ") } };
+		float Kx = X;
+		const float Ky = H - 70.f * Sx;
+		for (const FKey& Kk : Keys)
+		{
+			const float Kw = (FString(Kk.K).Len() * 13.f + 22.f) * Sx;
+			Panel(Kx, Ky, Kw, 28.f * Sx, FLinearColor(0.f, 0.05f, 0.08f, 0.8f), A(kCyan, 0.8f));
+			Text(Kk.K, Kx + Kw * 0.5f, Ky + 5.f * Sx, kWhite, 0.8f * Sx, 1, 1);
+			Text(Kk.L, Kx + Kw + 10.f * Sx, Ky + 5.f * Sx, A(kWhite, 0.65f), 0.8f * Sx, 1);
+			Kx += Kw + 16.f * Sx + FString(Kk.L).Len() * 11.f * Sx;
+		}
+		Text(TEXT("клавиатура + мышь  ·  геймпад  ·  вибрация"), X, Ky + 34.f * Sx, A(kCyan, 0.5f), 0.7f * Sx, 1);
+	}
 }
 
 void AIVHUD::DrawJoin(AIVGameFlow* Flow)

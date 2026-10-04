@@ -44,6 +44,8 @@ public:
 	EIVFlowState GetState() const { return State; }
 	// ---- menu
 	TArray<FString> GetMenuItems() const;
+	FString GetMenuValue(int32 I) const;
+	FString GetMenuHint(int32 I) const;
 	int32 GetMenuIndex() const { return MenuIndex; }
 	FString GetDifficultyName() const;
 	// ---- split screen join screen

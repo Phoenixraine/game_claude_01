@@ -427,13 +427,27 @@ FString AIVGameFlow::GetStatsLine() const
 
 TArray<FString> AIVGameFlow::GetMenuItems() const
 {
-	TArray<FString> I;
-	I.Add(FString::Printf(TEXT("ДУЭЛЬ С ИИ      <  %s  >"), kDifficulty[FMath::Clamp(Difficulty, 0, 2)]));
-	I.Add(TEXT("ОБУЧЕНИЕ"));
-	I.Add(TEXT("СПЛИТ-СКРИН  ·  2 ГЕЙМПАДА"));
-	I.Add(FString::Printf(TEXT("ГРАФИКА      <  %s  >"), IVGraphics::PresetName(GfxPreset)));
-	I.Add(TEXT("ВЫХОД"));
-	return I;
+	return { TEXT("ДУЭЛЬ С ИИ"), TEXT("ОБУЧЕНИЕ"), TEXT("СПЛИТ-СКРИН"), TEXT("ГРАФИКА"), TEXT("ВЫХОД") };
+}
+
+FString AIVGameFlow::GetMenuValue(int32 I) const
+{
+	if (I == 0) return kDifficulty[FMath::Clamp(Difficulty, 0, 2)];
+	if (I == 2) return TEXT("2 ГЕЙМПАДА");
+	if (I == 3) return IVGraphics::PresetName(GfxPreset);
+	return FString();
+}
+
+FString AIVGameFlow::GetMenuHint(int32 I) const
+{
+	switch (I)
+	{
+	case 0: return TEXT("Дуэль один на один против пилота-ИИ. Меч, броня по зонам, берсерк и аварии в отсеках. A / D — сложность.");
+	case 1: return TEXT("Пошаговое обучение: стойки, парирование, рывок, бросок здания, ремонт в нижнем отсеке.");
+	case 2: return TEXT("Два пилота — два геймпада. Каждый стыкуется со своим мехом, экран делится вертикальной линией.");
+	case 3: return TEXT("Пресеты от НИЗКОГО до RTX. Для трассировки лучей нужна видеокарта с аппаратной поддержкой. A / D — сменить.");
+	default: return TEXT("Закрыть игру.");
+	}
 }
 
 FString AIVGameFlow::GetDifficultyName() const { return kDifficulty[FMath::Clamp(Difficulty, 0, 2)]; }
