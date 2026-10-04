@@ -1,0 +1,124 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "glass_hud layout.json",
+ "type": "object",
+ "required": [
+  "version",
+  "reference",
+  "free_center",
+  "max_persistent_coverage",
+  "aspects",
+  "elements",
+  "world_elements",
+  "fullscreen_layers",
+  "bindings"
+ ],
+ "properties": {
+  "version": {
+   "type": "integer",
+   "enum": [
+    1
+   ]
+  },
+  "reference": {
+   "type": "object",
+   "required": [
+    "width",
+    "height"
+   ]
+  },
+  "free_center": {
+   "type": "array",
+   "items": {
+    "type": "number",
+    "minimum": 0,
+    "maximum": 1
+   },
+   "minItems": 4,
+   "maxItems": 4
+  },
+  "max_persistent_coverage": {
+   "type": "number",
+   "minimum": 0,
+   "maximum": 1
+  },
+  "aspects": {
+   "type": "object"
+  },
+  "elements": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "file",
+     "anchor",
+     "rect",
+     "persistent"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "file": {
+      "type": "string"
+     },
+     "rect": {
+      "type": "array",
+      "items": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      },
+      "minItems": 4,
+      "maxItems": 4
+     },
+     "persistent": {
+      "type": "boolean"
+     },
+     "anchor": {
+      "type": "string",
+      "enum": [
+       "top_left",
+       "top_right",
+       "top_center",
+       "bottom_left",
+       "bottom_right",
+       "bottom_center"
+      ]
+     }
+    }
+   }
+  },
+  "world_elements": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "file"
+    ]
+   }
+  },
+  "fullscreen_layers": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id"
+    ]
+   }
+  },
+  "bindings": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "event",
+     "element",
+     "behavior"
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,521 @@
+{
+ "version": 1,
+ "reference": {
+  "width": 1920,
+  "height": 1080,
+  "note": "rects are fractions [x, y, w, h] of the 16:9 reference frame; anchor says which corner/edge the element keeps its distance from on other aspect ratios"
+ },
+ "safe_margin": {
+  "x": 0.02,
+  "y": 0.03
+ },
+ "free_center": [
+  0.2,
+  0.2,
+  0.6,
+  0.6
+ ],
+ "max_persistent_coverage": 0.25,
+ "aspects": {
+  "16:9": {
+   "ratio": 1.7778,
+   "rule": "uniform UI scale = height/1080 for ratio >= 16:9, width/1920 below; corner offsets scale with it; centred elements stay centred"
+  },
+  "21:9": {
+   "ratio": 2.3333,
+   "rule": "uniform UI scale = height/1080 for ratio >= 16:9, width/1920 below; corner offsets scale with it; centred elements stay centred"
+  },
+  "16:10": {
+   "ratio": 1.6,
+   "rule": "uniform UI scale = height/1080 for ratio >= 16:9, width/1920 below; corner offsets scale with it; centred elements stay centred"
+  }
+ },
+ "elements": [
+  {
+   "id": "body_player",
+   "file": "svg/silhouette_body_player.svg",
+   "anchor": "top_left",
+   "rect": [
+    0.02,
+    0.03,
+    0.135,
+    0.33
+   ],
+   "persistent": true
+  },
+  {
+   "id": "layers_player",
+   "file": "svg/zone_layers_arcs.svg",
+   "anchor": "top_left",
+   "rect": [
+    0.02,
+    0.03,
+    0.135,
+    0.33
+   ],
+   "persistent": true,
+   "overlay_of": "body_player"
+  },
+  {
+   "id": "body_enemy",
+   "file": "svg/silhouette_body_enemy.svg",
+   "anchor": "top_right",
+   "rect": [
+    0.845,
+    0.03,
+    0.135,
+    0.33
+   ],
+   "persistent": true
+  },
+  {
+   "id": "layers_enemy",
+   "file": "svg/zone_layers_arcs_enemy.svg",
+   "anchor": "top_right",
+   "rect": [
+    0.845,
+    0.03,
+    0.135,
+    0.33
+   ],
+   "persistent": true,
+   "overlay_of": "body_enemy"
+  },
+  {
+   "id": "enemy_status",
+   "file": "svg/status_icons_row.svg",
+   "anchor": "top_right",
+   "rect": [
+    0.845,
+    0.375,
+    0.135,
+    0.05
+   ],
+   "persistent": false
+  },
+  {
+   "id": "enemy_stability",
+   "file": "svg/stability_bar_h.svg",
+   "anchor": "top_right",
+   "rect": [
+    0.845,
+    0.435,
+    0.135,
+    0.028
+   ],
+   "persistent": false
+  },
+  {
+   "id": "compass",
+   "file": "svg/compass_strip.svg",
+   "anchor": "top_center",
+   "rect": [
+    0.35,
+    0.02,
+    0.3,
+    0.04
+   ],
+   "persistent": true
+  },
+  {
+   "id": "weapons",
+   "file": "svg/weapon_icons_row.svg",
+   "anchor": "bottom_left",
+   "rect": [
+    0.02,
+    0.745,
+    0.15,
+    0.055
+   ],
+   "persistent": true
+  },
+  {
+   "id": "gauge_armor",
+   "file": "png/bar_armor.png",
+   "anchor": "bottom_left",
+   "rect": [
+    0.02,
+    0.835,
+    0.06,
+    0.107
+   ],
+   "persistent": true
+  },
+  {
+   "id": "gauge_stability",
+   "file": "png/bar_stability.png",
+   "anchor": "bottom_left",
+   "rect": [
+    0.087,
+    0.835,
+    0.06,
+    0.107
+   ],
+   "persistent": true
+  },
+  {
+   "id": "gauge_heat",
+   "file": "png/bar_heat.png",
+   "anchor": "bottom_left",
+   "rect": [
+    0.154,
+    0.835,
+    0.06,
+    0.107
+   ],
+   "persistent": true
+  },
+  {
+   "id": "gauge_energy",
+   "file": "png/bar_energy.png",
+   "anchor": "bottom_left",
+   "rect": [
+    0.221,
+    0.835,
+    0.06,
+    0.107
+   ],
+   "persistent": true
+  },
+  {
+   "id": "arm_armor",
+   "file": "svg/arm_armor_bars.svg",
+   "anchor": "bottom_left",
+   "rect": [
+    0.02,
+    0.95,
+    0.261,
+    0.02
+   ],
+   "persistent": true
+  },
+  {
+   "id": "clock",
+   "file": "svg/clock_digits.svg",
+   "anchor": "bottom_right",
+   "rect": [
+    0.805,
+    0.7,
+    0.062,
+    0.035
+   ],
+   "persistent": true
+  },
+  {
+   "id": "distance",
+   "file": "svg/distance_digits.svg",
+   "anchor": "bottom_right",
+   "rect": [
+    0.875,
+    0.7,
+    0.105,
+    0.035
+   ],
+   "persistent": true
+  },
+  {
+   "id": "priority",
+   "file": "svg/power_priority.svg",
+   "anchor": "bottom_right",
+   "rect": [
+    0.805,
+    0.748,
+    0.062,
+    0.038
+   ],
+   "persistent": true
+  },
+  {
+   "id": "radar",
+   "file": "svg/radar.svg",
+   "anchor": "bottom_right",
+   "rect": [
+    0.875,
+    0.745,
+    0.105,
+    0.187
+   ],
+   "persistent": true
+  },
+  {
+   "id": "ultimate",
+   "file": "png/ultimate_gauge.png",
+   "anchor": "bottom_right",
+   "rect": [
+    0.805,
+    0.835,
+    0.062,
+    0.11
+   ],
+   "persistent": true
+  }
+ ],
+ "world_elements": [
+  {
+   "id": "lockon",
+   "file": "svg/lockon_corners.svg",
+   "note": "4 corner brackets around the target's screen rect; min 120 px, drawn over the enemy",
+   "center_ok": true
+  },
+  {
+   "id": "lockon_ring",
+   "file": "png/lockon_ring_anim_strip.png",
+   "note": "16-frame 4x4 strip (128 px cells), 24 fps loop while the lock is being acquired",
+   "center_ok": true
+  },
+  {
+   "id": "lockon_zone_hexes",
+   "file": "svg/lockon_zone_hexes.svg",
+   "note": "hex outline of the selected zone on the enemy (pitch s.21)",
+   "center_ok": true
+  },
+  {
+   "id": "strike_arc",
+   "file": "svg/strike_arc.svg",
+   "note": "the thin line the player draws for the strike; the only persistent central element",
+   "center_ok": true
+  },
+  {
+   "id": "crosshair",
+   "file": "svg/crosshair.svg",
+   "note": "tiny reticle, 24 px",
+   "center_ok": true
+  },
+  {
+   "id": "off_screen_arrow",
+   "file": "svg/threat_arrows_up.svg",
+   "note": "points at an off-screen target, clamped to the safe margin",
+   "center_ok": false
+  }
+ ],
+ "fullscreen_layers": [
+  {
+   "id": "alarm_frame",
+   "file": "png/alarm_frame.png",
+   "blend": "add"
+  },
+  {
+   "id": "threat_arrows",
+   "files": [
+    "svg/threat_arrows_up.svg",
+    "svg/threat_arrows_left.svg",
+    "svg/threat_arrows_right.svg",
+    "svg/threat_arrows_down.svg"
+   ],
+   "placement": "edge midpoints, 2 % inset"
+  },
+  {
+   "id": "crack_masks",
+   "files": [
+    "png/crack_mask_00.png",
+    "png/crack_mask_01.png",
+    "png/crack_mask_02.png",
+    "png/crack_mask_03.png",
+    "png/crack_mask_04.png",
+    "png/crack_mask_05.png",
+    "png/crack_mask_06.png",
+    "png/crack_mask_07.png"
+   ],
+   "blend": "mask"
+  },
+  {
+   "id": "soot_masks",
+   "files": [
+    "png/soot_mask_00.png",
+    "png/soot_mask_01.png",
+    "png/soot_mask_02.png",
+    "png/soot_mask_03.png"
+   ],
+   "blend": "multiply"
+  },
+  {
+   "id": "rain_drops",
+   "files": [
+    "png/rain_drops_atlas.png"
+   ],
+   "blend": "normal"
+  },
+  {
+   "id": "glitch_strips",
+   "files": [
+    "png/glitch_strip_00.png",
+    "png/glitch_strip_01.png",
+    "png/glitch_strip_02.png",
+    "png/glitch_strip_03.png",
+    "png/glitch_strip_04.png",
+    "png/glitch_strip_05.png",
+    "png/glitch_strip_06.png",
+    "png/glitch_strip_07.png"
+   ],
+   "blend": "add"
+  }
+ ],
+ "bindings": [
+  {
+   "event": "ZoneState",
+   "element": "layers_player / layers_enemy / body_*",
+   "behavior": "Recolour the zone (a = new ZoneState) with the style from states.json; Critical blinks; actor decides the player or the enemy silhouette."
+  },
+  {
+   "event": "HitEvent",
+   "element": "layers_*, alarm_frame, cracks",
+   "behavior": "Pulse the hit zone outline (0.25 s); layer reached (a) shortens that layer arc; severity b >= Exposed spawns the plate marks; S2+ adds a crack mask, S3+ soot."
+  },
+  {
+   "event": "ArmorPlateLost",
+   "element": "body_* (shard marks)",
+   "behavior": "Small shard ticks fly off the zone outline; the Armor arc loses 1/b of its length."
+  },
+  {
+   "event": "ReactorBreach",
+   "element": "body_player zone_Reactor, alarm_frame",
+   "behavior": "Reactor hex turns red and blinks 4 Hz for 8 s, red edge frame on."
+  },
+  {
+   "event": "SystemFailure",
+   "element": "weapons, gauge_*, priority, radar",
+   "behavior": "The matching widget shows a dead state (dotted outline, no fill); a = SystemId (Sensors -> radar + lock-on quality 0, Power -> gauge_energy, Cooling -> gauge_heat, Weapon -> weapons)."
+  },
+  {
+   "event": "LimbSevered",
+   "element": "body_* zone",
+   "behavior": "Zone drawn as Severed (dotted + slash); an arm hides its weapon-hand icon."
+  },
+  {
+   "event": "StaggerBegin",
+   "element": "gauge_stability, alarm_frame",
+   "behavior": "Stability ring flashes orange; short horizontal glitch strip."
+  },
+  {
+   "event": "StaggerEnd",
+   "element": "gauge_stability",
+   "behavior": "Flash stops."
+  },
+  {
+   "event": "Knockdown",
+   "element": "alarm_frame, glitch_strips",
+   "behavior": "Signal loss 0.6 s (glitch strip alpha 1), red edge frame pulse."
+  },
+  {
+   "event": "HeatWarning",
+   "element": "gauge_heat",
+   "behavior": "Ring turns orange then red above the hot threshold and blinks 2 Hz."
+  },
+  {
+   "event": "CoolantLeak",
+   "element": "gauge_heat, body_player",
+   "behavior": "Heat ring drips marks; the torso outline blinks amber."
+  },
+  {
+   "event": "Shutdown",
+   "element": "all persistent elements",
+   "behavior": "Everything dims to 25 % except alarm_frame and gauge_energy (power loss)."
+  },
+  {
+   "event": "EnergyShift",
+   "element": "priority",
+   "behavior": "The new priority pictogram lights, the old one fades (0.3 s)."
+  },
+  {
+   "event": "StatusApplied",
+   "element": "enemy_status, body_player corner",
+   "behavior": "Show the status icon (a = StatusKind: Blind, StrikeLock, Burn) with a duration ring (b ticks); actor chooses the player or the enemy side."
+  },
+  {
+   "event": "StatusEnded",
+   "element": "enemy_status",
+   "behavior": "Remove the status icon."
+  },
+  {
+   "event": "WeaponCharging",
+   "element": "weapons",
+   "behavior": "The weapon icon fills a ring."
+  },
+  {
+   "event": "WeaponFired",
+   "element": "weapons",
+   "behavior": "Icon flash, cooldown ring starts from full."
+  },
+  {
+   "event": "WeaponReady",
+   "element": "weapons",
+   "behavior": "Ring completes, icon pulses once (a = WeaponKind)."
+  },
+  {
+   "event": "WeaponEmpty",
+   "element": "weapons",
+   "behavior": "Icon turns red and dotted."
+  },
+  {
+   "event": "UltimateReady",
+   "element": "ultimate",
+   "behavior": "Ring full: white blink 2 Hz."
+  },
+  {
+   "event": "UltimateUsed",
+   "element": "ultimate",
+   "behavior": "Ring empties with a sweep."
+  },
+  {
+   "event": "WindupStarted",
+   "element": "threat_arrows, strike_arc",
+   "behavior": "Threat arrow in the attack direction (b = SwingSide) with a wide sector; narrows after the commit."
+  },
+  {
+   "event": "Committed",
+   "element": "threat_arrows",
+   "behavior": "The arrow turns solid red and the sector collapses into a line."
+  },
+  {
+   "event": "StrikeContact",
+   "element": "alarm_frame",
+   "behavior": "Single white-red flash of the edges at the contact moment."
+  },
+  {
+   "event": "ExternalHit",
+   "element": "alarm_frame, threat_arrows",
+   "behavior": "Arrow from the side of the source (a: 0 debris, 1 building, 2 fall)."
+  },
+  {
+   "event": "BurnTick",
+   "element": "status_icons_burn, soot_masks",
+   "behavior": "Burn icon pulses; soot grows by one step every 5 ticks."
+  },
+  {
+   "event": "BoardingSwatTelegraph",
+   "element": "threat_arrows, alarm_frame",
+   "behavior": "Corner arrow on the shoulder side (a), the edge frame fills during b ticks until impact."
+  },
+  {
+   "event": "HackProgress",
+   "element": "distance, lockon_ring",
+   "behavior": "Progress arc around the crosshair (value 0..1)."
+  },
+  {
+   "event": "MatchEnd",
+   "element": "all",
+   "behavior": "Fade everything out over 1 s (a = EndReason)."
+  }
+ ],
+ "state_inputs": {
+  "note": "What the game passes each frame (lib/presets.py shows complete examples).",
+  "player/enemy": "zones{Zone: ZoneState name}, layers{Zone: [armor, mechanism, system] remaining 0..1}",
+  "scalars": [
+   "armor",
+   "stability",
+   "heat",
+   "energy",
+   "ultimate{value, ready}",
+   "arm_armor[L, R]",
+   "priority (EnergyPriority)",
+   "heading",
+   "distance_m",
+   "clock_s"
+  ],
+  "weapons": "{rail|rockets|plasma: {ring 0..1, dead, empty}}",
+  "lock": "{rect (fractions), quality 0..1, hex, hex_hot}",
+  "strike": "{points (fractions), committed}",
+  "threats": "list of up|down|left|right",
+  "glass": "{cracks[idx], soot[idx], drops N, glitch 0..1, alarm 0..1}"
+ }
+}
