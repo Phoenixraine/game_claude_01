@@ -1,0 +1,264 @@
+{
+ "version": 1,
+ "seed": 7,
+ "source_of_counts": "embedded (data/damage_fx/cockpit_effects.json not found)",
+ "red_light_peak": {
+  "S0": 0.0,
+  "S1": 0.18,
+  "S2": 0.4,
+  "S3": 0.7,
+  "S4": 1.0
+ },
+ "shake": {
+  "profile": "HitEvent (data/damage_fx/shake_profiles.json)",
+  "severity_mult": {
+   "S0": 0.12,
+   "S1": 0.4,
+   "S2": 1.0,
+   "S3": 1.7,
+   "S4": 2.6
+  },
+  "limits": {
+   "max_pos_cm": 12.0,
+   "max_rot_deg": 4.0,
+   "reduce_motion_mult": 0.25
+  }
+ },
+ "levels": {
+  "S0": {
+   "SteamPort": [
+    "SteamPort_08"
+   ],
+   "red_light_peak": 0.0,
+   "siren": null,
+   "voice": null,
+   "power_flicker": false,
+   "shake_mult": 0.12
+  },
+  "S1": {
+   "Lamp_Warn": [
+    "Lamp_Warn_12"
+   ],
+   "SteamPort": [
+    "SteamPort_08",
+    "SteamPort_13"
+   ],
+   "Mon_glitch": [
+    "Mon_13"
+   ],
+   "red_light_peak": 0.18,
+   "siren": null,
+   "voice": null,
+   "power_flicker": false,
+   "shake_mult": 0.4
+  },
+  "S2": {
+   "Pipe_Burst": [
+    "Pipe_Burst_07"
+   ],
+   "Wire_Snapped": [
+    "Wire_Snapped_04",
+    "Wire_Snapped_15"
+   ],
+   "Lamp_Warn": [
+    "Lamp_Warn_12",
+    "Lamp_Warn_02",
+    "Lamp_Warn_11",
+    "Lamp_Warn_07",
+    "Lamp_Warn_06"
+   ],
+   "AlarmBeacon": [
+    "AlarmBeacon_03"
+   ],
+   "Glass_Crack_Mask": [
+    "Glass_Crack_Mask_02"
+   ],
+   "SteamPort": [
+    "SteamPort_08",
+    "SteamPort_13"
+   ],
+   "Mon_glitch": [
+    "Mon_13",
+    "Mon_02"
+   ],
+   "red_light_peak": 0.4,
+   "siren": "fx_alarm_beep",
+   "voice": "vo_hull_damage",
+   "power_flicker": false,
+   "shake_mult": 1.0
+  },
+  "S3": {
+   "Pipe_Burst": [
+    "Pipe_Burst_07",
+    "Pipe_Burst_11",
+    "Pipe_Burst_03",
+    "Pipe_Burst_10"
+   ],
+   "Wire_Snapped": [
+    "Wire_Snapped_04",
+    "Wire_Snapped_15",
+    "Wire_Snapped_11",
+    "Wire_Snapped_05",
+    "Wire_Snapped_23"
+   ],
+   "Lamp_Warn": [
+    "Lamp_Warn_12",
+    "Lamp_Warn_02",
+    "Lamp_Warn_11",
+    "Lamp_Warn_07",
+    "Lamp_Warn_06",
+    "Lamp_Warn_00",
+    "Lamp_Warn_21",
+    "Lamp_Warn_13",
+    "Lamp_Warn_08",
+    "Lamp_Warn_01"
+   ],
+   "AlarmBeacon": [
+    "AlarmBeacon_03",
+    "AlarmBeacon_01",
+    "AlarmBeacon_02"
+   ],
+   "Glass_Crack_Mask": [
+    "Glass_Crack_Mask_02",
+    "Glass_Crack_Mask_01"
+   ],
+   "Fire_Socket": [
+    "Fire_Socket_04"
+   ],
+   "Scorch_Decal": [
+    "Scorch_Decal_01"
+   ],
+   "StrobePanel": [
+    "StrobePanel_02",
+    "StrobePanel_00"
+   ],
+   "SteamPort": [
+    "SteamPort_08",
+    "SteamPort_13"
+   ],
+   "Mon_dead": [
+    "Mon_13",
+    "Mon_02"
+   ],
+   "Mon_glitch": [
+    "Mon_01",
+    "Mon_06"
+   ],
+   "red_light_peak": 0.7,
+   "siren": "fx_siren",
+   "voice": "vo_hull_damage",
+   "power_flicker": false,
+   "shake_mult": 1.7
+  },
+  "S4": {
+   "Pipe_Burst": [
+    "Pipe_Burst_07",
+    "Pipe_Burst_11",
+    "Pipe_Burst_03",
+    "Pipe_Burst_10",
+    "Pipe_Burst_08",
+    "Pipe_Burst_04",
+    "Pipe_Burst_09",
+    "Pipe_Burst_01"
+   ],
+   "Wire_Snapped": [
+    "Wire_Snapped_04",
+    "Wire_Snapped_15",
+    "Wire_Snapped_11",
+    "Wire_Snapped_05",
+    "Wire_Snapped_23",
+    "Wire_Snapped_10",
+    "Wire_Snapped_14",
+    "Wire_Snapped_18",
+    "Wire_Snapped_12",
+    "Wire_Snapped_03"
+   ],
+   "Lamp_Warn": [
+    "Lamp_Warn_12",
+    "Lamp_Warn_02",
+    "Lamp_Warn_11",
+    "Lamp_Warn_07",
+    "Lamp_Warn_06",
+    "Lamp_Warn_00",
+    "Lamp_Warn_21",
+    "Lamp_Warn_13",
+    "Lamp_Warn_08",
+    "Lamp_Warn_01",
+    "Lamp_Warn_16",
+    "Lamp_Warn_15",
+    "Lamp_Warn_10",
+    "Lamp_Warn_14",
+    "Lamp_Warn_20",
+    "Lamp_Warn_19",
+    "Lamp_Warn_05",
+    "Lamp_Warn_09",
+    "Lamp_Warn_18",
+    "Lamp_Warn_03"
+   ],
+   "Lamp_Ok": [
+    "Lamp_Ok_21",
+    "Lamp_Ok_00",
+    "Lamp_Ok_08",
+    "Lamp_Ok_06",
+    "Lamp_Ok_19",
+    "Lamp_Ok_05",
+    "Lamp_Ok_13",
+    "Lamp_Ok_15",
+    "Lamp_Ok_04",
+    "Lamp_Ok_16",
+    "Lamp_Ok_01",
+    "Lamp_Ok_03",
+    "Lamp_Ok_17",
+    "Lamp_Ok_02"
+   ],
+   "AlarmBeacon": [
+    "AlarmBeacon_03",
+    "AlarmBeacon_01",
+    "AlarmBeacon_02",
+    "AlarmBeacon_00"
+   ],
+   "Glass_Crack_Mask": [
+    "Glass_Crack_Mask_02",
+    "Glass_Crack_Mask_01",
+    "Glass_Crack_Mask_03"
+   ],
+   "Fire_Socket": [
+    "Fire_Socket_04",
+    "Fire_Socket_01",
+    "Fire_Socket_00"
+   ],
+   "Scorch_Decal": [
+    "Scorch_Decal_01",
+    "Scorch_Decal_04",
+    "Scorch_Decal_02"
+   ],
+   "StrobePanel": [
+    "StrobePanel_02",
+    "StrobePanel_00",
+    "StrobePanel_03",
+    "StrobePanel_01"
+   ],
+   "SteamPort": [
+    "SteamPort_08",
+    "SteamPort_13"
+   ],
+   "Mon_dead": [
+    "Mon_13",
+    "Mon_02",
+    "Mon_01",
+    "Mon_06",
+    "Mon_00",
+    "Mon_03"
+   ],
+   "Mon_glitch": [
+    "Mon_04",
+    "Mon_07"
+   ],
+   "red_light_peak": 1.0,
+   "siren": "fx_siren",
+   "voice": "vo_hull_critical",
+   "power_flicker": true,
+   "shake_mult": 2.6
+  }
+ }
+}
