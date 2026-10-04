@@ -1,0 +1,807 @@
+{
+ "version": 1,
+ "red_light": {
+  "S0": {
+   "period_s": 0.0,
+   "peak": 0.0,
+   "base": 0.0,
+   "fade_s": 0.0
+  },
+  "S1": {
+   "period_s": 1.4,
+   "peak": 0.18,
+   "base": 0.0,
+   "fade_s": 1.5
+  },
+  "S2": {
+   "period_s": 1.1,
+   "peak": 0.4,
+   "base": 0.08,
+   "fade_s": 3.0
+  },
+  "S3": {
+   "period_s": 0.8,
+   "peak": 0.7,
+   "base": 0.18,
+   "fade_s": 6.0
+  },
+  "S4": {
+   "period_s": 0.6,
+   "peak": 1.0,
+   "base": 0.35,
+   "fade_s": 10.0
+  }
+ },
+ "siren": {
+  "S0": null,
+  "S1": null,
+  "S2": {
+   "sound": "fx_alarm_beep",
+   "duration_s": 2.0
+  },
+  "S3": {
+   "sound": "fx_siren",
+   "duration_s": 6.0
+  },
+  "S4": {
+   "sound": "fx_siren",
+   "duration_s": 12.0
+  }
+ },
+ "voice": {
+  "S0": null,
+  "S1": null,
+  "S2": {
+   "id": "vo_hull_damage",
+   "delay_s": 0.6
+  },
+  "S3": {
+   "id": "vo_hull_damage",
+   "delay_s": 0.4
+  },
+  "S4": {
+   "id": "vo_hull_critical",
+   "delay_s": 0.3
+  }
+ },
+ "fire": {
+  "spread_per_s": 0.12,
+  "burn_s": [
+   12.0,
+   25.0
+  ],
+  "extinguish_after_s": [
+   6.0,
+   9.0
+  ],
+  "extinguish_below": "S3",
+  "max_simultaneous": 4
+ },
+ "severity": {
+  "S0": [
+   {
+    "target": "Lamp_Warn",
+    "action": "flicker",
+    "count": [
+     0,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.2
+    ],
+    "duration_s": [
+     0.2,
+     0.4
+    ],
+    "probability": 0.5,
+    "params": {}
+   },
+   {
+    "target": "SteamPort",
+    "action": "puff",
+    "count": [
+     0,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.3
+    ],
+    "duration_s": [
+     0.4,
+     0.8
+    ],
+    "probability": 0.3,
+    "params": {
+     "system": "ps_steam_puff"
+    }
+   }
+  ],
+  "S1": [
+   {
+    "target": "SteamPort",
+    "action": "puff",
+    "count": [
+     1,
+     2
+    ],
+    "delay_s": [
+     0.0,
+     0.4
+    ],
+    "duration_s": [
+     0.6,
+     1.2
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_steam_puff"
+    }
+   },
+   {
+    "target": "Lamp_Warn",
+    "action": "on",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.3
+    ],
+    "duration_s": [
+     2.0,
+     4.0
+    ],
+    "probability": 0.8,
+    "params": {
+     "color": "amber"
+    }
+   },
+   {
+    "target": "Mon",
+    "action": "glitch",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.3
+    ],
+    "duration_s": [
+     0.2,
+     0.5
+    ],
+    "probability": 0.7,
+    "params": {}
+   },
+   {
+    "target": "Cockpit_Root",
+    "action": "dust_fall",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.2
+    ],
+    "duration_s": [
+     0.8,
+     1.6
+    ],
+    "probability": 0.6,
+    "params": {
+     "system": "ps_dust_ceiling"
+    }
+   }
+  ],
+  "S2": [
+   {
+    "target": "Pipe_Burst",
+    "action": "burst",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.3
+    ],
+    "duration_s": [
+     6.0,
+     10.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_steam_jet",
+     "leak": "LeakPoint",
+     "sound": "fx_pipe_burst"
+    }
+   },
+   {
+    "target": "Wire_Snapped",
+    "action": "snap",
+    "count": [
+     1,
+     2
+    ],
+    "delay_s": [
+     0.0,
+     0.5
+    ],
+    "duration_s": [
+     3.0,
+     6.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_sparks_wire",
+     "spark": "SparkPort",
+     "sound": "fx_wire_spark"
+    }
+   },
+   {
+    "target": "Lamp_Warn",
+    "action": "on",
+    "count": [
+     3,
+     5
+    ],
+    "delay_s": [
+     0.0,
+     0.5
+    ],
+    "duration_s": [
+     4.0,
+     8.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "color": "red"
+    }
+   },
+   {
+    "target": "AlarmBeacon",
+    "action": "spin",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.1,
+     0.4
+    ],
+    "duration_s": [
+     4.0,
+     6.0
+    ],
+    "probability": 1.0,
+    "params": {}
+   },
+   {
+    "target": "Mon",
+    "action": "glitch",
+    "count": [
+     1,
+     2
+    ],
+    "delay_s": [
+     0.0,
+     0.4
+    ],
+    "duration_s": [
+     1.0,
+     2.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "sound": "fx_monitor_glitch"
+    }
+   },
+   {
+    "target": "Glass_Crack_Mask",
+    "action": "crack",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.1
+    ],
+    "duration_s": [
+     20.0,
+     40.0
+    ],
+    "probability": 0.4,
+    "params": {
+     "strength": 0.35,
+     "sound": "fx_glass_crack"
+    }
+   }
+  ],
+  "S3": [
+   {
+    "target": "Pipe_Burst",
+    "action": "burst",
+    "count": [
+     2,
+     4
+    ],
+    "delay_s": [
+     0.0,
+     0.8
+    ],
+    "duration_s": [
+     8.0,
+     14.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_steam_jet",
+     "leak": "LeakPoint",
+     "sound": "fx_pipe_burst"
+    }
+   },
+   {
+    "target": "Wire_Snapped",
+    "action": "snap",
+    "count": [
+     3,
+     5
+    ],
+    "delay_s": [
+     0.0,
+     0.8
+    ],
+    "duration_s": [
+     4.0,
+     8.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_sparks_wire",
+     "spark": "SparkPort",
+     "sound": "fx_wire_spark"
+    }
+   },
+   {
+    "target": "Fire_Socket",
+    "action": "ignite",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.4,
+     1.2
+    ],
+    "duration_s": [
+     12.0,
+     25.0
+    ],
+    "probability": 0.9,
+    "params": {
+     "system": "ps_fire_small",
+     "sound": "fx_fire_loop"
+    }
+   },
+   {
+    "target": "Scorch_Decal",
+    "action": "show",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.6,
+     1.4
+    ],
+    "duration_s": [
+     60.0,
+     120.0
+    ],
+    "probability": 0.9,
+    "params": {}
+   },
+   {
+    "target": "Mon",
+    "action": "dead",
+    "count": [
+     1,
+     2
+    ],
+    "delay_s": [
+     0.0,
+     0.6
+    ],
+    "duration_s": [
+     6.0,
+     12.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "sound": "fx_monitor_dead"
+    }
+   },
+   {
+    "target": "Mon",
+    "action": "glitch",
+    "count": [
+     1,
+     2
+    ],
+    "delay_s": [
+     0.0,
+     0.6
+    ],
+    "duration_s": [
+     1.5,
+     3.0
+    ],
+    "probability": 1.0,
+    "params": {}
+   },
+   {
+    "target": "Lamp_Warn",
+    "action": "on",
+    "count": [
+     6,
+     10
+    ],
+    "delay_s": [
+     0.0,
+     0.8
+    ],
+    "duration_s": [
+     8.0,
+     14.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "color": "red"
+    }
+   },
+   {
+    "target": "AlarmBeacon",
+    "action": "spin",
+    "count": [
+     2,
+     3
+    ],
+    "delay_s": [
+     0.0,
+     0.5
+    ],
+    "duration_s": [
+     6.0,
+     10.0
+    ],
+    "probability": 1.0,
+    "params": {}
+   },
+   {
+    "target": "StrobePanel",
+    "action": "strobe",
+    "count": [
+     1,
+     2
+    ],
+    "delay_s": [
+     0.2,
+     0.8
+    ],
+    "duration_s": [
+     1.5,
+     3.0
+    ],
+    "probability": 1.0,
+    "params": {}
+   },
+   {
+    "target": "Glass_Crack_Mask",
+    "action": "crack",
+    "count": [
+     1,
+     2
+    ],
+    "delay_s": [
+     0.0,
+     0.3
+    ],
+    "duration_s": [
+     40.0,
+     90.0
+    ],
+    "probability": 0.9,
+    "params": {
+     "strength": 0.7,
+     "sound": "fx_glass_crack"
+    }
+   },
+   {
+    "target": "Cockpit_Root",
+    "action": "dust_fall",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.2
+    ],
+    "duration_s": [
+     1.5,
+     3.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_dust_ceiling"
+    }
+   }
+  ],
+  "S4": [
+   {
+    "target": "Pipe_Burst",
+    "action": "burst",
+    "count": [
+     5,
+     8
+    ],
+    "delay_s": [
+     0.0,
+     1.0
+    ],
+    "duration_s": [
+     10.0,
+     18.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_steam_jet",
+     "leak": "LeakPoint",
+     "sound": "fx_pipe_burst"
+    }
+   },
+   {
+    "target": "Wire_Snapped",
+    "action": "snap",
+    "count": [
+     6,
+     10
+    ],
+    "delay_s": [
+     0.0,
+     1.0
+    ],
+    "duration_s": [
+     5.0,
+     10.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_sparks_wire",
+     "spark": "SparkPort",
+     "sound": "fx_wire_spark"
+    }
+   },
+   {
+    "target": "Fire_Socket",
+    "action": "ignite",
+    "count": [
+     2,
+     3
+    ],
+    "delay_s": [
+     0.3,
+     1.5
+    ],
+    "duration_s": [
+     15.0,
+     30.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_fire_big",
+     "sound": "fx_fire_loop"
+    }
+   },
+   {
+    "target": "Scorch_Decal",
+    "action": "show",
+    "count": [
+     2,
+     3
+    ],
+    "delay_s": [
+     0.5,
+     1.6
+    ],
+    "duration_s": [
+     90.0,
+     180.0
+    ],
+    "probability": 1.0,
+    "params": {}
+   },
+   {
+    "target": "Mon",
+    "action": "dead",
+    "count": [
+     4,
+     6
+    ],
+    "delay_s": [
+     0.0,
+     0.8
+    ],
+    "duration_s": [
+     10.0,
+     20.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "sound": "fx_monitor_dead"
+    }
+   },
+   {
+    "target": "Lamp_Warn",
+    "action": "on",
+    "count": [
+     12,
+     20
+    ],
+    "delay_s": [
+     0.0,
+     1.0
+    ],
+    "duration_s": [
+     10.0,
+     20.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "color": "red"
+    }
+   },
+   {
+    "target": "Lamp_Ok",
+    "action": "off",
+    "count": [
+     8,
+     14
+    ],
+    "delay_s": [
+     0.0,
+     0.8
+    ],
+    "duration_s": [
+     10.0,
+     20.0
+    ],
+    "probability": 1.0,
+    "params": {}
+   },
+   {
+    "target": "AlarmBeacon",
+    "action": "spin",
+    "count": [
+     4,
+     4
+    ],
+    "delay_s": [
+     0.0,
+     0.4
+    ],
+    "duration_s": [
+     10.0,
+     16.0
+    ],
+    "probability": 1.0,
+    "params": {}
+   },
+   {
+    "target": "StrobePanel",
+    "action": "strobe",
+    "count": [
+     3,
+     4
+    ],
+    "delay_s": [
+     0.1,
+     0.6
+    ],
+    "duration_s": [
+     3.0,
+     5.0
+    ],
+    "probability": 1.0,
+    "params": {}
+   },
+   {
+    "target": "Glass_Crack_Mask",
+    "action": "crack",
+    "count": [
+     2,
+     3
+    ],
+    "delay_s": [
+     0.0,
+     0.4
+    ],
+    "duration_s": [
+     60.0,
+     120.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "strength": 1.0,
+     "sound": "fx_glass_shatter"
+    }
+   },
+   {
+    "target": "Camera_Rig",
+    "action": "power_flicker",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.3
+    ],
+    "duration_s": [
+     0.5,
+     0.9
+    ],
+    "probability": 1.0,
+    "params": {
+     "sound": "fx_power_flicker"
+    }
+   },
+   {
+    "target": "Cockpit_Root",
+    "action": "dust_fall",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.0,
+     0.2
+    ],
+    "duration_s": [
+     2.5,
+     4.5
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_dust_ceiling"
+    }
+   },
+   {
+    "target": "Cockpit_Root",
+    "action": "smoke",
+    "count": [
+     1,
+     1
+    ],
+    "delay_s": [
+     0.8,
+     2.0
+    ],
+    "duration_s": [
+     10.0,
+     25.0
+    ],
+    "probability": 1.0,
+    "params": {
+     "system": "ps_smoke_dark"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,223 @@
+{
+ "version": 1,
+ "note": "Registry of ids used by the damage-FX tables. cockpit.* = scene object / empty classes of TASK-020 (name = <class>_<NN>, two digits); shards.* = TASK-016; sounds / voices / icons = proposals for audio/ and ui/glass_hud (TASK-021): they must adopt these ids or tell us the new ones.",
+ "zones": [
+  "Head",
+  "Torso",
+  "Reactor",
+  "ShoulderL",
+  "ShoulderR",
+  "ArmL",
+  "ArmR",
+  "LegL",
+  "LegR"
+ ],
+ "layers": [
+  "Armor",
+  "Mechanism",
+  "System"
+ ],
+ "zone_states": [
+  "Intact",
+  "Dented",
+  "Exposed",
+  "Damaged",
+  "Critical",
+  "Destroyed",
+  "Severed"
+ ],
+ "severities": [
+  "S0",
+  "S1",
+  "S2",
+  "S3",
+  "S4"
+ ],
+ "cockpit": {
+  "Pipe_Burst": 12,
+  "SteamPort": 12,
+  "LeakPoint": 12,
+  "Wire_Snapped": 24,
+  "SparkPort": 24,
+  "Mon": 12,
+  "Lamp_Warn": 20,
+  "Lamp_Ok": 20,
+  "AlarmBeacon": 4,
+  "StrobePanel": 4,
+  "Fire_Socket": 8,
+  "Scorch_Decal": 6,
+  "Glass_Crack_Mask": 4,
+  "Btn": 80,
+  "Dial": 12
+ },
+ "cockpit_singletons": [
+  "Glass_Front",
+  "Cockpit_Root",
+  "Camera_Rig"
+ ],
+ "fire_graph": {
+  "edges": [
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    4,
+    5
+   ],
+   [
+    5,
+    6
+   ],
+   [
+    6,
+    7
+   ],
+   [
+    7,
+    0
+   ],
+   [
+    1,
+    6
+   ],
+   [
+    2,
+    5
+   ]
+  ]
+ },
+ "shards": {
+  "concrete": [
+   "Shard_Concrete_S",
+   "Shard_Concrete_M",
+   "Shard_Concrete_L",
+   "Shard_Concrete_XL"
+  ],
+  "big": [
+   "Slab_Concrete",
+   "Column_Broken",
+   "Panel_Facade_Torn",
+   "Girder_Twisted",
+   "Steel_Plate_Bent",
+   "AC_Unit_Broken",
+   "Sign_Torn"
+  ],
+  "small": [
+   "Glass_Shard",
+   "Gravel_Cluster",
+   "Pebble",
+   "Rebar_Single",
+   "Rebar_Bundle",
+   "Pipe_Broken",
+   "Cable_Dangling",
+   "Window_Frame_Broken"
+  ]
+ },
+ "mech_chunks": [
+  "armor_plate",
+  "armor_plate_burning",
+  "piston",
+  "hose",
+  "cable_bundle",
+  "limb_part",
+  "reactor_fragment",
+  "sensor_housing",
+  "debris_small"
+ ],
+ "sounds": [
+  "fx_cockpit_hit_light",
+  "fx_cockpit_hit_heavy",
+  "fx_cockpit_hit_crit",
+  "fx_pipe_burst",
+  "fx_steam_jet",
+  "fx_wire_spark",
+  "fx_fire_loop",
+  "fx_extinguisher",
+  "fx_monitor_glitch",
+  "fx_monitor_dead",
+  "fx_glass_crack",
+  "fx_glass_shatter",
+  "fx_power_flicker",
+  "fx_siren",
+  "fx_alarm_beep",
+  "fx_servo_whine",
+  "fx_chunk_tumble",
+  "fx_chunk_ground",
+  "fx_building_crack",
+  "fx_building_collapse",
+  "fx_debris_rain",
+  "fx_dust_whoosh",
+  "fx_glass_rain",
+  "fx_blast_far"
+ ],
+ "voices": [
+  "vo_hull_damage",
+  "vo_hull_critical",
+  "vo_reactor_breach",
+  "vo_arm_lost",
+  "vo_leg_lost",
+  "vo_overheat",
+  "vo_coolant_leak",
+  "vo_power_loss",
+  "vo_sensors_failed",
+  "vo_hook_alert",
+  "vo_ultimate_ready",
+  "vo_weapon_ready",
+  "vo_target_lost"
+ ],
+ "icons": [
+  "icon_hull",
+  "icon_reactor",
+  "icon_arm",
+  "icon_leg",
+  "icon_head",
+  "icon_heat",
+  "icon_coolant",
+  "icon_power",
+  "icon_sensors",
+  "icon_fire",
+  "icon_hook",
+  "icon_ultimate",
+  "icon_weapon_rail",
+  "icon_weapon_rockets",
+  "icon_weapon_plasma",
+  "icon_status_blind",
+  "icon_status_strikelock",
+  "icon_status_burn"
+ ],
+ "particle_systems": [
+  "ps_steam_puff",
+  "ps_steam_jet",
+  "ps_sparks_wire",
+  "ps_sparks_ground",
+  "ps_fire_small",
+  "ps_fire_big",
+  "ps_smoke_dark",
+  "ps_smoke_light",
+  "ps_dust_ceiling",
+  "ps_coolant_spray",
+  "ps_dust_cloud",
+  "ps_dust_puff",
+  "ps_debris_trail_fire",
+  "ps_glass_sparkle"
+ ],
+ "building_materials": [
+  "concrete",
+  "glass_curtain",
+  "brick",
+  "steel_frame"
+ ]
+}

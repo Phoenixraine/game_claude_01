@@ -1,0 +1,54 @@
+{
+ "version": 1,
+ "note": "The 'juiciness knobs'. Everything multiplies the table values at run time; 1.0 = as authored.",
+ "knobs": {
+  "shake": 1.0,
+  "shake_reduce_motion": false,
+  "cockpit_fire": 1.0,
+  "cockpit_effects_count": 1.0,
+  "chunks_count": 1.0,
+  "chunks_speed": 1.0,
+  "building_shards": 1.0,
+  "building_dust": 1.0,
+  "red_light": 1.0,
+  "siren_volume": 1.0
+ },
+ "ranges": {
+  "shake": [
+   0.0,
+   2.0
+  ],
+  "cockpit_fire": [
+   0.0,
+   2.0
+  ],
+  "cockpit_effects_count": [
+   0.25,
+   2.0
+  ],
+  "chunks_count": [
+   0.25,
+   2.0
+  ],
+  "chunks_speed": [
+   0.5,
+   1.5
+  ],
+  "building_shards": [
+   0.25,
+   1.5
+  ],
+  "building_dust": [
+   0.25,
+   2.0
+  ],
+  "red_light": [
+   0.0,
+   1.5
+  ],
+  "siren_volume": [
+   0.0,
+   1.0
+  ]
+ }
+}

@@ -1,0 +1,287 @@
+{
+ "version": 1,
+ "colors": {
+  "red": "#ff4a3d",
+  "orange": "#ff9a2e",
+  "amber": "#ffd24a",
+  "cyan": "#7fe4ff",
+  "white": "#e8fbff"
+ },
+ "priority_note": "1 = highest. Only the highest priority warning owns the siren and the voice; lower ones keep their lamp / HUD icon.",
+ "warnings": [
+  {
+   "id": "reactor_breach",
+   "trigger": {
+    "event": "ReactorBreach"
+   },
+   "priority": 1,
+   "color": "red",
+   "blink_ms": [
+    200,
+    200
+   ],
+   "sound": "fx_siren",
+   "hud_icon": "icon_reactor",
+   "voice": "vo_reactor_breach",
+   "hold_s": 8.0,
+   "red_edge": true
+  },
+  {
+   "id": "hull_critical",
+   "trigger": {
+    "event": "HitEvent",
+    "min_severity": "S4"
+   },
+   "priority": 1,
+   "color": "red",
+   "blink_ms": [
+    250,
+    250
+   ],
+   "sound": "fx_siren",
+   "hud_icon": "icon_hull",
+   "voice": "vo_hull_critical",
+   "hold_s": 6.0,
+   "red_edge": true
+  },
+  {
+   "id": "power_loss",
+   "trigger": {
+    "event": "Shutdown"
+   },
+   "priority": 1,
+   "color": "red",
+   "blink_ms": [
+    400,
+    400
+   ],
+   "sound": "fx_power_flicker",
+   "hud_icon": "icon_power",
+   "voice": "vo_power_loss",
+   "hold_s": 10.0,
+   "red_edge": true
+  },
+  {
+   "id": "arm_lost",
+   "trigger": {
+    "event": "LimbSevered",
+    "zones": [
+     "ArmL",
+     "ArmR"
+    ]
+   },
+   "priority": 2,
+   "color": "red",
+   "blink_ms": [
+    300,
+    300
+   ],
+   "sound": "fx_alarm_beep",
+   "hud_icon": "icon_arm",
+   "voice": "vo_arm_lost",
+   "hold_s": 5.0
+  },
+  {
+   "id": "leg_lost",
+   "trigger": {
+    "event": "LimbSevered",
+    "zones": [
+     "LegL",
+     "LegR"
+    ]
+   },
+   "priority": 2,
+   "color": "red",
+   "blink_ms": [
+    300,
+    300
+   ],
+   "sound": "fx_alarm_beep",
+   "hud_icon": "icon_leg",
+   "voice": "vo_leg_lost",
+   "hold_s": 5.0
+  },
+  {
+   "id": "sensors_failed",
+   "trigger": {
+    "event": "SystemFailure",
+    "system": "Sensors"
+   },
+   "priority": 2,
+   "color": "orange",
+   "blink_ms": [
+    500,
+    300
+   ],
+   "sound": "fx_monitor_glitch",
+   "hud_icon": "icon_sensors",
+   "voice": "vo_sensors_failed",
+   "hold_s": 5.0
+  },
+  {
+   "id": "system_failure",
+   "trigger": {
+    "event": "SystemFailure"
+   },
+   "priority": 3,
+   "color": "orange",
+   "blink_ms": [
+    500,
+    500
+   ],
+   "sound": "fx_alarm_beep",
+   "hud_icon": "icon_hull",
+   "voice": null,
+   "hold_s": 4.0
+  },
+  {
+   "id": "overheat",
+   "trigger": {
+    "event": "HeatWarning"
+   },
+   "priority": 3,
+   "color": "orange",
+   "blink_ms": [
+    600,
+    400
+   ],
+   "sound": "fx_alarm_beep",
+   "hud_icon": "icon_heat",
+   "voice": "vo_overheat",
+   "hold_s": 6.0
+  },
+  {
+   "id": "coolant_leak",
+   "trigger": {
+    "event": "CoolantLeak"
+   },
+   "priority": 3,
+   "color": "orange",
+   "blink_ms": [
+    700,
+    300
+   ],
+   "sound": "fx_steam_jet",
+   "hud_icon": "icon_coolant",
+   "voice": "vo_coolant_leak",
+   "hold_s": 6.0
+  },
+  {
+   "id": "fire_in_cockpit",
+   "trigger": {
+    "event": "cockpit_fire"
+   },
+   "priority": 3,
+   "color": "red",
+   "blink_ms": [
+    350,
+    350
+   ],
+   "sound": "fx_fire_loop",
+   "hud_icon": "icon_fire",
+   "voice": null,
+   "hold_s": 4.0
+  },
+  {
+   "id": "burning",
+   "trigger": {
+    "event": "StatusApplied",
+    "status": "Burn"
+   },
+   "priority": 4,
+   "color": "orange",
+   "blink_ms": [
+    500,
+    500
+   ],
+   "sound": "fx_alarm_beep",
+   "hud_icon": "icon_status_burn",
+   "voice": null,
+   "hold_s": 3.0
+  },
+  {
+   "id": "blinded",
+   "trigger": {
+    "event": "StatusApplied",
+    "status": "Blind"
+   },
+   "priority": 4,
+   "color": "cyan",
+   "blink_ms": [
+    800,
+    400
+   ],
+   "sound": "fx_monitor_glitch",
+   "hud_icon": "icon_status_blind",
+   "voice": null,
+   "hold_s": 3.0
+  },
+  {
+   "id": "strike_lock",
+   "trigger": {
+    "event": "StatusApplied",
+    "status": "StrikeLock"
+   },
+   "priority": 4,
+   "color": "amber",
+   "blink_ms": [
+    600,
+    600
+   ],
+   "sound": "fx_alarm_beep",
+   "hud_icon": "icon_status_strikelock",
+   "voice": null,
+   "hold_s": 3.0
+  },
+  {
+   "id": "hook_alert",
+   "trigger": {
+    "event": "BoardingSwatTelegraph"
+   },
+   "priority": 1,
+   "color": "red",
+   "blink_ms": [
+    150,
+    150
+   ],
+   "sound": "fx_siren",
+   "hud_icon": "icon_hook",
+   "voice": "vo_hook_alert",
+   "hold_s": 3.0,
+   "red_edge": true,
+   "note": "TASK-017: the enemy hand is swinging at the pilot"
+  },
+  {
+   "id": "ultimate_ready",
+   "trigger": {
+    "event": "UltimateReady"
+   },
+   "priority": 5,
+   "color": "cyan",
+   "blink_ms": [
+    900,
+    300
+   ],
+   "sound": null,
+   "hud_icon": "icon_ultimate",
+   "voice": "vo_ultimate_ready",
+   "hold_s": 4.0
+  },
+  {
+   "id": "weapon_ready",
+   "trigger": {
+    "event": "WeaponReady"
+   },
+   "priority": 5,
+   "color": "white",
+   "blink_ms": [
+    300,
+    0
+   ],
+   "sound": null,
+   "hud_icon": "icon_weapon_rail",
+   "voice": "vo_weapon_ready",
+   "hold_s": 1.5
+  }
+ ]
+}

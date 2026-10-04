@@ -1,0 +1,280 @@
+{
+ "title": "shake profiles",
+ "type": "object",
+ "required": [
+  "version",
+  "limits",
+  "severity_mult",
+  "events",
+  "zone_direction",
+  "swing_direction",
+  "named_direction",
+  "severity"
+ ],
+ "properties": {
+  "version": {
+   "type": "integer"
+  },
+  "limits": {
+   "type": "object",
+   "required": [
+    "max_pos_cm",
+    "max_rot_deg",
+    "high_freq_hz",
+    "high_freq_max_s",
+    "reduce_motion_mult",
+    "sample_hz"
+   ],
+   "properties": {
+    "max_pos_cm": {
+     "type": "number",
+     "maximum": 12
+    },
+    "max_rot_deg": {
+     "type": "number",
+     "maximum": 4
+    },
+    "high_freq_hz": {
+     "type": "number"
+    },
+    "high_freq_max_s": {
+     "type": "number",
+     "maximum": 0.3
+    },
+    "reduce_motion_mult": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 0.5
+    },
+    "sample_hz": {
+     "type": "integer",
+     "minimum": 30,
+     "maximum": 240
+    }
+   }
+  },
+  "severity_mult": {
+   "type": "array",
+   "minItems": 5,
+   "maxItems": 5,
+   "items": {
+    "type": "number"
+   }
+  },
+  "events": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "direction",
+     "scale",
+     "components"
+    ],
+    "properties": {
+     "direction": {
+      "type": "string"
+     },
+     "scale": {
+      "enum": [
+       "severity",
+       "fixed"
+      ]
+     },
+     "mult": {
+      "type": "number"
+     },
+     "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+       "type": "object",
+       "required": [
+        "shape",
+        "freq_hz",
+        "amp_cm",
+        "amp_deg",
+        "decay",
+        "attack_s",
+        "duration_s",
+        "axes",
+        "chroma"
+       ],
+       "properties": {
+        "shape": {
+         "enum": [
+          "damped_sine",
+          "impulse",
+          "noise"
+         ]
+        },
+        "freq_hz": {
+         "type": "number",
+         "minimum": 0.05,
+         "maximum": 40
+        },
+        "amp_cm": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 20
+        },
+        "amp_deg": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 8
+        },
+        "decay": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 60
+        },
+        "attack_s": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 2
+        },
+        "duration_s": {
+         "type": "number",
+         "minimum": 0.02,
+         "maximum": 6
+        },
+        "axes": {
+         "type": "array",
+         "minItems": 3,
+         "maxItems": 3,
+         "items": {
+          "type": "number"
+         }
+        },
+        "chroma": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 1
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "zone_direction": {
+   "type": "object",
+   "required": [
+    "Head",
+    "Torso",
+    "Reactor",
+    "ShoulderL",
+    "ShoulderR",
+    "ArmL",
+    "ArmR",
+    "LegL",
+    "LegR"
+   ],
+   "additionalProperties": {
+    "type": "array",
+    "minItems": 3,
+    "maxItems": 3,
+    "items": {
+     "type": "number"
+    }
+   }
+  },
+  "swing_direction": {
+   "type": "object",
+   "required": [
+    "Up",
+    "Left",
+    "Right",
+    "Down"
+   ],
+   "additionalProperties": {
+    "type": "array",
+    "minItems": 3,
+    "maxItems": 3,
+    "items": {
+     "type": "number"
+    }
+   }
+  },
+  "named_direction": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "array",
+    "minItems": 3,
+    "maxItems": 3,
+    "items": {
+     "type": "number"
+    }
+   }
+  },
+  "severity": {
+   "type": "object",
+   "required": [
+    "reference_damage",
+    "layer_mult",
+    "zone_weight",
+    "blocked_mult",
+    "parried_mult",
+    "state_bump",
+    "stability_term",
+    "thresholds",
+    "external_source_mult"
+   ],
+   "properties": {
+    "reference_damage": {
+     "type": "number",
+     "minimum": 1
+    },
+    "layer_mult": {
+     "type": "object",
+     "required": [
+      "Armor",
+      "Mechanism",
+      "System"
+     ]
+    },
+    "zone_weight": {
+     "type": "object",
+     "required": [
+      "Head",
+      "Torso",
+      "Reactor",
+      "ShoulderL",
+      "ShoulderR",
+      "ArmL",
+      "ArmR",
+      "LegL",
+      "LegR"
+     ]
+    },
+    "blocked_mult": {
+     "type": "number"
+    },
+    "parried_mult": {
+     "type": "number"
+    },
+    "state_bump": {
+     "type": "object"
+    },
+    "stability_term": {
+     "type": "object",
+     "required": [
+      "per_point",
+      "cap"
+     ]
+    },
+    "thresholds": {
+     "type": "array",
+     "minItems": 4,
+     "maxItems": 4,
+     "items": {
+      "type": "number"
+     }
+    },
+    "external_source_mult": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

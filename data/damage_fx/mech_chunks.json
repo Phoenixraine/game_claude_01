@@ -1,0 +1,2948 @@
+{
+ "version": 1,
+ "units": "SI: metres, kilograms, seconds; velocities are along the impact normal + spread; the mech is 82 m tall",
+ "ballistics": {
+  "gravity": 9.81,
+  "drag_per_s": 0.04,
+  "max_range_m": 120.0,
+  "spawn_offset_m": 0.8,
+  "min_up_mps": 6.0,
+  "spread_deg": 38.0,
+  "owner_capsule_radius_m": {
+   "default": 12.0
+  },
+  "speed_scale_by_severity": [
+   0.6,
+   0.8,
+   1.0,
+   1.15,
+   1.3
+  ]
+ },
+ "event_rules": {
+  "ArmorPlateLost": {
+   "layers": [
+    "Armor"
+   ],
+   "scale": 1.0,
+   "count_mult": 1.0
+  },
+  "HitEvent": {
+   "min_layer": "Mechanism",
+   "min_severity": "S2",
+   "count_mult": 0.7
+  },
+  "LimbSevered": {
+   "layers": [
+    "Armor",
+    "Mechanism",
+    "System"
+   ],
+   "scale": 1.4,
+   "count_mult": 1.0,
+   "extra": "limb_part"
+  },
+  "ReactorBreach": {
+   "layers": [
+    "System"
+   ],
+   "scale": 1.3,
+   "count_mult": 1.0,
+   "zone": "Reactor"
+  },
+  "UltimateFinisher": {
+   "layers": [
+    "Armor",
+    "Mechanism",
+    "System"
+   ],
+   "scale": 1.6,
+   "count_mult": 2.0
+  },
+  "UltimateSever": {
+   "layers": [
+    "Armor",
+    "Mechanism",
+    "System"
+   ],
+   "scale": 1.5,
+   "count_mult": 1.5,
+   "extra": "limb_part"
+  },
+  "ExternalHit": {
+   "min_layer": "Mechanism",
+   "min_severity": "S2",
+   "count_mult": 0.8
+  },
+  "BoardingBlast": {
+   "layers": [
+    "Armor",
+    "Mechanism"
+   ],
+   "scale": 1.2,
+   "count_mult": 1.2
+  }
+ },
+ "limb_part": {
+  "type": "limb_part",
+  "mesh_hint": "Limb_Part",
+  "count": [
+   2,
+   3
+  ],
+  "mass_kg": [
+   800,
+   4000
+  ],
+  "speed_mps": [
+   10,
+   30
+  ],
+  "spin_rad_s": [
+   0.5,
+   3.0
+  ],
+  "life_s": [
+   8,
+   14
+  ],
+  "fire_prob": 0.8,
+  "fire_s": [
+   10,
+   20
+  ],
+  "smoke_s": [
+   10,
+   20
+  ],
+  "ground_sparks": 14
+ },
+ "zones": {
+  "Head": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      1
+     ],
+     "mass_kg": [
+      100.0,
+      450.0
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      75.0,
+      250.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      2,
+      3
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      100.0,
+      350.0
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "sensor_housing",
+     "mesh_hint": "Sensor_Housing",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      75.0,
+      300.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  },
+  "Torso": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      3
+     ],
+     "mass_kg": [
+      280.0,
+      1260.0
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      210.0,
+      700.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      4,
+      8
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      4
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      280.0,
+      979.9999999999999
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      3,
+      6
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      210.0,
+      840.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  },
+  "Reactor": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      200.0,
+      900.0
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      150.0,
+      500.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      3,
+      6
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      3
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      200.0,
+      700.0
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      2,
+      4
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "reactor_fragment",
+     "mesh_hint": "Reactor_Fragment",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      150.0,
+      600.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  },
+  "ShoulderL": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      200.0,
+      900.0
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      150.0,
+      500.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      3,
+      6
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      3
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      200.0,
+      700.0
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      2,
+      4
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      150.0,
+      600.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  },
+  "ShoulderR": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      200.0,
+      900.0
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      150.0,
+      500.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      3,
+      6
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      3
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      200.0,
+      700.0
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      2,
+      4
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      150.0,
+      600.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  },
+  "ArmL": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      180.0,
+      810.0
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      135.0,
+      450.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      3,
+      5
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      3
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      180.0,
+      630.0
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      2,
+      4
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      135.0,
+      540.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  },
+  "ArmR": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      180.0,
+      810.0
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      135.0,
+      450.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      3,
+      5
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      3
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      180.0,
+      630.0
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      2,
+      4
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      135.0,
+      540.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  },
+  "LegL": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      220.00000000000003,
+      990.0000000000001
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      165.0,
+      550.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      3,
+      7
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      3
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      220.00000000000003,
+      770.0000000000001
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      2,
+      4
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      165.0,
+      660.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  },
+  "LegR": {
+   "Armor": [
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      220.00000000000003,
+      990.0000000000001
+     ],
+     "speed_mps": [
+      14,
+      34
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.25,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      165.0,
+      550.0
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      11
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      6,
+      12
+     ],
+     "smoke_s": [
+      6,
+      12
+     ],
+     "ground_sparks": 10
+    },
+    {
+     "type": "debris_small",
+     "mesh_hint": "Shard_Steel_Small",
+     "count": [
+      3,
+      7
+     ],
+     "mass_kg": [
+      5,
+      40
+     ],
+     "speed_mps": [
+      10,
+      40
+     ],
+     "spin_rad_s": [
+      3.0,
+      12.0
+     ],
+     "life_s": [
+      3,
+      6
+     ],
+     "fire_prob": 0.1,
+     "fire_s": [
+      2,
+      4
+     ],
+     "smoke_s": [
+      1,
+      3
+     ],
+     "ground_sparks": 2
+    }
+   ],
+   "Mechanism": [
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      80,
+      260
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      1.5,
+      6.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.2,
+     "fire_s": [
+      4,
+      8
+     ],
+     "smoke_s": [
+      3,
+      6
+     ],
+     "ground_sparks": 5
+    },
+    {
+     "type": "hose",
+     "mesh_hint": "Hose_Cut",
+     "count": [
+      1,
+      3
+     ],
+     "mass_kg": [
+      10,
+      60
+     ],
+     "speed_mps": [
+      8,
+      22
+     ],
+     "spin_rad_s": [
+      2.0,
+      9.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.4,
+     "fire_s": [
+      3,
+      7
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 3
+    },
+    {
+     "type": "armor_plate",
+     "mesh_hint": "Armor_Plate",
+     "count": [
+      0,
+      1
+     ],
+     "mass_kg": [
+      220.00000000000003,
+      770.0000000000001
+     ],
+     "speed_mps": [
+      14,
+      30
+     ],
+     "spin_rad_s": [
+      1.0,
+      5.0
+     ],
+     "life_s": [
+      5,
+      9
+     ],
+     "fire_prob": 0.3,
+     "fire_s": [
+      4,
+      9
+     ],
+     "smoke_s": [
+      3,
+      7
+     ],
+     "ground_sparks": 6
+    }
+   ],
+   "System": [
+    {
+     "type": "cable_bundle",
+     "mesh_hint": "Cable_Bundle",
+     "count": [
+      2,
+      4
+     ],
+     "mass_kg": [
+      20,
+      90
+     ],
+     "speed_mps": [
+      8,
+      20
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      4,
+      8
+     ],
+     "fire_prob": 0.6,
+     "fire_s": [
+      3,
+      8
+     ],
+     "smoke_s": [
+      3,
+      8
+     ],
+     "ground_sparks": 4
+    },
+    {
+     "type": "piston",
+     "mesh_hint": "Piston_Rod",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      60,
+      300
+     ],
+     "speed_mps": [
+      10,
+      26
+     ],
+     "spin_rad_s": [
+      1.0,
+      6.0
+     ],
+     "life_s": [
+      5,
+      10
+     ],
+     "fire_prob": 0.7,
+     "fire_s": [
+      5,
+      12
+     ],
+     "smoke_s": [
+      5,
+      12
+     ],
+     "ground_sparks": 8
+    },
+    {
+     "type": "armor_plate_burning",
+     "mesh_hint": "Armor_Plate_Burning",
+     "count": [
+      1,
+      2
+     ],
+     "mass_kg": [
+      165.0,
+      660.0
+     ],
+     "speed_mps": [
+      12,
+      28
+     ],
+     "spin_rad_s": [
+      2.0,
+      8.0
+     ],
+     "life_s": [
+      6,
+      12
+     ],
+     "fire_prob": 1.0,
+     "fire_s": [
+      8,
+      16
+     ],
+     "smoke_s": [
+      8,
+      16
+     ],
+     "ground_sparks": 10
+    }
+   ]
+  }
+ }
+}

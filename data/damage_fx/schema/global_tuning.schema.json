@@ -1,0 +1,47 @@
+{
+ "title": "global tuning",
+ "type": "object",
+ "required": [
+  "version",
+  "knobs",
+  "ranges"
+ ],
+ "properties": {
+  "version": {
+   "type": "integer"
+  },
+  "knobs": {
+   "type": "object",
+   "required": [
+    "shake",
+    "shake_reduce_motion",
+    "cockpit_fire",
+    "cockpit_effects_count",
+    "chunks_count",
+    "chunks_speed",
+    "building_shards",
+    "building_dust",
+    "red_light",
+    "siren_volume"
+   ],
+   "additionalProperties": {
+    "type": [
+     "number",
+     "boolean"
+    ]
+   }
+  },
+  "ranges": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "array",
+    "minItems": 2,
+    "maxItems": 2,
+    "items": {
+     "type": "number"
+    }
+   }
+  }
+ },
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,129 @@
+{
+ "title": "damage_fx identifiers",
+ "type": "object",
+ "required": [
+  "version",
+  "zones",
+  "layers",
+  "zone_states",
+  "severities",
+  "cockpit",
+  "cockpit_singletons",
+  "fire_graph",
+  "shards",
+  "mech_chunks",
+  "sounds"
+ ],
+ "properties": {
+  "version": {
+   "type": "integer"
+  },
+  "note": {
+   "type": "string"
+  },
+  "zones": {
+   "type": "array",
+   "minItems": 9,
+   "maxItems": 9,
+   "items": {
+    "enum": [
+     "Head",
+     "Torso",
+     "Reactor",
+     "ShoulderL",
+     "ShoulderR",
+     "ArmL",
+     "ArmR",
+     "LegL",
+     "LegR"
+    ]
+   }
+  },
+  "layers": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "zone_states": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "severities": {
+   "type": "array",
+   "items": {
+    "enum": [
+     "S0",
+     "S1",
+     "S2",
+     "S3",
+     "S4"
+    ]
+   }
+  },
+  "cockpit": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "integer",
+    "minimum": 1
+   }
+  },
+  "cockpit_singletons": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "fire_graph": {
+   "type": "object",
+   "required": [
+    "edges"
+   ],
+   "properties": {
+    "edges": {
+     "type": "array",
+     "items": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "shards": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "array",
+    "items": {
+     "type": "string"
+    }
+   }
+  },
+  "mech_chunks": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "sounds": {
+   "oneOf": [
+    {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    {
+     "type": "object"
+    }
+   ]
+  }
+ },
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

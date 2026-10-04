@@ -1,0 +1,1250 @@
+{
+ "version": 1,
+ "limits": {
+  "max_pos_cm": 12.0,
+  "max_rot_deg": 4.0,
+  "high_freq_hz": 3.5,
+  "high_freq_max_s": 0.3,
+  "reduce_motion_mult": 0.25,
+  "sample_hz": 120
+ },
+ "severity_mult": [
+  0.12,
+  0.4,
+  1.0,
+  1.7,
+  2.6
+ ],
+ "events": {
+  "HitEvent": {
+   "direction": "impact",
+   "scale": "severity",
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 10.0,
+     "amp_cm": 2.4,
+     "amp_deg": 0.7,
+     "duration_s": 0.28,
+     "decay": 16.0,
+     "attack_s": 0.0,
+     "chroma": 0.5,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 2.2,
+     "amp_cm": 1.2,
+     "amp_deg": 0.5,
+     "duration_s": 0.9,
+     "decay": 4.5,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "noise",
+     "freq_hz": 3.0,
+     "amp_cm": 0.5,
+     "amp_deg": 0.2,
+     "duration_s": 0.7,
+     "decay": 5.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "ExternalHit": {
+   "direction": "impact",
+   "scale": "severity",
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 8.0,
+     "amp_cm": 3.0,
+     "amp_deg": 0.9,
+     "duration_s": 0.3,
+     "decay": 14.0,
+     "attack_s": 0.0,
+     "chroma": 0.6,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.8,
+     "amp_cm": 2.0,
+     "amp_deg": 0.8,
+     "duration_s": 1.1,
+     "decay": 3.8,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "Blocked": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 0.45,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 12.0,
+     "amp_cm": 1.4,
+     "amp_deg": 0.4,
+     "duration_s": 0.22,
+     "decay": 18.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 2.5,
+     "amp_cm": 0.6,
+     "amp_deg": 0.3,
+     "duration_s": 0.5,
+     "decay": 6.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "ParrySuccess": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 0.3,
+   "components": [
+    {
+     "shape": "impulse",
+     "freq_hz": 6.0,
+     "amp_cm": 0.9,
+     "amp_deg": 0.25,
+     "duration_s": 0.14,
+     "decay": 0.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "InterceptSuccess": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 0.5,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 11.0,
+     "amp_cm": 1.6,
+     "amp_deg": 0.5,
+     "duration_s": 0.2,
+     "decay": 18.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "BladesClash": {
+   "direction": "forward",
+   "scale": "fixed",
+   "mult": 0.7,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 14.0,
+     "amp_cm": 1.8,
+     "amp_deg": 0.4,
+     "duration_s": 0.2,
+     "decay": 20.0,
+     "attack_s": 0.0,
+     "chroma": 0.3,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 2.8,
+     "amp_cm": 0.8,
+     "amp_deg": 0.3,
+     "duration_s": 0.6,
+     "decay": 6.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "Evaded": {
+   "direction": "lateral",
+   "scale": "fixed",
+   "mult": 0.2,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 2.0,
+     "amp_cm": 0.5,
+     "amp_deg": 0.3,
+     "duration_s": 0.5,
+     "decay": 5.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "Dodge": {
+   "direction": "lateral",
+   "scale": "fixed",
+   "mult": 0.6,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.6,
+     "amp_cm": 2.2,
+     "amp_deg": 1.4,
+     "duration_s": 0.8,
+     "decay": 3.5,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "impulse",
+     "freq_hz": 6.0,
+     "amp_cm": 0.8,
+     "amp_deg": 0.2,
+     "duration_s": 0.12,
+     "decay": 0.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "StaggerBegin": {
+   "direction": "back",
+   "scale": "fixed",
+   "mult": 1.0,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.4,
+     "amp_cm": 3.2,
+     "amp_deg": 1.8,
+     "duration_s": 1.0,
+     "decay": 3.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 9.0,
+     "amp_cm": 1.6,
+     "amp_deg": 0.6,
+     "duration_s": 0.25,
+     "decay": 15.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "StaggerEnd": {
+   "direction": "forward",
+   "scale": "fixed",
+   "mult": 0.25,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 2.0,
+     "amp_cm": 0.8,
+     "amp_deg": 0.4,
+     "duration_s": 0.5,
+     "decay": 5.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "Knockdown": {
+   "direction": "down",
+   "scale": "fixed",
+   "mult": 1.8,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.2,
+     "amp_cm": 5.0,
+     "amp_deg": 2.6,
+     "duration_s": 1.6,
+     "decay": 2.4,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 8.0,
+     "amp_cm": 2.8,
+     "amp_deg": 1.0,
+     "duration_s": 0.3,
+     "decay": 12.0,
+     "attack_s": 0.0,
+     "chroma": 0.8,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "noise",
+     "freq_hz": 3.2,
+     "amp_cm": 1.2,
+     "amp_deg": 0.6,
+     "duration_s": 1.2,
+     "decay": 2.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "GotUp": {
+   "direction": "up",
+   "scale": "fixed",
+   "mult": 0.5,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.5,
+     "amp_cm": 1.8,
+     "amp_deg": 0.9,
+     "duration_s": 0.9,
+     "decay": 3.5,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "Clinch": {
+   "direction": "forward",
+   "scale": "fixed",
+   "mult": 1.1,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 6.0,
+     "amp_cm": 2.4,
+     "amp_deg": 0.8,
+     "duration_s": 0.3,
+     "decay": 10.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "noise",
+     "freq_hz": 3.4,
+     "amp_cm": 1.4,
+     "amp_deg": 0.5,
+     "duration_s": 1.5,
+     "decay": 1.2,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "WallSlam": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 1.7,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 9.0,
+     "amp_cm": 4.0,
+     "amp_deg": 1.4,
+     "duration_s": 0.3,
+     "decay": 11.0,
+     "attack_s": 0.0,
+     "chroma": 0.9,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.6,
+     "amp_cm": 3.0,
+     "amp_deg": 1.2,
+     "duration_s": 1.2,
+     "decay": 3.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "GrabHit": {
+   "direction": "forward",
+   "scale": "fixed",
+   "mult": 1.0,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 8.0,
+     "amp_cm": 2.2,
+     "amp_deg": 0.7,
+     "duration_s": 0.3,
+     "decay": 12.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 2.0,
+     "amp_cm": 1.2,
+     "amp_deg": 0.6,
+     "duration_s": 0.8,
+     "decay": 4.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "HeatWarning": {
+   "direction": "none",
+   "scale": "fixed",
+   "mult": 0.25,
+   "components": [
+    {
+     "shape": "noise",
+     "freq_hz": 3.4,
+     "amp_cm": 0.4,
+     "amp_deg": 0.15,
+     "duration_s": 2.0,
+     "decay": 0.6,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "CoolantLeak": {
+   "direction": "none",
+   "scale": "fixed",
+   "mult": 0.4,
+   "components": [
+    {
+     "shape": "noise",
+     "freq_hz": 3.2,
+     "amp_cm": 0.6,
+     "amp_deg": 0.2,
+     "duration_s": 2.5,
+     "decay": 0.5,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "Shutdown": {
+   "direction": "down",
+   "scale": "fixed",
+   "mult": 1.2,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.3,
+     "amp_cm": 3.0,
+     "amp_deg": 1.6,
+     "duration_s": 1.5,
+     "decay": 2.6,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "ArmorPlateLost": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 0.8,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 12.0,
+     "amp_cm": 1.8,
+     "amp_deg": 0.5,
+     "duration_s": 0.2,
+     "decay": 20.0,
+     "attack_s": 0.0,
+     "chroma": 0.4,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "LimbSevered": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 2.2,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 9.0,
+     "amp_cm": 3.6,
+     "amp_deg": 1.2,
+     "duration_s": 0.3,
+     "decay": 11.0,
+     "attack_s": 0.0,
+     "chroma": 1.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.4,
+     "amp_cm": 3.4,
+     "amp_deg": 1.8,
+     "duration_s": 1.6,
+     "decay": 2.4,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "noise",
+     "freq_hz": 3.0,
+     "amp_cm": 1.0,
+     "amp_deg": 0.5,
+     "duration_s": 1.4,
+     "decay": 1.6,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "ReactorBreach": {
+   "direction": "forward",
+   "scale": "fixed",
+   "mult": 2.0,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 8.0,
+     "amp_cm": 3.2,
+     "amp_deg": 1.2,
+     "duration_s": 0.3,
+     "decay": 10.0,
+     "attack_s": 0.0,
+     "chroma": 1.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "noise",
+     "freq_hz": 3.4,
+     "amp_cm": 2.0,
+     "amp_deg": 0.9,
+     "duration_s": 2.5,
+     "decay": 1.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "SystemFailure": {
+   "direction": "none",
+   "scale": "fixed",
+   "mult": 1.0,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 9.0,
+     "amp_cm": 1.8,
+     "amp_deg": 0.6,
+     "duration_s": 0.25,
+     "decay": 14.0,
+     "attack_s": 0.0,
+     "chroma": 0.6,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "noise",
+     "freq_hz": 3.0,
+     "amp_cm": 0.9,
+     "amp_deg": 0.4,
+     "duration_s": 1.2,
+     "decay": 2.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "WeaponCharging": {
+   "direction": "none",
+   "scale": "fixed",
+   "mult": 0.3,
+   "components": [
+    {
+     "shape": "noise",
+     "freq_hz": 3.3,
+     "amp_cm": 0.5,
+     "amp_deg": 0.2,
+     "duration_s": 1.5,
+     "decay": 0.4,
+     "attack_s": 0.6,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "WeaponFired": {
+   "direction": "back",
+   "scale": "fixed",
+   "mult": 1.3,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 7.0,
+     "amp_cm": 3.0,
+     "amp_deg": 0.9,
+     "duration_s": 0.3,
+     "decay": 10.0,
+     "attack_s": 0.0,
+     "chroma": 0.7,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.8,
+     "amp_cm": 1.6,
+     "amp_deg": 0.7,
+     "duration_s": 0.9,
+     "decay": 4.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "UltimateUsed": {
+   "direction": "forward",
+   "scale": "fixed",
+   "mult": 1.6,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 6.0,
+     "amp_cm": 2.8,
+     "amp_deg": 1.0,
+     "duration_s": 0.3,
+     "decay": 9.0,
+     "attack_s": 0.0,
+     "chroma": 0.8,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "noise",
+     "freq_hz": 3.0,
+     "amp_cm": 1.6,
+     "amp_deg": 0.8,
+     "duration_s": 2.0,
+     "decay": 1.4,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "UltimateFinisher": {
+   "direction": "down",
+   "scale": "fixed",
+   "mult": 2.2,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.2,
+     "amp_cm": 5.0,
+     "amp_deg": 2.6,
+     "duration_s": 2.0,
+     "decay": 2.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "UltimateSever": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 2.0,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 8.0,
+     "amp_cm": 3.4,
+     "amp_deg": 1.2,
+     "duration_s": 0.3,
+     "decay": 10.0,
+     "attack_s": 0.0,
+     "chroma": 0.9,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.4,
+     "amp_cm": 2.8,
+     "amp_deg": 1.4,
+     "duration_s": 1.4,
+     "decay": 2.6,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "BurnTick": {
+   "direction": "none",
+   "scale": "fixed",
+   "mult": 0.15,
+   "components": [
+    {
+     "shape": "impulse",
+     "freq_hz": 5.0,
+     "amp_cm": 0.3,
+     "amp_deg": 0.1,
+     "duration_s": 0.1,
+     "decay": 0.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "StatusApplied": {
+   "direction": "none",
+   "scale": "fixed",
+   "mult": 0.5,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 9.0,
+     "amp_cm": 1.0,
+     "amp_deg": 0.4,
+     "duration_s": 0.2,
+     "decay": 16.0,
+     "attack_s": 0.0,
+     "chroma": 0.4,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "MatchEnd": {
+   "direction": "down",
+   "scale": "fixed",
+   "mult": 1.5,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.2,
+     "amp_cm": 4.0,
+     "amp_deg": 2.0,
+     "duration_s": 2.5,
+     "decay": 1.8,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "HookFired": {
+   "direction": "forward",
+   "scale": "fixed",
+   "mult": 0.5,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 7.0,
+     "amp_cm": 1.2,
+     "amp_deg": 0.4,
+     "duration_s": 0.25,
+     "decay": 12.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "HookLanded": {
+   "direction": "forward",
+   "scale": "fixed",
+   "mult": 0.8,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 6.0,
+     "amp_cm": 1.8,
+     "amp_deg": 0.6,
+     "duration_s": 0.3,
+     "decay": 9.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "BoardingSwatImpact": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 2.6,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 8.0,
+     "amp_cm": 4.4,
+     "amp_deg": 1.6,
+     "duration_s": 0.3,
+     "decay": 9.0,
+     "attack_s": 0.0,
+     "chroma": 1.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.4,
+     "amp_cm": 3.8,
+     "amp_deg": 2.0,
+     "duration_s": 1.6,
+     "decay": 2.4,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "BoardingBlast": {
+   "direction": "back",
+   "scale": "fixed",
+   "mult": 1.4,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 5.0,
+     "amp_cm": 2.4,
+     "amp_deg": 0.9,
+     "duration_s": 0.3,
+     "decay": 7.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "shape": "damped_sine",
+     "freq_hz": 1.6,
+     "amp_cm": 2.2,
+     "amp_deg": 1.0,
+     "duration_s": 1.4,
+     "decay": 3.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "BoardingShock": {
+   "direction": "impact",
+   "scale": "fixed",
+   "mult": 0.9,
+   "components": [
+    {
+     "shape": "damped_sine",
+     "freq_hz": 9.0,
+     "amp_cm": 2.0,
+     "amp_deg": 0.7,
+     "duration_s": 0.25,
+     "decay": 14.0,
+     "attack_s": 0.0,
+     "chroma": 0.0,
+     "axes": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  }
+ },
+ "zone_direction": {
+  "Head": [
+   0.0,
+   0.3,
+   -0.9
+  ],
+  "Torso": [
+   0.0,
+   0.0,
+   -1.0
+  ],
+  "Reactor": [
+   0.0,
+   0.1,
+   1.0
+  ],
+  "ShoulderL": [
+   0.9,
+   -0.2,
+   -0.3
+  ],
+  "ShoulderR": [
+   -0.9,
+   -0.2,
+   -0.3
+  ],
+  "ArmL": [
+   0.7,
+   -0.4,
+   -0.2
+  ],
+  "ArmR": [
+   -0.7,
+   -0.4,
+   -0.2
+  ],
+  "LegL": [
+   0.5,
+   -0.8,
+   0.0
+  ],
+  "LegR": [
+   -0.5,
+   -0.8,
+   0.0
+  ]
+ },
+ "swing_direction": {
+  "Up": [
+   0.0,
+   -0.8,
+   0.0
+  ],
+  "Left": [
+   0.8,
+   0.0,
+   0.0
+  ],
+  "Right": [
+   -0.8,
+   0.0,
+   0.0
+  ],
+  "Down": [
+   0.0,
+   0.8,
+   0.0
+  ]
+ },
+ "named_direction": {
+  "none": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "forward": [
+   0.0,
+   0.0,
+   1.0
+  ],
+  "back": [
+   0.0,
+   0.0,
+   -1.0
+  ],
+  "down": [
+   0.0,
+   -1.0,
+   0.0
+  ],
+  "up": [
+   0.0,
+   1.0,
+   0.0
+  ],
+  "lateral": [
+   1.0,
+   0.0,
+   0.0
+  ]
+ },
+ "severity": {
+  "reference_damage": 17.5,
+  "layer_mult": {
+   "Armor": 1.0,
+   "Mechanism": 1.35,
+   "System": 1.8
+  },
+  "zone_weight": {
+   "Head": 1.25,
+   "Torso": 1.2,
+   "Reactor": 1.5,
+   "ShoulderL": 1.0,
+   "ShoulderR": 1.0,
+   "ArmL": 0.8,
+   "ArmR": 0.8,
+   "LegL": 0.7,
+   "LegR": 0.7
+  },
+  "blocked_mult": 0.45,
+  "parried_mult": 0.1,
+  "state_bump": {
+   "Intact": 0.0,
+   "Dented": 0.0,
+   "Exposed": 0.1,
+   "Damaged": 0.4,
+   "Critical": 0.8,
+   "Destroyed": 1.2,
+   "Severed": 1.5
+  },
+  "stability_term": {
+   "per_point": 0.005,
+   "cap": 0.3
+  },
+  "thresholds": [
+   0.35,
+   0.9,
+   1.6,
+   2.6
+  ],
+  "external_source_mult": {
+   "0": 1.0,
+   "1": 1.5,
+   "2": 1.3,
+   "3": 1.4
+  }
+ }
+}
