@@ -1110,8 +1110,22 @@ float cc = step(Kind, 0.5), cs = step(0.5, Kind) * step(Kind, 1.5), cg = step(1.
     return m
 
 
+def build_emissive():
+    """Plain glowing surface: Color * Intensity."""
+    m = make_material("M_Emissive")
+    col = vector(m, "Color", (1, 1, 1, 1), -600, 0)
+    inten = scalar(m, "Intensity", 5.0, -600, 150)
+    mul = expr(m, unreal.MaterialExpressionMultiply, -300, 50)
+    MEL.connect_material_expressions(col, "", mul, "A")
+    MEL.connect_material_expressions(inten, "", mul, "B")
+    MEL.connect_material_property(mul, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 ALL = [build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor,
-       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk]
+       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive]
 import os
 _only = [x for x in os.environ.get("IV_ONLY", "").split(",") if x]
 for fn in ALL:

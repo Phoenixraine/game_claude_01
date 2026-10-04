@@ -1,5 +1,6 @@
 #include "IVGameMode.h"
 #include "IVFXManager.h"
+#include "IVHelicopter.h"
 #include "RenderCore.h"
 #include "RHI.h"
 #include "IVMechPawn.h"
@@ -97,6 +98,9 @@ void AIVGameMode::StartPlay()
 			}
 		}
 	}
+
+	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoHeli")))
+		AIVHelicopter::SpawnFleet(W, (PlayerLoc + EnemyLoc) * 0.5f, 2);
 
 	// combat: the player is side A, the enemy mech side B
 	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoCombat")))

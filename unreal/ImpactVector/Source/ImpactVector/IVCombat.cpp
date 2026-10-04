@@ -1,6 +1,8 @@
 #include "IVCombat.h"
 #include "IVMechPawn.h"
 #include "IVFXManager.h"
+#include "IVHelicopter.h"
+#include "EngineUtils.h"
 #include "IVAudio.h"
 #include "IVEnvironment.h"
 #include "IVAbilities.h"
@@ -611,6 +613,32 @@ void AIVCombatDirector::TryScoop(iv::Side S)
 	AIVEnvironment* Env = AIVEnvironment::Get(GetWorld());
 	FVector Base, Size;
 	const FVector ToEnemy = (D->GetActorLocation() - A->GetActorLocation()).GetSafeNormal2D();
+	// a helicopter on a low pass is the better grab: hurled whole, it burns and blows up on the head
+	{
+		AIVHelicopter* Best = nullptr;
+		float BestD = 16000.f;
+		for (TActorIterator<AIVHelicopter> It(GetWorld()); It; ++It)
+		{
+			if (!It->IsGrabbable()) continue;
+			const FVector To = It->GetActorLocation() - A->GetActorLocation();
+			const float Dd = To.Size();
+			if (Dd < BestD && FVector::DotProduct(To.GetSafeNormal2D(), A->GetActorForwardVector().GetSafeNormal2D()) > -0.2f) { BestD = Dd; Best = *It; }
+		}
+		if (Best)
+		{
+			UE_LOG(LogTemp, Display, TEXT("IV heli grabbed at %.0f cm"), BestD);
+			ScoopCooldown[Idx] = kScoopCooldownSec;
+			A->PlayAction(FName(TEXT("grab_clamp")), 1.2f);
+			TWeakObjectPtr<AIVCombatDirector> Self(this);
+			Best->GrabAndThrow(A, D, 0.55f, 1.2f, [Self, S](const FVector&)
+			{
+				if (!Self.IsValid() || !Self->Duel.IsValid() || Self->Duel->result().over) return;
+				Self->Duel->ExternalHit(iv::Other(S), iv::Zone::Head, iv::tune::kDebrisDamage * 1.5f, iv::tune::kDebrisStability * 1.4f, 0, iv::StatusKind::Blind, iv::tune::kDebrisBlindTicks);
+			});
+			if (A->IsLocallyControlled()) A->AddCockpitImpulse(0.f, 0.f, 1.0f);
+			return;
+		}
+	}
 	if (!Env || !Env->FindScoopBuilding(A->GetActorLocation(), ToEnemy, Base, Size))
 	{
 		if (A->IsLocallyControlled()) IVAudio::Play2D(GetWorld(), TEXT("cockpit_alarm_warning"), 0.6f);

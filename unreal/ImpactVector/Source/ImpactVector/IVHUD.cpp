@@ -1,4 +1,6 @@
 #include "IVHUD.h"
+#include "IVHelicopter.h"
+#include "EngineUtils.h"
 #include "IVMechPawn.h"
 #include "IVCombat.h"
 #include "IVFlow.h"
@@ -20,6 +22,16 @@ namespace
 	const FLinearColor kWhite(0.92f, 0.96f, 1.f, 1.f);
 
 	FLinearColor A(FLinearColor C, float Alpha) { C.A = Alpha; return C; }
+
+	/** A helicopter on a low pass within the scoop's reach: the F action grabs it instead of a building. */
+	bool HeliInReach(AHUD* H)
+	{
+		APawn* P = H->GetOwningPawn();
+		if (!P || !H->GetWorld()) return false;
+		for (TActorIterator<AIVHelicopter> It(H->GetWorld()); It; ++It)
+			if (It->IsGrabbable() && FVector::Dist(It->GetActorLocation(), P->GetActorLocation()) < 16000.f) return true;
+		return false;
+	}
 
 	const FLinearColor kZoneCol[7] = {
 		FLinearColor(0.35f, 0.9f, 1.f, 0.9f), FLinearColor(0.7f, 0.95f, 0.7f, 0.9f), FLinearColor(1.f, 0.9f, 0.35f, 0.92f), FLinearColor(1.f, 0.6f, 0.15f, 0.95f),
@@ -256,6 +268,7 @@ void AIVHUD::DrawAbilitiesGlass(AIVCombatDirector*, const iv::Fighter& F, float 
 			Ready = Dir ? Dir->GetScoopReady01(MySide) : 1.f;
 			Key = TEXT("F"); Name = TEXT("ЗДАНИЕ");
 			C = kGreen;
+			if (HeliInReach(this)) { Name = TEXT("ВЕРТОЛЁТ"); C = kYellow; }
 		}
 		const bool bReady = Ready >= 0.999f;
 		const int32 N = 36;
@@ -770,6 +783,7 @@ void AIVHUD::DrawAbilities(AIVCombatDirector* Dir, const iv::Fighter& F)
 			Ready = Dir->GetScoopReady01(iv::Side::A);
 			Key = TEXT("F"); Name = TEXT("ЗДАНИЕ");
 			C = kGreen;
+			if (HeliInReach(this)) { Name = TEXT("ВЕРТОЛЁТ"); C = kYellow; }
 		}
 		const bool bReady = Ready >= 0.999f;
 		Panel(X, Y0, SW, SH, FLinearColor(0.f, 0.03f, 0.05f, 0.62f), A(bSel ? kWhite : C, bReady ? 0.95f : 0.45f));
