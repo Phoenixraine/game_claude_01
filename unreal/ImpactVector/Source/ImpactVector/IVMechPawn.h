@@ -253,6 +253,9 @@ protected:
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> GrowthMID;
 	UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> GrowthComps;
 	void BuildGrowths();
+	void BuildGreebles();
+	UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> GreebleComps;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> GreebleMID;
 	void UpdateGrowths(float Dt);
 
 	// ---- head lamps (motivated key light on the opponent, volumetric beams in the fog)
