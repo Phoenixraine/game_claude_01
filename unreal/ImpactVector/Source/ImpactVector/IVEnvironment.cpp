@@ -84,12 +84,17 @@ AIVEnvironment::AIVEnvironment()
 	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 1.6f;
 	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 1.6f;
 	S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.4f;
-	S.bOverride_BloomIntensity = true; S.BloomIntensity = 0.45f;
+	S.bOverride_BloomIntensity = true; S.BloomIntensity = 0.8f;
 	S.bOverride_VignetteIntensity = true; S.VignetteIntensity = 0.45f;
 	S.bOverride_FilmGrainIntensity = true; S.FilmGrainIntensity = 0.08f;
 	S.bOverride_DynamicGlobalIlluminationMethod = true; S.DynamicGlobalIlluminationMethod = EDynamicGlobalIlluminationMethod::Lumen;
 	S.bOverride_ReflectionMethod = true; S.ReflectionMethod = EReflectionMethod::Lumen;
-	S.bOverride_ColorSaturation = true; S.ColorSaturation = FVector4(0.9f, 0.95f, 1.0f, 1.0f);
+	S.bOverride_ColorSaturation = true; S.ColorSaturation = FVector4(1.08f, 1.08f, 1.14f, 1.0f);
+	S.bOverride_ColorContrast = true; S.ColorContrast = FVector4(1.12f, 1.12f, 1.12f, 1.0f);
+	S.bOverride_ColorGain = true; S.ColorGain = FVector4(0.97f, 0.985f, 1.06f, 1.0f);
+	S.bOverride_ColorGainShadows = true; S.ColorGainShadows = FVector4(0.9f, 0.96f, 1.12f, 1.0f);
+	S.bOverride_ColorGainHighlights = true; S.ColorGainHighlights = FVector4(1.08f, 1.0f, 0.96f, 1.0f);
+	S.bOverride_SceneFringeIntensity = true; S.SceneFringeIntensity = 0.35f;
 
 	auto MakeSlab = [&](const TCHAR* Name) {
 		UStaticMeshComponent* M = CreateDefaultSubobject<UStaticMeshComponent>(Name);
