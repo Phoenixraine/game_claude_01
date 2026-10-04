@@ -1,0 +1,2 @@
+data/**/*.json text eol=lf
+*.json text eol=lf

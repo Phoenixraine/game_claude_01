@@ -26,15 +26,6 @@ add_executable(ivsim tools/ivsim.cpp)
 target_link_libraries(ivsim PRIVATE ivcore)
 target_compile_options(ivsim PRIVATE ${IV_FLAGS})
 
-# Hack mini-game calibration: bots x difficulties (docs/ux/hack_calibration.md).
-add_executable(hack_calib tools/hack_calib.cpp)
-target_link_libraries(hack_calib PRIVATE ivcore)
-target_compile_options(hack_calib PRIVATE ${IV_FLAGS})
-
-add_executable(hack_export tools/hack_export.cpp)
-target_link_libraries(hack_export PRIVATE ivcore)
-target_compile_options(hack_export PRIVATE ${IV_FLAGS})
-
 # The documented game loop (docs/CORE_API.md) as a runnable example, kept honest by CTest.
 add_executable(iv_example examples/game_loop.cpp)
 target_link_libraries(iv_example PRIVATE ivcore)

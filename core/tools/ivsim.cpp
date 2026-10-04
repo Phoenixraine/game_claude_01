@@ -187,9 +187,9 @@ void RunBoardingMode(int seeds, uint64_t seedBase, int diffMask) {
       if (pol == Policy::Spam) bi.start = !bd.Active() && bd.cooldownLeft() == 0;
       else if (pol == Policy::Periodic) bi.start = !bd.Active() && bd.cooldownLeft() == 0 && sinceLast >= 90 * kTickHz;
       else if (pol == Policy::Smart) {   // only when it is safe: the enemy is far away or down, and the own mech is steady
-        const Fighter& foe = duel.fighter(Side::B);
-        const bool calm = duel.distance() >= 45.f || foe.posture != Posture::Standing;
-        bi.start = !bd.Active() && bd.cooldownLeft() == 0 && calm && duel.fighter(Side::A).res.stability >= 80.f && foe.phase == Phase::Idle;
+        const Fighter& foeF = duel.fighter(Side::B);
+        const bool calm = duel.distance() >= 45.f || foeF.posture != Posture::Standing;
+        bi.start = !bd.Active() && bd.cooldownLeft() == 0 && calm && duel.fighter(Side::A).res.stability >= 80.f && foeF.phase == Phase::Idle;
       }
       if (!duel.cinematic().active) drv.Decide(bd, &bi);   // inputs during an external cut are lost (the boarding is frozen too)
       lastPressedInWindow = drv.pressedInWindow;
