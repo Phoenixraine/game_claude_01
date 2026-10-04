@@ -90,6 +90,12 @@ for sd in (1, -1):          # +1 = left (y > 0)
             pf.cyl(S, v, sy * 0.03, 0.016, 0.022, 0.0045, cls=10, seg=6)
         if k % 3 == 0:
             pf.box(S, v + L * 0.03, 0.0, 0.016, 0.03, 0.045, 0.01, cls=0, bevel=0.002)
+    rg_ = random.Random(900 + sd)
+    greeble_patch(S, pf, 0.0, 0.0, L * 0.92, 0.1, 90, rg_, hmax=0.035, palette=(0, 1, 0, 0, 10, 0))
+    for k in range(5):
+        c_ = pt_top + (pt_bot - pt_top) * (0.12 + 0.18 * k)
+        S.cyl(c_ + Vector((-0.1, -sd * 0.03, 0)), c_ + Vector((-0.17, -sd * 0.03, 0)), 0.02 + 0.006 * (k % 3), cls=10, seg=8)
+        S.sphere(c_ + Vector((-0.17, -sd * 0.03, 0)), 0.026, cls=0, seg=8)
     # tiny amber status lamps (the only colour on the pillar)
     pf.box(S, -L * 0.30, 0.0, 0.018, 0.035, 0.012, 0.006, cls=5)
     pf.box(S, L * 0.2, 0.0, 0.018, 0.02, 0.012, 0.006, cls=5)
@@ -241,6 +247,10 @@ for mid, px, py, w, h, yaw in cfg:
             knob(S, f, sx * (w / 2 + 0.07), -0.04, 0.018, r5)
             dial(S, f, sx * (w / 2 + 0.07), 0.07, 0.032, r5)
         led_bar(S, f, -0.12, h / 2 + 0.07, 12, r5, pitch=0.02, cls_on=5)
+rg2 = random.Random(77)
+for px_ in (836 - 520, 836 + 520, 836 - 250, 836 + 250):
+    gf = Frame(on_dash(px_, 905), (0, -1, 0), DASH_N)
+    greeble_patch(S, gf, 0, 0, 0.3, 0.14, 40, rg2, hmax=0.03, palette=(0, 1, 0, 0, 10))
 for sd in (1, -1):
     for k in range(3):
         fk = Frame(on_dash(836 - sd * (360 + 60 * k), 860), (0, -1, 0), DASH_N)
