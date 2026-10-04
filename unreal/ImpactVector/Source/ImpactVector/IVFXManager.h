@@ -100,6 +100,7 @@ private:
 	TArray<int32> FamilyFirst, FamilyCount;
 	TArray<FIVChunk> Chunks;
 	float GroundZ = 0.f;
+	float MistAcc = 0.f;
 	TWeakObjectPtr<class AIVDistrict> Dist;
 	static constexpr int32 MaxChunks = 420;
 	void TickChunks(float Dt);

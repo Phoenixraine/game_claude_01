@@ -43,7 +43,7 @@ AIVEnvironment::AIVEnvironment()
 	Moon = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("Moon"));
 	Moon->SetupAttachment(Root);
 	Moon->SetRelativeRotation(FRotator(-38.f, 140.f, 0.f));
-	Moon->SetIntensity(4.f);
+	Moon->SetIntensity(2.6f);
 	Moon->SetLightColor(FLinearColor(0.55f, 0.66f, 1.0f).ToFColor(true));
 	Moon->SetMobility(EComponentMobility::Movable);
 	Moon->SetCastShadows(true);
@@ -57,7 +57,7 @@ AIVEnvironment::AIVEnvironment()
 	SkyLight->SetupAttachment(Root);
 	SkyLight->SetMobility(EComponentMobility::Movable);
 	SkyLight->bRealTimeCapture = true;
-	SkyLight->SetIntensity(1.6f);
+	SkyLight->SetIntensity(0.8f);
 
 	Fog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("Fog"));
 	Fog->SetupAttachment(Root);
@@ -65,9 +65,13 @@ AIVEnvironment::AIVEnvironment()
 	Fog->SetFogHeightFalloff(0.012f);
 	Fog->SetVolumetricFog(true);
 	Fog->SetVolumetricFogDistance(30000.f);
-	Fog->SetFogInscatteringColor(FLinearColor(0.13f, 0.12f, 0.22f));
+	Fog->SetFogInscatteringColor(FLinearColor(0.07f, 0.06f, 0.13f));
 	Fog->SkyAtmosphereAmbientContributionColorScale = FLinearColor(0.12f, 0.16f, 0.26f);
 	Fog->SetFogMaxOpacity(1.f);
+	// a second, low and dense layer: ground mist that lets the street surface read as soft shapes and catches the neon
+	Fog->SecondFogData.FogDensity = 0.05f;
+	Fog->SecondFogData.FogHeightFalloff = 0.05f;
+	Fog->SecondFogData.FogHeightOffset = -400.f;
 	Fog->SetStartDistance(0.f);
 
 	Clouds = CreateDefaultSubobject<UVolumetricCloudComponent>(TEXT("Clouds"));
@@ -81,8 +85,8 @@ AIVEnvironment::AIVEnvironment()
 	FPostProcessSettings& S = PostProcess->Settings;
 	S.bOverride_AutoExposureMethod = true;
 	S.AutoExposureMethod = EAutoExposureMethod::AEM_Histogram;
-	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 1.6f;
-	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 1.6f;
+	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 1.25f;
+	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 1.25f;
 	S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.4f;
 	S.bOverride_BloomIntensity = true; S.BloomIntensity = 0.8f;
 	S.bOverride_VignetteIntensity = true; S.VignetteIntensity = 0.45f;

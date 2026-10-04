@@ -41,7 +41,7 @@ void AIVRain::BeginPlay()
 	for (int32 i = 0; i < Count; ++i)
 	{
 		const FVector P(R.FRandRange(-BoxXY * 0.5f, BoxXY * 0.5f), R.FRandRange(-BoxXY * 0.5f, BoxXY * 0.5f), R.FRandRange(-BoxZ * 0.5f, BoxZ * 0.5f));
-		const float L = R.FRandRange(4.0f, 7.0f), W = R.FRandRange(0.06f, 0.12f);
+		const float L = R.FRandRange(4.0f, 7.0f), W = R.FRandRange(0.035f, 0.07f);
 		T.Add(FTransform(Tilt, P, FVector(W, W, L)));
 	}
 	ISM->AddInstances(T, false);

@@ -137,18 +137,25 @@ def place_tower_belt():
             cy = y + d / 2
             if not overlaps_free(cx, cy, w, d):
                 b = tower(cx, cy, w, d, h, 180 if side > 0 else 0)
-                # mega sign on the inner face
-                if R.random() < 0.8:
-                    face = 180.0 if side > 0 else 0.0
-                    fx = cx - side * (w / 2 + 0.3)
-                    sw = R.uniform(18, 36) if R.random() < 0.6 else R.uniform(8, 14)
-                    sh = R.uniform(40, min(150, h * 0.8)) if sw < 15 else R.uniform(22, 50)
+                # HUGE signs on the inner face: building-sized billboards and towering vertical banners, several per tower
+                face = 180.0 if side > 0 else 0.0
+                fx = cx - side * (w / 2 + 0.3)
+                kinds = R.choice([("billboard", 0), ("banner", 1), ("billboard", 0)])
+                z_prev = 0
+                for k in range(R.choice([1, 2, 2, 3])):
+                    if k == 0 and R.random() < 0.55:
+                        sw = min(R.uniform(34, 62), d * 0.95)
+                        sh = R.uniform(46, min(150, h * 0.7))
+                        style = "billboard"
+                    else:
+                        sw = R.uniform(9, 16)
+                        sh = R.uniform(60, min(190, h * 0.85))
+                        style = "banner"
                     sz = R.uniform(sh / 2 + 12, max(sh / 2 + 14, h - sh / 2 - 6))
-                    style = "banner" if sw < 15 else R.choice(["billboard", "banner", "billboard"])
-                    add_sign((fx, cy + R.uniform(-d / 4, d / 4), sz), face, sw if style != "banner" else min(sw, 12), sh, style, pal(), anim=R.choice([0, 1, 2]), seed=R.randrange(10000))
-                    # a second, smaller sign lower down
-                    if R.random() < 0.7:
-                        add_sign((fx, cy + R.uniform(-d / 3, d / 3), R.uniform(14, 40)), face, R.uniform(6, 18), R.uniform(10, 28), "banner", pal(), anim=1)
+                    off = R.uniform(-d / 3, d / 3)
+                    add_sign((fx - side * 0.2 * k, cy + off, sz), face, sw if style != "banner" else min(sw, 14), sh, style, pal(), anim=R.choice([0, 1, 2]), seed=R.randrange(10000))
+                if R.random() < 0.7:
+                    add_sign((fx, cy + R.uniform(-d / 3, d / 3), R.uniform(14, 40)), face, R.uniform(6, 18), R.uniform(10, 28), "banner", pal(), anim=1)
             y += d + R.uniform(2, 8)
     # south end: wall of towers beyond the scramble avenue, facing north
     x = -330.0

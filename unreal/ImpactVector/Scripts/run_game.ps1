@@ -1,7 +1,7 @@
 param([string]$GameArgs = "", [int]$TimeoutSec = 400, [string]$Cvars = "")
 $ue='E:\epic games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe'
 Remove-Item 'F:\IVUnreal\Saved\Screenshots' -Recurse -Force -ErrorAction SilentlyContinue
-$a = @('F:\IVUnreal\ImpactVector.uproject','-game','-windowed','-ResX=1600','-ResY=900','-log','-nosplash','-unattended') + ($GameArgs -split ' ' | ? { $_ })
+$a = @('F:\IVUnreal\ImpactVector.uproject','-game','-windowed','-ResX=1600','-ResY=900','-WinX=3480','-WinY=60','-log','-nosplash','-unattended') + ($GameArgs -split ' ' | ? { $_ })
 if ($Cvars) { $a += ('-ExecCmds="' + $Cvars + '"') }
 $p = Start-Process -FilePath $ue -ArgumentList $a -PassThru
 if (-not $p.WaitForExit($TimeoutSec * 1000)) { $p.Kill(); "killed (timeout)" }

@@ -332,9 +332,9 @@ float edge = saturate((conv - 0.7) * 5.0) * saturate(0.35 + 1.3 * n) * Wear;
 float s = frac((P.x * 0.45 + P.z * 0.55) * 0.23 + n * 0.5);
 float band = smoothstep(0.80, 0.83, s) * smoothstep(0.96, 0.93, s) * smoothstep(0.35, 0.55, n) * AccAmt;
 float soot = smoothstep(1.0 - Damage * 0.95, 1.0, n * 1.25 + 0.15 * (1.0 - ao));
-float3 paint = Tint * 2.1 * (0.7 + 0.7 * n) * (1.0 - 0.45 * pl);
+float3 paint = Tint * 1.5 * (0.7 + 0.7 * n) * (1.0 - 0.45 * pl);
 paint = lerp(paint, Accent * (0.6 + 0.8 * fine), band);
-float3 metal = float3(0.52, 0.5, 0.48) * (0.8 + 0.3 * fine);
+float3 metal = float3(0.3, 0.29, 0.28) * (0.8 + 0.3 * fine);
 float3 col = lerp(paint, metal, edge);
 col *= lerp(0.4, 1.0, ao);
 col = lerp(col, float3(0.012, 0.011, 0.01), soot);
@@ -346,7 +346,7 @@ col = lerp(col, float3(0.012, 0.011, 0.01), soot);
     rough = custom(m, common + "return clamp(lerp(0.34, 0.2, edge) + 0.16 * pl + 0.3 * soot + 0.1 * (n - 0.4), 0.14, 0.9);", t.CMOT_FLOAT1, names, -900, 300, "hull_rough")
     wire_custom(rough, srcs)
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
-    met = custom(m, common + "return saturate(0.62 + 0.38 * edge) * (1.0 - soot * 0.9) * (1.0 - 0.35 * band);", t.CMOT_FLOAT1, names, -900, 600, "hull_metal")
+    met = custom(m, common + "return saturate(0.55 + 0.4 * edge) * (1.0 - soot * 0.9) * (1.0 - 0.35 * band);", t.CMOT_FLOAT1, names, -900, 600, "hull_metal")
     wire_custom(met, srcs)
     MEL.connect_material_property(met, "", unreal.MaterialProperty.MP_METALLIC)
     camv = expr(m, unreal.MaterialExpressionCameraVectorWS, -1500, 1200)
@@ -409,7 +409,7 @@ float3 newP = Cam + R;
     wpo = custom(m, code_pos + "return newP - P0;", t.CMOT_FLOAT3, names, -900, 0, "rain_wpo")
     wire_custom(wpo, srcs)
     MEL.connect_material_property(wpo, "", unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
-    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(350.0, 2200.0, d) * (1.0 - smoothstep(6500.0, 10000.0, d)); float tw = 0.65 + 0.35 * frac(sin(dot(P0.xy, float2(12.9, 78.2))) * 43758.5); return 0.55 * fade * tw;",
+    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(350.0, 2200.0, d) * (1.0 - smoothstep(6500.0, 10000.0, d)); float tw = 0.65 + 0.35 * frac(sin(dot(P0.xy, float2(12.9, 78.2))) * 43758.5); return 0.42 * fade * tw;",
                 t.CMOT_FLOAT1, names, -900, 300, "rain_opacity")
     wire_custom(op, srcs)
     MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
@@ -497,11 +497,23 @@ dark = lerp(dark, float3(0.2, 0.18, 0.15), wear * 0.55);
 float3 grey = lerp(float3(0.085, 0.08, 0.075) * (0.7 + 0.6 * n), float3(0.26, 0.24, 0.21), wear);
 float3 org = lerp(float3(0.1, 0.045, 0.015) * (0.75 + 0.5 * n), float3(0.09, 0.07, 0.055), smoothstep(0.7, 0.85, n));
 float3 rub = float3(0.010, 0.010, 0.012) * (0.7 + 0.6 * fine);
-float3 suit = float3(0.13, 0.15, 0.2) * weave * (0.8 + 0.5 * n);
-float3 arm = lerp(float3(0.24, 0.26, 0.3) * (0.8 + 0.5 * n), float3(0.42, 0.42, 0.43), wear);
+float3 suit = float3(0.045, 0.05, 0.06) * weave * (0.8 + 0.5 * n);
+float3 arm = lerp(float3(0.07, 0.072, 0.08) * (0.8 + 0.5 * n), float3(0.16, 0.155, 0.15), wear);
 float3 col = dark * c0 + grey * c1 + org * c2 + rub * c3 + float3(0.005, 0.01, 0.012) * c4 + float3(0.02, 0.01, 0.005) * c5 + float3(0.0, 0.0, 0.0) * c6 + float3(0.02, 0.0, 0.0) * c7
     + lerp(float3(0.012, 0.012, 0.012), float3(0.3, 0.22, 0.0), haz) * c8 + float3(0.03, 0.03, 0.03) * c9 + float3(0.5, 0.5, 0.52) * c10 + float3(0.004, 0.02, 0.006) * c11
     + suit * c12 + arm * c13 + float3(0.01, 0.03, 0.04) * c14;
+float3 gcell = frac(P / 0.23 + float3(0.31, 0.17, 0.53));
+float3 gd = min(gcell, 1.0 - gcell) * 0.23;
+float seamD = min(min(gd.x, gd.y), gd.z);
+float seam = (1.0 - smoothstep(0.0, 0.006, seamD)) * (c0 + c1);
+float seam2 = (1.0 - smoothstep(0.0, 0.0025, abs(seamD - 0.02))) * (c0 + c1) * 0.5;
+float3 cellId = floor(P / 0.23 + float3(0.31, 0.17, 0.53));
+float cellH = frac(sin(dot(cellId, float3(12.9898, 78.233, 37.719))) * 43758.5453);
+col *= 1.0 - 0.7 * seam;
+col *= 1.0 - 0.25 * seam2;
+col *= lerp(1.0, 0.78 + 0.44 * cellH, saturate(c0 + c1));
+float rivet = (1.0 - smoothstep(0.004, 0.009, length(frac(P / 0.115) - 0.5) * 0.115)) * (c0 + c1) * step(seamD, 0.03);
+col += rivet * float3(0.1, 0.09, 0.08);
 col *= (1.0 - 0.35 * streak * Wet);
 col = lerp(col, col * 0.3, Damage * smoothstep(0.5, 0.9, n));
 return col;
@@ -1014,7 +1026,7 @@ def build_glass_tower():
     b = _cd(m, 2, 0.3, -1500, 720)
     sd = _cd(m, 3, 0.0, -1500, 840)
     lit = scalar(m, "LitAmount", 1.0, -1500, 960)
-    bright = scalar(m, "Bright", 1.0, -1500, 1080)
+    bright = scalar(m, "Bright", 0.3, -1500, 1080)
     names = ["WP", "Nrm", "Cam", "T", "R", "G", "B", "Seed", "Lit", "Bright"]
     srcs = [(wp, ""), (nrm, ""), (cam, ""), (tm, ""), (r, ""), (g, ""), (b, ""), (sd, ""), (lit, ""), (bright, "")]
     common = HASH_FN + """
@@ -1056,7 +1068,7 @@ float cc = h21(id + Seed);
 float lit1 = step(0.88, hs) + step(0.74, hf) * step(0.3, hs) * 0.75;
 float on = saturate(lit1) * glassM * Lit;
 float3 warm = (cc < 0.6) ? float3(1.0, 0.78, 0.5) : ((cc < 0.9) ? float3(0.7, 0.86, 1.0) : float3(1.0, 0.4, 0.8));
-float3 e = warm * on * (1.2 + 1.8 * hs);
+float3 e = warm * on * (0.9 + 1.4 * hs);
 // faked sky/city reflection: the glass glows in its own tint, brighter near the horizon and at grazing angles
 float hgt = saturate(WP.z / 22000.0);
 float streak = 0.5 + 0.5 * sin(hRaw / 1900.0 + Seed * 30.0 + WP.z / 9000.0);
@@ -1064,7 +1076,7 @@ streak = pow(streak, 5.0);
 e += tint * glassM * (0.9 + 2.6 * fres) * (0.3 + 0.7 * hgt) * Bright * 2.0;
 e += lerp(tint, float3(1.0, 0.5, 0.9), 0.5) * glassM * streak * 1.6 * Bright;
 float3 street = lerp(float3(1.0, 0.25, 0.6), float3(0.1, 0.8, 1.0), h11(Seed * 3.3 + floor(WP.z / 1200.0) * 0.07));
-e += street * glassM * (1.0 - saturate(WP.z / 6000.0)) * 1.1 * (1.0 - roof);
+e += street * glassM * (1.0 - saturate(WP.z / 6000.0)) * 0.6 * (1.0 - roof);
 e *= 0.93 + 0.07 * sin(T * 0.7 + hs * 20.0);
 return e;
 """, t.CMOT_FLOAT3, names, -900, 1000, "gt_emissive")

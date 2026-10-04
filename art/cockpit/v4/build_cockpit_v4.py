@@ -522,7 +522,7 @@ for k, (ax_, ay_) in enumerate(slots):
     S.cyl(Vector((ax_, ay_, ceil_z - 0.02)), Vector((ax_, ay_, ceil_z - 0.1)), 0.03, cls=10, seg=8)
 
 # ---------------------------------------------------------------------------------------------- lamps (low-key: mostly dark, small accents)
-add_lamp("dash_cyan", (0.85, 0.0, -0.45), [0.2, 0.7, 1.0], 1.6, 1.8)
+add_lamp("dash_cyan", (0.45, 0.0, -0.1), [0.2, 0.7, 1.0], 1.6, 1.8)
 add_lamp("left_amber", (0.55, 0.9, -0.35), [1.0, 0.5, 0.14], 1.0, 1.6)
 add_lamp("right_amber", (0.55, -0.9, -0.35), [1.0, 0.5, 0.14], 1.0, 1.6)
 add_lamp("ceiling_cool", (0.2, 0.0, 0.45), [0.6, 0.75, 1.0], 1.0, 2.4)

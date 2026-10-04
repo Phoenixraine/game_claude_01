@@ -502,7 +502,7 @@ bool AIVHUD::DrawBoarding(AIVCombatDirector* Dir, float Sx)
 		if (Dir->GetDuel() && !Dir->IsMatchOver())
 		{
 			const float R = Dir->GetBoardingCooldown01();
-			Text(R >= 0.999f ? TEXT("J — ВЫЙТИ ИЗ КАБИНЫ (АБОРДАЖ)") : FString::Printf(TEXT("АБОРДАЖ: ПЕРЕЗАРЯДКА %d%%"), int32(R * 100.f)), CX, H - 128.f * Sx, A(R >= 0.999f ? kGreen : kWhite, R >= 0.999f ? 0.55f + 0.3f * Pulse(1.5f) : 0.35f), 0.7f * Sx, 0, 1);
+			Text(R >= 0.999f ? TEXT("J — ВЫЙТИ ИЗ КАБИНЫ (АБОРДАЖ)") : FString::Printf(TEXT("АБОРДАЖ: ПЕРЕЗАРЯДКА %d%%"), int32(R * 100.f)), CX, H - 16.f * Sx, A(R >= 0.999f ? kGreen : kWhite, R >= 0.999f ? 0.55f + 0.3f * Pulse(1.5f) : 0.35f), 0.7f * Sx, 0, 1);
 		}
 		return false;
 	}

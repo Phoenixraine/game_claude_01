@@ -34,6 +34,9 @@ static TAutoConsoleVariable<float> CVarIVCamDist(TEXT("iv.CamDist"), 16000.f, TE
 
 static TAutoConsoleVariable<FString> CVarIVFreeCam(TEXT("iv.FreeCam"), TEXT("0 0 0 0 0"), TEXT("Free camera for iv.Cam=6: x y z (m, district frame y=forward) pitch yaw(ue)"), ECVF_Default);
 
+// centre-to-centre distance limits between the two giants (cm)
+static constexpr float kMinSeparation = 5000.f, kSlowSeparation = 7000.f;
+
 int32 GetIVCam() { return CVarIVCam.GetValueOnGameThread(); }
 float GetIVCamDist() { return CVarIVCamDist.GetValueOnGameThread(); }
 
@@ -433,12 +436,42 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 		SpeedFactor = Align >= 0.f ? FMath::Lerp(0.45f, 1.f, Align) : 0.45f;
 	}
 	const float MaxSpeed = WalkSpeed * (bSprint ? SprintMultiplier : 1.f) * SpeedFactor;
-	const FVector Desired = Wish.GetClampedToMaxSize2D(1.f) * MaxSpeed;
+	FVector Desired = Wish.GetClampedToMaxSize2D(1.f) * MaxSpeed;
+	// the two giants never close inside 50 m (centre to centre): from 70 m every step towards the opponent costs more and more effort,
+	// at 50 m the approach stops dead (no stepping animation either). Walking away is always free.
+	FVector ToOther = FVector::ZeroVector;
+	float OtherDist = 1e9f;
+	{
+		if (!OtherMechCache.IsValid()) for (TActorIterator<AIVMechPawn> It(GetWorld()); It; ++It) if (*It != this) { OtherMechCache = *It; break; }
+		if (AIVMechPawn* Om = OtherMechCache.Get())
+		{
+			ToOther = Om->GetActorLocation() - GetActorLocation(); ToOther.Z = 0.f;
+			OtherDist = ToOther.Size();
+			ToOther = ToOther.GetSafeNormal();
+			const float Appr = FVector::DotProduct(Desired, ToOther);
+			if (Appr > 0.f)
+			{
+				const float F = FMath::Clamp((OtherDist - kMinSeparation) / (kSlowSeparation - kMinSeparation), 0.f, 1.f);
+				const float Eff = F * F * (3.f - 2.f * F);                      // 0 at 50 m .. 1 at 70 m
+				Desired -= ToOther * Appr * (1.f - FMath::Lerp(0.f, 1.f, Eff) * FMath::Lerp(0.55f, 1.f, Eff));
+			}
+		}
+	}
 	const FVector Delta = Desired - Velocity;
 	const float Rate = (Mag > 0.05f) ? Acceleration : Deceleration;
 	const float Step = Rate * Dt;
 	Velocity += (Delta.Size2D() <= Step) ? Delta : Delta.GetSafeNormal2D() * Step;
 	Velocity.Z = 0;
+	if (OtherDist < kSlowSeparation)
+	{
+		const float Vt = FVector::DotProduct(Velocity, ToOther);
+		if (Vt > 0.f)
+		{
+			const float F = FMath::Clamp((OtherDist - kMinSeparation) / (kSlowSeparation - kMinSeparation), 0.f, 1.f);
+			Velocity -= ToOther * Vt * (1.f - F);
+		}
+		if (OtherDist < kMinSeparation) Velocity -= ToOther * FMath::Min(0.f, -FVector::DotProduct(Velocity, -ToOther)) ;
+	}
 
 	SetActorRotation(FRotator(0, NewLegsYaw, 0));
 	if (!Velocity.IsNearlyZero())
@@ -469,6 +502,7 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 		}
 	}
 
+	if (OtherDist < kMinSeparation - 20.f && !bCine) AddActorWorldOffset(-ToOther * (kMinSeparation - OtherDist) * FMath::Min(1.f, Dt * 5.f), false);
 	FHitResult G;
 	FCollisionQueryParams Q(SCENE_QUERY_STAT(IVGround), false, this);
 	const FVector P = GetActorLocation();

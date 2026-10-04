@@ -274,6 +274,30 @@ void AIVFXManager::Tick(float Dt)
 	Super::Tick(Dt);
 	Dt = FMath::Min(Dt, 0.05f);
 	TickChunks(Dt);
+	{	// ground mist drifting along the street around the camera
+		MistAcc += Dt;
+		if (MistAcc > 0.18f && Puffs.Num() < MaxPuffs - 150)
+		{
+			MistAcc = 0.f;
+			APlayerCameraManager* PCM = UGameplayStatics::GetPlayerCameraManager(this, 0);
+			if (PCM)
+			{
+				const FVector C = PCM->GetCameraLocation();
+				FIVPuff P;
+				P.Dark = 0.3f;
+				const float A = Rng.FRandRange(0.f, 6.283f), Rr = Rng.FRandRange(10000.f, 32000.f);
+				P.Pos = FVector(C.X + FMath::Cos(A) * Rr, C.Y + FMath::Sin(A) * Rr, Rng.FRandRange(150.f, 700.f));
+				P.Vel = FVector(Rng.FRandRange(-260.f, 260.f), Rng.FRandRange(-260.f, 260.f), 0.f);
+				P.Life = Rng.FRandRange(14.f, 24.f);
+				P.Size0 = Rng.FRandRange(5000.f, 9000.f);
+				P.Size1 = P.Size0 * Rng.FRandRange(1.6f, 2.4f);
+				P.Roll = Rng.FRandRange(0.f, 360.f);
+				P.RollRate = Rng.FRandRange(-1.5f, 1.5f);
+				P.Drag = 0.3f; P.Rise = 0.f; P.Opacity = 0.16f; P.Seed = Rng.FRand();
+				Puffs.Add(P);
+			}
+		}
+	}
 
 	FVector CamPos = FVector::ZeroVector;
 	if (APlayerCameraManager* Cam = UGameplayStatics::GetPlayerCameraManager(this, 0)) CamPos = Cam->GetCameraLocation();
