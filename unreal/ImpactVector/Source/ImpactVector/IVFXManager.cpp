@@ -8,6 +8,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/PointLightComponent.h"
+#include "IVDistrict.h"
 
 AIVFXManager::AIVFXManager()
 {
@@ -73,6 +74,166 @@ AIVFXManager* AIVFXManager::Get(UWorld* World)
 	return World->SpawnActor<AIVFXManager>(FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
+void AIVFXManager::BeginPlay()
+{
+	Super::BeginPlay();
+	struct FFam { const TCHAR* Prefix; int32 First; int32 Num; };
+	static const FFam Fams[int32(EIVChunk::Count)] = {
+		{ TEXT("Shard_Concrete_M_"), 0, 6 }, { TEXT("Slab_Concrete_"), 0, 4 }, { TEXT("Glass_Shard_"), 0, 8 },
+		{ TEXT("Steel_Plate_Bent_"), 0, 4 }, { TEXT("Steel_Plate_Bent_"), 4, 4 }, { TEXT("Pebble_"), 0, 6 } };
+	UMaterialInterface* Mat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Chunk.M_Chunk"));
+	for (int32 F = 0; F < int32(EIVChunk::Count); ++F)
+	{
+		FamilyFirst.Add(ChunkISM.Num());
+		int32 Got = 0;
+		for (int32 k = 0; k < Fams[F].Num; ++k)
+		{
+			const FString Name = FString::Printf(TEXT("%s%02d"), Fams[F].Prefix, Fams[F].First + k);
+			UStaticMesh* M = LoadObject<UStaticMesh>(nullptr, *FString::Printf(TEXT("/Game/Shards/%s.%s"), *Name, *Name));
+			if (!M) continue;
+			UInstancedStaticMeshComponent* I = NewObject<UInstancedStaticMeshComponent>(this);
+			I->SetStaticMesh(M);
+			I->SetupAttachment(RootComponent);
+			I->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			I->SetCastShadow(true);
+			I->NumCustomDataFloats = 3;
+			I->SetCullDistances(0, 0);
+			I->bUseAsOccluder = false;
+			I->SetCanEverAffectNavigation(false);
+			if (Mat) for (int32 s = 0; s < M->GetStaticMaterials().Num(); ++s) I->SetMaterial(s, Mat);
+			I->RegisterComponent();
+			ChunkISM.Add(I);
+			ChunkRadius.Add(M->GetBounds().SphereRadius);
+			++Got;
+		}
+		FamilyCount.Add(Got);
+	}
+	UE_LOG(LogTemp, Display, TEXT("IV chunks: %d meshes"), ChunkISM.Num());
+}
+
+void AIVFXManager::SpawnChunks(const FVector& Center, const FVector& Dir, int32 Count, EIVChunk Family, float Scale, float Speed, float Heat, float Spread)
+{
+	const int32 F = int32(Family);
+	if (!FamilyCount.IsValidIndex(F) || FamilyCount[F] == 0) return;
+	static const float KindOf[int32(EIVChunk::Count)] = { 0.f, 0.f, 2.f, 1.f, 3.f, 0.f };
+	const FVector D0 = Dir.GetSafeNormal();
+	for (int32 i = 0; i < Count && Chunks.Num() < MaxChunks; ++i)
+	{
+		FIVChunk C;
+		C.Slot = FamilyFirst[F] + Rng.RandRange(0, FamilyCount[F] - 1);
+		C.Kind = KindOf[F];
+		C.Scale = Scale * 2.6f * Rng.FRandRange(0.6f, 1.5f);
+		C.Radius = ChunkRadius[C.Slot] * C.Scale;
+		const FVector D = (D0 + Rng.VRand() * Spread).GetSafeNormal();
+		C.Pos = Center + Rng.VRand() * C.Radius * 1.5f;
+		C.Vel = D * Speed * Rng.FRandRange(0.35f, 1.f) + FVector(0, 0, Speed * 0.25f);
+		C.AngVel = Rng.VRand() * Rng.FRandRange(2.f, 9.f);
+		C.Rot = FQuat(Rng.VRand(), Rng.FRandRange(0.f, 6.28f));
+		C.Life = Rng.FRandRange(7.f, 13.f);
+		C.Heat = Heat * Rng.FRandRange(0.6f, 1.f);
+		C.Seed = Rng.FRand();
+		Chunks.Add(C);
+	}
+}
+
+void AIVFXManager::TickChunks(float Dt)
+{
+	if (ChunkISM.Num() == 0) return;
+	if (!Dist.IsValid()) for (TActorIterator<AIVDistrict> It(GetWorld()); It; ++It) { Dist = *It; break; }
+	for (int32 i = Chunks.Num() - 1; i >= 0; --i)
+	{
+		FIVChunk& C = Chunks[i];
+		C.Age += Dt;
+		if (C.Age >= C.Life) { Chunks.RemoveAtSwap(i); continue; }
+		C.Heat = FMath::Max(0.f, C.Heat - Dt * (C.bRest ? 0.18f : 0.1f));
+		if (C.bRest) continue;
+		C.Vel.Z -= 1900.f * Dt;
+		C.Vel *= FMath::Exp(-0.12f * Dt);
+		C.Pos += C.Vel * Dt;
+		const FQuat Dq = FQuat(C.AngVel.GetSafeNormal(), C.AngVel.Size() * Dt);
+		C.Rot = (Dq * C.Rot).GetNormalized();
+		const float G = (Dist.IsValid() ? Dist->SampleHeightCm(C.Pos.X, C.Pos.Y) : GroundZ) + C.Radius * 0.35f;
+		if (C.Pos.Z < G)
+		{
+			C.Pos.Z = G;
+			if (FMath::Abs(C.Vel.Z) < 260.f && C.Vel.Size2D() < 500.f) { C.bRest = true; C.Vel = FVector::ZeroVector; }
+			else
+			{
+				C.Vel.Z = FMath::Abs(C.Vel.Z) * 0.32f;
+				C.Vel.X *= 0.62f; C.Vel.Y *= 0.62f;
+				C.AngVel *= 0.55f;
+				if (C.Vel.Z > 700.f && C.Scale > 1.5f && Rng.FRand() < 0.3f) SpawnDust(C.Pos, C.Radius, 1, 0.3f);
+			}
+		}
+		if (C.Heat > 0.35f)
+		{
+			C.FlameAcc += Dt;
+			if (C.FlameAcc > 0.07f)
+			{
+				C.FlameAcc = 0.f;
+				FIVFlame F;
+				F.Pos = C.Pos; F.Vel = FVector(0, 0, 250.f) + Rng.VRand() * 150.f;
+				F.Life = Rng.FRandRange(0.4f, 0.8f);
+				F.Size0 = C.Radius * 0.8f; F.Size1 = C.Radius * 1.6f;
+				F.Roll = Rng.FRandRange(0.f, 360.f); F.Rise = 500.f; F.Heat = C.Heat; F.Seed = Rng.FRand();
+				if (Flames.Num() < MaxFlames) Flames.Add(F);
+				if (Rng.FRand() < 0.35f && Puffs.Num() < MaxPuffs)
+				{
+					FIVPuff P;
+					P.Dark = 0.8f; P.Pos = C.Pos; P.Vel = FVector(0, 0, 200.f) + Rng.VRand() * 100.f;
+					P.Life = Rng.FRandRange(2.5f, 4.5f); P.Size0 = C.Radius * 1.2f; P.Size1 = C.Radius * 4.f;
+					P.Roll = Rng.FRandRange(0.f, 360.f); P.RollRate = Rng.FRandRange(-8.f, 8.f); P.Drag = 0.6f; P.Rise = 140.f; P.Opacity = 0.6f; P.Seed = Rng.FRand();
+					Puffs.Add(P);
+				}
+			}
+		}
+	}
+	{
+		static float LogT = 0.f;
+		LogT += Dt;
+		if (Chunks.Num() > 0 && LogT > 1.5f)
+		{
+			LogT = 0.f;
+			int32 Inst = 0;
+			for (UInstancedStaticMeshComponent* I : ChunkISM) Inst += I->GetInstanceCount();
+			UE_LOG(LogTemp, Display, TEXT("IV chunks live %d instances %d first(%s) pos %s scale %.1f"), Chunks.Num(), Inst, *GetNameSafe(ChunkISM[Chunks[0].Slot]->GetStaticMesh()), *Chunks[0].Pos.ToString(), Chunks[0].Scale);
+		}
+	}
+	// instances per mesh slot
+	static TArray<TArray<int32>> BySlot;
+	BySlot.SetNum(ChunkISM.Num());
+	for (TArray<int32>& B : BySlot) B.Reset();
+	for (int32 i = 0; i < Chunks.Num(); ++i) BySlot[Chunks[i].Slot].Add(i);
+	for (int32 S = 0; S < ChunkISM.Num(); ++S)
+	{
+		UInstancedStaticMeshComponent* I = ChunkISM[S];
+		const TArray<int32>& L = BySlot[S];
+		if (L.Num() == 0 && I->GetInstanceCount() == 0) continue;
+		TArray<FTransform> T;
+		T.Reserve(L.Num());
+		for (int32 k : L)
+		{
+			const FIVChunk& C = Chunks[k];
+			const float Fade = FMath::Clamp((C.Life - C.Age) / 1.5f, 0.f, 1.f);
+			T.Add(FTransform(C.Rot, C.Pos, FVector(C.Scale * Fade)));
+		}
+		if (I->GetInstanceCount() != T.Num())
+		{
+			I->ClearInstances();
+			I->NumCustomDataFloats = 3;
+			if (T.Num() > 0) I->AddInstances(T, false, true);
+		}
+		else if (T.Num() > 0) I->BatchUpdateInstancesTransforms(0, T, true, true, true);
+		for (int32 n = 0; n < L.Num(); ++n)
+		{
+			const FIVChunk& C = Chunks[L[n]];
+			I->SetCustomDataValue(n, 0, C.Heat, false);
+			I->SetCustomDataValue(n, 1, C.Kind, false);
+			I->SetCustomDataValue(n, 2, C.Seed, n == L.Num() - 1);
+		}
+	}
+}
+
 void AIVFXManager::SpawnDust(const FVector& Center, float Radius, int32 Count, float Strength)
 {
 	for (int32 i = 0; i < Count && Puffs.Num() < MaxPuffs; ++i)
@@ -112,6 +273,7 @@ void AIVFXManager::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	Dt = FMath::Min(Dt, 0.05f);
+	TickChunks(Dt);
 
 	FVector CamPos = FVector::ZeroVector;
 	if (APlayerCameraManager* Cam = UGameplayStatics::GetPlayerCameraManager(this, 0)) CamPos = Cam->GetCameraLocation();

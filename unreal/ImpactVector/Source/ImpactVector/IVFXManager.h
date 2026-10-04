@@ -43,6 +43,20 @@ struct FIVSpark
 	float Len = 80.f;
 };
 
+/** Debris families from the shard library (art/shards). */
+enum class EIVChunk : uint8 { Concrete, Slab, Glass, Steel, Armor, Gravel, Count };
+
+struct FIVChunk
+{
+	int32 Slot = 0;                  // index into ChunkISM
+	float Kind = 0.f;                // material kind: 0 concrete, 1 steel, 2 glass, 3 armour
+	FVector Pos = FVector::ZeroVector, Vel = FVector::ZeroVector, AngVel = FVector::ZeroVector;
+	FQuat Rot = FQuat::Identity;
+	float Scale = 1.f, Radius = 50.f;
+	float Age = 0.f, Life = 10.f, Heat = 0.f, Seed = 0.f, FlameAcc = 0.f;
+	bool bRest = false;
+};
+
 UCLASS()
 class IMPACTVECTOR_API AIVFXManager : public AActor
 {
@@ -51,6 +65,7 @@ class IMPACTVECTOR_API AIVFXManager : public AActor
 public:
 	AIVFXManager();
 	virtual void Tick(float Dt) override;
+	virtual void BeginPlay() override;
 
 	static AIVFXManager* Get(UWorld* World);
 
@@ -65,6 +80,8 @@ public:
 	void SpawnJet(const FVector& Pos, const FVector& Dir, int32 Count, float Speed, float Size);
 	/** Fireball + smoke + sparks + light flash. Scale 1 = a limb breaking, 3 = a mech blowing up. */
 	void SpawnExplosion(const FVector& Center, float Scale = 1.f);
+	/** Flying debris from the shard library. Dir = main direction of the spray; Heat > 0 makes the pieces glow and burn while they fly. */
+	void SpawnChunks(const FVector& Center, const FVector& Dir, int32 Count, EIVChunk Family, float Scale, float Speed, float Heat = 0.f, float Spread = 0.8f);
 	/** Short light flash (clashes, muzzle, lightning-like). */
 	void SpawnFlash(const FVector& Center, const FLinearColor& Color, float Candela, float Seconds, float Radius = 9000.f);
 
@@ -78,6 +95,14 @@ private:
 	static constexpr int32 MaxFlames = 500;
 	TArray<FIVPuff> Puffs;
 	TArray<FIVSpark> Sparks;
+	UPROPERTY() TArray<TObjectPtr<UInstancedStaticMeshComponent>> ChunkISM;
+	TArray<float> ChunkRadius;
+	TArray<int32> FamilyFirst, FamilyCount;
+	TArray<FIVChunk> Chunks;
+	float GroundZ = 0.f;
+	TWeakObjectPtr<class AIVDistrict> Dist;
+	static constexpr int32 MaxChunks = 420;
+	void TickChunks(float Dt);
 	FRandomStream Rng{4711};
 	static constexpr int32 MaxPuffs = 900;
 	static constexpr int32 MaxSparks = 600;

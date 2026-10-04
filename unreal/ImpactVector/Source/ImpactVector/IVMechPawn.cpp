@@ -1010,6 +1010,11 @@ void AIVMechPawn::OnCombatHit(iv::Zone Z, float Strength01, bool bBlocked, bool 
 		const float K = bParried ? 1.2f : (bBlocked ? 0.6f : 1.f);
 		FX->SpawnSparks(Loc, GetActorForwardVector() + FVector(0, 0, 0.3f), int32(10 + 55 * Strength01 * K), 3000.f + 4000.f * Strength01);
 		if (Strength01 > 0.35f && !bBlocked) FX->SpawnDust(Loc, 900.f + 1800.f * Strength01, int32(4 + 12 * Strength01), 0.5f + Strength01);
+		if (Strength01 > 0.3f && !bBlocked)
+		{
+			const FVector Out = GetActorForwardVector() * 0.6f + GetActorRightVector() * ZoneSide(Z) * 0.8f + FVector(0, 0, 0.7f);
+			FX->SpawnChunks(Loc, Out, 1 + int32(5.f * Strength01), EIVChunk::Armor, 2.4f + 1.6f * Strength01, 2600.f + 3600.f * Strength01, 0.5f + 0.5f * Strength01);
+		}
 	}
 	const float Side = ZoneSide(Z);
 	const float S = Strength01 * (bBlocked ? 0.55f : 1.f);
@@ -1041,6 +1046,15 @@ void AIVMechPawn::OnZoneState(iv::Zone Z, iv::ZoneState NewState, iv::ZoneState 
 	if (FX)
 	{
 		if (NewState >= iv::ZoneState::Damaged && OldState < iv::ZoneState::Damaged) FX->SpawnDust(Loc, 700.f, 6, 0.4f);
+		if (NewState >= iv::ZoneState::Damaged && OldState < iv::ZoneState::Damaged)
+			FX->SpawnChunks(Loc, GetActorForwardVector() * 0.5f + FVector(0, 0, 0.8f), 3, EIVChunk::Armor, 3.f, 3200.f, 0.6f);
+		if (NewState >= iv::ZoneState::Critical && OldState < iv::ZoneState::Critical)
+			FX->SpawnChunks(Loc, FVector(0, 0, 1.f), 7, EIVChunk::Armor, 3.6f, 4800.f, 1.f, 1.1f);
+		if (NewState >= iv::ZoneState::Destroyed && OldState < iv::ZoneState::Destroyed)
+		{
+			FX->SpawnChunks(Loc, FVector(0, 0, 1.f), 12, EIVChunk::Armor, 4.4f, 6200.f, 1.f, 1.3f);
+			FX->SpawnChunks(Loc, FVector(0, 0, 1.f), 6, EIVChunk::Steel, 3.f, 5200.f, 0.9f, 1.3f);
+		}
 		if (NewState >= iv::ZoneState::Critical && OldState < iv::ZoneState::Critical)
 		{
 			FX->SpawnExplosion(Loc, 0.9f);

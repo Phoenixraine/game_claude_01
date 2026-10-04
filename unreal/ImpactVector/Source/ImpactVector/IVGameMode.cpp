@@ -1,4 +1,5 @@
 #include "IVGameMode.h"
+#include "IVFXManager.h"
 #include "RenderCore.h"
 #include "RHI.h"
 #include "IVMechPawn.h"
@@ -178,6 +179,7 @@ void AIVGameMode::StartPlay()
 	FParse::Value(FCommandLine::Get(), TEXT("-IVBlast="), BlastAt);
 	{ int32 N = 1; FParse::Value(FCommandLine::Get(), TEXT("-IVBlastN="), N); BlastsLeft = (BlastAt >= 0.f) ? N : 0; }
 	FParse::Value(FCommandLine::Get(), TEXT("-IVCollapse="), CollapseAt);
+	FParse::Value(FCommandLine::Get(), TEXT("-IVChunkTest="), ChunkTestAt);
 	{
 		FString A;
 		if (FParse::Value(FCommandLine::Get(), TEXT("-IVAction="), A, false))
@@ -228,8 +230,22 @@ void AIVGameMode::Tick(float Dt)
 		if (APawn* P = UGameplayStatics::GetPlayerPawn(this, 0))
 			if (AIVEnvironment* Env = AIVEnvironment::Get(GetWorld()))
 			{
-				const int32 N = Env->CollapseNearestAhead(P->GetActorLocation(), P->GetActorForwardVector());
+				float YawOff = 0.f; FParse::Value(FCommandLine::Get(), TEXT("-IVCollapseYaw="), YawOff);
+				const int32 N = Env->CollapseNearestAhead(P->GetActorLocation(), FRotator(0.f, YawOff, 0.f).RotateVector(P->GetActorForwardVector()));
 				UE_LOG(LogTemp, Display, TEXT("IV: collapse test destroyed %d cells"), N);
+			}
+	}
+	if (ChunkTestAt >= 0.f && Elapsed >= ChunkTestAt)
+	{
+		ChunkTestAt = -1.f;
+		if (APawn* P = UGameplayStatics::GetPlayerPawn(this, 0))
+			if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
+			{
+				const FVector C = P->GetActorLocation() + P->GetActorForwardVector() * 5000.f + FVector(0, 0, 1500.f);
+				FX->SpawnChunks(C, FVector(0, 0, 1), 16, EIVChunk::Armor, 3.5f, 5000.f, 1.f);
+				FX->SpawnChunks(C, FVector(0, 0, 1), 20, EIVChunk::Concrete, 4.f, 4500.f);
+				FX->SpawnChunks(C, FVector(0, 0, 1), 20, EIVChunk::Glass, 5.f, 4500.f);
+				FX->SpawnChunks(C, FVector(0, 0, 1), 10, EIVChunk::Steel, 3.f, 4500.f, 0.8f);
 			}
 	}
 	if (ActionAt >= 0.f && Elapsed >= ActionAt)

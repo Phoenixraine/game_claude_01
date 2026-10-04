@@ -156,6 +156,15 @@ int32 AIVBuilding::ApplyBlast(const FVector& C, float Radius, float Impulse)
 	if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
 	{
 		FX->SpawnDust(C, Radius * 1.2f, FMath::Clamp(Killed / 3, 6, 40));
+		{
+			const FVector Out = FVector(0, 0, 0.6f);
+			const float Cell = FMath::Max3(CellSz.X, CellSz.Y, CellSz.Z);
+			const float Sc = FMath::Clamp(Cell / 170.f, 3.f, 7.f);
+			FX->SpawnChunks(C, Out, FMath::Clamp(Killed / 2, 6, 44), EIVChunk::Concrete, Sc, 2800.f + Impulse * 0.5f, 0.f, 1.3f);
+			FX->SpawnChunks(C, Out, FMath::Clamp(Killed / 6, 2, 10), EIVChunk::Slab, Sc * 0.9f, 2200.f + Impulse * 0.3f, 0.f, 1.2f);
+			FX->SpawnChunks(C, Out, FMath::Clamp(Killed / 2, 8, 40), EIVChunk::Glass, Sc * 1.3f, 3200.f + Impulse * 0.4f, 0.f, 1.5f);
+			FX->SpawnChunks(C, Out, FMath::Clamp(Killed, 10, 50), EIVChunk::Gravel, Sc * 1.4f, 3600.f, 0.f, 1.6f);
+		}
 		FX->SpawnSparks(C, FVector::UpVector, 20, 5000.f);
 	}
 	IVAudio::Play3D(GetWorld(), TEXT("env_glass_shatter_big"), C, 0.9f);

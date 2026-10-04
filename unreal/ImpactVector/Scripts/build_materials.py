@@ -1057,8 +1057,61 @@ return c * Gn * scan * (0.5 + 0.5 * vig) * on;
     return m
 
 
+def build_chunk():
+    """Debris chunks (cloud shard library): kind from per-instance custom data 0 concrete, 1 steel, 2 glass, 3 armour plate; heat -> glowing embers."""
+    m = make_material("M_Chunk")
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    heat = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 0)
+    heat.set_editor_property("data_index", 0)
+    kind = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 120)
+    kind.set_editor_property("data_index", 1)
+    seed = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 240)
+    seed.set_editor_property("data_index", 2)
+    pos = expr(m, unreal.MaterialExpressionWorldPosition, -1200, 360)
+    accent = vector(m, "Accent", (0.85, 0.2, 0.03, 1), -1200, 480)
+    names = ["Heat", "Kind", "Seed", "WP", "Accent"]
+    srcs = [(heat, ""), (kind, ""), (seed, ""), (pos, ""), (accent, "")]
+    common = """
+float n = 0.0, a = 0.5; float3 p = WP * 0.0045 + Seed * 31.7;
+for (int i = 0; i < 3; i++)
+{
+    float3 ip = floor(p), fp = frac(p);
+    float3 u = fp * fp * (3.0 - 2.0 * fp);
+    float3 k = float3(127.1, 311.7, 74.7);
+    float c000 = frac(sin(dot(ip, k)) * 43758.5453);
+    float c100 = frac(sin(dot(ip + float3(1,0,0), k)) * 43758.5453);
+    float c010 = frac(sin(dot(ip + float3(0,1,0), k)) * 43758.5453);
+    float c110 = frac(sin(dot(ip + float3(1,1,0), k)) * 43758.5453);
+    float c001 = frac(sin(dot(ip + float3(0,0,1), k)) * 43758.5453);
+    float c101 = frac(sin(dot(ip + float3(1,0,1), k)) * 43758.5453);
+    float c011 = frac(sin(dot(ip + float3(0,1,1), k)) * 43758.5453);
+    float c111 = frac(sin(dot(ip + float3(1,1,1), k)) * 43758.5453);
+    n += a * lerp(lerp(lerp(c000, c100, u.x), lerp(c010, c110, u.x), u.y), lerp(lerp(c001, c101, u.x), lerp(c011, c111, u.x), u.y), u.z);
+    p *= 2.3; a *= 0.5;
+}
+float n2 = n;
+float cc = step(Kind, 0.5), cs = step(0.5, Kind) * step(Kind, 1.5), cg = step(1.5, Kind) * step(Kind, 2.5), ca = step(2.5, Kind);
+"""
+    t = unreal.CustomMaterialOutputType
+    base = custom(m, common + "float3 conc = float3(0.30, 0.29, 0.275) * (0.7 + 0.5 * n2); float3 steel = float3(0.22, 0.22, 0.24) * (0.8 + 0.4 * n); float3 gl = float3(0.35, 0.55, 0.65); float3 arm = lerp(float3(0.07, 0.075, 0.09), Accent * 0.6, step(0.8, n)); float3 c = conc * cc + steel * cs + gl * cg + arm * ca; return lerp(c, float3(0.015, 0.012, 0.01), saturate(Heat * 0.25));", t.CMOT_FLOAT3, names, -700, 0, "chunk_base")
+    wire_custom(base, srcs)
+    MEL.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = custom(m, common + "return cc * 0.85 + cs * 0.45 + cg * 0.08 + ca * 0.35;", t.CMOT_FLOAT1, names, -700, 250, "chunk_rough")
+    wire_custom(rough, srcs)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    met = custom(m, common + "return cs * 0.9 + cg * 0.6 + ca * 0.75;", t.CMOT_FLOAT1, names, -700, 450, "chunk_metal")
+    wire_custom(met, srcs)
+    MEL.connect_material_property(met, "", unreal.MaterialProperty.MP_METALLIC)
+    emi = custom(m, common + "float crack = smoothstep(0.42, 0.75, n); float e = saturate(Heat) * (0.15 + 1.1 * crack); return float3(4.0, 1.0, 0.12) * e * e * 2.6 + cg * float3(0.04, 0.2, 0.3) + float3(1.0, 0.25, 0.04) * saturate(Heat - 0.6) * 0.7;", t.CMOT_FLOAT3, names, -700, 650, "chunk_emissive")
+    wire_custom(emi, srcs)
+    MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 ALL = [build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor,
-       build_neon_sign, build_glass_tower, build_trim, build_monitor]
+       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk]
 import os
 _only = [x for x in os.environ.get("IV_ONLY", "").split(",") if x]
 for fn in ALL:
