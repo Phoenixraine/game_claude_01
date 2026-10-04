@@ -84,11 +84,14 @@ def _guardrails(layout, terrain, buildings, port):
     return rails
 
 
-def build(seed, style="generic"):
+def build(seed, style="generic", arena="takeshita"):
     """style 'generic' = the v1 district (schema_version 1, unchanged); 'tokyo' = the Tokyo district (schema_version 2)."""
     if style == "tokyo":
         from iv_worldgen import tokyo_gen
         return tokyo_gen.build_tokyo(seed)
+    if style == "cyber":
+        from iv_worldgen import cyber_gen
+        return cyber_gen.build_cyber(seed, arena)
     root = Rng(seed)
     basins = _basins(root)
     terrain = Tm.Terrain(seed, basins)
@@ -134,6 +137,9 @@ def digest(doc, terrain):
     h = hashlib.sha256()
     h.update(canonical(doc).encode("ascii"))
     h.update(terrain.to_r16())
+    for name, blob in sorted(getattr(terrain, "extras", {}).items()):
+        h.update(name.encode("ascii"))
+        h.update(blob)
     return h.hexdigest()
 
 
@@ -142,17 +148,24 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--out", default="worldgen/out")
     ap.add_argument("--no-preview", action="store_true")
-    ap.add_argument("--style", choices=("tokyo", "generic"), default="tokyo", help="tokyo = schema_version 2 (default); generic = the v1 coastal district")
+    ap.add_argument("--style", choices=("tokyo", "generic", "cyber"), default="tokyo", help="tokyo = schema_version 2 (default); cyber = schema_version 3 (TASK-019); generic = the v1 coastal district")
+    ap.add_argument("--arena", choices=("takeshita", "shibuya_scramble"), default="takeshita", help="cyber style: battle arena (Takeshita-dori or the Shibuya scramble)")
+    ap.add_argument("--preview-dir", default=None, help="where the cyber previews go (default: <out>/previews)")
     a = ap.parse_args(argv)
     t0 = time.time()
-    doc, terrain = build(a.seed, a.style)
+    doc, terrain = build(a.seed, a.style, a.arena)
     os.makedirs(a.out, exist_ok=True)
     with open(os.path.join(a.out, "district.json"), "w", encoding="ascii") as f:
         f.write(canonical(doc))
     with open(os.path.join(a.out, "heightmap.r16"), "wb") as f:
         f.write(terrain.to_r16())
     if not a.no_preview:
-        if a.style == "tokyo":
+        if a.style == "cyber":
+            from iv_worldgen import cyber_render
+            pdir = a.preview_dir or os.path.join(a.out, "previews")
+            os.makedirs(pdir, exist_ok=True)
+            cyber_render.render_all(doc, terrain, pdir)
+        elif a.style == "tokyo":
             from iv_worldgen import tokyo_render as R
             cv = R.render_topdown(doc, terrain)
             write_png(os.path.join(a.out, "preview_topdown.png"), cv.w, cv.h, cv.buf)
@@ -163,11 +176,14 @@ def main(argv=None):
             write_png(os.path.join(a.out, "preview_topdown.png"), cv.w, cv.h, cv.buf)
             cv = render.render_skyline(doc, terrain)
             write_png(os.path.join(a.out, "preview_skyline.png"), cv.w, cv.h, cv.buf)
+    for name, blob in sorted(getattr(terrain, "extras", {}).items()):
+        with open(os.path.join(a.out, name), "wb") as f:
+            f.write(blob)
     d = digest(doc, terrain)
     with open(os.path.join(a.out, "district.sha256"), "w") as f:
         f.write(d + "\n")
     n_hero = sum(1 for b in doc["buildings"] if b["type"] == "hero")
-    print("seed %d [%s]: %d buildings (%d hero), %d roads, %d props, sha256 %s, %.1fs" % (a.seed, a.style, len(doc["buildings"]), n_hero, len(doc["roads"]),
+    print("seed %d [%s%s]: %d buildings (%d hero), %d roads, %d props, sha256 %s, %.1fs" % (a.seed, a.style, ("/" + a.arena) if a.style == "cyber" else "", len(doc["buildings"]), n_hero, len(doc["roads"]),
                                                                                        len(doc["props"]), d[:16], time.time() - t0))
     return 0
 
