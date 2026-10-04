@@ -17,6 +17,8 @@ class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UTextureRenderTarget2D;
 class UCanvas;
+class UTexture2D;
+struct FIVMonCanvas;
 
 /** What the monitors and alarms need to know, pushed by the combat director every frame. All fractions are 0..1. */
 struct FIVCockpitFeed
@@ -122,7 +124,7 @@ public:
 	float GetBodyLean() const { return BodyLean; }
 
 private:
-	bool bBuilt = false, bShown = true;
+	bool bBuilt = false, bShown = true, bNoMonitors = false;
 	FIVCockpitFeed Feed;
 	FVector LocalVel = FVector::ZeroVector, LocalAccel = FVector::ZeroVector;
 	float Speed01 = 0.f, Lean = 0.f, Twist = 0.f;
@@ -152,6 +154,8 @@ private:
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> SparkISM;
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> FlameISM;
 	UPROPERTY() TArray<TObjectPtr<UTextureRenderTarget2D>> Targets;
+	UPROPERTY() TObjectPtr<UTexture2D> MonTex;
+	TArray<FColor> MonPx;
 	UPROPERTY() TObjectPtr<UPointLightComponent> FireLight;
 	TArray<FIVCockpitPuff> Puffs;
 	TArray<FIVCockpitSpark> Sparks;
@@ -180,6 +184,6 @@ private:
 	void BurstPipe(int32 Index);
 	void SnapWire(int32 Index);
 	void AddFire(int32 SocketIndex);
-	void DrawMonitor(int32 Feed, UTextureRenderTarget2D* RT);
+	void DrawMonitor(int32 Type, FIVMonCanvas* C, float W, float H);
 	void LogLine(const FString& S);
 };

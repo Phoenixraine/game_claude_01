@@ -6,6 +6,8 @@
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "Math/RandomStream.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 void AIVDistrict::Tick(float Dt)
 {
@@ -236,6 +238,8 @@ void AIVDistrict::DecorateBuilding(int32 Bi, const FString& Crown, FRandomStream
 void AIVDistrict::BuildDecor(const TSharedPtr<FJsonObject>& Rootj)
 {
 	FRandomStream R(7771);
+	FParse::Value(FCommandLine::Get(), TEXT("-IVLights="), MaxNeonLights);
+	if (FParse::Param(FCommandLine::Get(), TEXT("IVNoDeco"))) return;
 	for (int32 i = 0; i < Buildings.Num(); ++i)
 	{
 		if (Buildings[i].bHero) continue;

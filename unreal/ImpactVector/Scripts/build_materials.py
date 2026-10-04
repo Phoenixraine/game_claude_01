@@ -429,7 +429,7 @@ float c14 = step(13.5, cls);
 float haz = step(0.5, frac((P.x + P.y + P.z) * 17.0));
 float weave = 0.75 + 0.25 * sin(P.x * 420.0) * sin(P.y * 380.0 + P.z * 300.0);
 float n = 0.0, a = 0.5; float3 p = P * 9.0;
-for (int i = 0; i < 4; i++)
+for (int i = 0; i < 2; i++)
 {
     float3 ip = floor(p), fp = frac(p);
     float3 u = fp * fp * (3.0 - 2.0 * fp);
@@ -1024,20 +1024,24 @@ def build_monitor():
     power = scalar(m, "Power", 1.0, -1200, 400)
     glitch = scalar(m, "Glitch", 0.0, -1200, 500)
     gain = scalar(m, "Gain", 1.7, -1200, 600)
+    uo = scalar(m, "UOff", 0.0, -1200, 700)
+    vo = scalar(m, "VOff", 0.0, -1200, 800)
+    us = scalar(m, "USc", 1.0, -1200, 900)
+    vs = scalar(m, "VSc", 1.0, -1200, 1000)
     c = custom(m, """
-float2 uv = UV;
-float row = floor(uv.y * 26.0);
+float2 uv = UV * float2(Us, Vs) + float2(Uo, Vo);
+float row = floor(UV.y * 26.0);
 float jit = frac(sin(row * 91.7 + floor(T * 11.0) * 13.1) * 437.5) - 0.5;
 float hit = step(0.82, frac(sin(row * 12.3 + floor(T * 7.0) * 3.7) * 91.0));
 uv.x += jit * 0.05 * Gl * hit;
 float3 c = Tex.Sample(TexSampler, uv).rgb;
 c.r = Tex.Sample(TexSampler, uv + float2(0.005 * Gl, 0)).r;
-float scan = 0.86 + 0.14 * sin(uv.y * 420.0 + T * 5.0);
-float vig = smoothstep(0.0, 0.08, uv.x) * smoothstep(1.0, 0.92, uv.x) * smoothstep(0.0, 0.08, uv.y) * smoothstep(1.0, 0.92, uv.y);
-float on = Pw * (1.0 - Gl * step(0.93, frac(T * 2.3 + uv.y * 1.7)));
+float scan = 0.86 + 0.14 * sin(UV.y * 420.0 + T * 5.0);
+float vig = smoothstep(0.0, 0.08, UV.x) * smoothstep(1.0, 0.92, UV.x) * smoothstep(0.0, 0.08, UV.y) * smoothstep(1.0, 0.92, UV.y);
+float on = Pw * (1.0 - Gl * step(0.93, frac(T * 2.3 + UV.y * 1.7)));
 return c * Gn * scan * (0.5 + 0.5 * vig) * on;
-""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["Tex", "UV", "T", "Pw", "Gl", "Gn"], -800, 100, "monitor_emissive")
-    wire_custom(c, [(tex, ""), (uv, ""), (tm, ""), (power, ""), (glitch, ""), (gain, "")])
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["Tex", "UV", "T", "Pw", "Gl", "Gn", "Uo", "Vo", "Us", "Vs"], -800, 100, "monitor_emissive")
+    wire_custom(c, [(tex, ""), (uv, ""), (tm, ""), (power, ""), (glitch, ""), (gain, ""), (uo, ""), (vo, ""), (us, ""), (vs, "")])
     MEL.connect_material_property(c, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     bc = expr(m, unreal.MaterialExpressionConstant3Vector, -800, 400)
     bc.set_editor_property("constant", unreal.LinearColor(0.004, 0.006, 0.008, 1))

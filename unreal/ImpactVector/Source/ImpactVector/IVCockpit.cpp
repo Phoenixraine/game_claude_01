@@ -10,6 +10,7 @@
 #include "Engine/Font.h"
 #include "Engine/Canvas.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Engine/Texture2D.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "CanvasItem.h"
@@ -20,6 +21,8 @@
 #include "Serialization/JsonSerializer.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 namespace
 {
@@ -118,38 +121,65 @@ namespace
 		}
 	}
 
-	// ---- canvas helpers (monitor drawing)
-	void FillR(FCanvas* C, float X, float Y, float W, float H, const FLinearColor& Col)
+	// ---- monitor drawing. Geometry is rasterised on the CPU into one texture (Canvas line/triangle items cost ~0.1 ms each on the render
+	// thread - 1000 of them stalled it for 100+ ms); only the text goes through the Canvas, queued here and drawn on top.
+}
+
+struct FIVMonCanvas
+{
+	struct FTxt { FString S; float X, Y; FLinearColor Col; float Scale; int32 Align; int32 Ox, Oy; };
+	FColor* Px = nullptr;
+	int32 PW = 0, PH = 0;
+	int32 Ox = 0, Oy = 0, Tw = 0, Th = 0;       // current tile inside the atlas
+	TArray<FTxt> Texts;
+};
+
+namespace
+{
+	void Blend(FIVMonCanvas* C, int32 X, int32 Y, const FColor& S, float A)
 	{
-		FCanvasTileItem T(FVector2D(X, Y), GWhiteTexture, FVector2D(W, H), Col);
-		T.BlendMode = SE_BLEND_Translucent;
-		C->DrawItem(T);
+		if (X < 0 || Y < 0 || X >= C->Tw || Y >= C->Th) return;
+		FColor& D = C->Px[(C->Oy + Y) * C->PW + C->Ox + X];
+		const int32 Ia = FMath::Clamp(int32(A * 256.f), 0, 256), Ja = 256 - Ia;
+		D.R = uint8((D.R * Ja + S.R * Ia) >> 8); D.G = uint8((D.G * Ja + S.G * Ia) >> 8); D.B = uint8((D.B * Ja + S.B * Ia) >> 8); D.A = 255;
 	}
-	void Ln(FCanvas* C, float X0, float Y0, float X1, float Y1, const FLinearColor& Col, float Th = 1.5f)
+	void FillR(FIVMonCanvas* C, float X, float Y, float W, float H, const FLinearColor& Col)
 	{
-		FCanvasLineItem L(FVector2D(X0, Y0), FVector2D(X1, Y1));
-		L.SetColor(Col);
-		L.LineThickness = Th;
-		L.BlendMode = SE_BLEND_Translucent;
-		C->DrawItem(L);
+		const FColor S = FLinearColor(Col.R, Col.G, Col.B, 1.f).ToFColor(true);
+		const int32 X0 = FMath::Max(0, FMath::RoundToInt(X)), Y0 = FMath::Max(0, FMath::RoundToInt(Y));
+		const int32 X1 = FMath::Min(C->Tw, FMath::RoundToInt(X + W)), Y1 = FMath::Min(C->Th, FMath::RoundToInt(Y + H));
+		for (int32 y = Y0; y < Y1; ++y) for (int32 x = X0; x < X1; ++x) Blend(C, x, y, S, Col.A);
 	}
-	void Frame(FCanvas* C, float X, float Y, float W, float H, const FLinearColor& Col, float Th = 1.5f)
+	void Ln(FIVMonCanvas* C, float X0, float Y0, float X1, float Y1, const FLinearColor& Col, float Th = 1.5f)
+	{
+		const float Dx = X1 - X0, Dy = Y1 - Y0;
+		const float Len2 = Dx * Dx + Dy * Dy;
+		const float Th2 = FMath::Max(Th, 1.f);
+		if (FMath::Abs(Dy) < 0.01f) { FillR(C, FMath::Min(X0, X1), Y0 - Th2 * 0.5f, FMath::Abs(Dx), Th2, Col); return; }
+		if (FMath::Abs(Dx) < 0.01f) { FillR(C, X0 - Th2 * 0.5f, FMath::Min(Y0, Y1), Th2, FMath::Abs(Dy), Col); return; }
+		const FColor S = FLinearColor(Col.R, Col.G, Col.B, 1.f).ToFColor(true);
+		const float R = Th2 * 0.5f + 0.5f;
+		const int32 Bx0 = FMath::Max(0, FMath::FloorToInt(FMath::Min(X0, X1) - R)), Bx1 = FMath::Min(C->Tw - 1, FMath::CeilToInt(FMath::Max(X0, X1) + R));
+		const int32 By0 = FMath::Max(0, FMath::FloorToInt(FMath::Min(Y0, Y1) - R)), By1 = FMath::Min(C->Th - 1, FMath::CeilToInt(FMath::Max(Y0, Y1) + R));
+		for (int32 y = By0; y <= By1; ++y)
+			for (int32 x = Bx0; x <= Bx1; ++x)
+			{
+				const float Px = x + 0.5f - X0, Py = y + 0.5f - Y0;
+				const float T = FMath::Clamp((Px * Dx + Py * Dy) / Len2, 0.f, 1.f);
+				const float Ex = Px - Dx * T, Ey = Py - Dy * T;
+				const float Cov = FMath::Clamp(Th2 * 0.5f + 0.5f - FMath::Sqrt(Ex * Ex + Ey * Ey), 0.f, 1.f);
+				if (Cov > 0.f) Blend(C, x, y, S, Cov * Col.A);
+			}
+	}
+	void Frame(FIVMonCanvas* C, float X, float Y, float W, float H, const FLinearColor& Col, float Th = 1.5f)
 	{
 		Ln(C, X, Y, X + W, Y, Col, Th); Ln(C, X, Y + H, X + W, Y + H, Col, Th); Ln(C, X, Y, X, Y + H, Col, Th); Ln(C, X + W, Y, X + W, Y + H, Col, Th);
 	}
-	void Txt(FCanvas* C, const FString& S, float X, float Y, const FLinearColor& Col, float Scale = 1.f, int32 Align = 0)
+	void Txt(FIVMonCanvas* C, const FString& S, float X, float Y, const FLinearColor& Col, float Scale = 1.f, int32 Align = 0)
 	{
-		UFont* F = GEngine->GetSmallFont();
-		int32 Wi = 0, Hi = 0;
-		F->GetStringHeightAndWidth(S, Hi, Wi);
-		const float W = Wi * Scale;
-		const float X0 = Align == 1 ? X - W * 0.5f : (Align == 2 ? X - W : X);
-		FCanvasTextItem T(FVector2D(X0, Y), FText::FromString(S), F, Col);
-		T.Scale = FVector2D(Scale, Scale);
-		T.BlendMode = SE_BLEND_Translucent;
-		C->DrawItem(T);
+		C->Texts.Add({ S, X, Y, Col, Scale, Align, C->Ox, C->Oy });
 	}
-	void Circle(FCanvas* C, float Cx, float Cy, float R, const FLinearColor& Col, float Th = 1.5f, int32 N = 40, float A0 = 0.f, float A1 = 2.f * PI)
+	void Circle(FIVMonCanvas* C, float Cx, float Cy, float R, const FLinearColor& Col, float Th = 1.5f, int32 N = 40, float A0 = 0.f, float A1 = 2.f * PI)
 	{
 		for (int32 i = 0; i < N; ++i)
 		{
@@ -164,7 +194,7 @@ namespace
 		FLinearColor(0.3f, 0.9f, 1.f), FLinearColor(0.55f, 0.95f, 0.75f), FLinearColor(1.f, 0.9f, 0.3f), FLinearColor(1.f, 0.55f, 0.12f),
 		FLinearColor(1.f, 0.18f, 0.1f), FLinearColor(0.35f, 0.05f, 0.04f), FLinearColor(0.12f, 0.02f, 0.02f) };
 
-	void Schematic(FCanvas* C, float X, float Y, float S, const float* Armor, const uint8* State, bool bFront, float Time)
+	void Schematic(FIVMonCanvas* C, float X, float Y, float S, const float* Armor, const uint8* State, bool bFront, float Time)
 	{
 		struct R { int32 Z; float x, y, w, h; };
 		static const R Parts[] = {
@@ -187,6 +217,14 @@ namespace
 			if (w > 22.f) Txt(C, FString::Printf(TEXT("%d"), int32(Armor[P.Z] * 100.f)), x0 + w * 0.5f, y0 + h * 0.5f - 4.f, Al(kWh, 0.85f), 0.7f, 1);
 		}
 	}
+}
+
+namespace
+{
+	// monitor pages inside the one atlas render target (1024 x 1152)
+	const FIntRect kTiles[8] = {
+		FIntRect(0, 0, 512, 512), FIntRect(512, 0, 1024, 512), FIntRect(0, 512, 512, 768), FIntRect(512, 512, 1024, 768),
+		FIntRect(0, 768, 256, 1024), FIntRect(256, 768, 640, 1024), FIntRect(640, 768, 1024, 1024), FIntRect(0, 1024, 1024, 1152) };
 }
 
 // =====================================================================================================================
@@ -284,10 +322,13 @@ void UIVCockpitComponent::EnsureBuilt()
 	if (!LoadLayout()) { UE_LOG(LogTemp, Warning, TEXT("IV cockpit: layout missing")); return; }
 	UMaterialInterface* PropM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_PropColor.M_PropColor"));
 	if (PropM) PropMID = UMaterialInstanceDynamic::Create(PropM, this);
-	BuildBody();
-	BuildPipes();
-	BuildWires();
-	BuildMonitors();
+	FString Off;
+	FParse::Value(FCommandLine::Get(), TEXT("-IVCkOff="), Off, false);
+	if (!Off.Contains(TEXT("body"))) BuildBody();
+	if (!Off.Contains(TEXT("pipe"))) BuildPipes();
+	if (!Off.Contains(TEXT("wire"))) BuildWires();
+	if (!Off.Contains(TEXT("mon"))) BuildMonitors();
+	bNoMonitors = Off.Contains(TEXT("mon"));
 
 	auto MakeISM = [&](const TCHAR* Name, UStaticMesh* Mesh, UMaterialInterface* Mat, int32 NumCD) -> UInstancedStaticMeshComponent*
 	{
@@ -839,8 +880,7 @@ void UIVCockpitComponent::BuildMonitors()
 {
 	UStaticMesh* Plane = LoadSM(TEXT("/Engine/BasicShapes/Plane.Plane"));
 	UMaterialInterface* MonM = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Monitor.M_Monitor"));
-	const int32 Sizes[8][2] = { { 512, 512 }, { 512, 512 }, { 512, 256 }, { 512, 256 }, { 256, 256 }, { 512, 256 }, { 512, 256 }, { 512, 128 } };
-	for (int32 i = 0; i < 8; ++i) Targets.Add(UKismetRenderingLibrary::CreateRenderTarget2D(this, Sizes[i][0], Sizes[i][1], RTF_RGBA8, FLinearColor::Black, false));
+	Targets.Add(UKismetRenderingLibrary::CreateRenderTarget2D(this, 1024, 1152, RTF_RGBA8, FLinearColor::Black, false));
 	for (FIVCockpitMonitor& M : Monitors)
 	{
 		int32 Fd = 6;
@@ -866,7 +906,12 @@ void UIVCockpitComponent::BuildMonitors()
 		if (MonM)
 		{
 			M.MID = UMaterialInstanceDynamic::Create(MonM, this);
-			M.MID->SetTextureParameterValue(TEXT("Tex"), Targets[Fd]);
+			M.MID->SetTextureParameterValue(TEXT("Tex"), Targets[0]);
+			const FIntRect& Tl = kTiles[Fd];
+			M.MID->SetScalarParameterValue(TEXT("UOff"), float(Tl.Min.X) / 1024.f);
+			M.MID->SetScalarParameterValue(TEXT("VOff"), float(Tl.Min.Y) / 1152.f);
+			M.MID->SetScalarParameterValue(TEXT("USc"), float(Tl.Width()) / 1024.f);
+			M.MID->SetScalarParameterValue(TEXT("VSc"), float(Tl.Height()) / 1152.f);
 			C->SetMaterial(0, M.MID);
 		}
 		M.Mesh = C;
@@ -882,13 +927,54 @@ void UIVCockpitComponent::LogLine(const FString& S)
 void UIVCockpitComponent::UpdateMonitors(float Dt)
 {
 	MonAcc += Dt;
-	if (MonAcc < 1.f / 30.f) return;
-	MonAcc = 0.f;
-	// two targets per refresh keep the cost flat
-	for (int32 k = 0; k < 2; ++k)
+	if (MonAcc >= 0.1f && Targets.Num() > 0 && Targets[0])
 	{
-		const int32 I = (MonRound++) % 8;
-		DrawMonitor(I, Targets[I]);
+		MonAcc = 0.f;
+		constexpr int32 AW = 1024, AH = 1152;
+		if (!MonTex)
+		{
+			MonTex = UTexture2D::CreateTransient(AW, AH, PF_B8G8R8A8);
+			MonTex->Filter = TF_Bilinear;
+			MonTex->NeverStream = true;
+			MonTex->SRGB = true;
+			MonTex->UpdateResource();
+		}
+		MonPx.SetNumUninitialized(AW * AH);
+		FIVMonCanvas Mc;
+		Mc.Px = MonPx.GetData(); Mc.PW = AW; Mc.PH = AH;
+		for (int32 i = 0; i < 8; ++i)
+		{
+			Mc.Ox = kTiles[i].Min.X; Mc.Oy = kTiles[i].Min.Y; Mc.Tw = kTiles[i].Width(); Mc.Th = kTiles[i].Height();
+			DrawMonitor(i, &Mc, float(Mc.Tw), float(Mc.Th));
+		}
+		uint8* Copy = static_cast<uint8*>(FMemory::Malloc(AW * AH * 4));
+		FMemory::Memcpy(Copy, MonPx.GetData(), AW * AH * 4);
+		MonTex->UpdateTextureRegions(0, 1, new FUpdateTextureRegion2D(0, 0, 0, 0, AW, AH), AW * 4, 4, Copy,
+			[](uint8* D, const FUpdateTextureRegion2D* R) { FMemory::Free(D); delete R; });
+
+		UCanvas* Cv = nullptr;
+		FVector2D Size;
+		FDrawToRenderTargetContext Ctx;
+		UKismetRenderingLibrary::BeginDrawCanvasToRenderTarget(this, Targets[0], Cv, Size, Ctx);
+		if (Cv && Cv->Canvas)
+		{
+			FCanvasTileItem Base(FVector2D(0, 0), MonTex->GetResource(), FVector2D(AW, AH), FLinearColor::White);
+			Base.BlendMode = SE_BLEND_Opaque;
+			Cv->Canvas->DrawItem(Base);
+			UFont* F = GEngine->GetSmallFont();
+			for (const FIVMonCanvas::FTxt& T : Mc.Texts)
+			{
+				int32 Wi = 0, Hi = 0;
+				F->GetStringHeightAndWidth(T.S, Hi, Wi);
+				const float W = Wi * T.Scale;
+				const float X0 = T.Ox + (T.Align == 1 ? T.X - W * 0.5f : (T.Align == 2 ? T.X - W : T.X));
+				FCanvasTextItem Ti(FVector2D(X0, T.Oy + T.Y), FText::FromString(T.S), F, T.Col);
+				Ti.Scale = FVector2D(T.Scale, T.Scale);
+				Ti.BlendMode = SE_BLEND_Translucent;
+				Cv->Canvas->DrawItem(Ti);
+			}
+		}
+		UKismetRenderingLibrary::EndDrawCanvasToRenderTarget(this, Ctx);
 	}
 	for (FIVCockpitMonitor& M : Monitors)
 	{
@@ -898,16 +984,8 @@ void UIVCockpitComponent::UpdateMonitors(float Dt)
 	}
 }
 
-void UIVCockpitComponent::DrawMonitor(int32 Type, UTextureRenderTarget2D* RT)
+void UIVCockpitComponent::DrawMonitor(int32 Type, FIVMonCanvas* C, float W, float H)
 {
-	if (!RT) return;
-	UCanvas* Cv = nullptr;
-	FVector2D Size;
-	FDrawToRenderTargetContext Ctx;
-	UKismetRenderingLibrary::BeginDrawCanvasToRenderTarget(this, RT, Cv, Size, Ctx);
-	if (!Cv || !Cv->Canvas) { UKismetRenderingLibrary::EndDrawCanvasToRenderTarget(this, Ctx); return; }
-	FCanvas* C = Cv->Canvas;
-	const float W = Size.X, H = Size.Y;
 	const float T = Time;
 	const bool bAlert = AlertSmooth > 0.5f;
 	const FLinearColor Back(0.0f, 0.025f, 0.04f, 1.f);
@@ -1038,7 +1116,6 @@ void UIVCockpitComponent::DrawMonitor(int32 Type, UTextureRenderTarget2D* RT)
 	}
 	}
 	if (Glitch > 0.2f && FMath::Frac(T * 5.f + Type) < 0.15f) FillR(C, 0, FMath::Frac(T * 3.1f) * H, W, 6.f, Al(kWh, 0.5f));
-	UKismetRenderingLibrary::EndDrawCanvasToRenderTarget(this, Ctx);
 }
 
 // ----------------------------------------------------------------------------------------------------------- events
@@ -1194,12 +1271,12 @@ void UIVCockpitComponent::TickComponent(float Dt, ELevelTick TickType, FActorCom
 			if (Sp.Num()) { const FIVLayoutSocket& So = Sockets[Sp[Rng.RandRange(0, Sp.Num() - 1)]]; EmitSparks(So.P, So.D, 6, 250.f); }
 		}
 	}
-	UpdateBody(Dt);
+	if (BodyPivot.Num()) UpdateBody(Dt);
 	UpdatePipes(Dt);
 	UpdateWires(Dt);
 	UpdateParticles(Dt);
 	UpdateLamps(Dt);
-	UpdateMonitors(Dt);
+	if (!bNoMonitors) UpdateMonitors(Dt);
 	if (Feed.bValid && Feed.Overall < 0.35f && Rng.FRand() < Dt * 0.35f) { Glitch = FMath::Max(Glitch, 0.8f); }
 	LogAcc += Dt;
 	if (LogAcc > 6.f + 6.f * Rng.FRand())

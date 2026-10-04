@@ -1,4 +1,6 @@
 #include "IVGameMode.h"
+#include "RenderCore.h"
+#include "RHI.h"
 #include "IVMechPawn.h"
 #include "IVPlayerController.h"
 #include "IVHUD.h"
@@ -196,7 +198,7 @@ void AIVGameMode::Tick(float Dt)
 		PerfAcc += Dt; ++PerfFrames; PerfMin = FMath::Min(PerfMin, 1.f / FMath::Max(Dt, 1e-4f));
 		if (PerfAcc >= 10.f)
 		{
-			UE_LOG(LogTemp, Display, TEXT("IV perf: avg %.1f fps, worst frame %.1f fps"), PerfFrames / PerfAcc, PerfMin);
+			UE_LOG(LogTemp, Display, TEXT("IV perf: avg %.1f fps, worst frame %.1f fps | game %.1f ms render %.1f ms gpu %.1f ms"), PerfFrames / PerfAcc, PerfMin, FPlatformTime::ToMilliseconds(GGameThreadTime), FPlatformTime::ToMilliseconds(GRenderThreadTime), FPlatformTime::ToMilliseconds(RHIGetGPUFrameCycles(0)));
 			PerfAcc = 0.f; PerfFrames = 0; PerfMin = 1e9f;
 		}
 	}
