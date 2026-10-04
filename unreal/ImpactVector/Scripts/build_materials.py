@@ -172,6 +172,24 @@ return lerp(r0, 0.85, VCa * UseVC);
     wire_custom(rough, [(wp, ""), (wet, ""), (scale, ""), (vc, "A"), (use_vc, "")])
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
 
+    tmg = expr(m, unreal.MaterialExpressionTime, -1200, 900)
+    nrm = custom(m, common + """
+// rain ripples: expanding rings in random cells, only in the puddles
+float2 q = WP.xy / 140.0;
+float2 cid = floor(q);
+float2 cf = frac(q) - 0.5;
+float h1 = frac(sin(dot(cid, float2(12.9898, 78.233))) * 43758.5453);
+float h2 = frac(sin(dot(cid, float2(39.346, 11.135))) * 43758.5453);
+float2 off = (float2(h1, h2) - 0.5) * 0.5;
+float t = frac(T * (0.7 + h1 * 0.5) + h2);
+float r = length(cf - off);
+float ring = sin((r - t * 0.55) * 46.0) * exp(-t * 3.2) * (1.0 - smoothstep(0.0, 0.55, abs(r - t * 0.55) * 3.0));
+float2 dir = normalize(cf - off + 1e-4);
+float k = ring * 0.55 * puddle * step(0.35, h1);
+return normalize(float3(dir * k, 1.0));
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["WP", "Wet", "Sc", "T"], -700, 800, "ground_ripple")
+    wire_custom(nrm, [(wp, ""), (wet, ""), (scale, ""), (tmg, "")])
+    MEL.connect_material_property(nrm, "", unreal.MaterialProperty.MP_NORMAL)
     spec = scalar(m, "Specular", 0.5, -700, 600)
     MEL.connect_material_property(spec, "", unreal.MaterialProperty.MP_SPECULAR)
     MEL.recompile_material(m)
@@ -391,12 +409,23 @@ float3 newP = Cam + R;
     wpo = custom(m, code_pos + "return newP - P0;", t.CMOT_FLOAT3, names, -900, 0, "rain_wpo")
     wire_custom(wpo, srcs)
     MEL.connect_material_property(wpo, "", unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
-    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(500.0, 2600.0, d) * (1.0 - smoothstep(6000.0, 9000.0, d)); return 0.26 * fade;",
+    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(350.0, 2200.0, d) * (1.0 - smoothstep(6500.0, 10000.0, d)); float tw = 0.65 + 0.35 * frac(sin(dot(P0.xy, float2(12.9, 78.2))) * 43758.5); return 0.55 * fade * tw;",
                 t.CMOT_FLOAT1, names, -900, 300, "rain_opacity")
     wire_custom(op, srcs)
     MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
     col = vector(m, "Color", (0.55, 0.62, 0.72, 1), -900, 600)
-    MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    names2 = names + ["Col"]
+    srcs2 = srcs + [(col, "")]
+    # neon-lit rain: the streaks pick up the pink / cyan / amber glow of the street depending on where they fall
+    em = custom(m, code_pos + """
+float zone = 0.5 + 0.5 * sin(newP.x * 0.0004 + newP.y * 0.0006 + T * 0.15);
+float zone2 = 0.5 + 0.5 * sin(newP.y * 0.0009 - newP.x * 0.0003 + 1.7);
+float3 tint = lerp(lerp(Col, float3(1.0, 0.3, 0.75), zone * 0.8), float3(0.2, 0.9, 1.0), zone2 * 0.6);
+float glow = 0.9 + 1.6 * saturate(1.0 - (newP.z - 0.0) / 6000.0);
+return tint * glow;
+""", t.CMOT_FLOAT3, names2, -900, 700, "rain_color")
+    wire_custom(em, srcs2)
+    MEL.connect_material_property(em, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m)
     return m
@@ -517,8 +546,11 @@ def build_cockpit_glass():
     tm = expr(m, unreal.MaterialExpressionTime, -1500, 240)
     rain = scalar(m, "Rain", 1.0, -1500, 360)
     crack = scalar(m, "Crack", 0.0, -1500, 460)
-    names = ["A", "Bq", "T", "Rain", "Crack"]
-    srcs = [(uv0, ""), (uv1, ""), (tm, ""), (rain, ""), (crack, "")]
+    imp0 = vector(m, "Imp0", (0, 0, 0, 0), -1500, 1000)
+    imp1 = vector(m, "Imp1", (0, 0, 0, 0), -1500, 1100)
+    imp2 = vector(m, "Imp2", (0, 0, 0, 0), -1500, 1200)
+    names = ["A", "Bq", "T", "Rain", "Crack", "Imp0", "Imp1", "Imp2"]
+    srcs = [(uv0, ""), (uv1, ""), (tm, ""), (rain, ""), (crack, ""), (imp0, ""), (imp1, ""), (imp2, "")]
     common = """
 float2 g = float2((0.5 - A.y) * 2.0, (Bq.x - 0.5) * 2.0);      // lateral, height (m)
 float2 q = g / 0.05;
@@ -544,18 +576,48 @@ float3 nrm = float3(-bo * (1.0 - cap) * 1.4 * inside, 1.0);
 float sx = frac(sin(floor(g.x * 55.0) * 91.7) * 437.5);
 float sy = frac(g.y * 3.0 + sx * 7.0 - T * (0.02 + 0.05 * sx));
 float run = step(0.82, sx) * smoothstep(0.0, 0.2, sy) * smoothstep(0.6, 0.2, sy) * Rain;
-float2 cq = g / 0.42; float2 cid0 = floor(cq), cf = frac(cq);
-float d1 = 9.0, d2 = 9.0, cellh = 0.0;
-for (int cj = -1; cj <= 1; cj++)
-for (int ci = -1; ci <= 1; ci++)
+float web = 0.0;
+// impact cracks: radial spokes with broken concentric rings around each hit, growing with its strength
+float3 imps[3] = { Imp0, Imp1, Imp2 };
+for (int ii = 0; ii < 3; ii++)
 {
-    float2 cc = cid0 + float2(ci, cj);
-    float2 cp = float2(ci, cj) + 0.15 + 0.7 * float2(frac(sin(dot(cc, float2(12.9, 78.2))) * 43758.5), frac(sin(dot(cc, float2(39.3, 11.1))) * 43758.5));
-    float dd = length(cp - cf);
-    float hh = frac(sin(dot(cc, float2(93.9, 67.3))) * 43758.5);
-    if (dd < d1) { d2 = d1; d1 = dd; cellh = hh; } else if (dd < d2) { d2 = dd; }
+    float st = imps[ii].z;
+    if (st > 0.01)
+    {
+        float2 d = g - imps[ii].xy;
+        float r = length(d);
+        float ang = atan2(d.y, d.x);
+        float N = 13.0;
+        float s2 = ang / 6.2832 * N + ii * 3.1;
+        float sid = floor(s2);
+        float jit = (frac(sin(sid * 91.7 + ii * 17.3) * 437.5) - 0.5) * 0.55;
+        float fr = frac(s2) - 0.5;
+        float wdt = abs(fr - jit) * r * 6.2832 / N;
+        float reach = st * (0.35 + 0.9 * frac(sin(sid * 12.3 + ii * 5.1) * 913.1));
+        float spoke = (1.0 - smoothstep(0.0, 0.0045 + 0.004 * st, wdt)) * step(r, reach) * smoothstep(0.012, 0.05, r);
+        float ringId = floor(r / 0.085);
+        float rh = frac(sin(ringId * 31.1 + ii * 7.7) * 713.3);
+        float rd = abs(frac(r / 0.085) - 0.5) * 0.085;
+        float seg = step(0.45, frac(sin(floor(ang * 4.0 + ringId * 3.0) * 53.1) * 321.7));
+        float rg = (1.0 - smoothstep(0.0, 0.0035, rd)) * step(r, reach * 0.62) * seg * step(0.2, rh) * step(0.04, r);
+        float core = (1.0 - smoothstep(0.0, 0.035, r)) * st;
+        web = max(web, max(spoke, max(rg * 0.85, core)));
+    }
 }
-float web = (1.0 - smoothstep(0.0, 0.075, d2 - d1)) * step(cellh, Crack * 1.2);
+// hairline scratches: always there, a little more of them as the glass takes a beating
+for (int si = 0; si < 14; si++)
+{
+    float h0 = frac(sin(si * 12.9898 + 4.1) * 43758.5);
+    float h1 = frac(sin(si * 78.233 + 1.3) * 43758.5);
+    float h2 = frac(sin(si * 39.346 + 9.7) * 43758.5);
+    float2 p0 = float2((h0 - 0.5) * 2.2, (h1 - 0.35) * 1.1);
+    float an = (h2 - 0.5) * 3.1416;
+    float2 dir = float2(cos(an), sin(an));
+    float len = 0.12 + 0.35 * frac(h0 * 7.0 + h1 * 3.0);
+    float tt = clamp(dot(g - p0, dir), 0.0, len);
+    float dd = length(g - p0 - dir * tt);
+    web = max(web, (1.0 - smoothstep(0.0, 0.0022, dd)) * 0.35 * step(si, 5.0 + 9.0 * Crack));
+}
 """
     t = unreal.CustomMaterialOutputType
     nrmn = custom(m, common + "return normalize(float3(nrm.xy + float2(0, 0.35) * run, nrm.z));", t.CMOT_FLOAT3, names, -900, 0, "glass_normal")

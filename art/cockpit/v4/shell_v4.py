@@ -170,6 +170,25 @@ for sd in (1, -1):
     S.sphere(hubp, 0.1, cls=1, seg=14)
     S.cyl(hubp, PIL[sd][0] + Vector((-0.02, sd * 0.1, 0.1)), 0.05, cls=10, seg=12)
     S.cyl(hubp + Vector((0, 0, 0.0)), Vector((0.2, sd * 0.9, ceil_z - 0.03)), 0.075, cls=0, seg=14)
+# ceiling clutter: junction boxes, clamps, relays and U-shaped cable loops (the busy roof of the concept)
+rc = random.Random(31)
+for k in range(46):
+    cx = rc.uniform(0.15, 1.0)
+    cy = rc.uniform(-1.45, 1.45)
+    if abs(cy) < 0.5 and cx > 0.3 and rc.random() < 0.6:
+        continue
+    sz = (rc.uniform(0.05, 0.2), rc.uniform(0.05, 0.22), rc.uniform(0.03, 0.12))
+    S.box(Vector((cx, cy, ceil_z - 0.02 - sz[2] / 2)), sz, cls=rc.choice((0, 0, 1)), bevel=0.008)
+    if rc.random() < 0.35:
+        S.box(Vector((cx + sz[0] / 2, cy, ceil_z - 0.04 - sz[2] * 0.5)), (0.012, 0.03, 0.012), cls=5 if rc.random() < 0.7 else 9)
+    if rc.random() < 0.3:
+        S.cyl(Vector((cx, cy, ceil_z)), Vector((cx, cy, ceil_z - 0.1 - sz[2])), 0.02, cls=10, seg=8)
+for sd in (1, -1):
+    for k in range(7):
+        x0 = 0.25 + 0.1 * k
+        y0 = sd * (0.45 + 0.17 * k)
+        pts = [Vector((x0, y0, ceil_z - 0.03)), Vector((x0 + 0.02, y0 + sd * 0.03, ceil_z - 0.2 - 0.03 * (k % 3))), Vector((x0 + 0.03, y0 + sd * 0.12, ceil_z - 0.26 - 0.04 * (k % 2))), Vector((x0 + 0.02, y0 + sd * 0.22, ceil_z - 0.18)), Vector((x0, y0 + sd * 0.26, ceil_z - 0.03))]
+        S.pipe(pts, rc.choice((0.012, 0.016, 0.02)), cls=3, collars=False)
 # centre overhead strip with switches (reachable by looking up)
 oc = Vector((0.5, 0, ceil_z - 0.14))
 of = Frame(oc, (0, -1, 0), Vector((-0.15, 0, -1)))

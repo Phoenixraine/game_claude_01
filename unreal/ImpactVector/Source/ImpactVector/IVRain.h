@@ -16,8 +16,8 @@ public:
 	AIVRain();
 	virtual void Tick(float Dt) override;
 	virtual void BeginPlay() override;
-	int32 Count = 24000;
-	float BoxXY = 18000.f, BoxZ = 12000.f;
+	int32 Count = 30000;
+	float BoxXY = 14000.f, BoxZ = 9000.f;
 private:
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> ISM;
 };

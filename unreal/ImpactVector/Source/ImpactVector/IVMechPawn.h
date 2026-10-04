@@ -254,6 +254,15 @@ protected:
 	UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> GrowthComps;
 	void BuildGrowths();
 	void BuildGreebles();
+	void BuildPlates();
+	struct FIVPlate { TObjectPtr<UStaticMeshComponent> C; iv::Zone Z = iv::Zone::Torso; FVector Size = FVector::OneVector; bool bGone = false; };
+	TArray<FIVPlate> Plates;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> PlateMID;
+	void UpdateBladeContact(float Dt, FIVPoseAngles& Pose);
+	float BladeBlock = 0.f, BladeBlockHold = 0.f;
+TMap<FName, FVector> CombatVel;       // joint velocities of the spring-driven combat pose (weight and follow-through)
+float SwingWeightPitch = 0.f, SwingWeightYaw = 0.f, PelvisDip = 0.f;
+	TWeakObjectPtr<AIVMechPawn> OtherMechCache;
 	UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> GreebleComps;
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> GreebleMID;
 	void UpdateGrowths(float Dt);
