@@ -692,9 +692,9 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 		FVector Other = GetActorLocation();
 		for (TActorIterator<AIVMechPawn> It(GetWorld()); It; ++It) if (*It != this) Other = It->GetActorLocation();
 		const FVector Mid = (GetActorLocation() + Other) * 0.5f + FVector(0, 0, 3600.f);
-		const float Ang = GetWorld()->GetTimeSeconds() * 4.5f + 35.f;
-		const float Rad = 9800.f + 1400.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 0.21f);
-		const FVector From5 = Mid + FRotator(0.f, Ang, 0.f).Vector() * Rad + FVector(0, 0, 1900.f + 800.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 0.33f));
+		const float Ang = GetWorld()->GetTimeSeconds() * 3.2f + 75.f;
+		const float Rad = 15500.f + 2200.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 0.21f);
+		const FVector From5 = Mid + FRotator(0.f, Ang, 0.f).Vector() * Rad + FVector(0, 0, 500.f + 900.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 0.33f));
 		Camera->SetFieldOfView(52.f);
 		Camera->SetWorldLocationAndRotation(From5, (Mid - From5).Rotation());
 		return;
