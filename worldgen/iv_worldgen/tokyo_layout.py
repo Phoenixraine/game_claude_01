@@ -68,8 +68,16 @@ def _fit_widths(rng, n, lo, hi, total):
     return w
 
 
+PLAZA_SIZE = {"takeshita": 180.0, "shibuya_scramble": 170.0}
+STRIP_LENGTH = 380.0         # rows 0 + 1 + the cross street between them (Takeshita-dori is ~335 m after the plaza takes its end)
+
+
 class TokyoLayout:
-    def __init__(self, seed, terrain, rng):
+    def __init__(self, seed, terrain, rng, arena=None):
+        self.arena = arena          # None = TASK-015 (schema 2); "takeshita" | "shibuya_scramble" = TASK-019
+        self.plaza = None
+        self.strip_col = None
+        self.strip = None
         self.seed = seed
         self.T = terrain
         self.rng = rng
@@ -123,7 +131,14 @@ class TokyoLayout:
         # horizontal streets: 3 between 4 rows; the middle one is the 90 m boulevard (scramble)
         hs = [r.choice([44.0, 48.0, 52.0, 56.0]), 90.0, r.choice([44.0, 48.0, 52.0])]
         rows_total = (BLOCK_TOP - Y_ROW0) - sum(hs)
-        rh = _fit_widths(r, 4, 96.0, 178.0, rows_total)
+        if self.arena == "takeshita":
+            # rows 0 and 1 (+ the street between them) form the ~380 m strip of the pedestrian street; rows 2 and 3 share the rest
+            r01 = (STRIP_LENGTH - hs[0]) / 2.0
+            rest = (rows_total - 2.0 * r01) / 2.0
+            rh = [r01, r01, rest, rest]
+            self.strip_col = self._pick_strip_column()
+        else:
+            rh = _fit_widths(r, 4, 96.0, 178.0, rows_total)
         y = Y_ROW0
         for k in range(4):
             self.block_rows.append((y, y + rh[k]))
@@ -132,6 +147,20 @@ class TokyoLayout:
                 self.hlines.append((y + hs[k] / 2.0, hs[k], "boulevard" if hs[k] >= 90.0 else "street"))
                 y += hs[k]
         assert abs(y - BLOCK_TOP) < 1e-6, y
+
+    def _pick_strip_column(self):
+        """Column for the pedestrian street: a regular block column (not the station site) with room for two shop rows, near the middle of the map."""
+        best = None
+        for c, (x0, x1, kind) in enumerate(self.block_cols):
+            if kind != "block" or c not in (2, 3, 4) or x1 - x0 < 118.0:
+                continue
+            d = abs((x0 + x1) / 2.0 + 150.0)
+            if best is None or d < best[0]:
+                best = (d, c)
+        if best is None:                      # widen the search
+            c = max((c for c in (2, 3, 4)), key=lambda c: self.block_cols[c][1] - self.block_cols[c][0])
+            return c
+        return best[1]
 
     # ---- waterfront: promenade, canal, embankment -------------------------------------------------------------------
     def _waterfront(self):
@@ -197,7 +226,14 @@ class TokyoLayout:
                 y0 = t.coast_y(xc) + 72.0 + self.canal_width(xc) + 34.0       # T-junction with the embankment road
                 self._road("street", name, w, self._line((xc, y0), (xc, Y_TOP)))
         for j, (yc, w, kind) in enumerate(self.hlines):
-            self._road("street", "Boulevard" if kind == "boulevard" else "Cross Street %d" % (j + 1), w, self._line((X_MIN, yc), (X_MAX, yc)))
+            nm = "Boulevard" if kind == "boulevard" else "Cross Street %d" % (j + 1)
+            if self.arena == "takeshita" and j == 0:       # the cross street stops at the two streets flanking the pedestrian column
+                xl, xr = self.vlines[self.strip_col - 1][0], self.vlines[self.strip_col][0]
+                self._road("street", nm + " west", w, self._line((X_MIN, yc), (xl, yc)))
+                self._road("street", nm + " east", w, self._line((xr, yc), (X_MAX, yc)))
+            else:
+                self._road("street", nm, w, self._line((X_MIN, yc), (X_MAX, yc)))
+        self._plaza()
 
     # ---- blocks and alleys ------------------------------------------------------------------------------------------
     def _quad(self, x0, y0, x1, y1):
@@ -239,11 +275,62 @@ class TokyoLayout:
             self.sites[name] = b
         return b
 
+    def _plaza(self):
+        """Battle plaza (>= 160 x 160 m, no buildings): at the junction of the strip and the boulevard (takeshita) or round the scramble (shibuya_scramble)."""
+        if self.arena is None:
+            return
+        size = PLAZA_SIZE[self.arena]
+        if self.arena == "takeshita":
+            x0, x1, _ = self.block_cols[self.strip_col]
+            cx = (x0 + x1) / 2.0
+            cy = self.hlines[PLAZA_BOULEVARD][0]
+        else:
+            cx, cy = self.vlines[self.avenue_idx[0]][0], self.hlines[PLAZA_BOULEVARD][0]
+        cx, cy = self.warp(cx, cy)
+        h = size / 2.0
+        self.plaza = {"id": "battle_plaza", "center": [round(cx, 1), round(cy, 1)], "size": size,
+                      "polygon": [[round(cx - h, 1), round(cy - h, 1)], [round(cx + h, 1), round(cy - h, 1)], [round(cx + h, 1), round(cy + h, 1)], [round(cx - h, 1), round(cy + h, 1)]]}
+
+    def _strip_blocks(self, c, x0, x1, district):
+        """Takeshita strip: one merged column (rows 0-1) cut by the 12 m pedestrian street and three 24 m side lanes into shop blocks."""
+        y_start = self.block_rows[0][0]
+        y_end = self.plaza["center"][1] - self.plaza["size"] / 2.0 - 2.0
+        poly = self._quad(x0, y_start, x1, y_end)
+        w = x1 - x0
+        h = y_end - y_start
+        half = 6.0 / w
+        # side lanes at ~1/4, 1/2, 3/4 of the strip
+        rr = self.rng.fork("lanes")
+        fs = sorted([rr.uniform(0.17, 0.27), rr.uniform(0.45, 0.55), rr.uniform(0.72, 0.82)])
+        lane_w = 24.0
+        edges = [0.0]
+        for f in fs:
+            edges += [f - lane_w / 2.0 / h, f + lane_w / 2.0 / h]
+        edges.append(1.0)
+        for side in (0, 1):
+            u0, u1 = (0.0, 0.5 - half) if side == 0 else (0.5 + half, 1.0)
+            for k in range(0, len(edges), 2):
+                self._add_block("block", district, c, 0, self._sub(poly, u0, u1, edges[k], edges[k + 1]), sub=True, name=None)
+        # the pedestrian street itself (south end reaches the embankment road, north end the plaza)
+        pts = [self.warp((x0 + x1) / 2.0, y_start - 28.0)] + [self.bilinear(poly, 0.5, k / 6.0) for k in range(7)]
+        self.strip = {"road": self._road("pedestrian", "Takeshita-dori", 12.0, pts), "u_mid": 0.5, "x0": x0, "x1": x1, "y_start": y_start, "y_end": y_end}
+        for f in fs:
+            a = self._alley_line([self.bilinear(poly, k / 4.0, f) for k in range(5)])
+            a[0] = (a[0][0] - 24.0, a[0][1])
+            a[-1] = (a[-1][0] + 24.0, a[-1][1])
+            self.alleys.append(self._road("alley", "Side Lane %d" % (len(self.alleys) + 1), lane_w, a))
+        self.strip_poly = poly
+
     def _blocks(self):
         r = self.rng.fork("alleys")
         for c, (x0, x1, kind) in enumerate(self.block_cols):
             for rr, (y0, y1) in enumerate(self.block_rows):
                 district = self._district(c, rr)
+                if self.arena == "takeshita" and c == self.strip_col:
+                    if rr == 0:
+                        self._strip_blocks(c, x0, x1, district)
+                    if rr <= 1:
+                        continue
                 poly = self._quad(x0, y0, x1, y1)
                 w, h = x1 - x0, y1 - y0
                 reserved = kind == "site" or (c, rr) in self.reserved_cells()
@@ -264,6 +351,11 @@ class TokyoLayout:
         """(col,row) -> site name for blocks kept free for hero buildings (decided from the grid, not from random draws)."""
         if hasattr(self, "_reserved"):
             return self._reserved
+        if self.arena == "takeshita":
+            c = self.strip_col
+            res = {(c + 1, 3): "glass_tower_site", (c - 1, 3): "tower_lattice_site", (c, 3): "twin_hall_site", (0, 1): "temple_site"}
+            self._reserved = res
+            return res
         # scramble crossing joins the first avenue and the boulevard; the glass tower and the twin hall flank it
         av = self.avenue_idx[0]                  # street index k lies between columns k and k+1
         res = {(av, 2): "glass_tower_site", (av + 1, 3): "tower_lattice_site"}
@@ -346,6 +438,8 @@ class TokyoLayout:
 
     def scramble_centre(self):
         """Centre of the junction of the first avenue and the boulevard (the 80 x 80 m crossing)."""
+        if self.plaza is not None:
+            return tuple(self.plaza["center"])
         xc, w, _, _ = self.vlines[self.avenue_idx[0]]
         yc, hw, _ = self.hlines[PLAZA_BOULEVARD]
         return self.warp(xc, yc)

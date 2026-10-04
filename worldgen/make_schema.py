@@ -146,6 +146,60 @@ def make_v2():
     return s2
 
 
+def make_v3():
+    """schema_version 3 (cyberpunk layer, TASK-019): a superset of v2."""
+    import copy
+    s3 = copy.deepcopy(make_v2())
+    d = s3["definitions"]
+    s3["description"] = ("Contract between worldgen/ (generator) and the Unreal project. Units: metres; x right, y from the sea toward the city, z up. "
+                         "schema_version 3 = cyberpunk layer (TASK-019): arena config, glass towers, shop rows, mega signs, 1500+ lights, destruction, fog maps.")
+    d["road"]["properties"]["kind"] = {"enum": ["promenade", "avenue", "street", "alley", "embankment", "pedestrian"]}
+    d["road"]["properties"]["width"] = {"type": "number", "minimum": 8, "maximum": 90}
+    b = d["building"]["properties"]
+    b["building_type"] = {"enum": b["building_type"]["enum"] + ["glass_tower", "shopfront_row"]}
+    b["hero_kind"] = b["hero_kind"]
+    b["facade"] = {"type": "object"}
+    b["destruction"] = obj({"material": {"enum": ["glass", "concrete", "mixed"]}, "fracture_pattern": STR,
+                            "debris_mix": obj({"chunks": N, "gravel": N, "glass_shards": N, "dust": N}),
+                            "dust_color": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 255}, "minItems": 3, "maxItems": 3}})
+    d["prop"]["properties"]["kind"] = {"enum": d["prop"]["properties"]["kind"]["enum"] + ["torii_neon", "banner_flag", "steam_vent", "puddle", "water_tank", "rooftop_antenna"]}
+    d["prop"]["properties"].update({"width_m": N, "height_m": N})
+    d["light"] = obj({
+        "id": {"$ref": "#/definitions/id"},
+        "kind": {"enum": ["street", "neon_sign", "neon_tube", "window_block", "billboard", "beacon", "under_tower", "plaza"]},
+        "type": {"enum": ["point", "rect", "spot"]}, "pos": {"$ref": "#/definitions/point3"},
+        "color": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 255}, "minItems": 3, "maxItems": 3},
+        "intensity_hint": {"type": "number", "minimum": 0}, "radius": {"type": "number", "minimum": 0}, "flicker": {"type": "number", "minimum": 0, "maximum": 1},
+        "flicker_hz": N, "shadow": {"type": "boolean"}, "priority": {"type": "integer", "minimum": 1, "maximum": 5},
+        "hue": {"enum": ["cyan", "magenta", "amber", "red", "tungsten"]}, "block_id": {"type": ["string", "null"]}, "size": P2, "dir": P3},
+        ["id", "kind", "type", "pos", "color", "intensity_hint", "radius", "flicker", "shadow", "priority", "hue"])
+    d["mega_sign"] = obj({
+        "id": {"$ref": "#/definitions/id"}, "host": {"$ref": "#/definitions/id"}, "block_id": STR,
+        "style": {"enum": ["vertical_banner", "billboard_screen", "neon_tube_kanji", "holo_ad", "logo_sphere"]}, "size_m": P2, "pos": {"$ref": "#/definitions/point3"},
+        "yaw_deg": N, "normal": P2, "offset_m": N, "palette": {"type": "array", "items": {"type": "array", "items": INT, "minItems": 3, "maxItems": 3}, "minItems": 1},
+        "palette_names": {"type": "array", "items": STR}, "emissive_intensity": N,
+        "animation": obj({"kind": {"enum": ["flicker", "scroll", "pulse", "cycle"]}, "speed": N, "phase": N}),
+        "glyph_set": STR, "text_glyphs": {"type": "array", "items": STR, "minItems": 1}, "glyph_layout": STR, "monster": {"type": "boolean"}})
+    d["crowd"] = obj({"id": {"$ref": "#/definitions/id"}, "pos": {"$ref": "#/definitions/point3"}, "radius_m": N, "density_per_100m2": N, "speed_mps": N, "dir": P2})
+    d["wire"] = obj({"id": {"$ref": "#/definitions/id"}, "kind": STR, "from": STR, "to": STR, "points": {"type": "array", "items": P3, "minItems": 2}})
+    plaza = obj({"id": STR, "center": P2, "size": N, "polygon": {"$ref": "#/definitions/polygon"}})
+    s3["properties"]["schema_version"] = {"const": 3}
+    s3["properties"]["style"] = {"enum": ["cyber"]}
+    s3["properties"]["arena"] = obj({"name": {"enum": ["takeshita", "shibuya_scramble", "nakamise"]}, "plaza": plaza, "free_zone_m": N,
+                                     "street": {"type": ["object", "null"]}})
+    s3["properties"]["lights"] = {"type": "array", "items": {"$ref": "#/definitions/light"}, "minItems": 1500}
+    s3["properties"]["mega_signs"] = {"type": "array", "items": {"$ref": "#/definitions/mega_sign"}, "minItems": 80}
+    s3["properties"]["crowd_spawners"] = {"type": "array", "items": {"$ref": "#/definitions/crowd"}, "minItems": 1}
+    s3["properties"]["light_report"] = {"type": "object"}
+    s3["properties"]["fog_map"] = {"type": "object"}
+    s3["properties"]["resources"] = {"type": "object"}
+    infra = s3["properties"]["infrastructure"]
+    infra["properties"]["wires"] = {"type": "array", "items": {"$ref": "#/definitions/wire"}}
+    s3["required"] = [r for r in s3["required"] if r != "style"] + ["style", "arena", "mega_signs", "crowd_spawners", "fog_map", "light_report"]
+    s3["required"] = sorted(set(s3["required"]), key=s3["required"].index)
+    return s3
+
+
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(here, "schema.json"), "w", encoding="utf-8") as f:
@@ -154,4 +208,7 @@ if __name__ == "__main__":
     with open(os.path.join(here, "schema_v2.json"), "w", encoding="utf-8") as f:
         json.dump(make_v2(), f, indent=2, ensure_ascii=False)
         f.write("\n")
-    print("schema.json (v1) and schema_v2.json written")
+    with open(os.path.join(here, "schema_v3.json"), "w", encoding="utf-8") as f:
+        json.dump(make_v3(), f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    print("schema.json (v1), schema_v2.json and schema_v3.json written")

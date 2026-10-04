@@ -8,12 +8,12 @@ from .terrain import X0, X1
 HERO_COLORS = {"glass_tower": (60, 200, 230), "tower_lattice": (235, 70, 60), "twin_tower_hall": (170, 120, 230), "brick_station": (170, 70, 50),
                "sphere_building": (250, 200, 80), "temple_gate": (255, 90, 40), "scramble_crossing": (255, 255, 255), "port_crane": (250, 150, 40),
                "expressway": (150, 90, 200), "suspension_bridge": (235, 235, 245)}
-TYPE_COLORS = {"apartment_tower": (222, 178, 130), "office_tower": (110, 130, 170), "low_shop": (205, 190, 150), "parking": (150, 150, 158), "temple": (200, 70, 50),
+TYPE_COLORS = {"glass_tower": (70, 190, 225), "shopfront_row": (235, 120, 170), "apartment_tower": (222, 178, 130), "office_tower": (110, 130, 170), "low_shop": (205, 190, 150), "parking": (150, 150, 158), "temple": (200, 70, 50),
                "station": (170, 70, 50), "landmark": (200, 200, 200)}
 ROAD_COLORS = {"promenade": (110, 112, 118), "embankment": (92, 92, 104), "avenue": (82, 84, 92), "street": ASPHALT, "alley": (118, 116, 112)}
 
 
-def render_topdown(doc, terrain):
+def render_topdown(doc, terrain, title=None, overlay=None, legend_extra=None):
     ymin, ymax = -120.0, 1200.0
     W, H = int(X1 - X0), int(ymax - ymin)
     cv = Canvas(W, H)
@@ -124,6 +124,8 @@ def render_topdown(doc, terrain):
             tri = [(x, y - 8), (x + 7, y + 6), (x - 7, y + 6)]
             cv.polygon(tri, (255, 255, 255))
             cv.outline(tri, (0, 0, 0), 1)
+    if overlay:
+        overlay(cv, P)
     for b in doc["buildings"]:
         if b["type"] != "hero":
             continue
@@ -145,10 +147,10 @@ def render_topdown(doc, terrain):
              ("LOW SHOP", TYPE_COLORS["low_shop"]), ("PARKING", TYPE_COLORS["parking"]), ("TEMPLE", TYPE_COLORS["temple"]), ("EXPRESSWAY + RAMPS", (130, 80, 170)),
              ("COLLAPSE ZONE", (255, 80, 80)), ("CANAL 50-80 M + 2 BRIDGES", (60, 140, 255)), ("SPAWN PLAYER (BAY)", (30, 220, 60)), ("SPAWN ENEMY (SCRAMBLE)", (230, 40, 40)),
              ("DUEL POINTS", (255, 230, 40)), ("CAMERA", (255, 255, 255)), ("ALLEY 24-36 M", ROAD_COLORS["alley"]), ("STREET 44-90 M", ASPHALT), ("VENDING MACHINE", (60, 240, 255)),
-             ("LANTERN", (255, 50, 40)), ("SAKURA (40)", (255, 150, 190)), ("SIGN (NO TEXT)", (255, 70, 200)), ("CAR", (235, 235, 235))]
+             ("LANTERN", (255, 50, 40)), ("SAKURA (40)", (255, 150, 190)), ("SIGN (NO TEXT)", (255, 70, 200)), ("CAR", (235, 235, 235))] + list(legend_extra or [])
     lx, ly = 16, H - 36 - (len(items) + 1) // 2 * 20 - 30
     cv.rect(lx - 6, ly - 6, lx + 700, H - 8, (20, 22, 28))
-    cv.text(lx, ly, "TOKYO DISTRICT  SEED %d  1.6 X 1.2 KM  (SEA AT THE BOTTOM)" % doc["seed"], (255, 255, 255), 2)
+    cv.text(lx, ly, title or ("TOKYO DISTRICT  SEED %d  1.6 X 1.2 KM  (SEA AT THE BOTTOM)" % doc["seed"]), (255, 255, 255), 2)
     half = (len(items) + 1) // 2
     for k, (label, col) in enumerate(items):
         x = lx + (k // half) * 350

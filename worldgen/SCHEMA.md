@@ -169,3 +169,58 @@ footprint'ов зданий и вне воды.
 Детерминизм (хэш, CLI дважды), валидность по `schema_v2.json`, ровно 10 heroes по списку и в границах, 150–260 зданий и ограничения высот по типам, ≥ 20 переулков 24–36 м (сиды 1–3), кварталы 90–180 м, отсутствие пересечений
 и выхода на улицы, канал 50–80 м и 2 моста, коридор 35 м от `spawn_player` до `spawn_enemy`, эстакада не пересекает здания и стоит вне канала, статика (weak line → обрушение в `collapse_dir` ± 25°,
 одиночная колонна не роняет здание, у эстакады падает ≤ 4 пролёта), уникальные id, ≥ 800 автоматов, 40 сакур, провода соединяют существующие столбы, ≥ 600 источников света всех четырёх видов.
+
+---
+
+# schema_version 3 — киберпанк: Такэсита-дори и неон (TASK-019)
+
+Машиночитаемая схема: `worldgen/schema_v3.json` (`python3 worldgen/make_schema.py` собирает `schema.json` (v1), `schema_v2.json` и `schema_v3.json`). **Поля v1/v2 сохранены**, v3 их расширяет;
+`schema.json` и `schema_v2.json` не менялись. Запуск: `python3 worldgen/generate.py --style cyber --arena takeshita|shibuya_scramble --seed 1 --out DIR [--preview-dir DIR]`.
+Файлы рядом с `district.json`: `heightmap.r16`, `fog_density.png`, `fog_glow.png`, `towers.json`, `glyph_sets.json`, `light_report.json`. Как читать в Unreal — `UNREAL_NOTES.md`.
+
+## Арена (`arena`)
+| Поле | Смысл |
+|---|---|
+| `arena.name` | `takeshita` \| `shibuya_scramble` (значение `nakamise` зарезервировано схемой, генератор его пока не строит) |
+| `arena.plaza` | площадка боя: `{id, center, size, polygon}`; `size` ≥ 160 м (180 у Такэситы, 170 у Сибуи), **внутри нет ни одного здания** (тест). `spawn_enemy` и `spawn_duel_a/b` лежат внутри площадки |
+| `arena.street` | только `takeshita`: `{road_id, name, width_m: 12, length_m, entrance_torii: 3}`; иначе `null` |
+
+**Takeshita:** сетка Токио (v2) с «полосой»: два ряда кварталов колонны около центра слиты в один квартал длиной ≈ 335 м; он разрезан пешеходной улицей `road.kind = "pedestrian"`
+шириной 12 м (`roads[]`, ширина допускается от 8 м) и тремя боковыми переулками 24 м; южный конец выходит на набережную канала (там 3 арки `torii_neon`), северный — на площадку боя.
+Улица обрамлена `shopfront_row` (3–6 этажей); по сторонам площадки — стеклянные башни 120–300 м, в тылу площадки — двойная башня мэрии (hero), по бокам — телебашня и стеклянная башня 220 м.
+**Shibuya:** площадка 170×170 м вокруг скрамбла на перекрёстке авеню и бульвара (круг арок над бульваром, баннеры-флаги по краю).
+
+## Здания
+* `building_type: "glass_tower"` (≥ 120 м, до 300 м; в `seed 1` Такэситы — 9 штук с 9 разными пресетами из 12, в двух аренах вместе используются ≥ 10) с `facade`: `{preset, mullion_spacing_m, floor_height_m, tint[r,g,b], reflectivity 0..1,
+  crown: flat|spire|stepped|slanted|halo|antenna_cluster, setbacks[{from_floor, inset_m, side?}], curtain_wall{panel_w, panel_h, spandrel_ratio}, emissive_floors{pattern, density, color_seed},
+  rooftop_lights[{pos, color, kind: beacon|steady, blink_hz}]}`. Пресеты (12 силуэтов) — `towers.json`.
+* `building_type: "shopfront_row"` (улица): `facade{floors, bay_width_m, street_side, signage_strip{height_m, emissive}, awning, shutter, shopfront_glass_ratio, vertical_signs, crowd_spawn}`.
+* **`destruction`** у каждого здания (кроме `scramble_crossing`): `{material: glass|concrete|mixed, fracture_pattern, debris_mix{chunks, gravel, glass_shards, dust}, dust_color}`.
+  `fracture_pattern` — имя из `art/shards/fracture_patterns.json` (TASK-016); стеклянные башни — стекло+сталь+пыль (`glass_shards ≥ 0,5`), лавки — бетон+дерево+вывески.
+* Каждая стеклянная башня имеет `structure` (граф конструкции как в v1).
+
+## `mega_signs[]` (≥ 80; в `seed 1` — 96, из них 35 «монстров» ≥ 40 м высотой)
+`{id, host (id здания), block_id, style: vertical_banner|billboard_screen|neon_tube_kanji|holo_ad|logo_sphere, size_m [w,h] (до 60×180), pos [x,y,z центра], yaw_deg, normal [nx,ny], offset_m (от стены),
+palette[[r,g,b]…], palette_names, emissive_intensity, animation{kind: flicker|scroll|pulse|cycle, speed, phase}, glyph_set, text_glyphs[id…], glyph_layout, monster}`.
+`text_glyphs` — **только идентификаторы** глифов из `glyph_sets.json` (выдуманные псевдо-японские наборы `kana_like`, `kanji_like`, `pictograms`, `digits_like`; ничего не читаются, брендов нет).
+Вывеска ставится только на фасад, обращённый к центру площадки, с чистым 2D-лучом на высоте 40 м (нет здания ≥ 40 м между ними); проверка независимая в тестах.
+
+## Реквизит, провода, толпа
+`props[].kind` добавлены: `torii_neon` (`width_m`, `height_m`), `banner_flag`, `steam_vent`, `puddle` (`size` — маска отражения), `water_tank`, `rooftop_antenna` (на крышах, `building_id`).
+`infrastructure.wires[]` теперь и `kind: "garland"` (гирлянды поперёк улицы; `from`/`to` = `"street"`). `crowd_spawners[]`: `{id, pos, radius_m, density_per_100m2, speed_mps, dir}` (на Такэсите — вдоль улицы, гуще у входа и площадки).
+
+## Свет (`lights[]`, ≥ 1500; в `seed 1` — 3 106)
+`{id, kind: street|neon_sign|neon_tube|window_block|billboard|beacon|under_tower|plaza, type: point|rect|spot, pos, color[r,g,b], intensity_hint, radius, flicker 0..1, flicker_hz?, shadow (false),
+priority 1..5 (1 — всегда, 5 — гасить первым), hue: cyan|magenta|amber|red|tungsten, block_id, size? (rect), dir? (spot)}`.
+**Палитра:** неон — циан/маджента/янтарь/красный, лампы и окна — тёплый вольфрам; в квартале 3 (иногда 4) неоновых оттенка, всего ≤ 5 вместе с вольфрамом (`light_report.json`: распределение по видам/типам/приоритетам,
+доли оттенков, доминирующие оттенки каждого квартала, `max_dominant_hues_in_a_block`). Цвет любого источника отличается от цвета своей палитры не более чем на 60 по RGB (тест).
+
+## Карты тумана (`fog_map`)
+`fog_density.png` — 8 бит, серый, 512×512, 0 = чистый воздух, 255 = самый густой; `fog_glow.png` — RGB 512×512, цвет цветного ореола в тумане у неона/экранов. Покрывают арену `x −800…800`, `y 0…1200`
+(3,125 × 2,34 м/пиксель, строка 0 = `y_max`). Туман гуще над водой и в переулках с паром/на площадке, реже на улицах; ореолы — у неона и билбордов.
+
+## Гарантии v3 (`python3 -m unittest discover -s worldgen/tests -t worldgen`)
+Детерминизм (хэш всех файлов; ≤ 90 с — в реальности ≈ 10 с), валидность по `schema_v3.json` (обе арены), уникальные id, площадка ≥ 160 м без зданий и со спавнами внутри, башни не менее чем с трёх сторон площадки,
+Такэсита 320–380 м и 12 м шириной, 3 арки, ≥ 24 лавок вдоль улицы, ось улицы свободна, каждая стеклянная башня ≥ 120 м с полным набором параметров, ≥ 10 разных силуэтов-пресетов, ≥ 80 вывесок / ≥ 25 % монстров /
+≥ 90 % видимых с площадки, глифы — известные id, ≥ 1500 света с полным набором полей и `shadow:false`, политика палитры, fog PNG 512×512 8 бит (густота над водой > на улице), `destruction` у каждого здания,
+JSON < 15 МБ, и все проверки 015 (нет пересечений, коридор 35 м от залива до площадки, статика всех графов, 10 hero).
