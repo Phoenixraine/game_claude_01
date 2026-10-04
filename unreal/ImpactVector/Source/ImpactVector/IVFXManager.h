@@ -61,6 +61,8 @@ public:
 	void SpawnSmoke(const FVector& Center, float Radius, int32 Count, float Strength = 1.f);
 	/** Licking flames rising from a point (one call = a few sprites; call repeatedly for a burning zone). */
 	void SpawnFlame(const FVector& Center, float Radius, int32 Count, float Strength = 1.f);
+	/** A directed burst of flame (jetpack nozzle): Dir is the exhaust direction. */
+	void SpawnJet(const FVector& Pos, const FVector& Dir, int32 Count, float Speed, float Size);
 	/** Fireball + smoke + sparks + light flash. Scale 1 = a limb breaking, 3 = a mech blowing up. */
 	void SpawnExplosion(const FVector& Center, float Scale = 1.f);
 	/** Short light flash (clashes, muzzle, lightning-like). */

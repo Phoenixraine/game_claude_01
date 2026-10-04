@@ -13,6 +13,11 @@
 #include "Components/AudioComponent.h"
 #include "Sound/SoundBase.h"
 #include "IVAudio.h"
+#include "IVGraphics.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/LocalPlayer.h"
+#include "GenericPlatform/GenericApplication.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 
@@ -74,6 +79,7 @@ void AIVGameFlow::Begin(AIVMechPawn* InPlayer, AIVMechPawn* InEnemy, AIVCombatDi
 	EnemyHome = Enemy->GetActorTransform();
 	BuildSteps();
 	if (Dir) EventHandle = Dir->OnEvent.AddUObject(this, &AIVGameFlow::OnCombatEvent);
+	FParse::Value(FCommandLine::Get(), TEXT("-IVPick="), PendingPick);
 	switch (Initial)
 	{
 	case EIVFlowState::Tutorial: EnterTutorial(); break;
@@ -186,7 +192,9 @@ void AIVGameFlow::UpdateMusic(float Dt)
 // ---------------------------------------------------------------------------------------------------- states
 void AIVGameFlow::EnterMenu()
 {
+	if (bVersus || Player2) LeaveVersus();
 	State = EIVFlowState::Menu;
+	GfxPreset = IVGraphics::Load();
 	MenuIndex = 0;
 	if (AIVPlayerController* P = PC()) P->SetCombatEnabled(false);
 	SetCam(5);
@@ -249,6 +257,75 @@ void AIVGameFlow::EnterDuel()
 	HitsLanded = HitsTaken = Parries = 0;
 	EndDelay = -1.f;
 	StartBattleMusic();
+}
+
+bool AIVGameFlow::SecondPadPresent() const { return true; }
+
+void AIVGameFlow::EnterJoin()
+{
+	State = EIVFlowState::Join;
+	bJoin1 = bJoin2 = false;
+	if (!Player2)
+	{
+		Player2 = Cast<AIVPlayerController>(UGameplayStatics::CreatePlayer(this, 1, true));
+		if (Player2) { Player2->MySide = iv::Side::B; Player2->SetCombatEnabled(false); }
+	}
+	if (UGameViewportClient* VC = GetWorld()->GetGameViewport()) VC->SetForceDisableSplitscreen(true);
+}
+
+void AIVGameFlow::JoinInput()
+{
+	APlayerController* P1 = UGameplayStatics::GetPlayerController(this, 0);
+	if (!P1) return;
+	if (P1->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom) || P1->WasInputKeyJustPressed(EKeys::Enter) || P1->WasInputKeyJustPressed(EKeys::SpaceBar)) { bJoin1 = true; IVAudio::Play2D(GetWorld(), TEXT("cockpit_switch_02"), 0.8f); }
+	if (Player2 && (Player2->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom) || Player2->WasInputKeyJustPressed(EKeys::Gamepad_RightTriggerAxis))) { bJoin2 = true; IVAudio::Play2D(GetWorld(), TEXT("cockpit_switch_03"), 0.8f); }
+	if (FParse::Param(FCommandLine::Get(), TEXT("IVSplitAuto"))) bJoin1 = bJoin2 = true;
+	if (bJoin1 && bJoin2) EnterVersus();
+}
+
+void AIVGameFlow::EnterVersus()
+{
+	bVersus = true;
+	if (!Player2) { EnterMenu(); return; }
+	if (UGameViewportClient* VC = GetWorld()->GetGameViewport()) VC->SetForceDisableSplitscreen(false);
+	Player2->Possess(Enemy);
+	Enemy->bAIControlled = false;
+	Enemy->SetExternalControl(true);
+	Enemy->SetPlayerLamps(true);
+	Enemy->SetFirstPersonView(true);
+	Player2->SetCombatEnabled(true);
+	Player2->SetLockOn(true);
+	if (AIVPlayerController* P = PC()) { P->SetCombatEnabled(true); P->SetLockOn(true); }
+	State = EIVFlowState::Duel;
+	SetCam(0);
+	if (Dir)
+	{
+		Dir->ClearPlayerAuto();
+		Dir->SetHumanB(true);
+		Dir->Restart();
+		Dir->SetDummy(iv::DummyMode::Off);
+	}
+	PlaceMechs(60.f);
+	SetBanner(TEXT("ДУЭЛЬ ИГРОКОВ"), TEXT("Игрок 1 — слева  ·  Игрок 2 — справа"), 3.5f);
+	DuelClock = 0.f;
+	HitsLanded = HitsTaken = Parries = 0;
+	EndDelay = -1.f;
+	StartBattleMusic();
+}
+
+void AIVGameFlow::LeaveVersus()
+{
+	bVersus = false;
+	if (Player2)
+	{
+		Player2->UnPossess();
+		UGameplayStatics::RemovePlayer(Player2, true);
+		Player2 = nullptr;
+	}
+	if (Enemy) { Enemy->SetPlayerLamps(false); Enemy->SetExternalControl(true); }
+	if (Dir) Dir->SetHumanB(false);
+	if (AIVPlayerController* P = PC()) P->SetLockOn(false);
+	if (UGameViewportClient* VC = GetWorld()->GetGameViewport()) VC->SetForceDisableSplitscreen(false);
 }
 
 void AIVGameFlow::EnterResult()
@@ -351,8 +428,10 @@ FString AIVGameFlow::GetStatsLine() const
 TArray<FString> AIVGameFlow::GetMenuItems() const
 {
 	TArray<FString> I;
+	I.Add(FString::Printf(TEXT("ДУЭЛЬ С ИИ      <  %s  >"), kDifficulty[FMath::Clamp(Difficulty, 0, 2)]));
 	I.Add(TEXT("ОБУЧЕНИЕ"));
-	I.Add(FString::Printf(TEXT("ДУЭЛЬ      <  %s  >"), kDifficulty[FMath::Clamp(Difficulty, 0, 2)]));
+	I.Add(TEXT("СПЛИТ-СКРИН  ·  2 ГЕЙМПАДА"));
+	I.Add(FString::Printf(TEXT("ГРАФИКА      <  %s  >"), IVGraphics::PresetName(GfxPreset)));
 	I.Add(TEXT("ВЫХОД"));
 	return I;
 }
@@ -365,17 +444,30 @@ void AIVGameFlow::MenuInput()
 	APlayerController* P = UGameplayStatics::GetPlayerController(this, 0);
 	if (!P) return;
 	auto Pressed = [P](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (P->WasInputKeyJustPressed(K)) return true; return false; };
-	if (Pressed({ EKeys::Up, EKeys::W, EKeys::Gamepad_DPad_Up })) MenuIndex = (MenuIndex + 2) % 3;
-	if (Pressed({ EKeys::Down, EKeys::S, EKeys::Gamepad_DPad_Down })) MenuIndex = (MenuIndex + 1) % 3;
-	if (MenuIndex == 1)
+	const int32 N = 5;
+	if (Pressed({ EKeys::Up, EKeys::W, EKeys::Gamepad_DPad_Up, EKeys::Gamepad_LeftStick_Up })) { MenuIndex = (MenuIndex + N - 1) % N; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.7f); }
+	if (Pressed({ EKeys::Down, EKeys::S, EKeys::Gamepad_DPad_Down, EKeys::Gamepad_LeftStick_Down })) { MenuIndex = (MenuIndex + 1) % N; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.7f); }
+	const bool bLeft = Pressed({ EKeys::Left, EKeys::A, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftStick_Left });
+	const bool bRight = Pressed({ EKeys::Right, EKeys::D, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftStick_Right });
+	if (MenuIndex == 0)
 	{
-		if (Pressed({ EKeys::Left, EKeys::A, EKeys::Gamepad_DPad_Left })) Difficulty = FMath::Max(0, Difficulty - 1);
-		if (Pressed({ EKeys::Right, EKeys::D, EKeys::Gamepad_DPad_Right })) Difficulty = FMath::Min(2, Difficulty + 1);
+		if (bLeft) Difficulty = FMath::Max(0, Difficulty - 1);
+		if (bRight) Difficulty = FMath::Min(2, Difficulty + 1);
+	}
+	if (MenuIndex == 3 && (bLeft || bRight))
+	{
+		GfxPreset = FMath::Clamp(GfxPreset + (bRight ? 1 : -1), 0, IVGraphics::kPresetCount - 1);
+		IVGraphics::Apply(GetWorld(), GfxPreset);
+		IVGraphics::Save(GfxPreset);
+		IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.7f);
 	}
 	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom, EKeys::LeftMouseButton }))
 	{
-		if (MenuIndex == 0) EnterTutorial();
-		else if (MenuIndex == 1) EnterDuel();
+		IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.8f);
+		if (MenuIndex == 0) EnterDuel();
+		else if (MenuIndex == 1) EnterTutorial();
+		else if (MenuIndex == 2) EnterJoin();
+		else if (MenuIndex == 3) { GfxPreset = (GfxPreset + 1) % IVGraphics::kPresetCount; IVGraphics::Apply(GetWorld(), GfxPreset); IVGraphics::Save(GfxPreset); }
 		else UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
 	}
 }
@@ -392,8 +484,16 @@ void AIVGameFlow::Tick(float Dt)
 	UpdateMusic(Dt);
 	if (State != EIVFlowState::Menu && P->WasInputKeyJustPressed(EKeys::Escape)) { EnterMenu(); return; }
 
+	if (PendingPick >= 0 && State == EIVFlowState::Menu && GetGameTimeSinceCreation() > 1.5f)
+	{
+		const int32 K = PendingPick; PendingPick = -1;
+		if (K == 0) EnterDuel(); else if (K == 1) EnterTutorial(); else if (K == 2) EnterJoin();
+	}
 	switch (State)
 	{
+	case EIVFlowState::Join:
+		JoinInput();
+		break;
 	case EIVFlowState::Menu:
 		MenuInput();
 		if (Dir->IsMatchOver() && Dir->GetSecondsSinceEnd() > 6.f)
@@ -450,8 +550,7 @@ void AIVGameFlow::Tick(float Dt)
 		break;
 	case EIVFlowState::Result:
 		ResultT += Dt;
-		if (ResultT > 0.6f && P->WasInputKeyJustPressed(EKeys::Enter)) EnterDuel();
-		if (ResultT > 0.6f && P->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom)) EnterDuel();
+		if (ResultT > 0.6f && (P->WasInputKeyJustPressed(EKeys::Enter) || P->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom))) { if (bVersus) EnterVersus(); else EnterDuel(); }
 		break;
 	}
 }

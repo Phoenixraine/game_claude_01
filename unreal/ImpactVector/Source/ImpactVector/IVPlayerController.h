@@ -23,6 +23,16 @@ class AIVCombatDirector;
  *   F = scoop a building and throw it in the opponent's face | A     G = grab | X     C / R = cancel / reverse | B
  *   V = ultimate | Y     arrows = power priority     Tab = lock-on | R3     Enter = restart     Esc = menu
  */
+/** DbD-style below-deck repair: hold to work, and hit the skill checks that pop up. */
+struct FIVRepairGame
+{
+	bool bActive = false, bWorking = false, bCheck = false;
+	float Progress = 0.f, Time = 0.f, TimeLimit = 22.f;
+	float Needle = 0.f, NeedleSpeed = 240.f, ZoneStart = 0.f, ZoneLen = 54.f, GreatLen = 12.f;
+	float NextCheck = 1.2f, FlashGood = 0.f, FlashBad = 0.f, Cooldown = 0.f, RepairedMark = 0.f;
+	int32 Level = 1;
+};
+
 UCLASS()
 class IMPACTVECTOR_API AIVPlayerController : public APlayerController
 {
@@ -69,7 +79,25 @@ private:
 	void OnAct5() { DoAction(TEXT("dodge_left")); }
 	void OnAct6() { DoAction(TEXT("quick_piston_r")); }
 
+public:
 	bool WantsFreeLook() const;
+	bool IsRepairing() const { return Repair.bActive; }
+	const FIVRepairGame& GetRepair() const { return Repair; }
+	FVector2D GetBerserkAim() const { return BerserkAim; }
+	void SetLockOn(bool b) { bLockOn = b; LockOffYaw = LockOffPitch = 0.f; }
+	/** Gamepad vibration (large + small motor), Strength 0..1. */
+	void Rumble(float Strength, float Seconds);
+	bool bRumbleEnabled = true;
+	void StartRepair();
+	void StopRepair(bool bSuccess);
+	void UpdateRepair(float Dt);
+	FIVRepairGame Repair;
+	/** The side this controller plays in the duel (split screen: the second pad plays side B). */
+	iv::Side MySide = iv::Side::A;
+	FVector2D BerserkAim = FVector2D::ZeroVector;
+	bool bPadStrikePrev = false;
+	bool bScriptLunge = false, bScriptHold = false, bScriptPress = false;
+private:
 	AIVMechPawn* Mech() const;
 	AIVCombatDirector* GetDirector();
 	void UpdateCombatInput(float Dt);

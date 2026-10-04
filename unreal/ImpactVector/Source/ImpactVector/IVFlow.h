@@ -13,7 +13,7 @@ class AIVCombatDirector;
 class AIVPlayerController;
 class UAudioComponent;
 
-enum class EIVFlowState : uint8 { Menu, Tutorial, Duel, Result };
+enum class EIVFlowState : uint8 { Menu, Tutorial, Duel, Result, Join };
 
 enum class ETutGoal : uint8 { Timer, Walk, Look, HeavyHit, QuickHit, Defend, Evade, Counter, Ability, Scoop, Ultimate };
 
@@ -46,6 +46,11 @@ public:
 	TArray<FString> GetMenuItems() const;
 	int32 GetMenuIndex() const { return MenuIndex; }
 	FString GetDifficultyName() const;
+	// ---- split screen join screen
+	bool IsVersus() const { return bVersus; }
+	bool JoinReady(int32 I) const { return I == 0 ? bJoin1 : bJoin2; }
+	bool SecondPadPresent() const;
+	int32 GetGfxPreset() const { return GfxPreset; }
 	// ---- prompts
 	bool HasPrompt() const { return State == EIVFlowState::Tutorial && Steps.IsValidIndex(Step); }
 	const FIVTutorialStep& GetStep() const { return Steps[Step]; }
@@ -99,6 +104,14 @@ private:
 	void SetBanner(const FString& Main, const FString& Sub, float Seconds);
 	void OnCombatEvent(const iv::Event& Ev);
 	void MenuInput();
+	void EnterJoin();
+	void EnterVersus();
+	void LeaveVersus();
+	void JoinInput();
+	bool bVersus = false, bJoin1 = false, bJoin2 = false;
+	int32 PendingPick = -1;
+	int32 GfxPreset = 3;
+	UPROPERTY() TObjectPtr<AIVPlayerController> Player2;
 	AIVPlayerController* PC() const;
 
 	// ---- music: stems that fade in with the intensity of the fight

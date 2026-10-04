@@ -24,6 +24,7 @@
 #include "Components/SpotLightComponent.h"
 #include "ProceduralMeshComponent.h"
 #include "IVDistrict.h"
+#include "IVPlayerController.h"
 #include "Components/InstancedStaticMeshComponent.h"
 
 static TAutoConsoleVariable<int32> CVarIVCam(TEXT("iv.Cam"), 0,
@@ -305,6 +306,20 @@ void AIVMechPawn::SetBodyTint(const FLinearColor& Tint)
 	}
 }
 
+void AIVMechPawn::SetPlayerLamps(bool bOn)
+{
+	bLampsDown = !bOn;
+	LampPower = bOn ? 1.f : 0.12f;
+	LampColor = bOn ? FLinearColor(0.75f, 0.88f, 1.f) : FLinearColor(1.f, 0.28f, 0.12f);
+	for (int32 i = 0; i < 2; ++i) if (HeadLamp[i])
+	{
+		HeadLamp[i]->SetLightColor(LampColor);
+		HeadLamp[i]->SetIntensity(70000.f * LampPower);
+		HeadLamp[i]->SetVolumetricScatteringIntensity(1.6f * FMath::Sqrt(LampPower));
+		HeadLamp[i]->SetRelativeRotation(bOn ? FRotator(-13.f, (i == 0 ? 5.f : -5.f), 0.f) : FRotator(-30.f, (i == 0 ? 16.f : -16.f), 0.f));
+	}
+}
+
 void AIVMechPawn::SetFirstPersonView(bool bFirstPerson)
 {
 	if (HeadMesh) HeadMesh->SetOwnerNoSee(bFirstPerson);
@@ -334,6 +349,7 @@ void AIVMechPawn::Tick(float Dt)
 	UpdateDetached(Dt);
 	UpdateDamageFX(Dt);
 	UpdateBladeTrail(Dt);
+	UpdateV5Fx(Dt);
 	if (IsLocallyControlled() || GetIVCam() != 0)
 	{
 		if (CockpitFx && GetIVCam() == 0)
@@ -443,9 +459,11 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 	FHitResult G;
 	FCollisionQueryParams Q(SCENE_QUERY_STAT(IVGround), false, this);
 	const FVector P = GetActorLocation();
-	if (GetWorld()->LineTraceSingleByChannel(G, P + FVector(0, 0, 3000), P - FVector(0, 0, 12000), ECC_WorldStatic, Q))
+	const float LiftTarget = (CombatAnim.posture == iv::Posture::Airborne) ? 3400.f * FMath::Sin(3.14159f * FMath::Clamp(CombatAnim.airProgress, 0.f, 1.f)) : 0.f;
+	AirLift = FMath::FInterpTo(AirLift, LiftTarget, Dt, 12.f);
+	if (GetWorld()->LineTraceSingleByChannel(G, P + FVector(0, 0, 3000), P - FVector(0, 0, 16000), ECC_WorldStatic, Q))
 	{
-		SetActorLocation(FVector(P.X, P.Y, G.ImpactPoint.Z + 4100.f));
+		SetActorLocation(FVector(P.X, P.Y, G.ImpactPoint.Z + 4100.f + AirLift));
 	}
 }
 
@@ -624,11 +642,18 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 		Camera->SetWorldLocationAndRotation(From2, (CC + FVector(0, 0, bUlt ? 0.f : 900.f) - From2).Rotation());
 		return;
 	}
-	Camera->SetFieldOfView(92.f);
+	{
+		UGameViewportClient* VPC = GetWorld() ? GetWorld()->GetGameViewport() : nullptr;
+		const bool bSplit = VPC && VPC->GetCurrentSplitscreenConfiguration() != ESplitScreenType::None;
+		Camera->SetFieldOfView((bSplit ? 70.f : 92.f) - 7.f * Rage);
+	}
 
 	if (Mode == 0)
 	{
-		Camera->SetWorldLocationAndRotation(CamPos, (CamRot + FRotator(0.3f * SwayRot.Pitch, 0.3f * SwayRot.Yaw, 0.3f * SwayRot.Roll)).Quaternion() * LookQ);
+		ShakeAmp = FMath::FInterpTo(ShakeAmp, 0.f, Dt, 3.4f);
+		const float Tm = GetWorld()->GetTimeSeconds();
+		const FRotator Shk(ShakeAmp * 1.1f * FMath::Sin(Tm * 47.f), ShakeAmp * 1.1f * FMath::Sin(Tm * 59.f + 1.f), ShakeAmp * 1.6f * FMath::Sin(Tm * 39.f + 2.f));
+		Camera->SetWorldLocationAndRotation(CamPos + FVector(0.f, 0.f, ShakeAmp * 1.8f * FMath::Sin(Tm * 71.f)), (CamRot + FRotator(0.3f * SwayRot.Pitch, 0.3f * SwayRot.Yaw, 0.3f * SwayRot.Roll) + Shk).Quaternion() * LookQ);
 		return;
 	}
 
@@ -967,8 +992,14 @@ FVector AIVMechPawn::GetZoneWorldLocation(iv::Zone Z) const
 
 void AIVMechPawn::AddCockpitImpulse(float Right, float Up, float Strength)
 {
-	SwayVel += FVector(-45.f * Strength, 55.f * Right * Strength, 40.f * Up * Strength);
-	SwayRotVel += FVector(-14.f * Right * Strength, -9.f * Strength * FMath::Abs(Up) - 7.f * Strength, 9.f * Right * Strength);
+	const float S = Strength * (Strength > 0.7f ? 1.5f : 1.f);
+	SwayVel += FVector(-45.f * S, 55.f * Right * S, 40.f * Up * S);
+	SwayRotVel += FVector(-14.f * Right * S, -9.f * S * FMath::Abs(Up) - 7.f * S, 9.f * Right * S);
+	if (IsLocallyControlled())
+	{
+		ShakeAmp = FMath::Max(ShakeAmp, FMath::Min(Strength, 2.5f));
+		if (AIVPlayerController* C = Cast<AIVPlayerController>(GetController())) C->Rumble(FMath::Clamp(Strength * 0.45f, 0.f, 1.f), 0.12f + 0.16f * FMath::Min(Strength, 2.f));
+	}
 }
 
 void AIVMechPawn::OnCombatHit(iv::Zone Z, float Strength01, bool bBlocked, bool bParried, iv::SwingSide Dir)
@@ -1229,7 +1260,7 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 	auto P = [&](const FString& N) -> const FIVPoseAngles* { return D.FindPose(FName(*N)); };
 	auto Ease = [](float u) { u = FMath::Clamp(u, 0.f, 1.f); return 1.f - FMath::Pow(1.f - u, 2.6f); };
 	const FString Arm = (S.arm == iv::Arm::R) ? TEXT("r") : TEXT("l");
-	const FString Side = SideName(S.side);
+	const FString Side = (S.kind == iv::StrikeKind::Lunge) ? FString(TEXT("right")) : ((S.kind == iv::StrikeKind::AirChop) ? FString(TEXT("up")) : FString(SideName(S.side)));
 
 	FIVPoseAngles Target = *Guard;
 	bool bLegs = false;
@@ -1241,10 +1272,15 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 		const FIVPoseAngles* B = P(TEXT("knockdown_down"));
 		if (A && B) Target = FIVPoseAngles::Lerp(*A, *B, Ease((S.postureProgress - 0.15f) / 0.5f));
 	}
-	else if (S.posture == iv::Posture::Staggered || S.posture == iv::Posture::ShutDown)
+	else if (S.posture == iv::Posture::Staggered || S.posture == iv::Posture::ShutDown || S.posture == iv::Posture::Overloaded)
 	{
 		bLegs = true;
-		if (const FIVPoseAngles* K = P(TEXT("kneel"))) Target = FIVPoseAngles::Lerp(*Guard, *K, S.posture == iv::Posture::ShutDown ? 0.9f : 0.45f * FMath::Sin(FMath::Clamp(S.postureProgress, 0.f, 1.f) * 3.14159f));
+		if (const FIVPoseAngles* K = P(TEXT("kneel"))) Target = FIVPoseAngles::Lerp(*Guard, *K, (S.posture == iv::Posture::ShutDown || S.posture == iv::Posture::Overloaded) ? 0.9f : 0.45f * FMath::Sin(FMath::Clamp(S.postureProgress, 0.f, 1.f) * 3.14159f));
+	}
+	else if (S.posture == iv::Posture::Sliding)
+	{
+		bLegs = true;
+		if (const FIVPoseAngles* K = P(TEXT("kneel"))) Target = FIVPoseAngles::Lerp(*Guard, *K, 0.8f);
 	}
 	else if (S.posture == iv::Posture::Dodging)
 	{
@@ -1332,10 +1368,19 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 		if (const FIVPoseAngles* B = P(FString::Printf(TEXT("block_%s"), SideName(S.guardSide)))) Target = *B;
 	}
 
+	if (S.posture == iv::Posture::Airborne || S.posture == iv::Posture::Sliding) bLegs = true;
 	// smooth towards the target (fast, but never a pop) and merge into the locomotion pose
 	if (!bCombatPoseInit) { CombatPose = *Guard; bCombatPoseInit = true; }
 	const float K = 1.f - FMath::Exp(-16.f * Dt);
 	CombatPose = FIVPoseAngles::Lerp(CombatPose, Target, K);
+	if (S.posture == iv::Posture::Airborne)
+	{
+		// the legs fold up under the jump-jets
+		const float Tuck = FMath::Pow(FMath::Sin(FMath::Clamp(S.airProgress, 0.f, 1.f) * 3.14159f), 0.6f);
+		for (const TCHAR* N : { TEXT("thigh_l"), TEXT("thigh_r") }) if (FVector* V = CombatPose.Joint.Find(FName(N))) V->X += -42.f * Tuck;
+		for (const TCHAR* N : { TEXT("shin_l"), TEXT("shin_r") }) if (FVector* V = CombatPose.Joint.Find(FName(N))) V->X += 66.f * Tuck;
+		for (const TCHAR* N : { TEXT("foot_l"), TEXT("foot_r") }) if (FVector* V = CombatPose.Joint.Find(FName(N))) V->X += -24.f * Tuck;
+	}
 
 	static const TCHAR* Upper[] = { TEXT("torso"), TEXT("head"), TEXT("reactor"), TEXT("shoulder_l"), TEXT("upperarm_l"), TEXT("forearm_l"), TEXT("hand_l"),
 		TEXT("shoulder_r"), TEXT("upperarm_r"), TEXT("forearm_r"), TEXT("hand_r") };
@@ -1367,6 +1412,85 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 	if (FVector* H = Pose.Joint.Find(FName(TEXT("head")))) *H += HitKick * 0.5f;
 }
 
+
+void AIVMechPawn::UpdateV5Fx(float Dt)
+{
+	Rage = FMath::FInterpTo(Rage, RageTarget, Dt, 2.5f);
+	if (HullMID) HullMID->SetScalarParameterValue(TEXT("Rage"), Rage);
+	AIVFXManager* FX = AIVFXManager::Get(GetWorld());
+	if (!FX) return;
+	// jump-jets: two nozzles on the back, exhaust straight down
+	if (CombatAnim.posture == iv::Posture::Airborne)
+	{
+		JetAcc += Dt;
+		while (JetAcc > 0.025f)
+		{
+			JetAcc -= 0.025f;
+			const FVector Base = GetActorLocation() - FVector(0, 0, 2400.f) - GetActorForwardVector() * 700.f;
+			for (int32 s = -1; s <= 1; s += 2) FX->SpawnJet(Base + GetActorRightVector() * (450.f * s), FVector(0.f, 0.f, -1.f), 2, 5200.f, 700.f);
+		}
+		if (JetAcc < 0.f) JetAcc = 0.f;
+	}
+	// the charge of a lunge: the blade burns hot and the joints vent
+	if (CombatAnim.lungeCharge01 > 0.f)
+	{
+		SetSwordHeat(0.8f + 1.6f * CombatAnim.lungeCharge01);
+		LungeFxAcc += Dt;
+		if (LungeFxAcc > 0.12f)
+		{
+			LungeFxAcc = 0.f;
+			FX->SpawnSparks(GetZoneWorldLocation(iv::Zone::ArmR), FVector::UpVector, 3 + int32(8 * CombatAnim.lungeCharge01), 2600.f);
+		}
+	}
+	else if (CombatAnim.kind == iv::StrikeKind::Lunge && CombatAnim.phase == iv::Phase::Strike)
+	{
+		FVector B, T; GetBladeSegment(B, T);
+		FX->SpawnSparks(T, -GetActorForwardVector(), 6, 5000.f);
+	}
+	// an overloaded mech smokes and sparks while it waits for the power
+	if (CombatAnim.posture == iv::Posture::Overloaded)
+	{
+		LungeFxAcc += Dt;
+		if (LungeFxAcc > 0.2f)
+		{
+			LungeFxAcc = 0.f;
+			FX->SpawnSmoke(GetZoneWorldLocation(iv::Zone::Torso), 600.f, 2, 0.8f);
+			FX->SpawnSparks(GetZoneWorldLocation(iv::Zone::Reactor), FVector::UpVector, 5, 3500.f);
+		}
+	}
+}
+
+void AIVMechPawn::PlayBerserkSwing(iv::SwingSide Side)
+{
+	const FString Sd = SideName(Side);
+	PlaySequence({ FName(*FString::Printf(TEXT("swing_%s_r_windup"), *Sd)), FName(*FString::Printf(TEXT("swing_%s_r_commit"), *Sd)),
+		FName(*FString::Printf(TEXT("swing_%s_r_strike_end"), *Sd)), FName(TEXT("grab_clamp")) }, { 0.28f, 0.1f, 0.18f, 0.5f });
+}
+
+void AIVMechPawn::StartCounterPunch(AIVMechPawn* Victim)
+{
+	PlaySequence({ FName(TEXT("quick_piston_r_windup")), FName(TEXT("quick_piston_r_strike")), FName(TEXT("quick_piston_r_strike")), FName(TEXT("guard_neutral")) }, { 0.45f, 0.14f, 0.5f, 0.9f });
+	AddVelocityImpulse(GetActorForwardVector() * 1500.f);   // a short run-up
+	if (Victim)
+	{
+		Victim->PlaySequence({ FName(TEXT("knockdown_fall")), FName(TEXT("knockdown_down")), FName(TEXT("knockdown_down")), FName(TEXT("kneel")) }, { 0.45f, 1.2f, 1.6f, 2.f });
+		TWeakObjectPtr<AIVMechPawn> V(Victim);
+		FTimerHandle H;
+		GetWorld()->GetTimerManager().SetTimer(H, FTimerDelegate::CreateLambda([V]()
+		{
+			if (!V.IsValid()) return;
+			if (AIVFXManager* FX = AIVFXManager::Get(V->GetWorld())) FX->SpawnExplosion(V->GetZoneWorldLocation(iv::Zone::Torso), 1.1f);
+			V->AddCockpitImpulse(0.f, 1.f, 2.f);
+			V->AddVelocityImpulse(-V->GetActorForwardVector() * 1800.f);
+		}), 0.55f, false);
+	}
+}
+
+void AIVMechPawn::StartLockPose(bool bOn)
+{
+	if (bOn) PlaySequence({ FName(TEXT("block_up")), FName(TEXT("block_up")) }, { 0.2f, 6.f });
+	else PlaySequence({ FName(TEXT("guard_neutral")) }, { 0.4f });
+}
 
 void AIVMechPawn::UpdateBladeTrail(float Dt)
 {

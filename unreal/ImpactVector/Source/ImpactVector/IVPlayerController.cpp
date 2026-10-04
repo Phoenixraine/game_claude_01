@@ -1,6 +1,9 @@
 #include "IVPlayerController.h"
 #include "IVMechPawn.h"
 #include "IVCombat.h"
+#include "IVAudio.h"
+#include "IVFXManager.h"
+#include "GameFramework/ForceFeedbackEffect.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -157,6 +160,7 @@ void AIVPlayerController::OnLook(const FInputActionValue& V)
 	const bool bVectorMode = IsInputKeyDown(EKeys::LeftMouseButton) || IsInputKeyDown(EKeys::RightMouseButton) || GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.2f || GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.2f;
 	if (bMouse)
 	{
+		BerserkAim = (BerserkAim + FVector2D(L.X, L.Y) * 0.05f).GetClampedToMaxSize(1.f);
 		if (bVectorMode)
 		{
 			Stick += FVector2D(L.X, L.Y) * VectorSensitivity;
@@ -203,6 +207,18 @@ void AIVPlayerController::RunScript(float Dt)
 		else if (In && C.Name == TEXT("scoop")) In->bScoop = true;
 		else if (In && C.Name == TEXT("ult")) In->bUltimate = true;
 		else if (In && C.Name == TEXT("cancel")) In->bCancel = true;
+		else if (C.Name == TEXT("lunge")) bScriptLunge = C.Arg == TEXT("1");
+		else if (C.Name == TEXT("hurt") && Dir && Dir->GetMutableDuel()) { for (int32 k = 0; k < FCString::Atoi(*C.Arg); ++k) Dir->GetMutableDuel()->ExternalHit(MySide, iv::Zone::Reactor, 40.f, 0.f, 1); }
+		else if (C.Name == TEXT("repair")) StartRepair();
+		else if (C.Name == TEXT("hold")) bScriptHold = C.Arg == TEXT("1");
+		else if (C.Name == TEXT("press")) bScriptPress = true;
+		else if (C.Name == TEXT("hit")) { if (APawn* Pw = GetPawn()) if (AIVMechPawn* Mp = Cast<AIVMechPawn>(Pw)) if (Mp->GetCockpitFx()) Mp->GetCockpitFx()->Hit(FCString::Atof(*C.Arg), FVector(0, 1, 0), false); }
+		else if (In && C.Name == TEXT("jump")) In->bJump = true;
+		else if (In && C.Name == TEXT("chop")) In->bChop = true;
+		else if (In && C.Name == TEXT("slide")) In->bSlide = true;
+		else if (In && C.Name == TEXT("mash")) In->bMash = true;
+		else if (In && C.Name == TEXT("berserk")) In->bBerserk = true;
+		else if (In && C.Name == TEXT("qte")) { In->bQte = true; In->Side = iv::SwingSide::Right; }
 		else if (C.Name == TEXT("key") && C.Arg == TEXT("enter")) { /* menus are driven by the flow through real keys only */ }
 	}
 }
@@ -213,7 +229,7 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 	AIVCombatDirector* Dir = GetDirector();
 	AIVMechPawn* M = Mech();
 	if (!Dir || !M) return;
-	FIVCombatInput& In = Dir->PlayerIn;
+	FIVCombatInput& In = Dir->InputOf(MySide);
 
 	const bool bPadStrike = GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.4f;
 	const bool bPadGuard = GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.4f;
@@ -274,8 +290,30 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 	if (WasInputKeyJustPressed(EKeys::C) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) In.bCancel = true;
 	if (WasInputKeyJustPressed(EKeys::G) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left)) In.bGrab = true;
 	if (WasInputKeyJustPressed(EKeys::R) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) In.bReverse = true;
-	if (WasInputKeyJustPressed(EKeys::V) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) In.bUltimate = true;
-	if (WasInputKeyJustPressed(EKeys::F) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom)) In.bScoop = true;
+	if (!Repair.bActive && (WasInputKeyJustPressed(EKeys::H) || WasInputKeyJustPressed(EKeys::Gamepad_Special_Right))) StartRepair();
+	if (Repair.bActive) { In = FIVCombatInput(); return; }
+	const bool bPadLT = bPadGuard;
+	if (WasInputKeyJustPressed(EKeys::V) || (WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top) && !bPadLT)) In.bUltimate = true;
+	if (WasInputKeyJustPressed(EKeys::F) || (WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom) && bPadLT)) In.bScoop = true;
+	// ---- v5: lunge (hold B / R3), jetpack jump (Space / A), aerial chop (LMB / RT in the air), slide (X / B), sword-lock mashing, berserk (N / LT+Y)
+	In.bLungeHeld = IsInputKeyDown(EKeys::B) || IsInputKeyDown(EKeys::Gamepad_RightThumbstick) || bScriptLunge;
+	if (WasInputKeyJustPressed(EKeys::SpaceBar) || (WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom) && !bPadLT)) In.bJump = true;
+	const bool bRtEdge = bPadStrike && !bPadStrikePrev;
+	if (WasInputKeyJustPressed(EKeys::LeftMouseButton) || bRtEdge) In.bChop = true;
+	if (WasInputKeyJustPressed(EKeys::X) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) In.bSlide = true;
+	if (WasInputKeyJustPressed(EKeys::SpaceBar) || WasInputKeyJustPressed(EKeys::E) || WasInputKeyJustPressed(EKeys::Q) || WasInputKeyJustPressed(EKeys::LeftMouseButton) ||
+		WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right) ||
+		WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder) || bRtEdge)
+		In.bMash = true;
+	if (WasInputKeyJustPressed(EKeys::SpaceBar) || WasInputKeyJustPressed(EKeys::E) || WasInputKeyJustPressed(EKeys::LeftMouseButton) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom) || bRtEdge)
+	{
+		In.bQte = true;
+		if (Dir->GetDuel() && Dir->GetDuel()->berserk().active) In.Side = BerserkAim.Size() > 0.22f ? SideFromStick(BerserkAim) : iv::SwingSide::Right;
+	}
+	if (WasInputKeyJustPressed(EKeys::N) || (WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top) && bPadLT)) In.bBerserk = true;
+	if (!LookStick.IsNearlyZero(0.25f)) BerserkAim = LookStick;
+	BerserkAim = FMath::Vector2DInterpTo(BerserkAim, FVector2D::ZeroVector, Dt, 1.6f);
+	bPadStrikePrev = bPadStrike;
 
 	// ---- long-cooldown abilities: press selects, hold charges, release fires
 	const bool bK1 = IsInputKeyDown(EKeys::One) || IsInputKeyDown(EKeys::Gamepad_DPad_Up);
@@ -305,7 +343,7 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 	}
 	bGuardWasDown = bGuardDown;
 
-	if (WasInputKeyJustPressed(EKeys::Tab) || WasInputKeyJustPressed(EKeys::Gamepad_RightThumbstick)) { bLockOn = !bLockOn; LockOffYaw = LockOffPitch = 0.f; }
+	if (WasInputKeyJustPressed(EKeys::Tab) || (WasInputKeyJustPressed(EKeys::Gamepad_DPad_Down) && !bPadGuard)) { bLockOn = !bLockOn; LockOffYaw = LockOffPitch = 0.f; }
 	if (WasInputKeyJustPressed(EKeys::Enter) && Dir->IsMatchOver()) Dir->Restart();
 }
 
@@ -315,7 +353,7 @@ void AIVPlayerController::PlayerTick(float Dt)
 	AIVMechPawn* M = Mech();
 	if (!M) return;
 
-	FVector2D Move = bCombatEnabled ? MoveValue : FVector2D::ZeroVector;
+	FVector2D Move = (bCombatEnabled && !Repair.bActive) ? MoveValue : FVector2D::ZeroVector;
 	bool bSpr = bSprint;
 	if (bAuto)
 	{
@@ -331,6 +369,7 @@ void AIVPlayerController::PlayerTick(float Dt)
 	M->SetFreeLook(bFL);
 
 	AIVCombatDirector* Dir = GetDirector();
+	UpdateRepair(Dt);
 	if (Dir && !bAuto && bCombatEnabled)
 	{
 		UpdateCombatInput(Dt);
@@ -367,4 +406,144 @@ void AIVPlayerController::OnFire(const FInputActionValue&)
 void AIVPlayerController::DoAction(FName N)
 {
 	if (AIVMechPawn* M = Mech()) M->PlayAction(N);
+}
+
+
+// ------------------------------------------------------------------------------------------------ below-deck repair
+void AIVPlayerController::StartRepair()
+{
+	AIVCombatDirector* Dir = GetDirector();
+	AIVMechPawn* M = Mech();
+	if (!Dir || !M || !Dir->GetDuel() || Repair.bActive || Repair.Cooldown > 0.f) return;
+	const iv::Duel& D = *Dir->GetDuel();
+	const iv::Fighter& F = D.fighter(MySide);
+	if (D.result().over || D.lock().active || D.berserk().active || D.cinematic().active || F.breakdown <= 0) return;
+	if (F.posture != iv::Posture::Standing && F.posture != iv::Posture::Staggered) return;
+	FIVRepairGame G;
+	G.bActive = true;
+	G.Level = F.breakdown;
+	G.TimeLimit = 20.f + 3.f * F.breakdown;
+	Repair = G;
+	Dir->SetAutopilot(MySide, true);
+	IVAudio::Play2D(GetWorld(), TEXT("cockpit_switch_02"), 1.f);
+	IVAudio::Play2D(GetWorld(), TEXT("cockpit_hud_lock"), 0.8f);
+}
+
+void AIVPlayerController::StopRepair(bool bSuccess)
+{
+	AIVCombatDirector* Dir = GetDirector();
+	AIVMechPawn* M = Mech();
+	Repair.bActive = false;
+	Repair.bCheck = false;
+	if (Dir) Dir->SetAutopilot(MySide, false);
+	if (bSuccess)
+	{
+		if (Dir) Dir->RepairBreakdown(MySide, 3);
+		if (M && M->GetCockpitFx()) M->GetCockpitFx()->Repair(1.f);
+		IVAudio::Play2D(GetWorld(), TEXT("cockpit_hud_unlock"), 1.f);
+		IVAudio::Play2D(GetWorld(), TEXT("cockpit_switch_04"), 1.f);
+	}
+	else
+	{
+		Repair.Cooldown = 6.f;
+		IVAudio::Play2D(GetWorld(), TEXT("cockpit_alarm_warning"), 0.9f);
+	}
+}
+
+void AIVPlayerController::UpdateRepair(float Dt)
+{
+	FIVRepairGame& G = Repair;
+	G.Cooldown = FMath::Max(0.f, G.Cooldown - Dt);
+	G.FlashGood = FMath::Max(0.f, G.FlashGood - Dt * 2.5f);
+	G.FlashBad = FMath::Max(0.f, G.FlashBad - Dt * 2.5f);
+	if (!G.bActive) return;
+	AIVCombatDirector* Dir = GetDirector();
+	AIVMechPawn* M = Mech();
+	if (!Dir || !M || !Dir->GetDuel() || Dir->IsMatchOver()) { StopRepair(false); return; }
+	G.Time += Dt;
+	const bool bPress = bScriptPress || WasInputKeyJustPressed(EKeys::SpaceBar) || WasInputKeyJustPressed(EKeys::LeftMouseButton) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom) ||
+		(GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.5f && !bPadStrikePrev);
+	bPadStrikePrev = GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.5f;
+	const bool bHold = IsInputKeyDown(EKeys::SpaceBar) || IsInputKeyDown(EKeys::LeftMouseButton) || IsInputKeyDown(EKeys::Gamepad_FaceButton_Bottom) || bPadStrikePrev || bScriptHold;
+	if (WasInputKeyJustPressed(EKeys::Escape) || WasInputKeyJustPressed(EKeys::H) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) { StopRepair(false); G.Cooldown = 1.5f; return; }
+	bScriptPress = false;
+	G.bWorking = bHold;
+	if (bHold) G.Progress += Dt * 0.075f;
+	M->AddCockpitImpulse(FMath::RandRange(-1.f, 1.f), FMath::RandRange(-1.f, 1.f), bHold ? 0.12f : 0.05f);
+	auto Fail = [&]()
+	{
+		G.Progress = FMath::Max(0.f, G.Progress - 0.10f);
+		G.FlashBad = 1.f;
+		IVAudio::Play2D(GetWorld(), IVAudio::Variant(TEXT("cockpit_spark_"), 4), 1.f);
+		M->AddCockpitImpulse(0.f, 0.f, 1.2f);
+		if (M->GetCockpitFx()) M->GetCockpitFx()->Hit(0.55f, FVector(0, 1, 0), false);
+		if (iv::Duel* Du = Dir->GetMutableDuel()) Du->ExternalHit(MySide, iv::Zone::Reactor, 2.5f, 3.f, 4);
+	};
+	if (!G.bCheck)
+	{
+		if (bHold)
+		{
+			G.NextCheck -= Dt;
+			if (G.NextCheck <= 0.f)
+			{
+				G.bCheck = true;
+				G.Needle = 0.f;
+				G.ZoneStart = FMath::RandRange(110.f, 290.f);
+				G.ZoneLen = FMath::RandRange(46.f, 58.f);
+				G.GreatLen = 12.f;
+				G.NeedleSpeed = 220.f + 28.f * G.Level;
+				IVAudio::Play2D(GetWorld(), TEXT("cockpit_hud_lock"), 0.8f, 1.4f);
+			}
+		}
+	}
+	else
+	{
+		G.Needle += G.NeedleSpeed * Dt;
+		if (bPress)
+		{
+			const float Rel = FMath::Fmod(G.Needle - G.ZoneStart + 720.f, 360.f);
+			if (Rel < G.ZoneLen && G.Needle >= G.ZoneStart - 1.f)
+			{
+				const bool bGreat = Rel < G.GreatLen;
+				G.Progress += bGreat ? 0.13f : 0.07f;
+				G.FlashGood = 1.f;
+				IVAudio::Play2D(GetWorld(), TEXT("cockpit_switch_03"), 1.f, bGreat ? 1.3f : 1.f);
+			}
+			else Fail();
+			G.bCheck = false;
+			G.NextCheck = FMath::RandRange(1.1f, 2.4f);
+		}
+		else if (G.Needle > G.ZoneStart + G.ZoneLen + 10.f)
+		{
+			Fail();
+			G.bCheck = false;
+			G.NextCheck = FMath::RandRange(1.1f, 2.4f);
+		}
+	}
+	G.Progress = FMath::Clamp(G.Progress, 0.f, 1.f);
+	if (G.Progress - G.RepairedMark > 0.2f)
+	{
+		G.RepairedMark = G.Progress;
+		if (M->GetCockpitFx()) M->GetCockpitFx()->Repair(0.45f);
+	}
+	if (G.Progress >= 1.f) StopRepair(true);
+	else if (G.Time >= G.TimeLimit) StopRepair(false);
+}
+
+
+void AIVPlayerController::Rumble(float Strength, float Seconds)
+{
+	if (!bRumbleEnabled || Strength <= 0.01f || !IsLocalController()) return;
+	UForceFeedbackEffect* Fx = NewObject<UForceFeedbackEffect>(this);
+	FForceFeedbackChannelDetails D;
+	D.bAffectsLeftLarge = D.bAffectsRightLarge = true;
+	D.bAffectsLeftSmall = D.bAffectsRightSmall = Strength > 0.35f;
+	D.Curve.GetRichCurve()->AddKey(0.f, FMath::Clamp(Strength, 0.f, 1.f));
+	D.Curve.GetRichCurve()->AddKey(0.04f, FMath::Clamp(Strength, 0.f, 1.f));
+	D.Curve.GetRichCurve()->AddKey(FMath::Max(Seconds, 0.06f), 0.f);
+	Fx->ChannelDetails.Add(D);
+	FForceFeedbackParameters P;
+	P.Tag = FName(TEXT("iv_rumble"));
+	P.bIgnoreTimeDilation = true;
+	ClientPlayForceFeedback(Fx, P);
 }

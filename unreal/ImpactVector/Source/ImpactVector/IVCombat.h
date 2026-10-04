@@ -30,6 +30,9 @@ struct FIVCombatInput
 	int8 WeaponSelect = -1;            // 0 rail lance, 1 rockets, 2 plasma: applied by the next step
 	bool bScoop = false;
 	bool bQuick = false, bCancel = false, bGrab = false, bSwitchArm = false, bReverse = false, bDodge = false, bUltimate = false, bSetPriority = false;
+	// v5
+	bool bLungeHeld = false;
+	bool bJump = false, bChop = false, bSlide = false, bMash = false, bBerserk = false, bQte = false;
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FIVCombatEventSignature, const iv::Event&);
@@ -66,6 +69,14 @@ public:
 	float GetBlindSeconds(iv::Side S) const { return Duel.IsValid() ? Duel->fighter(S).blindTicks / float(iv::kTickHz) : 0.f; }
 
 	FIVCombatInput PlayerIn;
+	FIVCombatInput PlayerIn2;         // side B when a second human plays (split screen)
+	bool bHumanB = false;
+	void SetHumanB(bool b);
+	FIVCombatInput& InputOf(iv::Side S) { return S == iv::Side::A ? PlayerIn : PlayerIn2; }
+	/** Below-deck repair: the mech runs on autopilot while the pilot is away. */
+	void SetAutopilot(iv::Side S, bool bOn);
+	void RepairBreakdown(iv::Side S, int32 Levels);
+	float GetLungeCharge01(iv::Side S) const { return Anim[iv::Index(S)].lungeCharge01; }
 	FIVCombatEventSignature OnEvent;
 
 	const iv::Duel* GetDuel() const { return Duel.Get(); }
@@ -95,6 +106,7 @@ private:
 	float ScoopCooldown[2] = { 0.f, 0.f };
 	float AiScoopTimer = 14.f;
 	float HitStop = 0.f;
+	float LockSparkAcc = 0.f;
 	void ApplyHitStop(float Seconds, float Dilation);
 	void BladeImpact(AIVMechPawn* A, AIVMechPawn* B, float Scale, bool bStop);
 

@@ -21,7 +21,13 @@ public:
 	virtual void DrawHUD() override;
 
 private:
+	void DrawGlassInfographics(const iv::Fighter& FA, const iv::Fighter& FB, AIVMechPawn* Me, float Sx, float Fd);
+	void DrawAbilitiesGlass(AIVCombatDirector* Dir, const iv::Fighter& F, float Sx, float Fd);
+	void DrawSpecials(AIVCombatDirector* Dir, iv::Side MySide, AIVPlayerController* PC, AIVMechPawn* Me, float Sx);
+	void DrawBreakdown(AIVCombatDirector* Dir, iv::Side MySide, AIVPlayerController* PC, float Sx);
+	void DrawRepair(AIVPlayerController* PC, const iv::Fighter& F, float Sx);
 	void DrawMenu(AIVGameFlow* Flow);
+	void DrawJoin(AIVGameFlow* Flow);
 	void DrawTutorial(AIVGameFlow* Flow);
 	void DrawTrail(AIVPlayerController* PC);
 	void DrawMechDiagram(const iv::Fighter& F, float X, float Y, float S, bool bFront);

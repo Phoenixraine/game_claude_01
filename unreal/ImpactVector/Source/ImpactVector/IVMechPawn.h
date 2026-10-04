@@ -112,11 +112,20 @@ public:
 	void AddCockpitImpulse(float Right, float Up, float Strength);
 	/** Free look inside the cockpit (hold the key): the head turns, the room stays. Pitch down far enough to see the pilot's own body. */
 	void SetFreeLook(bool b) { bFreeLook = b; }
+	/** The opponent's head lamps: dim and aimed at the ground for the AI mech, the full key light for a second human pilot. */
+	void SetPlayerLamps(bool bOn);
 	bool IsFreeLook() const { return bFreeLook; }
 	void AddLook(float DYaw, float DPitch) { LookYawT = FMath::Clamp(LookYawT + DYaw, -115.f, 115.f); LookPitchT = FMath::Clamp(LookPitchT + DPitch, -82.f, 58.f); }
 	float GetLookAmount() const { return FMath::Max(FMath::Abs(LookYaw) / 40.f, FMath::Abs(LookPitch) / 28.f); }
 	UIVCockpitComponent* GetCockpitFx() const { return CockpitFx; }
 	void SetCockpitFeed(const FIVCockpitFeed& F) { if (CockpitFx) CockpitFx->SetFeed(F); }
+	// v5 presentation
+	void SetRage(float R) { RageTarget = R; }
+	float GetRage() const { return Rage; }
+	void PlayBerserkSwing(iv::SwingSide Side);
+	void StartCounterPunch(AIVMechPawn* Victim);
+	void StartLockPose(bool bOn);
+	float GetAirLift() const { return AirLift; }
 	void StartCinematic(AIVMechPawn* Subject, float Seconds, int32 Kind);
 	void StopCinematic();
 	bool IsInCinematic() const { return bCine; }
@@ -267,6 +276,9 @@ protected:
 	bool bBurning = false, bStrikeLocked = false, bDying = false;
 	float DeathT = 0.f, FxAcc[iv::kZoneCount + 2] = {};
 	void UpdateDamageFX(float Dt);
+	void UpdateV5Fx(float Dt);
+	float ShakeAmp = 0.f;
+	float Rage = 0.f, RageTarget = 0.f, AirLift = 0.f, JetAcc = 0.f, LungeFxAcc = 0.f;
 	void RefreshHullDamage();
 
 	// ---- blade trail (ribbon behind the swinging sword)

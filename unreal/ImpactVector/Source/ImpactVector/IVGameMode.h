@@ -17,6 +17,8 @@ public:
 	AIVGameMode();
 	virtual void StartPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	/** The second local player (split screen) gets no pawn of its own: it takes over the enemy mech. */
+	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
 	UPROPERTY() TObjectPtr<AIVMechPawn> EnemyMech;
 

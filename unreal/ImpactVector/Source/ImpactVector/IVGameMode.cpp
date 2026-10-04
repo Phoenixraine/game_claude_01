@@ -8,6 +8,7 @@
 #include "IVDistrict.h"
 #include "IVCombat.h"
 #include "IVAudio.h"
+#include "IVGraphics.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "Misc/CommandLine.h"
@@ -25,11 +26,19 @@ AIVGameMode::AIVGameMode()
 	HUDClass = AIVHUD::StaticClass();
 }
 
+UClass* AIVGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
+{
+	if (APlayerController* PCtl = Cast<APlayerController>(InController))
+		if (UGameplayStatics::GetPlayerControllerID(PCtl) >= 1) return nullptr;
+	return Super::GetDefaultPawnClassForController_Implementation(InController);
+}
+
 void AIVGameMode::StartPlay()
 {
 	Super::StartPlay();
 
 	UWorld* W = GetWorld();
+	IVGraphics::ApplyAtStart(W);
 	W->SpawnActor<AIVEnvironment>(FVector::ZeroVector, FRotator::ZeroRotator);
 
 	FActorSpawnParameters P;

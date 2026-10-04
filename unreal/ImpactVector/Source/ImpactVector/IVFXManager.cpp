@@ -286,6 +286,24 @@ void AIVFXManager::SpawnFlame(const FVector& Center, float Radius, int32 Count, 
 	}
 }
 
+void AIVFXManager::SpawnJet(const FVector& Pos, const FVector& Dir, int32 Count, float Speed, float Size)
+{
+	for (int32 i = 0; i < Count && Flames.Num() < MaxFlames; ++i)
+	{
+		FIVFlame F;
+		F.Pos = Pos + Rng.VRand() * Size * 0.15f;
+		F.Vel = Dir * Speed * Rng.FRandRange(0.7f, 1.1f) + Rng.VRand() * Speed * 0.08f;
+		F.Life = Rng.FRandRange(0.25f, 0.55f);
+		F.Size0 = Size * Rng.FRandRange(0.5f, 0.8f);
+		F.Size1 = Size * Rng.FRandRange(1.2f, 1.9f);
+		F.Roll = Rng.FRandRange(0.f, 360.f);
+		F.Rise = 0.f;
+		F.Heat = Rng.FRandRange(0.8f, 1.f);
+		F.Seed = Rng.FRand();
+		Flames.Add(F);
+	}
+}
+
 void AIVFXManager::SpawnFlash(const FVector& Center, const FLinearColor& Color, float Candela, float Seconds, float Radius)
 {
 	int32 Slot = 0;

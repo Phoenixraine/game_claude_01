@@ -24,8 +24,10 @@ namespace
 		I.dodgeDir = P.DodgeDir;
 		I.weaponHeld = P.bWeaponHeld;
 		I.priority = P.Priority;
+		I.lungeHeld = P.bLungeHeld;
 		if (bEdges)
 		{
+			I.jump = P.bJump; I.chop = P.bChop; I.slide = P.bSlide; I.mash = P.bMash; I.berserk = P.bBerserk; I.qte = P.bQte;
 			I.quick = P.bQuick; I.cancel = P.bCancel; I.toGrab = P.bGrab; I.switchArm = P.bSwitchArm;
 			I.reverse = P.bReverse; I.dodge = P.bDodge; I.ultimate = P.bUltimate; I.setPriority = P.bSetPriority;
 		}
@@ -56,12 +58,15 @@ void AIVCombatDirector::Restart()
 {
 	Duel = MakeUnique<iv::Duel>(BotSeed, true);
 	Bot = MakeUnique<iv::Ai>(BotStyle, BotLevel, BotSeed + 7);
+	Duel->SetAiLevel(iv::Side::B, bHumanB ? -1 : static_cast<int>(BotLevel));
+	Duel->SetAiLevel(iv::Side::A, PlayerBot.IsValid() ? static_cast<int>(BotLevel) : -1);
 	if (PlayerBot.IsValid()) PlayerBot = MakeUnique<iv::Ai>(iv::Archetype::LimbHunter, BotLevel, BotSeed + 99);
 	Acc = 0.0;
 	EndText.Empty();
 	SinceEnd = 0.f;
 	bEndHandled = false;
 	PlayerIn = FIVCombatInput();
+	PlayerIn2 = FIVCombatInput();
 	UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
 	ScoopCooldown[0] = ScoopCooldown[1] = 0.f;
 	HitStop = 0.f;
@@ -72,6 +77,25 @@ void AIVCombatDirector::Restart()
 void AIVCombatDirector::EnableAutoPlayer(iv::Archetype Style, iv::Difficulty Level)
 {
 	PlayerBot = MakeUnique<iv::Ai>(Style, Level, BotSeed + 99);
+	if (Duel.IsValid()) Duel->SetAiLevel(iv::Side::A, static_cast<int>(Level));
+}
+
+void AIVCombatDirector::SetHumanB(bool b)
+{
+	bHumanB = b;
+	if (Duel.IsValid()) Duel->SetAiLevel(iv::Side::B, b ? -1 : static_cast<int>(BotLevel));
+	if (Enemy.IsValid()) Enemy->SetExternalControl(true);
+}
+
+void AIVCombatDirector::SetAutopilot(iv::Side S, bool bOn)
+{
+	if (Duel.IsValid()) Duel->fighter(S).set_autopilot(bOn);
+}
+
+void AIVCombatDirector::RepairBreakdown(iv::Side S, int32 Levels)
+{
+	if (!Duel.IsValid()) return;
+	Duel->RepairBreakdown(S, Levels);
 }
 
 void AIVCombatDirector::SetDummy(iv::DummyMode Mode)
@@ -117,7 +141,7 @@ void AIVCombatDirector::Tick(float Dt)
 		if (HitStop <= 0.f && !Duel->result().over) UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
 	}
 	// the enemy always faces the player
-	E->SetAim((P->GetActorLocation() - E->GetActorLocation()).Rotation().Yaw, 0.f);
+	if (!bHumanB) E->SetAim((P->GetActorLocation() - E->GetActorLocation()).Rotation().Yaw, 0.f);
 
 	Acc += FMath::Min<double>(Dt, 0.1);
 	const double Step = 1.0 / double(iv::kTickHz);
@@ -165,6 +189,21 @@ void AIVCombatDirector::Tick(float Dt)
 		P->SetCockpitFeed(Fd);
 	}
 
+	if (Duel->lock().active)
+	{
+		LockSparkAcc += Dt;
+		if (LockSparkAcc > 0.07f)
+		{
+			LockSparkAcc = 0.f;
+			FVector B0, T0, B1, T1;
+			P->GetBladeSegment(B0, T0);
+			E->GetBladeSegment(B1, T1);
+			const FVector At = (T0 + T1) * 0.5f;
+			if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) { FX->SpawnSparks(At, FVector(0, 0, 1), 18, 6000.f); FX->SpawnFlash(At, FLinearColor(1.f, 0.85f, 0.5f), 1.2e5f, 0.1f, 9000.f); }
+			P->AddCockpitImpulse(FMath::RandRange(-1.f, 1.f), FMath::RandRange(-0.5f, 0.5f), 0.55f);
+			E->AddCockpitImpulse(FMath::RandRange(-1.f, 1.f), FMath::RandRange(-0.5f, 0.5f), 0.35f);
+		}
+	}
 	const bool bFrozen = Duel->result().over || Duel->cinematic().active;
 	auto Locked = [&](const iv::AnimState& S) {
 		return bFrozen || S.legsLocked || (S.posture != iv::Posture::Standing && S.posture != iv::Posture::Dodging);
@@ -206,7 +245,7 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 	if (PlayerIn.bScoop) { TryScoop(iv::Side::A); PlayerIn.bScoop = false; }
 	iv::Input A = BuildInput(PlayerIn, bFirstOfFrame);
 	if (PlayerBot.IsValid()) { A = PlayerBot->Decide(iv::MakeObservation(*Duel, iv::Side::A)); P->SetMoveIntent(FVector2D(0.f, float(A.move))); }
-	const iv::Input B = Bot->Decide(iv::MakeObservation(*Duel, iv::Side::B));
+	const iv::Input B = bHumanB ? BuildInput(PlayerIn2, bFirstOfFrame) : Bot->Decide(iv::MakeObservation(*Duel, iv::Side::B));
 	iv::World W;
 	W.proximity[0] = ProximityBehind(P, E);
 	W.proximity[1] = ProximityBehind(E, P);
@@ -228,10 +267,13 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 	if (bFirstOfFrame)
 	{
 		PlayerIn.bQuick = PlayerIn.bCancel = PlayerIn.bGrab = PlayerIn.bSwitchArm = PlayerIn.bReverse = PlayerIn.bDodge = PlayerIn.bUltimate = PlayerIn.bSetPriority = false;
+		PlayerIn.bJump = PlayerIn.bChop = PlayerIn.bSlide = PlayerIn.bMash = PlayerIn.bBerserk = PlayerIn.bQte = false;
+		PlayerIn2.bQuick = PlayerIn2.bCancel = PlayerIn2.bGrab = PlayerIn2.bSwitchArm = PlayerIn2.bReverse = PlayerIn2.bDodge = PlayerIn2.bUltimate = PlayerIn2.bSetPriority = false;
+		PlayerIn2.bJump = PlayerIn2.bChop = PlayerIn2.bSlide = PlayerIn2.bMash = PlayerIn2.bBerserk = PlayerIn2.bQte = false;
 	}
 
 	// the enemy walks as its AI wants (the core's own distance integration is overridden every tick)
-	E->SetMoveIntent(FVector2D(0.f, float(B.move)));
+	if (!bHumanB) E->SetMoveIntent(FVector2D(0.f, float(B.move)));
 
 	// strikes with a step-in / step-back change the gap: move both mechs symmetrically along the line between them
 	const float Delta = Duel->distance() - Units;
@@ -316,6 +358,23 @@ void AIVCombatDirector::PlayEventSound(const iv::Event& Ev)
 	case EventType::UltimateReady: if (bPlayerActor) IVAudio::Play2D(W, TEXT("cockpit_hud_lock"), 0.9f); break;
 	case EventType::Clinch: if (Actor) IVAudio::Play3D(W, TEXT("intercept_clash"), Actor->GetActorLocation() + FVector(0, 0, 3000.f), 0.9f); break;
 	case EventType::StaggerBegin: if (bPlayerActor) IVAudio::Play2D(W, TEXT("cockpit_harness_creak"), 0.9f); break;
+	case EventType::LungeCharging: if (Actor) IVAudio::Play3D(W, TEXT("mech_weapon_charge_peak"), Actor->GetZoneWorldLocation(iv::Zone::ArmR), 0.8f, 0.7f); break;
+	case EventType::JumpStarted:
+		if (Actor) { IVAudio::Play3D(W, TEXT("mech_hydraulic_release"), Actor->GetActorLocation(), 1.f, 0.8f); IVAudio::Play3D(W, TEXT("env_missile_incoming"), Actor->GetActorLocation(), 0.7f, 1.4f); }
+		break;
+	case EventType::JumpEvadedLunge: if (Actor) IVAudio::Play3D(W, TEXT("mech_stabilizer_whine"), Actor->GetActorLocation(), 0.9f, 1.3f); break;
+	case EventType::AirChopStarted: if (Actor) IVAudio::Play3D(W, TEXT("mech_servo_arm_strike"), Actor->GetActorLocation(), 1.f, 0.8f); break;
+	case EventType::SlideStarted: if (Actor) IVAudio::Play3D(W, TEXT("env_concrete_crumble"), Actor->GetActorLocation() - FVector(0, 0, 3500.f), 0.9f, 1.2f); break;
+	case EventType::LockStarted: IVAudio::Play2D(W, TEXT("intercept_clash"), 1.f, 0.7f); if (Actor) IVAudio::Play3D(W, TEXT("clinch_grind_loop"), Actor->GetActorLocation() + FVector(0, 0, 3500.f), 0.9f); break;
+	case EventType::LockResolved: IVAudio::Play2D(W, TEXT("parry_clang"), 1.f, 0.7f); IVAudio::Play2D(W, TEXT("hit_lowfreq_thump_heavy"), 1.f); break;
+	case EventType::BerserkStarted: IVAudio::Play2D(W, TEXT("mus_commit_hit"), 1.f, 0.7f); IVAudio::Play2D(W, TEXT("cockpit_alarm_critical"), 0.8f, 0.6f); break;
+	case EventType::BerserkSwing: if (Actor) IVAudio::Play3D(W, TEXT("mech_servo_arm_strike"), Actor->GetActorLocation() + FVector(0, 0, 4000.f), 1.f, 0.7f); break;
+	case EventType::BerserkParried: IVAudio::Play2D(W, TEXT("parry_clang"), 1.f); break;
+	case EventType::BerserkPierce: IVAudio::Play2D(W, TEXT("mech_limb_sever"), 1.f, 0.6f); IVAudio::Play2D(W, TEXT("env_missile_explosion"), 1.f); break;
+	case EventType::BerserkOverload: IVAudio::Play2D(W, TEXT("cockpit_sensor_fail_static"), 1.f); IVAudio::Play2D(W, TEXT("cockpit_panel_burst"), 1.f); break;
+	case EventType::CounterPunch: IVAudio::Play2D(W, TEXT("hit_lowfreq_thump_heavy"), 1.f, 0.6f); IVAudio::Play2D(W, TEXT("env_distant_boom_01"), 1.f); break;
+	case EventType::BreakdownStarted: if (bPlayerActor) IVAudio::Play2D(W, TEXT("cockpit_alarm_critical"), 0.9f); break;
+	case EventType::BreakdownRepaired: if (bPlayerActor) IVAudio::Play2D(W, TEXT("cockpit_hud_unlock"), 1.f); break;
 	default: break;
 	}
 }
@@ -438,6 +497,84 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 			}
 		}
 		break;
+	// ---------------------------------------------------------------- v5 moves
+	case EventType::LungeCharging:
+		if (Actor && Actor->IsLocallyControlled()) Actor->AddCockpitImpulse(0.f, 0.f, 0.3f);
+		break;
+	case EventType::JumpStarted:
+		if (Actor)
+		{
+			Actor->AddCockpitImpulse(0.f, 1.f, 1.2f);
+			if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) { FX->SpawnDust(Actor->GetActorLocation() - FVector(0, 0, 4000.f), 3600.f, 30, 2.f); FX->SpawnFlash(Actor->GetActorLocation() - FVector(0, 0, 2800.f), FLinearColor(1.f, 0.6f, 0.25f), 3.0e5f, 0.5f, 18000.f); }
+		}
+		break;
+	case EventType::JumpEvadedLunge:
+		if (Actor && Other) { Actor->AddCockpitImpulse(0.f, 0.f, 0.5f); Other->AddCockpitImpulse(0.f, -1.f, 1.2f); }
+		break;
+	case EventType::AirChopStarted:
+		if (Actor) Actor->PlayAction(FName(TEXT("swing_up_r_commit")), 1.6f);
+		break;
+	case EventType::SlideStarted:
+		if (Actor)
+		{
+			Actor->AddVelocityImpulse(Actor->GetActorForwardVector() * 2200.f);
+			if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) { FX->SpawnDust(Actor->GetActorLocation() - FVector(0, 0, 4000.f), 3600.f, 24, 1.6f); FX->SpawnSparks(Actor->GetActorLocation() - FVector(0, 0, 3900.f), FVector::UpVector, 60, 5500.f); }
+		}
+		break;
+	case EventType::SlideEvadedChop:
+		if (Other) Other->AddCockpitImpulse(0.f, -1.f, 1.4f);
+		break;
+	case EventType::LockStarted:
+		if (Actor) Actor->StartLockPose(true);
+		if (Other) Other->StartLockPose(true);
+		BladeImpact(Actor, Other, 1.6f, true);
+		if (Actor && Actor->IsLocallyControlled()) Actor->AddCockpitImpulse(0.f, 0.f, 1.4f);
+		if (Other && Other->IsLocallyControlled()) Other->AddCockpitImpulse(0.f, 0.f, 1.4f);
+		LockSparkAcc = 0.f;
+		break;
+	case EventType::LockResolved:
+		if (Actor) Actor->StartLockPose(false);
+		if (Other) Other->StartLockPose(false);
+		BladeImpact(Actor, Other, 1.8f, true);
+		if (Other) Other->AddCockpitImpulse(0.f, 1.f, 2.0f);
+		break;
+	case EventType::BerserkStarted:
+		if (Actor) { Actor->SetRage(1.f); Actor->PlayAction(FName(TEXT("grab_clamp")), 1.f); }
+		if (Other) Other->PlayAction(FName(TEXT("grab_clamp")), 1.f);
+		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) if (Actor) FX->SpawnFlash(Actor->GetZoneWorldLocation(iv::Zone::Torso), FLinearColor(1.f, 0.1f, 0.05f), 4.0e5f, 0.8f, 20000.f);
+		break;
+	case EventType::BerserkSwing:
+		if (Actor) Actor->PlayBerserkSwing(static_cast<iv::SwingSide>(Ev.b));
+		break;
+	case EventType::BerserkParried:
+		if (Actor && Other) { BladeImpact(Actor, Other, 1.3f, true); Other->AddCockpitImpulse(0.f, 0.f, 1.0f); Actor->AddCockpitImpulse(0.f, 0.f, 0.8f); }
+		break;
+	case EventType::BerserkPierce:
+		if (Actor) Actor->SetRage(0.f);
+		if (Other)
+		{
+			if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) { FX->SpawnExplosion(Other->GetZoneWorldLocation(iv::Zone::Torso), 1.8f); FX->SpawnSparks(Other->GetZoneWorldLocation(iv::Zone::Torso), -Other->GetActorForwardVector(), 220, 9000.f); }
+			Other->AddCockpitImpulse(0.f, 1.f, 3.f);
+			Other->PlaySequence({ FName(TEXT("knockdown_fall")), FName(TEXT("knockdown_down")), FName(TEXT("kneel")) }, { 0.6f, 1.6f, 2.f });
+		}
+		ApplyHitStop(0.5f, 0.1f);
+		break;
+	case EventType::BerserkOverload:
+		if (Actor) { Actor->SetRage(0.f); Actor->AddCockpitImpulse(0.f, -1.f, 2.f); }
+		break;
+	case EventType::CounterPunch:
+		if (Actor && Other) Actor->StartCounterPunch(Other);
+		ApplyHitStop(0.35f, 0.15f);
+		break;
+	case EventType::BerserkEnded:
+		if (Actor) Actor->SetRage(0.f);
+		break;
+	case EventType::BreakdownStarted:
+		if (Actor && Actor->IsLocallyControlled() && Actor->GetCockpitFx()) { Actor->GetCockpitFx()->ForceFailures(1 + Ev.a); }
+		break;
+	case EventType::BreakdownRepaired:
+		if (Actor && Actor->GetCockpitFx()) Actor->GetCockpitFx()->Repair(1.f);
+		break;
 	case EventType::MatchEnd:
 	{
 		const bool bPlayerLost = (Ev.actor == iv::Side::A) && Ev.b == 0;
@@ -450,6 +587,7 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 	default:
 		break;
 	}
+	if (Ev.type >= EventType::LungeCharging && Ev.type <= EventType::BreakdownRepaired) UE_LOG(LogTemp, Display, TEXT("IV v5 event %d actor=%d a=%d b=%d v=%.2f"), int32(Ev.type), int32(Ev.actor), Ev.a, Ev.b, Ev.value);
 	PlayEventSound(Ev);
 	if (Ev.type == EventType::Whiff || Ev.type == EventType::WallSlam) HitCity(Ev);
 	OnEvent.Broadcast(Ev);

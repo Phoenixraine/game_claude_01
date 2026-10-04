@@ -279,8 +279,9 @@ def build_mechhull(name="M_MechHull", masked=False):
     wear = scalar(m, "Wear", 0.8, -1500, 780)
     dmg = scalar(m, "Damage", 0.0, -1500, 880)
     accamt = scalar(m, "AccentAmount", 1.0, -1500, 980)
-    names = ["UVA", "UVB", "VC", "VCA", "Tint", "Accent", "Glow", "Wear", "Damage", "AccAmt"]
-    srcs = [(uva, ""), (uvb, ""), (vc, ""), (vc, "A"), (tint, ""), (accent, ""), (glow, ""), (wear, ""), (dmg, ""), (accamt, "")]
+    rage = scalar(m, "Rage", 0.0, -1500, 1080)
+    names = ["UVA", "UVB", "VC", "VCA", "Tint", "Accent", "Glow", "Wear", "Damage", "AccAmt", "Rage"]
+    srcs = [(uva, ""), (uvb, ""), (vc, ""), (vc, "A"), (tint, ""), (accent, ""), (glow, ""), (wear, ""), (dmg, ""), (accamt, ""), (rage, "")]
     common = """
 float3 P = float3(UVA.x - 0.5, UVA.y - 0.5, UVB.x) * 82.0;
 float conv = VC.r, ao = VC.g, em = VCA;
@@ -326,7 +327,7 @@ col = lerp(col, float3(0.012, 0.011, 0.01), soot);
     met = custom(m, common + "return saturate(0.25 + 0.75 * edge) * (1.0 - soot);", t.CMOT_FLOAT1, names, -900, 600, "hull_metal")
     wire_custom(met, srcs)
     MEL.connect_material_property(met, "", unreal.MaterialProperty.MP_METALLIC)
-    emi = custom(m, common + "float ember = step(0.93, n) * step(0.45, Damage) * saturate(Damage * 2.0 - 0.7) * (0.5 + fine); return Glow * (em * (0.7 + 0.3 * n) + ember * 0.5);", t.CMOT_FLOAT3, names, -900, 900, "hull_emissive")
+    emi = custom(m, common + "float ember = step(0.93, n) * step(0.45, Damage) * saturate(Damage * 2.0 - 0.7) * (0.5 + fine); return Glow * (em * (0.7 + 0.3 * n) + ember * 0.5) * (1.0 + Rage * 2.2) + float3(1.0, 0.08, 0.02) * Rage * (edge * 6.0 + 0.6 * smoothstep(0.55, 0.9, n));", t.CMOT_FLOAT3, names, -900, 900, "hull_emissive")
     wire_custom(emi, srcs)
     MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     if masked:
