@@ -136,6 +136,7 @@ class Fighter {
   // v3
   void ApplyStatus(StatusKind k, int ticks, const StepContext& ctx);
   bool Blind() const { return blindTicks > 0; }
+  void set_autopilot(bool on) { autopilot = on; }
   // Two blades met: the strike (or windup) is dropped into a long recovery.
   void ClashBreak(const StepContext& ctx);
 
@@ -196,6 +197,7 @@ class Fighter {
   int strikeLockTicks = 0;      // v3 status: cannot start strikes (rail spear)
   int burnTicks = 0;            // v3 status: burning (plasma)
   bool ultimateLocked = false;  // v3: the off-hand arm was cut off, the ultimate is gone
+  bool autopilot = false;       // v4: the pilot is outside (boarding): Duel strips every offensive input of this fighter
   Tick lastHitTick = -100000;
   // Bookkeeping the pilot can feel or see; feeds the AI observation (never the opponent's intent).
   Outcome lastOwnOutcome = Outcome::Whiff;       // result of this fighter's last strike

@@ -36,6 +36,7 @@ Zone GuardZone(SwingSide s) {
 }
 
 void Fighter::Reset() {
+  autopilot = false;
   body.Reset();
   res = Resources();
   posture = Posture::Standing;
@@ -671,6 +672,7 @@ HitReport Fighter::TakeHit(Zone zone, float damage, StrikeKind kind, float stabi
   HitReport r;
   if (protectedTicks > 0) return r;  // v2: the shooter is untouchable for a moment after an external cut
   float dmg = damage * res.DamageTakenMult();
+  if (autopilot) dmg *= tune::kAutopilotDamageMult;   // v4: nobody braces the empty mech (boarding)
   if (posture == Posture::Staggered) dmg *= tune::kStaggerDamageMult;
   else if (posture == Posture::KnockedDown) dmg *= tune::kKnockdownDamageMult;
 

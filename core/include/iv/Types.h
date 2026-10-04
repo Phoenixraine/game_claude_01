@@ -67,6 +67,7 @@ enum class EndReason : uint8_t {
   PowerLoss,
   ArmsLostImmobilised,
   TimeLimit,
+  PilotLost,   // v4: the pilot was crushed by the enemy hand while boarding (TASK-017)
 };
 
 // v2: heavy weapons with a long cooldown (each one triggers an external cinematic cut when fired).
@@ -106,7 +107,7 @@ inline const char* Name(ZoneState s) {
 }
 inline const char* Name(EndReason r) {
   static const char* const kNames[] = {"None",         "ReactorDestroyed",    "CockpitCritical", "TotalImmobility",
-                                       "PowerLoss",    "ArmsLostImmobilised", "TimeLimit"};
+                                       "PowerLoss",    "ArmsLostImmobilised", "TimeLimit", "PilotLost"};
   return kNames[static_cast<int>(r)];
 }
 inline const char* Name(WeaponKind k) {

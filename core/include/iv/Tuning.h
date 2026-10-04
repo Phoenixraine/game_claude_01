@@ -299,6 +299,50 @@ constexpr float kMirrorChance[kDifficultyCount] = {0.25f, 0.45f, 0.65f};
 constexpr int kDummyReactionTicks = 14;
 constexpr int kDummyScriptGapTicks = MsToTicks(2200);
 
+// ---------------------------------------------------------------- boarding (STATUS §6B, TASK-017)
+// Phase lengths (STATUS §6B: climb out of the cockpit, stand on the shoulder, fire the grapple, fly, land, hack, throw, leave, watch, return).
+constexpr int kBoardClimbOutTicks = MsToTicks(2200);      // STATUS §6B 1
+constexpr int kBoardOnShoulderTicks = MsToTicks(700);     // STATUS §6B 1
+constexpr int kBoardHookLaunchTicks = MsToTicks(600);     // STATUS §6B 2
+constexpr int kBoardHookFlightTicks = MsToTicks(1400);    // STATUS §6B 2
+constexpr int kBoardLandingTicks = MsToTicks(800);        // STATUS §6B 3
+constexpr int kBoardGrenadeThrowTicks = MsToTicks(1100);  // STATUS §6B 5
+constexpr int kBoardEscapeTicks = MsToTicks(1500);        // STATUS §6B 5 (fly up and away)
+constexpr int kBoardBlastDelayTicks = MsToTicks(900);     // STATUS §6B 5: the grenade explodes this long after the WatchBlast phase begins
+constexpr int kBoardWatchBlastTicks = MsToTicks(2200);    // STATUS §6B 5: includes the delay above, then the look back
+constexpr int kBoardReturnHookTicks = MsToTicks(1500);    // STATUS §6B 5: the failed hack: back along the grapple
+constexpr int kBoardClimbInTicks = MsToTicks(1800);       // STATUS §6B 5: into the cockpit, control returns
+constexpr int kBoardHookSwingTicks = MsToTicks(900);      // STATUS §6B 6: swing to the other shoulder
+// Cost and limits (STATUS §6B 7).
+constexpr float kBoardEnergyCost = 25.f;                  // spent when the boarding starts
+constexpr float kBoardMinStability = 35.f;                // a shaky mech cannot be left
+constexpr float kBoardPenaltyEnergy = 15.f;               // extra energy lost after a failed or timed-out hack
+constexpr int kBoardCooldownTicks = MsToTicks(60000);     // STATUS §6B 7 (task: not below 45 s)
+constexpr int kBoardCooldownFailTicks = MsToTicks(75000); // longer after a failure
+constexpr float kBoardShockSeconds = 0.8f;                // an enemy hit on the empty mech shakes the pilot: this much hack time is lost per hit
+constexpr int kBoardMaxShocks = 4;
+// Grenade (STATUS §6B 5): 1.5 .. 2.2 heavy strikes (kHeavyDamage = 17.5), better hack quality -> bigger blast.
+constexpr float kGrenadeDamageMin = 27.f;
+constexpr float kGrenadeDamageMax = 38.f;                 // kGrenadeDamageMax: hard cap
+constexpr float kGrenadeStability = 30.f;
+constexpr int kGrenadeBurnTicks = MsToTicks(3500);
+constexpr int kGrenadeSource = 3;                         // Duel::ExternalHit source: 3 = grenade (0 debris, 1 crash, 2 fall)
+// The enemy hand (STATUS §6B 6): telegraph, the window in which the swing button works, and what is kept of the hack.
+constexpr int kSwatWindupTicks[kDifficultyCount] = {MsToTicks(1200), MsToTicks(900), MsToTicks(650)};  // >= 900 ms easy, >= 600 ms hard
+constexpr int kSwatReadyTicks = MsToTicks(200);           // presses in the first moments after the telegraph are ignored (it cannot be seen yet)
+constexpr int kSwingWindowTicks = MsToTicks(700);         // the swing works from this long before the impact...
+constexpr int kSwingMinTicks = MsToTicks(150);            // ...until this long before it (the leap needs time)
+constexpr float kSwingKeepProgress = 0.5f;                // share of the hack progress that survives a swing to the other shoulder
+constexpr int kSwatGraceTicks = MsToTicks(1500);          // no swat in the first moments after landing
+constexpr int kSwatCheckTicks = MsToTicks(500);           // the enemy decides every half second
+constexpr int kSwatCooldownTicks = MsToTicks(3000);       // between two swats
+constexpr int kMaxSwatsPerBoarding = 2;
+constexpr int kMaxSwatAdjust = 1;                         // an early press makes the enemy re-aim once per swat
+constexpr float kSwatChance[kDifficultyCount] = {0.05f, 0.09f, 0.14f};   // per check, by enemy difficulty
+constexpr float kSwatArchetypeMult[kArchetypeCount] = {1.2f, 1.0f, 1.0f, 0.9f, 0.5f, 1.4f};  // Counterpuncher, Breaker, LimbHunter, Trickster, Gunner, Grappler
+constexpr float kAutopilotDamageMult = 1.8f;           // STATUS §6B 3: the mech without its pilot takes more damage
+constexpr bool kAiBoardingEnabled = false;                // STATUS §6B: the enemy cannot board the player (yet); the API is symmetric by Side
+
 // ---------------------------------------------------------------- movement (pitch §11)
 constexpr float kMoveSpeedPerTick = 0.09f;             // distance units per tick at full leg condition
 constexpr float kRetreatSpeedMult = 0.6f;              // pitch §11: backing away is slower than closing in

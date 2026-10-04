@@ -62,7 +62,16 @@ void Duel::Step(const Input& a, const Input& b, const World& world) {
     return;
   }
   Input dummyIn[2];
+  Input autoIn[2];
   const Input* in[2] = {&a, &b};
+  for (int i = 0; i < 2; ++i) {   // v4: a mech whose pilot is outside only defends; whatever the caller sends, no strike, weapon or ultimate starts
+    if (f_[i].autopilot) {
+      autoIn[i] = *in[i];
+      autoIn[i].strikeHeld = autoIn[i].quick = autoIn[i].toGrab = autoIn[i].switchArm = autoIn[i].reverse = false;
+      autoIn[i].weaponHeld = autoIn[i].ultimate = false;
+      in[i] = &autoIn[i];
+    }
+  }
   for (int i = 0; i < 2; ++i) {
     if (dummy_[i].mode() != DummyMode::Off) {
       dummyIn[i] = dummy_[i].Next(f_[i], f_[1 - i], tick_);
@@ -260,6 +269,8 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
       EmitHit(def, as, d.zone, hr, hs, atk.strike.side, true, false);
       break;
     }
+    case Outcome::Clashed:   // resolved by ApplyClash before Apply is reached; listed so -Werror=switch passes on gcc
+      break;
     case Outcome::Grabbed: {
       Emit(EventType::GrabHit, as, d.zone);
       atk.res.AddHeat(tune::kGrabHeat);
@@ -518,6 +529,15 @@ void Duel::ResolveClinch(const World& w) {
 }
 
 // -------------------------------------------------------------------------------------- end
+
+void Duel::ForceEnd(Side loser, EndReason reason) {
+  if (result_.over) return;
+  result_.over = true;
+  result_.draw = false;
+  result_.loser = loser;
+  result_.reason = reason;
+  Emit(EventType::MatchEnd, loser, Zone::Torso, static_cast<int>(reason), 0);
+}
 
 void Duel::CheckEnd() {
   if (result_.over) return;

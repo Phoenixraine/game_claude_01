@@ -68,6 +68,24 @@ enum class EventType : uint8_t {
   UltimateSever,     // actor: the attacker, zone: the severed arm; the target can no longer use its ultimate
   ExternalHit,       // actor: the victim, zone, a: source (0 debris thrown, 1 crash into a building, 2 fall), value: damage
   BurnTick,          // actor: the burning fighter, value: damage
+  // ---- v4: boarding (TASK-017). actor = the side that owns the boarding. Appended: order above is a contract. ----
+  BoardingStarted,        // a: target shoulder (0 = ShoulderL, 1 = ShoulderR)
+  BoardingPhase,          // a: BoardPhase entered, b: its length in ticks (0 = open-ended, e.g. Hacking)
+  BoardingDenied,         // a: BoardingDenied reason
+  HookFired,              // a: target shoulder; the grapple leaves the wrist launcher
+  HookLanded,             // a: shoulder the pilot landed on
+  HackStarted,            // a: hack difficulty 1..10, b: time limit in ticks
+  HackProgress,           // value: progress 0..1 (emitted when it changes by >= 5 %)
+  HackResultEvt,          // a: HackState (Success / Fail / Timeout), value: quality 0..1
+  BoardingSwatTelegraph,  // actor: the pilot's side, a: shoulder under the hand (0 L / 1 R), b: ticks to impact, value: swat index (0-based) - drives the corner camera
+  BoardingSwingOk,        // a: new shoulder, value: hack progress kept
+  BoardingSmashed,        // the pilot was crushed (defeat)
+  GrenadeThrown,
+  BoardingBlast,          // zone: zone hit, value: damage dealt
+  BoardingEnded,          // a: BoardingOutcome, value: 0
+  BoardingSwatImpact,     // a: 1 = the pilot was on the shoulder (Smashed follows), 0 = missed, b: shoulder
+  BoardingSwatAdjusted,   // the swing was pressed too early: the enemy re-aims, a: new shoulder, b: ticks to impact
+  BoardingShock,          // the mech was hit while the pilot was outside: value: ticks lost
 };
 
 struct Event {
