@@ -13,7 +13,7 @@ class AIVCombatDirector;
 class AIVPlayerController;
 class UAudioComponent;
 
-enum class EIVFlowState : uint8 { Menu, Tutorial, Duel, Result, Join };
+enum class EIVFlowState : uint8 { Menu, Tutorial, Duel, Result, Join, Settings };
 
 enum class ETutGoal : uint8 { Timer, Walk, Look, HeavyHit, QuickHit, Defend, Evade, Counter, Ability, Scoop, Ultimate };
 
@@ -48,6 +48,9 @@ public:
 	FString GetMenuHint(int32 I) const;
 	int32 GetMenuIndex() const { return MenuIndex; }
 	FString GetDifficultyName() const;
+	// ---- settings screen
+	int32 GetSettingsTab() const { return SetTab; }
+	int32 GetSettingsIndex() const { return SetIdx; }
 	// ---- split screen join screen
 	bool IsVersus() const { return bVersus; }
 	bool JoinReady(int32 I) const { return I == 0 ? bJoin1 : bJoin2; }
@@ -106,6 +109,10 @@ private:
 	void SetBanner(const FString& Main, const FString& Sub, float Seconds);
 	void OnCombatEvent(const iv::Event& Ev);
 	void MenuInput();
+	void EnterSettings();
+	void SettingsInput();
+	int32 SetTab = 0, SetIdx = 0;
+	float SetHold = 0.f;
 	void EnterJoin();
 	void EnterVersus();
 	void LeaveVersus();

@@ -33,6 +33,7 @@ void AIVRain::BeginPlay()
 		MID->SetScalarParameterValue(TEXT("BoxXY"), BoxXY);
 		MID->SetScalarParameterValue(TEXT("BoxZ"), BoxZ);
 		ISM->SetMaterial(0, MID);
+		RainMID = MID;
 	}
 	FRandomStream R(777);
 	TArray<FTransform> T;
@@ -45,6 +46,11 @@ void AIVRain::BeginPlay()
 		T.Add(FTransform(Tilt, P, FVector(W, W, L)));
 	}
 	ISM->AddInstances(T, false);
+}
+
+void AIVRain::SetAmount(float A)
+{
+	if (RainMID) RainMID->SetScalarParameterValue(TEXT("Amount"), A);
 }
 
 void AIVRain::Tick(float Dt)

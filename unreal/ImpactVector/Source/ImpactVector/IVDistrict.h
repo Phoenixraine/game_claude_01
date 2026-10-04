@@ -132,5 +132,8 @@ public:
 	/** Lights allowed (set before Load); the preset menu changes it. */
 	int32 MaxNeonLights = 70;
 	void SetLightBudget(int32 N);
+	/** Instances further than this (cm) from the camera are not drawn; the fog hides the cut. */
+	void ApplyDrawDistance(float Cm);
+	void SetNeonScale(float Scale);
 private:
 };

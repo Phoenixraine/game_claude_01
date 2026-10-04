@@ -28,6 +28,8 @@ public:
 
 	/** Spawns the standing traffic (called once per match start). */
 	static void SpawnFleet(UWorld* World, const FVector& ArenaCenter, int32 Count = 2);
+	/** Spawns or removes patrolling helicopters until exactly Count are flying. */
+	static void SetFleetSize(UWorld* World, int32 Count);
 
 	/** True while it is low enough and close enough for a mech to take hold of it. */
 	bool IsGrabbable() const { return State == EIVHeliState::Patrol && LowFactor > 0.55f; }

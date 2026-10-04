@@ -1,4 +1,5 @@
 #include "IVHUD.h"
+#include "IVSettings.h"
 #include "GameFramework/WorldSettings.h"
 #include "IVHelicopter.h"
 #include "EngineUtils.h"
@@ -93,12 +94,12 @@ void AIVHUD::DrawHUD()
 	if (!Canvas) return;
 	{	// unobtrusive frame-rate readout in the bottom-left corner of the glass (F3 toggles)
 		static float Fps = 60.f, Shown = 60.f, Acc = 0.f;
-		static bool bShow = true;
 		const float Dt = GetWorld()->GetDeltaSeconds() / FMath::Max(GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation(), 0.01f);
 		if (Dt > 0.f) Fps = FMath::Lerp(Fps, 1.f / Dt, 0.05f);
 		Acc += Dt;
 		if (Acc > 0.5f) { Acc = 0.f; Shown = Fps; }
-		if (APlayerController* Pc0 = GetOwningPlayerController()) if (Pc0->WasInputKeyJustPressed(EKeys::F3)) bShow = !bShow;
+		if (APlayerController* Pc0 = GetOwningPlayerController()) if (Pc0->WasInputKeyJustPressed(EKeys::F3)) { IVSettings::Set(TEXT("fps_counter"), IVSettings::GetBool(TEXT("fps_counter")) ? 0.f : 1.f); }
+		const bool bShow = IVSettings::GetBool(TEXT("fps_counter"));
 		if (bShow)
 		{
 			const float Sx0 = FMath::Clamp(Canvas->ClipX / 1600.f, 0.6f, 1.6f);
@@ -109,6 +110,7 @@ void AIVHUD::DrawHUD()
 	for (TActorIterator<AIVGameFlow> It(GetWorld()); It; ++It) { Flow = *It; break; }
 	if (Flow && Flow->GetState() == EIVFlowState::Menu) { DrawMenu(Flow); return; }
 	if (Flow && Flow->GetState() == EIVFlowState::Join) { DrawJoin(Flow); return; }
+	if (Flow && Flow->GetState() == EIVFlowState::Settings) { DrawSettings(Flow); return; }
 
 	static IConsoleVariable* Cam = IConsoleManager::Get().FindConsoleVariable(TEXT("iv.Cam"));
 	if (Cam && Cam->GetInt() != 0) return;
@@ -141,7 +143,7 @@ void AIVHUD::DrawHUD()
 		const iv::Duel& Du = *Dir->GetDuel();
 		const iv::Fighter& FA = Du.fighter(MySide);
 		const iv::Fighter& FB = Du.fighter(iv::Other(MySide));
-		const float Sx = FMath::Clamp(W / 1600.f, 0.55f, 1.4f);
+		const float Sx = FMath::Clamp(W / 1600.f, 0.55f, 1.4f) * IVSettings::Get(TEXT("hud_scale"));
 		const float Fd = LookFade;
 		UIVCockpitComponent* Ck = Me ? Me->GetCockpitFx() : nullptr;
 		const float Alert = Ck ? Ck->GetAlert() : 0.f;
@@ -796,6 +798,72 @@ void AIVHUD::DrawMenu(AIVGameFlow* Flow)
 		}
 		Text(TEXT("клавиатура + мышь  ·  геймпад  ·  вибрация"), X, Ky + 34.f * Sx, A(kCyan, 0.5f), 0.7f * Sx, 1);
 	}
+}
+
+void AIVHUD::DrawSettings(AIVGameFlow* Flow)
+{
+	const float W = Canvas->ClipX, H = Canvas->ClipY;
+	const float Sx = FMath::Clamp(W / 1600.f, 0.6f, 1.6f);
+	const float Tm = GetWorld()->GetTimeSeconds();
+	DrawRect(FLinearColor(0.003f, 0.008f, 0.02f, 0.9f), 0, 0, W, H);
+	for (int32 i = 0; i < 8; ++i) DrawRect(A(kCyan, 0.012f), 0, FMath::Frac(Tm * 0.05f + i * 0.125f) * H, W, 2.f);
+	const float PX = W * 0.14f, PW = W * 0.72f;
+	Text(TEXT("НАСТРОЙКИ"), PX, H * 0.055f, kWhite, 2.8f * Sx, 2);
+	DrawLine(PX, H * 0.055f + 66.f * Sx, PX + PW, H * 0.055f + 66.f * Sx, A(kCyan, 0.8f), 2.f);
+	// tabs
+	float Tx = PX;
+	const int32 Tab = Flow->GetSettingsTab();
+	for (int32 t = 0; t < IVSettings::kTabCount; ++t)
+	{
+		const FString N = IVSettings::TabName(t);
+		const float Tw = (N.Len() * 15.f + 40.f) * Sx;
+		const bool bOn = t == Tab;
+		DrawRect(A(bOn ? kCyan : FLinearColor(0.1f, 0.2f, 0.3f), bOn ? 0.35f : 0.18f), Tx, H * 0.055f + 78.f * Sx, Tw, 34.f * Sx);
+		if (bOn) DrawRect(kCyan, Tx, H * 0.055f + 78.f * Sx + 32.f * Sx, Tw, 3.f);
+		Text(N, Tx + Tw * 0.5f, H * 0.055f + 84.f * Sx, bOn ? kWhite : A(kWhite, 0.55f), 0.95f * Sx, 1, 1);
+		Tx += Tw + 8.f * Sx;
+	}
+	Text(TEXT("Q / E — вкладка"), PX + PW, H * 0.055f + 84.f * Sx, A(kCyan, 0.6f), 0.75f * Sx, 1, 2);
+	// rows
+	const TArray<int32> Rows = IVSettings::OfTab(Tab);
+	const float Y0 = H * 0.055f + 130.f * Sx, RH = 44.f * Sx;
+	const int32 Sel = Flow->GetSettingsIndex();
+	for (int32 i = 0; i < Rows.Num(); ++i)
+	{
+		const IVSettings::FSetting& S = IVSettings::All()[Rows[i]];
+		const float Y = Y0 + i * RH;
+		const bool bSel = i == Sel;
+		if (bSel)
+		{
+			for (int32 k = 0; k < 14; ++k) DrawRect(A(kCyan, 0.2f * (1.f - k / 14.f)), PX + PW * k / 14.f, Y - 3.f, PW / 14.f + 1.f, RH - 4.f * Sx);
+			DrawRect(kCyan, PX - 10.f * Sx, Y - 3.f, 4.f * Sx, RH - 4.f * Sx);
+		}
+		Text(S.Label, PX + 8.f * Sx, Y + 6.f * Sx, bSel ? kWhite : A(kWhite, 0.6f), 0.95f * Sx, 1);
+		const float Vx = PX + PW * 0.64f;
+		const float Vv = IVSettings::Get(S.Id);
+		if (S.Kind == IVSettings::EKind::Slider)
+		{
+			const float U = (Vv - S.Min) / FMath::Max(S.Max - S.Min, 1e-3f);
+			const float BW = PW * 0.2f;
+			DrawRect(A(FLinearColor::Black, 0.55f), Vx, Y + 14.f * Sx, BW, 8.f * Sx);
+			DrawRect(A(bSel ? kOrange : kCyanDim, 0.95f), Vx, Y + 14.f * Sx, BW * U, 8.f * Sx);
+			DrawRect(kWhite, Vx + BW * U - 2.f, Y + 9.f * Sx, 4.f, 18.f * Sx);
+			Text(IVSettings::ValueText(Rows[i]), Vx + BW + 16.f * Sx, Y + 6.f * Sx, bSel ? kOrange : A(kOrange, 0.6f), 0.95f * Sx, 1);
+		}
+		else
+		{
+			Text(IVSettings::ValueText(Rows[i]), Vx, Y + 6.f * Sx, bSel ? kOrange : A(kOrange, 0.6f), 0.95f * Sx, 1);
+			if (bSel) { Text(TEXT("<"), Vx - 22.f * Sx, Y + 4.f * Sx, A(kCyan, 0.8f), 1.1f * Sx, 2, 2); Text(TEXT(">"), Vx + 280.f * Sx, Y + 4.f * Sx, A(kCyan, 0.8f), 1.1f * Sx, 2); }
+		}
+	}
+	// hint
+	if (Rows.IsValidIndex(Sel))
+	{
+		const float HY = H * 0.86f;
+		Panel(PX, HY, PW, 56.f * Sx, FLinearColor(0.f, 0.03f, 0.06f, 0.8f), A(kCyan, 0.7f));
+		Wrap(IVSettings::All()[Rows[Sel]].Hint, PX + 14.f * Sx, HY + 10.f * Sx, PW - 28.f * Sx, A(kWhite, 0.85f), 0.8f * Sx, 22.f * Sx);
+	}
+	Text(TEXT("W / S — выбор   ·   A / D — изменить (Shift — быстрее)   ·   Q / E — вкладка   ·   R — сбросить всё   ·   Esc — назад"), W * 0.5f, H - 30.f * Sx, A(kWhite, 0.55f), 0.75f * Sx, 1, 1);
 }
 
 void AIVHUD::DrawJoin(AIVGameFlow* Flow)

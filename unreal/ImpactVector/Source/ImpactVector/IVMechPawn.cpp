@@ -1,4 +1,5 @@
 #include "IVMechPawn.h"
+#include "IVSettings.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
@@ -35,7 +36,7 @@ static TAutoConsoleVariable<float> CVarIVCamDist(TEXT("iv.CamDist"), 16000.f, TE
 static TAutoConsoleVariable<FString> CVarIVFreeCam(TEXT("iv.FreeCam"), TEXT("0 0 0 0 0"), TEXT("Free camera for iv.Cam=6: x y z (m, district frame y=forward) pitch yaw(ue)"), ECVF_Default);
 
 // centre-to-centre distance limits between the two giants (cm)
-static constexpr float kMinSeparation = 5000.f, kSlowSeparation = 7000.f;
+
 
 int32 GetIVCam() { return CVarIVCam.GetValueOnGameThread(); }
 float GetIVCamDist() { return CVarIVCamDist.GetValueOnGameThread(); }
@@ -331,6 +332,20 @@ void AIVMechPawn::SetPlayerLamps(bool bOn)
 	}
 }
 
+void AIVMechPawn::ApplySettings()
+{
+	SetFov = IVSettings::Get(TEXT("fov"));
+	SetShake = IVSettings::Get(TEXT("shake"));
+	SetMinSep = IVSettings::Get(TEXT("min_dist")) * 100.f;
+	if (bAIControlled)
+	{
+		const bool bInf = IVSettings::GetBool(TEXT("infected"));
+		if (bInf && !bInfected) { bInfected = true; if (bRigActive && GrowthComps.Num() == 0) BuildGrowths(); }
+		for (UStaticMeshComponent* G : GrowthComps) if (G) G->SetVisibility(bInf);
+		if (!bInf) bInfected = false;
+	}
+}
+
 void AIVMechPawn::SetFirstPersonView(bool bFirstPerson)
 {
 	if (HeadMesh) HeadMesh->SetOwnerNoSee(bFirstPerson);
@@ -451,7 +466,7 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 			const float Appr = FVector::DotProduct(Desired, ToOther);
 			if (Appr > 0.f)
 			{
-				const float F = FMath::Clamp((OtherDist - kMinSeparation) / (kSlowSeparation - kMinSeparation), 0.f, 1.f);
+				const float F = FMath::Clamp((OtherDist - SetMinSep) / ((SetMinSep + 2000.f) - SetMinSep), 0.f, 1.f);
 				const float Eff = F * F * (3.f - 2.f * F);                      // 0 at 50 m .. 1 at 70 m
 				Desired -= ToOther * Appr * (1.f - FMath::Lerp(0.f, 1.f, Eff) * FMath::Lerp(0.55f, 1.f, Eff));
 			}
@@ -462,15 +477,15 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 	const float Step = Rate * Dt;
 	Velocity += (Delta.Size2D() <= Step) ? Delta : Delta.GetSafeNormal2D() * Step;
 	Velocity.Z = 0;
-	if (OtherDist < kSlowSeparation)
+	if (OtherDist < (SetMinSep + 2000.f))
 	{
 		const float Vt = FVector::DotProduct(Velocity, ToOther);
 		if (Vt > 0.f)
 		{
-			const float F = FMath::Clamp((OtherDist - kMinSeparation) / (kSlowSeparation - kMinSeparation), 0.f, 1.f);
+			const float F = FMath::Clamp((OtherDist - SetMinSep) / ((SetMinSep + 2000.f) - SetMinSep), 0.f, 1.f);
 			Velocity -= ToOther * Vt * (1.f - F);
 		}
-		if (OtherDist < kMinSeparation) Velocity -= ToOther * FMath::Min(0.f, -FVector::DotProduct(Velocity, -ToOther)) ;
+		if (OtherDist < SetMinSep) Velocity -= ToOther * FMath::Min(0.f, -FVector::DotProduct(Velocity, -ToOther)) ;
 	}
 
 	SetActorRotation(FRotator(0, NewLegsYaw, 0));
@@ -502,7 +517,7 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 		}
 	}
 
-	if (OtherDist < kMinSeparation - 20.f && !bCine) AddActorWorldOffset(-ToOther * (kMinSeparation - OtherDist) * FMath::Min(1.f, Dt * 5.f), false);
+	if (OtherDist < SetMinSep - 20.f && !bCine) AddActorWorldOffset(-ToOther * (SetMinSep - OtherDist) * FMath::Min(1.f, Dt * 5.f), false);
 	FHitResult G;
 	FCollisionQueryParams Q(SCENE_QUERY_STAT(IVGround), false, this);
 	const FVector P = GetActorLocation();
@@ -708,15 +723,16 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 	{
 		UGameViewportClient* VPC = GetWorld() ? GetWorld()->GetGameViewport() : nullptr;
 		const bool bSplit = VPC && VPC->GetCurrentSplitscreenConfiguration() != ESplitScreenType::None;
-		Camera->SetFieldOfView((bSplit ? 76.f : 98.f) - 7.f * Rage);
+		Camera->SetFieldOfView((bSplit ? SetFov - 22.f : SetFov) - 7.f * Rage);
 	}
 
 	if (Mode == 0)
 	{
 		ShakeAmp = FMath::FInterpTo(ShakeAmp, 0.f, Dt, 3.4f);
+		const float ShakeUse = ShakeAmp * SetShake;
 		const float Tm = GetWorld()->GetTimeSeconds();
-		const FRotator Shk(ShakeAmp * 1.1f * FMath::Sin(Tm * 47.f), ShakeAmp * 1.1f * FMath::Sin(Tm * 59.f + 1.f), ShakeAmp * 1.6f * FMath::Sin(Tm * 39.f + 2.f));
-		Camera->SetWorldLocationAndRotation(CamPos + FVector(0.f, 0.f, ShakeAmp * 1.8f * FMath::Sin(Tm * 71.f)), (CamRot + FRotator(0.3f * SwayRot.Pitch, 0.3f * SwayRot.Yaw, 0.3f * SwayRot.Roll) + Shk).Quaternion() * LookQ);
+		const FRotator Shk(ShakeUse * 1.1f * FMath::Sin(Tm * 47.f), ShakeUse * 1.1f * FMath::Sin(Tm * 59.f + 1.f), ShakeUse * 1.6f * FMath::Sin(Tm * 39.f + 2.f));
+		Camera->SetWorldLocationAndRotation(CamPos + FVector(0.f, 0.f, ShakeUse * 1.8f * FMath::Sin(Tm * 71.f)), (CamRot + FRotator(0.3f * SwayRot.Pitch, 0.3f * SwayRot.Yaw, 0.3f * SwayRot.Roll) + Shk).Quaternion() * LookQ);
 		return;
 	}
 

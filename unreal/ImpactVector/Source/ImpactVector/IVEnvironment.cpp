@@ -18,6 +18,8 @@
 #include "EngineUtils.h"
 #include "Engine/World.h"
 #include "IVRain.h"
+#include "IVFXManager.h"
+#include "IVDistrict.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 
@@ -125,6 +127,26 @@ AIVEnvironment::AIVEnvironment()
 	Glass->SetCollisionProfileName(TEXT("BlockAll"));
 }
 
+void AIVEnvironment::ApplySettings(float FogMul, float EV, float Neon, float Bloom, float MotionBlur, float Rain, bool bMist)
+{
+	if (Fog)
+	{
+		Fog->SetFogDensity(0.06f * FogMul);
+		Fog->SecondFogData.FogDensity = 0.05f * FogMul;
+		Fog->MarkRenderStateDirty();
+	}
+	if (PostProcess)
+	{
+		FPostProcessSettings& S = PostProcess->Settings;
+		S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.4f + EV;
+		S.bOverride_BloomIntensity = true; S.BloomIntensity = Bloom;
+		S.bOverride_MotionBlurAmount = true; S.MotionBlurAmount = MotionBlur;
+	}
+	if (District) District->SetNeonScale(Neon);
+	if (AActor* R = RainActor.Get()) { R->SetActorHiddenInGame(Rain < 0.02f); if (AIVRain* Rn = Cast<AIVRain>(R)) Rn->SetAmount(Rain); }
+	AIVFXManager::bGroundMist = bMist;
+}
+
 void AIVEnvironment::OnConstruction(const FTransform&)
 {
 }
@@ -141,7 +163,7 @@ void AIVEnvironment::BeginPlay()
 		if (FParse::Value(FCommandLine::Get(), TEXT("-IVSky="), V)) SkyLight->SetIntensity(V);
 		if (FParse::Value(FCommandLine::Get(), TEXT("-IVExp="), V)) { FPostProcessSettings& PS = PostProcess->Settings; PS.AutoExposureMinBrightness = V; PS.AutoExposureMaxBrightness = V; }
 		Clouds->SetVisibility(false);
-		if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoRain"))) GetWorld()->SpawnActor<AIVRain>(FVector::ZeroVector, FRotator::ZeroRotator);
+		if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoRain"))) RainActor = GetWorld()->SpawnActor<AIVRain>(FVector::ZeroVector, FRotator::ZeroRotator);
 	}
 	UMaterialInterface* Fallback = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
 	UMaterialInterface* Facade = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_BuildingFacade.M_BuildingFacade"));

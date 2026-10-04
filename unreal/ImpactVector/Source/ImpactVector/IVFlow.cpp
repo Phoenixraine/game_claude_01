@@ -1,4 +1,5 @@
 #include "IVFlow.h"
+#include "IVSettings.h"
 #include "IVMechPawn.h"
 #include "IVCombat.h"
 #include "IVEnvironment.h"
@@ -24,6 +25,7 @@
 namespace
 {
 	const TCHAR* kDifficulty[3] = { TEXT("Лёгкий"), TEXT("Нормальный"), TEXT("Жёсткий") };
+	int32 Diff() { return FMath::Clamp(IVSettings::GetInt(TEXT("difficulty")), 0, 2); }
 	const iv::Archetype kRotation[6] = { iv::Archetype::Counterpuncher, iv::Archetype::LimbHunter, iv::Archetype::Trickster, iv::Archetype::Breaker, iv::Archetype::Grappler, iv::Archetype::Gunner };
 
 	void SetCam(int32 V)
@@ -93,7 +95,7 @@ void AIVGameFlow::Begin(AIVMechPawn* InPlayer, AIVMechPawn* InEnemy, AIVCombatDi
 	EnemyHome = Enemy->GetActorTransform();
 	BuildSteps();
 	if (Dir) EventHandle = Dir->OnEvent.AddUObject(this, &AIVGameFlow::OnCombatEvent);
-	FParse::Value(FCommandLine::Get(), TEXT("-IVPick="), PendingPick);
+	FParse::Value(FCommandLine::Get(), TEXT("-IVPick="), PendingPick); FParse::Value(FCommandLine::Get(), TEXT("-IVSetTab="), SetTab);
 	switch (Initial)
 	{
 	case EIVFlowState::Tutorial: EnterTutorial(); break;
@@ -208,7 +210,7 @@ void AIVGameFlow::EnterMenu()
 {
 	if (bVersus || Player2) LeaveVersus();
 	State = EIVFlowState::Menu;
-	GfxPreset = IVGraphics::Load();
+	GfxPreset = IVSettings::GetInt(TEXT("preset"));
 	MenuIndex = 0;
 	if (AIVPlayerController* P = PC()) P->SetCombatEnabled(false);
 	SetCam(5);
@@ -253,7 +255,8 @@ void AIVGameFlow::EnterDuel()
 	if (Dir)
 	{
 		Dir->ClearPlayerAuto();
-		Dir->SetEnemyStyle(kRotation[NextStyle % 6], static_cast<iv::Difficulty>(FMath::Clamp(Difficulty, 0, 2)));
+		const int32 Fixed = IVSettings::GetInt(TEXT("enemy_style"));
+		Dir->SetEnemyStyle(kRotation[(Fixed > 0 ? Fixed - 1 : NextStyle) % 6], static_cast<iv::Difficulty>(Diff()));
 		Dir->Restart();
 		Dir->SetDummy(iv::DummyMode::Off);
 	}
@@ -264,8 +267,9 @@ void AIVGameFlow::EnterDuel()
 			for (int32 z = 0; z < iv::kZoneCount; ++z) Dir->GetMutableDuel()->fighter(iv::Side::B).body.ApplyDamage(static_cast<iv::Zone>(z), z == int32(iv::Zone::Reactor) ? 120.f : (z == int32(iv::Zone::Torso) ? 300.f : 125.f), iv::StrikeKind::Quick);
 		if (FParse::Param(FCommandLine::Get(), TEXT("IVFullUlt"))) Dir->FillUltimate(iv::Side::A);
 	}
-	const TCHAR* StyleNames[6] = { TEXT("Контрбойцовщик"), TEXT("Громила"), TEXT("Охотник на конечности"), TEXT("Обманщик"), TEXT("Стрелок"), TEXT("Борец") };
-	SetBanner(TEXT("ДУЭЛЬ"), FString::Printf(TEXT("Противник: %s  ·  %s"), StyleNames[NextStyle % 6], kDifficulty[FMath::Clamp(Difficulty, 0, 2)]), 3.2f);
+	const TCHAR* StyleNames[6] = { TEXT("Контрбойцовщик"), TEXT("Охотник на конечности"), TEXT("Обманщик"), TEXT("Громила"), TEXT("Борец"), TEXT("Стрелок") };
+	const int32 FixedS = IVSettings::GetInt(TEXT("enemy_style"));
+	SetBanner(TEXT("ДУЭЛЬ"), FString::Printf(TEXT("Противник: %s  ·  %s"), StyleNames[(FixedS > 0 ? FixedS - 1 : NextStyle) % 6], kDifficulty[Diff()]), 3.2f);
 	++NextStyle;
 	DuelClock = 0.f;
 	HitsLanded = HitsTaken = Parries = 0;
@@ -441,12 +445,12 @@ FString AIVGameFlow::GetStatsLine() const
 
 TArray<FString> AIVGameFlow::GetMenuItems() const
 {
-	return { TEXT("ДУЭЛЬ С ИИ"), TEXT("ОБУЧЕНИЕ"), TEXT("СПЛИТ-СКРИН"), TEXT("ГРАФИКА"), TEXT("ВЫХОД") };
+	return { TEXT("ДУЭЛЬ С ИИ"), TEXT("ОБУЧЕНИЕ"), TEXT("СПЛИТ-СКРИН"), TEXT("ГРАФИКА"), TEXT("НАСТРОЙКИ"), TEXT("ВЫХОД") };
 }
 
 FString AIVGameFlow::GetMenuValue(int32 I) const
 {
-	if (I == 0) return kDifficulty[FMath::Clamp(Difficulty, 0, 2)];
+	if (I == 0) return kDifficulty[Diff()];
 	if (I == 2) return TEXT("2 ГЕЙМПАДА");
 	if (I == 3) return IVGraphics::PresetName(GfxPreset);
 	return FString();
@@ -456,15 +460,16 @@ FString AIVGameFlow::GetMenuHint(int32 I) const
 {
 	switch (I)
 	{
-	case 0: return TEXT("Дуэль один на один против пилота-ИИ. Меч, броня по зонам, берсерк и аварии в отсеках. A / D — сложность.");
-	case 1: return TEXT("Пошаговое обучение: стойки, парирование, рывок, бросок здания, ремонт в нижнем отсеке.");
+	case 0: return TEXT("Дуэль один на один против пилота-ИИ. Меч, броня по зонам, берсерк, абордаж и аварии в отсеках. A / D — сложность.");
+	case 1: return TEXT("Пошаговое обучение: стойки, парирование, рывок, бросок здания и вертолёта, ремонт, абордаж.");
 	case 2: return TEXT("Два пилота — два геймпада. Каждый стыкуется со своим мехом, экран делится вертикальной линией.");
-	case 3: return TEXT("Пресеты от НИЗКОГО до RTX. Для трассировки лучей нужна видеокарта с аппаратной поддержкой. A / D — сменить.");
+	case 3: return TEXT("Пресеты от НИЗКОГО до RTX. Тонкая настройка (масштаб рендера, дальность, FPS) — в НАСТРОЙКАХ. A / D — сменить.");
+	case 4: return TEXT("Сложность, стиль врага, скорость боя, туман, яркость, дождь, вертолёты, апскейл, дальность прорисовки, управление и многое другое.");
 	default: return TEXT("Закрыть игру.");
 	}
 }
 
-FString AIVGameFlow::GetDifficultyName() const { return kDifficulty[FMath::Clamp(Difficulty, 0, 2)]; }
+FString AIVGameFlow::GetDifficultyName() const { return kDifficulty[Diff()]; }
 
 // ---------------------------------------------------------------------------------------------------- tick
 void AIVGameFlow::MenuInput()
@@ -472,21 +477,21 @@ void AIVGameFlow::MenuInput()
 	APlayerController* P = UGameplayStatics::GetPlayerController(this, 0);
 	if (!P) return;
 	auto Pressed = [P](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (P->WasInputKeyJustPressed(K)) return true; return false; };
-	const int32 N = 5;
+	const int32 N = 6;
 	if (Pressed({ EKeys::Up, EKeys::W, EKeys::Gamepad_DPad_Up, EKeys::Gamepad_LeftStick_Up })) { MenuIndex = (MenuIndex + N - 1) % N; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.7f); }
 	if (Pressed({ EKeys::Down, EKeys::S, EKeys::Gamepad_DPad_Down, EKeys::Gamepad_LeftStick_Down })) { MenuIndex = (MenuIndex + 1) % N; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.7f); }
 	const bool bLeft = Pressed({ EKeys::Left, EKeys::A, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftStick_Left });
 	const bool bRight = Pressed({ EKeys::Right, EKeys::D, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftStick_Right });
 	if (MenuIndex == 0)
 	{
-		if (bLeft) Difficulty = FMath::Max(0, Difficulty - 1);
-		if (bRight) Difficulty = FMath::Min(2, Difficulty + 1);
+		if (bLeft) { IVSettings::Set(TEXT("difficulty"), float(Diff() - 1)); }
+		if (bRight) { IVSettings::Set(TEXT("difficulty"), float(Diff() + 1)); }
 	}
 	if (MenuIndex == 3 && (bLeft || bRight))
 	{
 		GfxPreset = FMath::Clamp(GfxPreset + (bRight ? 1 : -1), 0, IVGraphics::kPresetCount - 1);
-		IVGraphics::Apply(GetWorld(), GfxPreset);
-		IVGraphics::Save(GfxPreset);
+		IVSettings::Set(TEXT("preset"), float(GfxPreset));
+		IVSettings::Apply(GetWorld());
 		IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.7f);
 	}
 	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom, EKeys::LeftMouseButton }))
@@ -495,9 +500,55 @@ void AIVGameFlow::MenuInput()
 		if (MenuIndex == 0) EnterDuel();
 		else if (MenuIndex == 1) EnterTutorial();
 		else if (MenuIndex == 2) EnterJoin();
-		else if (MenuIndex == 3) { GfxPreset = (GfxPreset + 1) % IVGraphics::kPresetCount; IVGraphics::Apply(GetWorld(), GfxPreset); IVGraphics::Save(GfxPreset); }
+		else if (MenuIndex == 3) { GfxPreset = (GfxPreset + 1) % IVGraphics::kPresetCount; IVSettings::Set(TEXT("preset"), float(GfxPreset)); IVSettings::Apply(GetWorld()); }
+		else if (MenuIndex == 4) EnterSettings();
 		else UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
 	}
+}
+
+void AIVGameFlow::EnterSettings()
+{
+	State = EIVFlowState::Settings;
+	SetIdx = 0;
+	SetHold = 0.f;
+}
+
+void AIVGameFlow::SettingsInput()
+{
+	APlayerController* P = UGameplayStatics::GetPlayerController(this, 0);
+	if (!P) return;
+	auto Pressed = [P](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (P->WasInputKeyJustPressed(K)) return true; return false; };
+	auto Down = [P](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (P->IsInputKeyDown(K)) return true; return false; };
+	const TArray<int32> Rows = IVSettings::OfTab(SetTab);
+	const int32 N = Rows.Num();
+	if (Pressed({ EKeys::Up, EKeys::W, EKeys::Gamepad_DPad_Up, EKeys::Gamepad_LeftStick_Up })) { SetIdx = (SetIdx + N - 1) % N; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.6f); }
+	if (Pressed({ EKeys::Down, EKeys::S, EKeys::Gamepad_DPad_Down, EKeys::Gamepad_LeftStick_Down })) { SetIdx = (SetIdx + 1) % N; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.6f); }
+	if (Pressed({ EKeys::Q, EKeys::Gamepad_LeftShoulder, EKeys::Tab })) { SetTab = (SetTab + IVSettings::kTabCount - 1) % IVSettings::kTabCount; SetIdx = 0; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.6f); }
+	if (Pressed({ EKeys::E, EKeys::Gamepad_RightShoulder })) { SetTab = (SetTab + 1) % IVSettings::kTabCount; SetIdx = 0; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.6f); }
+	SetIdx = FMath::Clamp(SetIdx, 0, FMath::Max(N - 1, 0));
+	const int32 Row = Rows.IsValidIndex(SetIdx) ? Rows[SetIdx] : 0;
+	const bool bShift = Down({ EKeys::LeftShift, EKeys::Gamepad_RightTrigger });
+	int32 Delta = 0;
+	if (Pressed({ EKeys::Left, EKeys::A, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftStick_Left })) { Delta = -1; SetHold = -0.35f; }
+	else if (Pressed({ EKeys::Right, EKeys::D, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftStick_Right })) { Delta = 1; SetHold = -0.35f; }
+	else if (IVSettings::All()[Row].Kind == IVSettings::EKind::Slider)
+	{
+		// held key repeats
+		const bool bL = Down({ EKeys::Left, EKeys::A, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftStick_Left });
+		const bool bR = Down({ EKeys::Right, EKeys::D, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftStick_Right });
+		if (bL || bR) { SetHold += GetWorld()->GetDeltaSeconds(); if (SetHold > 0.06f) { SetHold = 0.f; Delta = bR ? 1 : -1; } }
+		else SetHold = 0.f;
+	}
+	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom }) && IVSettings::All()[Row].Kind != IVSettings::EKind::Slider) Delta = 1;
+	if (Delta != 0)
+	{
+		IVSettings::Adjust(Row, Delta, bShift);
+		IVSettings::Apply(GetWorld());
+		GfxPreset = IVSettings::GetInt(TEXT("preset"));
+		IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.5f);
+	}
+	if (Pressed({ EKeys::R, EKeys::Gamepad_FaceButton_Left })) { IVSettings::ResetAll(); IVSettings::Apply(GetWorld()); IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.8f); }
+	if (Pressed({ EKeys::Escape, EKeys::BackSpace, EKeys::Gamepad_FaceButton_Right })) { State = EIVFlowState::Menu; IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.6f); }
 }
 
 void AIVGameFlow::Tick(float Dt)
@@ -510,17 +561,20 @@ void AIVGameFlow::Tick(float Dt)
 	if (!P || !Player || !Enemy || !Dir) return;
 
 	UpdateMusic(Dt);
-	if (State != EIVFlowState::Menu && P->WasInputKeyJustPressed(EKeys::Escape)) { EnterMenu(); return; }
+	if (State != EIVFlowState::Menu && State != EIVFlowState::Settings && P->WasInputKeyJustPressed(EKeys::Escape)) { EnterMenu(); return; }
 
 	if (PendingPick >= 0 && State == EIVFlowState::Menu && GetGameTimeSinceCreation() > 1.5f)
 	{
 		const int32 K = PendingPick; PendingPick = -1;
-		if (K == 0) EnterDuel(); else if (K == 1) EnterTutorial(); else if (K == 2) EnterJoin();
+		if (K == 0) EnterDuel(); else if (K == 1) EnterTutorial(); else if (K == 2) EnterJoin(); else if (K == 4) EnterSettings();
 	}
 	switch (State)
 	{
 	case EIVFlowState::Join:
 		JoinInput();
+		break;
+	case EIVFlowState::Settings:
+		SettingsInput();
 		break;
 	case EIVFlowState::Menu:
 		MenuInput();

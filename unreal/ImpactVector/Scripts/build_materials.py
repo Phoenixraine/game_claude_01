@@ -394,8 +394,9 @@ def build_rain():
     wind = scalar(m, "Wind", 700.0, -1400, 580)
     boxh = scalar(m, "BoxXY", 18000.0, -1400, 680)
     boxv = scalar(m, "BoxZ", 12000.0, -1400, 780)
-    names = ["P0", "Cam", "T", "Speed", "Wind", "BX", "BZ"]
-    srcs = [(obj, ""), (cam, ""), (tm, ""), (speed, ""), (wind, ""), (boxh, ""), (boxv, "")]
+    amount = scalar(m, "Amount", 0.8, -1400, 880)
+    names = ["P0", "Cam", "T", "Speed", "Wind", "BX", "BZ", "Amt"]
+    srcs = [(obj, ""), (cam, ""), (tm, ""), (speed, ""), (wind, ""), (boxh, ""), (boxv, ""), (amount, "")]
     code_pos = """
 float3 R = P0 - Cam;
 R.z -= Speed * T;
@@ -410,7 +411,7 @@ float3 newP = Cam + R;
     wpo = custom(m, code_pos + "return newP - P0;", t.CMOT_FLOAT3, names, -900, 0, "rain_wpo")
     wire_custom(wpo, srcs)
     MEL.connect_material_property(wpo, "", unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
-    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(1100.0, 3200.0, d) * (1.0 - smoothstep(6500.0, 10000.0, d)); float tw = 0.65 + 0.35 * frac(sin(dot(P0.xy, float2(12.9, 78.2))) * 43758.5); return 0.32 * fade * tw;",
+    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(1100.0, 3200.0, d) * (1.0 - smoothstep(6500.0, 10000.0, d)); float tw = 0.65 + 0.35 * frac(sin(dot(P0.xy, float2(12.9, 78.2))) * 43758.5); return 0.32 * fade * tw * step(frac(sin(dot(P0.xy, float2(41.7, 17.3))) * 9731.1), Amt);",
                 t.CMOT_FLOAT1, names, -900, 300, "rain_opacity")
     wire_custom(op, srcs)
     MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)

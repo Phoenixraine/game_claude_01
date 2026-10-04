@@ -1,4 +1,5 @@
 #include "IVPlayerController.h"
+#include "IVSettings.h"
 #include "IVMechPawn.h"
 #include "IVCombat.h"
 #include "IVAudio.h"
@@ -35,6 +36,7 @@ AIVCombatDirector* AIVPlayerController::GetDirector()
 void AIVPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	ApplySettings();
 	bAuto = FParse::Param(FCommandLine::Get(), TEXT("IVAuto"));
 	{
 		FString S;
@@ -554,8 +556,16 @@ void AIVPlayerController::UpdateRepair(float Dt)
 }
 
 
+void AIVPlayerController::ApplySettings()
+{
+	LookSensitivity = 0.11f * IVSettings::Get(TEXT("mouse"));
+	StickLookRate = 95.f * IVSettings::Get(TEXT("pad_look"));
+	RumbleScale = IVSettings::Get(TEXT("rumble"));
+}
+
 void AIVPlayerController::Rumble(float Strength, float Seconds)
 {
+	Strength *= RumbleScale;
 	if (!bRumbleEnabled || Strength <= 0.01f || !IsLocalController()) return;
 	UForceFeedbackEffect* Fx = NewObject<UForceFeedbackEffect>(this);
 	FForceFeedbackChannelDetails D;

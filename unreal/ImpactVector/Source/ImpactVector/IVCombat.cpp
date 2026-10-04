@@ -1,4 +1,5 @@
 #include "IVCombat.h"
+#include "IVSettings.h"
 #include "IVMechPawn.h"
 #include "IVPlayerController.h"
 #include "IVFXManager.h"
@@ -160,7 +161,7 @@ void AIVCombatDirector::Tick(float Dt)
 	if (!bHumanB) E->SetAim((P->GetActorLocation() - E->GetActorLocation()).Rotation().Yaw, 0.f);
 
 	// the fight runs a little slower than the raw core clock: heavier, more monumental swings (-IVFightSpeed= overrides)
-	static const double FightSpeed = [] { float V = 0.82f; FParse::Value(FCommandLine::Get(), TEXT("-IVFightSpeed="), V); return double(V); }();
+	const double FightSpeed = double(IVSettings::Get(TEXT("fight_speed")));
 	Acc += FMath::Min<double>(Dt, 0.1) * FightSpeed;
 	const double Step = 1.0 / double(iv::kTickHz);
 	bool bFirst = true;
@@ -627,6 +628,8 @@ void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 
 void AIVCombatDirector::ApplyHitStop(float Seconds, float Dilation)
 {
+	Seconds *= IVSettings::Get(TEXT("hit_stop"));
+	if (Seconds <= 0.001f) return;
 	HitStop = FMath::Max(HitStop, Seconds * Dilation);
 	UGameplayStatics::SetGlobalTimeDilation(this, Dilation);
 }

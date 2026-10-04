@@ -69,6 +69,7 @@ public:
 	virtual void BeginPlay() override;
 
 	static AIVFXManager* Get(UWorld* World);
+	static bool bGroundMist;
 
 	/** Big expanding dust/smoke cloud (building collapse, impacts). */
 	void SpawnDust(const FVector& Center, float Radius, int32 Count, float Strength = 1.f);

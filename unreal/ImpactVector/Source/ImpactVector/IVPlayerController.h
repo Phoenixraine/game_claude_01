@@ -43,6 +43,8 @@ public:
 	virtual void SetupInputComponent() override;
 	virtual void PlayerTick(float DeltaTime) override;
 
+	void ApplySettings();
+	float RumbleScale = 1.f;
 	float LookSensitivity = 0.11f;      // deg per mouse count
 	float StickLookRate = 95.f;         // deg/s at full deflection
 	float VectorSensitivity = 0.0045f;  // mouse counts -> virtual stick units

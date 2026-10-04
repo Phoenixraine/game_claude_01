@@ -100,6 +100,8 @@ public:
 	void SetHullDamage(float Amount);
 	/** Hide parts that would block the first-person view. */
 	void SetFirstPersonView(bool bFirstPerson);
+	/** Re-reads the player's settings (field of view, shake, infection...). */
+	void ApplySettings();
 
 	// ---- combat presentation (driven by AIVCombatDirector) ----
 	void SetCombatAnim(const iv::AnimState& S) { CombatAnim = S; bCombat = true; }
@@ -209,6 +211,7 @@ protected:
 	FVector2D MoveIntent = FVector2D::ZeroVector;
 	FVector Velocity = FVector::ZeroVector;
 	float AimYaw = 0.f, AimPitch = 0.f;
+	float SetFov = 98.f, SetShake = 1.f, SetMinSep = 5000.f;
 	float TorsoYawRel = 0.f;
 	bool bSprint = false;
 

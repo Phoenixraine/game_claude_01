@@ -36,6 +36,8 @@ public:
 	virtual void BeginPlay() override;
 
 	static AIVEnvironment* Get(UWorld* World);
+	/** Fog / exposure / neon / bloom / motion blur / rain amount / ground mist from the player's settings. */
+	void ApplySettings(float FogMul, float EV, float Neon, float Bloom, float MotionBlur, float Rain, bool bMist);
 
 	/** Blast at a world point: opens up the buildings it touches and destroys cells. Returns cells destroyed. */
 	int32 BlastAt(const FVector& Center, float Radius, float Impulse);
@@ -67,4 +69,5 @@ private:
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Glass;
 
 	void BuildCityBlockout();
+	UPROPERTY() TObjectPtr<AActor> RainActor;
 };

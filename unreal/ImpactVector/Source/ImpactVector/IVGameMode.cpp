@@ -1,4 +1,5 @@
 #include "IVGameMode.h"
+#include "IVSettings.h"
 #include "IVFXManager.h"
 #include "IVHelicopter.h"
 #include "RenderCore.h"
@@ -77,7 +78,7 @@ void AIVGameMode::StartPlay()
 			EnemyMech->LampColor = FLinearColor(1.f, 0.28f, 0.12f);
 			EnemyMech->LampPower = 0.12f;
 			EnemyMech->bLampsDown = true;
-			EnemyMech->bInfected = !FParse::Param(FCommandLine::Get(), TEXT("IVNoInfect"));
+			EnemyMech->bInfected = IVSettings::GetBool(TEXT("infected")) && !FParse::Param(FCommandLine::Get(), TEXT("IVNoInfect"));
 		}
 		EnemyMech->FinishSpawning(FTransform(FRotator(0.f, EnemyYaw, 0.f), EnemyLoc));
 		EnemyMech->bAIControlled = true;
@@ -101,7 +102,7 @@ void AIVGameMode::StartPlay()
 	}
 
 	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoHeli")))
-		AIVHelicopter::SpawnFleet(W, (PlayerLoc + EnemyLoc) * 0.5f, 2);
+		AIVHelicopter::SpawnFleet(W, (PlayerLoc + EnemyLoc) * 0.5f, IVSettings::GetInt(TEXT("helis")));
 
 	// combat: the player is side A, the enemy mech side B
 	if (!FParse::Param(FCommandLine::Get(), TEXT("IVNoCombat")))
@@ -211,7 +212,7 @@ void AIVGameMode::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	Elapsed += Dt;
-	if (!bGfxReapplied && Elapsed > 1.0f) { bGfxReapplied = true; IVGraphics::ApplyAtStart(GetWorld()); }   // the viewport has its real size by now
+	if (!bGfxReapplied && Elapsed > 1.0f) { bGfxReapplied = true; IVGraphics::ApplyAtStart(GetWorld()); IVSettings::Apply(GetWorld()); }   // the viewport has its real size by now
 	{	// frame-rate log every 10 s (find it with "IV perf" in the log)
 		PerfAcc += Dt; ++PerfFrames; PerfMin = FMath::Min(PerfMin, 1.f / FMath::Max(Dt, 1e-4f));
 		if (PerfAcc >= 10.f)

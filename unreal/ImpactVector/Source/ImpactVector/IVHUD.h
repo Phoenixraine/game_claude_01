@@ -31,6 +31,7 @@ private:
 	void DrawHack(const iv::HackGame& G, float Sx);
 	void DrawMenu(AIVGameFlow* Flow);
 	void DrawJoin(AIVGameFlow* Flow);
+	void DrawSettings(AIVGameFlow* Flow);
 	void DrawTutorial(AIVGameFlow* Flow);
 	void DrawTrail(AIVPlayerController* PC);
 	void DrawMechDiagram(const iv::Fighter& F, float X, float Y, float S, bool bFront);

@@ -12,6 +12,8 @@
 #include "Components/PointLightComponent.h"
 #include "IVDistrict.h"
 
+bool AIVFXManager::bGroundMist = false;
+
 AIVFXManager::AIVFXManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -321,7 +323,7 @@ void AIVFXManager::Tick(float Dt)
 	TickChunks(Dt);
 	{	// ground mist drifting along the street around the camera
 		MistAcc += Dt;
-		if (MistAcc > 0.18f && Puffs.Num() < MaxPuffs - 150 && FParse::Param(FCommandLine::Get(), TEXT("IVMist")))
+		if (MistAcc > 0.18f && Puffs.Num() < MaxPuffs - 150 && (bGroundMist || FParse::Param(FCommandLine::Get(), TEXT("IVMist"))))
 		{
 			MistAcc = 0.f;
 			APlayerCameraManager* PCM = UGameplayStatics::GetPlayerCameraManager(this, 0);

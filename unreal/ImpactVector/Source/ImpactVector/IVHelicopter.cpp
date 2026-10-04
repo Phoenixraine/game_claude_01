@@ -262,6 +262,34 @@ void AIVHelicopter::SpawnFleet(UWorld* World, const FVector& ArenaCenter, int32 
 	}
 }
 
+void AIVHelicopter::SetFleetSize(UWorld* World, int32 Count)
+{
+	if (!World) return;
+	TArray<AIVHelicopter*> Live;
+	for (TActorIterator<AIVHelicopter> It(World); It; ++It) if (It->State == EIVHeliState::Patrol) Live.Add(*It);
+	for (int32 i = Live.Num() - 1; i >= Count; --i) Live[i]->Destroy();
+	if (Live.Num() < Count)
+	{
+		FVector Mid = FVector(39500.f, 0.f, 0.f);
+		int32 N = 0; FVector Sum = FVector::ZeroVector;
+		for (TActorIterator<AIVMechPawn> It(World); It; ++It) { Sum += It->GetActorLocation(); ++N; }
+		if (N) Mid = FVector(Sum.X / N, Sum.Y / N, 0.f);
+		for (int32 i = Live.Num(); i < Count; ++i)
+		{
+			FActorSpawnParameters Sp;
+			Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			AIVHelicopter* H = World->SpawnActor<AIVHelicopter>(Mid, FRotator::ZeroRotator, Sp);
+			if (!H) continue;
+			H->Center = Mid;
+			H->Phase = 2.f * PI * (float(i) / FMath::Max(Count, 1)) + 0.7f;
+			H->bClockwise = (i % 2) == 0;
+			H->Radius = 17500.f + 4500.f * i;
+			H->Altitude = 10500.f + 2200.f * i;
+			H->LowTimer = 14.f + 16.f * i;
+		}
+	}
+}
+
 void AIVHelicopter::UpdateAim(float Dt)
 {
 	// who is on the ground below
