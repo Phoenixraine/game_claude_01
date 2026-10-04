@@ -1823,7 +1823,7 @@ USkeletalMeshComponent* AIVMechPawn::MakeCloneRig(UMaterialInterface* Mat, TObje
 	C->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	C->SetAnimInstanceClass(UIVRigAnimInstance::StaticClass());
 	C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	C->SetCastShadow(true);
+	C->SetCastShadow(false);
 	C->SetBoundsScale(3.f);
 	C->bUpdateJointsFromAnimation = true;
 	C->RegisterComponent();
@@ -2050,7 +2050,7 @@ void AIVMechPawn::BuildGrowths()
 			C->SetStaticMesh(M);
 			C->SetMaterial(0, GrowthMID);
 			C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			C->SetCastShadow(true);
+			C->SetCastShadow(false);
 			C->bAffectDynamicIndirectLighting = true;
 			// built in world space, stored relative to the bone so it follows the animation
 			const FTransform W(FRotationMatrix::MakeFromZ(WorldDir).ToQuat(), WorldPos, Scale);
@@ -2151,7 +2151,7 @@ void AIVMechPawn::BuildGreebles()
 		C->SetStaticMesh(M);
 		if (Mat) C->SetMaterial(0, Mat);
 		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		C->SetCastShadow(true);
+		C->SetCastShadow(false);
 		C->RegisterComponent();
 		C->SetWorldTransform(FTransform(Rot, Pos, Scale));
 		C->AttachToComponent(RigMesh, FAttachmentTransformRules::KeepWorldTransform, Bone);
@@ -2308,7 +2308,7 @@ void AIVMechPawn::BuildPlates()
 		C->SetStaticMesh(M);
 		C->SetMaterial(0, PlateMID);
 		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		C->SetCastShadow(true);
+		C->SetCastShadow(false);
 		C->RegisterComponent();
 		C->SetWorldTransform(FTransform(FRotationMatrix::MakeFromZX(Axis.GetSafeNormal(), Out).ToQuat(), Pos, Scale));
 		C->AttachToComponent(RigMesh, FAttachmentTransformRules::KeepWorldTransform, FName(AttachBone));

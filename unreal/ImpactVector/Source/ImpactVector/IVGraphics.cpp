@@ -40,7 +40,7 @@ namespace IVGraphics
 		if (Preset == 4 && !SupportsRayTracing()) Preset = 3;
 		// internal resolution from a pixel budget (millions of rendered pixels): 3440x1440 renders ~75 % per axis on HIGH, 1080p is native.
 		// TSR upscales to the display resolution.
-		static const float BudgetMpx[kPresetCount] = { 1.2f, 1.9f, 2.7f, 4.2f, 3.6f };
+		static const float BudgetMpx[kPresetCount] = { 0.9f, 1.3f, 1.75f, 2.8f, 2.5f };
 		float W = 1920.f, H = 1080.f;
 		if (GEngine && GEngine->GameViewport) { FVector2D VS; GEngine->GameViewport->GetViewportSize(VS); if (VS.X > 100.f && VS.Y > 100.f) { W = VS.X; H = VS.Y; } }
 		const float Sp = FMath::Clamp(FMath::Sqrt(BudgetMpx[Preset] * 1.0e6f / (W * H)) * 100.f, 45.f, 100.f);
@@ -74,6 +74,7 @@ namespace IVGraphics
 	int32 Load()
 	{
 		int32 P = 2;
+		if (GEngine && GEngine->GameViewport) { FVector2D VS; GEngine->GameViewport->GetViewportSize(VS); if (VS.X * VS.Y > 3.5e6f) P = 1; }   // ultrawide / 4K: default to MEDIUM to stay near 60 fps
 		GConfig->GetInt(TEXT("IV"), TEXT("GfxPresetV2"), P, IniPath());
 		return FMath::Clamp(P, 0, kPresetCount - 1);
 	}

@@ -344,17 +344,17 @@ col = lerp(col, float3(0.012, 0.011, 0.01), soot);
     base = custom(m, common + "return col;", t.CMOT_FLOAT3, names, -900, 0, "hull_base")
     wire_custom(base, srcs)
     MEL.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
-    rough = custom(m, common + "return clamp(lerp(0.34, 0.2, edge) + 0.16 * pl + 0.3 * soot + 0.1 * (n - 0.4), 0.14, 0.9);", t.CMOT_FLOAT1, names, -900, 300, "hull_rough")
+    rough = custom(m, common + "return clamp(lerp(0.46, 0.24, edge) + 0.16 * pl + 0.3 * soot + 0.1 * (n - 0.4), 0.14, 0.9);", t.CMOT_FLOAT1, names, -900, 300, "hull_rough")
     wire_custom(rough, srcs)
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
-    met = custom(m, common + "return saturate(0.55 + 0.4 * edge) * (1.0 - soot * 0.9) * (1.0 - 0.35 * band);", t.CMOT_FLOAT1, names, -900, 600, "hull_metal")
+    met = custom(m, common + "return saturate(0.4 + 0.5 * edge) * (1.0 - soot * 0.9) * (1.0 - 0.35 * band);", t.CMOT_FLOAT1, names, -900, 600, "hull_metal")
     wire_custom(met, srcs)
     MEL.connect_material_property(met, "", unreal.MaterialProperty.MP_METALLIC)
     camv = expr(m, unreal.MaterialExpressionCameraVectorWS, -1500, 1200)
     pnrm = expr(m, unreal.MaterialExpressionPixelNormalWS, -1500, 1300)
     names2 = names + ["CV", "PN"]
     srcs2 = srcs + [(camv, ""), (pnrm, "")]
-    emi = custom(m, common + "float rim = pow(saturate(1.0 - abs(dot(normalize(CV), normalize(PN)))), 3.0); float3 rimc = lerp(Accent, Glow * 0.12, 0.5) * rim * 0.9 * (1.0 + Rage * 2.0); float ember = step(0.93, n) * step(0.45, Damage) * saturate(Damage * 2.0 - 0.7) * (0.5 + fine); return Glow * (em * (0.7 + 0.3 * n) + ember * 0.5) * (1.0 + Rage * 2.2) + float3(1.0, 0.08, 0.02) * Rage * (edge * 6.0 + 0.6 * smoothstep(0.55, 0.9, n)) + rimc;", t.CMOT_FLOAT3, names2, -900, 900, "hull_emissive")
+    emi = custom(m, common + "float rim = pow(saturate(1.0 - abs(dot(normalize(CV), normalize(PN)))), 3.0); float3 rimc = lerp(Accent, Glow * 0.12, 0.5) * rim * 0.35 * (1.0 + Rage * 2.0); float ember = step(0.93, n) * step(0.45, Damage) * saturate(Damage * 2.0 - 0.7) * (0.5 + fine); return Glow * (em * (0.7 + 0.3 * n) + ember * 0.5) * (1.0 + Rage * 2.2) + float3(1.0, 0.08, 0.02) * Rage * (edge * 6.0 + 0.6 * smoothstep(0.55, 0.9, n)) + rimc;", t.CMOT_FLOAT3, names2, -900, 900, "hull_emissive")
     wire_custom(emi, srcs2)
     MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     if masked:
