@@ -1,0 +1,9760 @@
+{
+ "version": 1,
+ "units": "metres (1 uu = 1 m), +Z up, right-handed (Blender); FBX exported with -Y forward / +Z up",
+ "materials": [
+  "M_Concrete_Old",
+  "M_Fracture",
+  "M_Glass_Shard",
+  "M_Steel_Rust",
+  "M_Rebar",
+  "M_Gravel"
+ ],
+ "pivot": "centre of mass",
+ "triangles_total": 54158,
+ "groups": {
+  "Concrete": "out/Shards_Concrete.fbx",
+  "Structure": "out/Shards_Structure.fbx",
+  "Glass": "out/Shards_Glass.fbx",
+  "Gravel": "out/Shards_Gravel.fbx",
+  "Metal": "out/Shards_Metal.fbx"
+ },
+ "glb": "out/Shards_All.glb",
+ "assets": [
+  {
+   "name": "Shard_Concrete_S_00",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 60,
+   "vertices": 32,
+   "bbox_min": [
+    -0.1313,
+    -0.0267,
+    -0.0893
+   ],
+   "bbox_max": [
+    0.1573,
+    0.0325,
+    0.0936
+   ],
+   "size": [
+    0.2886,
+    0.0592,
+    0.183
+   ],
+   "radius": 0.1597,
+   "mass_kg_hint": 4.49378,
+   "volume_m3": 0.00187,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_S_00_00",
+   "pca_axes": [
+    [
+     -0.96375,
+     -0.03224,
+     0.26484
+    ],
+    [
+     -0.26203,
+     -0.07239,
+     -0.96234
+    ],
+    [
+     0.05019,
+     -0.99686,
+     0.06132
+    ]
+   ],
+   "pca_extents": [
+    0.3008,
+    0.1883,
+    0.07
+   ],
+   "old_face_normal": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_01",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 60,
+   "vertices": 32,
+   "bbox_min": [
+    -0.0398,
+    -0.1403,
+    -0.1299
+   ],
+   "bbox_max": [
+    0.0258,
+    0.1501,
+    0.1673
+   ],
+   "size": [
+    0.0656,
+    0.2903,
+    0.2972
+   ],
+   "radius": 0.1916,
+   "mass_kg_hint": 5.06065,
+   "volume_m3": 0.00211,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_S_01_00",
+   "pca_axes": [
+    [
+     0.04749,
+     -0.45259,
+     0.89045
+    ],
+    [
+     0.09741,
+     0.88931,
+     0.44681
+    ],
+    [
+     -0.99411,
+     0.06552,
+     0.08632
+    ]
+   ],
+   "pca_extents": [
+    0.3465,
+    0.2474,
+    0.0681
+   ],
+   "old_face_normal": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_02",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 48,
+   "vertices": 26,
+   "bbox_min": [
+    -0.192,
+    -0.1467,
+    -0.0435
+   ],
+   "bbox_max": [
+    0.1788,
+    0.1314,
+    0.0561
+   ],
+   "size": [
+    0.3707,
+    0.2781,
+    0.0996
+   ],
+   "radius": 0.2127,
+   "mass_kg_hint": 11.31053,
+   "volume_m3": 0.00471,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 10,
+   "ucx": "UCX_Shard_Concrete_S_02_00",
+   "pca_axes": [
+    [
+     -0.97605,
+     0.18386,
+     0.11627
+    ],
+    [
+     -0.18466,
+     -0.98279,
+     0.00398
+    ],
+    [
+     0.115,
+     -0.01758,
+     0.99321
+    ]
+   ],
+   "pca_extents": [
+    0.3752,
+    0.2826,
+    0.1155
+   ],
+   "old_face_normal": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_03",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 60,
+   "vertices": 32,
+   "bbox_min": [
+    -0.1547,
+    -0.05,
+    -0.1467
+   ],
+   "bbox_max": [
+    0.1409,
+    0.0697,
+    0.1668
+   ],
+   "size": [
+    0.2955,
+    0.1196,
+    0.3135
+   ],
+   "radius": 0.2187,
+   "mass_kg_hint": 13.39913,
+   "volume_m3": 0.00558,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_S_03_00",
+   "pca_axes": [
+    [
+     0.17871,
+     0.15892,
+     0.97098
+    ],
+    [
+     -0.98384,
+     0.03974,
+     0.17457
+    ],
+    [
+     -0.01084,
+     -0.98649,
+     0.16345
+    ]
+   ],
+   "pca_extents": [
+    0.3487,
+    0.271,
+    0.1306
+   ],
+   "old_face_normal": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_04",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 60,
+   "vertices": 32,
+   "bbox_min": [
+    -0.2058,
+    -0.1199,
+    -0.0569
+   ],
+   "bbox_max": [
+    0.1764,
+    0.1448,
+    0.0453
+   ],
+   "size": [
+    0.3823,
+    0.2648,
+    0.1022
+   ],
+   "radius": 0.2111,
+   "mass_kg_hint": 14.71523,
+   "volume_m3": 0.00613,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_S_04_00",
+   "pca_axes": [
+    [
+     -0.99764,
+     0.06679,
+     0.01596
+    ],
+    [
+     0.06735,
+     0.99702,
+     0.03751
+    ],
+    [
+     -0.01341,
+     0.0385,
+     -0.99917
+    ]
+   ],
+   "pca_extents": [
+    0.385,
+    0.2742,
+    0.1081
+   ],
+   "old_face_normal": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_05",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 60,
+   "vertices": 32,
+   "bbox_min": [
+    -0.0772,
+    -0.2755,
+    -0.1769
+   ],
+   "bbox_max": [
+    0.0987,
+    0.2074,
+    0.15
+   ],
+   "size": [
+    0.1758,
+    0.4829,
+    0.3269
+   ],
+   "radius": 0.2755,
+   "mass_kg_hint": 35.58564,
+   "volume_m3": 0.01483,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_S_05_00",
+   "pca_axes": [
+    [
+     0.07612,
+     0.87387,
+     0.48017
+    ],
+    [
+     0.04508,
+     0.47805,
+     -0.87717
+    ],
+    [
+     -0.99608,
+     0.08842,
+     -0.003
+    ]
+   ],
+   "pca_extents": [
+    0.4665,
+    0.3504,
+    0.1867
+   ],
+   "old_face_normal": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_06",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 60,
+   "vertices": 32,
+   "bbox_min": [
+    -0.0725,
+    -0.2935,
+    -0.2044
+   ],
+   "bbox_max": [
+    0.0579,
+    0.2496,
+    0.211
+   ],
+   "size": [
+    0.1304,
+    0.5431,
+    0.4154
+   ],
+   "radius": 0.3491,
+   "mass_kg_hint": 34.12859,
+   "volume_m3": 0.01422,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_S_06_00",
+   "pca_axes": [
+    [
+     0.0125,
+     -0.77521,
+     0.63157
+    ],
+    [
+     -0.01017,
+     0.63149,
+     0.77532
+    ],
+    [
+     -0.99987,
+     -0.01611,
+     1e-05
+    ]
+   ],
+   "pca_extents": [
+    0.6575,
+    0.3559,
+    0.1332
+   ],
+   "old_face_normal": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_07",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 60,
+   "vertices": 32,
+   "bbox_min": [
+    -0.2537,
+    -0.2762,
+    -0.1796
+   ],
+   "bbox_max": [
+    0.2303,
+    0.2479,
+    0.1781
+   ],
+   "size": [
+    0.484,
+    0.524,
+    0.3577
+   ],
+   "radius": 0.3348,
+   "mass_kg_hint": 81.56878,
+   "volume_m3": 0.03399,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_S_07_00",
+   "pca_axes": [
+    [
+     0.26426,
+     -0.95975,
+     0.09509
+    ],
+    [
+     0.94439,
+     0.23749,
+     -0.22743
+    ],
+    [
+     0.19569,
+     0.1499,
+     0.96914
+    ]
+   ],
+   "pca_extents": [
+    0.5454,
+    0.4602,
+    0.3683
+   ],
+   "old_face_normal": [
+    0.21744,
+    -0.27247,
+    0.93727
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_08",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 66,
+   "vertices": 35,
+   "bbox_min": [
+    -0.2623,
+    -0.0731,
+    -0.2995
+   ],
+   "bbox_max": [
+    0.238,
+    0.0867,
+    0.2183
+   ],
+   "size": [
+    0.5002,
+    0.1597,
+    0.5178
+   ],
+   "radius": 0.3275,
+   "mass_kg_hint": 49.32756,
+   "volume_m3": 0.02055,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 13,
+   "ucx": "UCX_Shard_Concrete_S_08_00",
+   "pca_axes": [
+    [
+     -0.58561,
+     0.00834,
+     -0.81055
+    ],
+    [
+     -0.80884,
+     -0.07179,
+     0.58364
+    ],
+    [
+     -0.05332,
+     0.99738,
+     0.04879
+    ]
+   ],
+   "pca_extents": [
+    0.6237,
+    0.5038,
+    0.1655
+   ],
+   "old_face_normal": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_S_09",
+   "category": "Shard_Concrete",
+   "size_class": "S",
+   "group": "Concrete",
+   "triangles": 60,
+   "vertices": 32,
+   "bbox_min": [
+    -0.2462,
+    -0.0576,
+    -0.248
+   ],
+   "bbox_max": [
+    0.2303,
+    0.0775,
+    0.2406
+   ],
+   "size": [
+    0.4765,
+    0.1351,
+    0.4886
+   ],
+   "radius": 0.3036,
+   "mass_kg_hint": 40.01892,
+   "volume_m3": 0.01667,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_S_09_00",
+   "pca_axes": [
+    [
+     -0.57522,
+     -0.02142,
+     0.81772
+    ],
+    [
+     -0.818,
+     0.0178,
+     -0.57495
+    ],
+    [
+     -0.00224,
+     -0.99961,
+     -0.02777
+    ]
+   ],
+   "pca_extents": [
+    0.571,
+    0.4388,
+    0.1403
+   ],
+   "old_face_normal": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_00",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 144,
+   "vertices": 74,
+   "bbox_min": [
+    -0.1759,
+    -0.2734,
+    -0.3243
+   ],
+   "bbox_max": [
+    0.1491,
+    0.2808,
+    0.3504
+   ],
+   "size": [
+    0.325,
+    0.5542,
+    0.6747
+   ],
+   "radius": 0.4342,
+   "mass_kg_hint": 122.55434,
+   "volume_m3": 0.05106,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 8,
+   "ucx": "UCX_Shard_Concrete_M_00_00",
+   "pca_axes": [
+    [
+     -0.10778,
+     0.43973,
+     0.89164
+    ],
+    [
+     -0.21865,
+     0.86442,
+     -0.45273
+    ],
+    [
+     -0.96983,
+     -0.24375,
+     0.00298
+    ]
+   ],
+   "pca_extents": [
+    0.7509,
+    0.5877,
+    0.3385
+   ],
+   "old_face_normal": [
+    -0.58284,
+    -0.81242,
+    -0.01636
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_01",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -0.4421,
+    -0.0534,
+    -0.2256
+   ],
+   "bbox_max": [
+    0.4532,
+    0.0854,
+    0.213
+   ],
+   "size": [
+    0.8952,
+    0.1389,
+    0.4386
+   ],
+   "radius": 0.4853,
+   "mass_kg_hint": 56.48474,
+   "volume_m3": 0.02354,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_M_01_00",
+   "pca_axes": [
+    [
+     -0.94493,
+     -0.03187,
+     0.32573
+    ],
+    [
+     -0.32443,
+     -0.03993,
+     -0.94507
+    ],
+    [
+     0.04313,
+     -0.99869,
+     0.02739
+    ]
+   ],
+   "pca_extents": [
+    0.9588,
+    0.4869,
+    0.1608
+   ],
+   "old_face_normal": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_02",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -0.2493,
+    -0.321,
+    -0.4642
+   ],
+   "bbox_max": [
+    0.3334,
+    0.3244,
+    0.5751
+   ],
+   "size": [
+    0.5827,
+    0.6453,
+    1.0393
+   ],
+   "radius": 0.6162,
+   "mass_kg_hint": 559.80964,
+   "volume_m3": 0.23325,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_M_02_00",
+   "pca_axes": [
+    [
+     -0.24044,
+     -0.06349,
+     0.96859
+    ],
+    [
+     -0.95613,
+     -0.15656,
+     -0.24761
+    ],
+    [
+     0.16736,
+     -0.98563,
+     -0.02306
+    ]
+   ],
+   "pca_extents": [
+    1.0912,
+    0.7808,
+    0.6551
+   ],
+   "old_face_normal": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_03",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 192,
+   "vertices": 98,
+   "bbox_min": [
+    -0.3065,
+    -0.1769,
+    -0.5029
+   ],
+   "bbox_max": [
+    0.28,
+    0.1044,
+    0.5943
+   ],
+   "size": [
+    0.5866,
+    0.2813,
+    1.0972
+   ],
+   "radius": 0.6662,
+   "mass_kg_hint": 162.79582,
+   "volume_m3": 0.06783,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 10,
+   "ucx": "UCX_Shard_Concrete_M_03_00",
+   "pca_axes": [
+    [
+     -0.34122,
+     0.00439,
+     0.93997
+    ],
+    [
+     0.93647,
+     -0.08474,
+     0.34034
+    ],
+    [
+     0.08115,
+     0.99639,
+     0.0248
+    ]
+   ],
+   "pca_extents": [
+    1.2034,
+    0.6347,
+    0.3149
+   ],
+   "old_face_normal": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_04",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 144,
+   "vertices": 74,
+   "bbox_min": [
+    -0.4162,
+    -0.5281,
+    -0.1755
+   ],
+   "bbox_max": [
+    0.5267,
+    0.5363,
+    0.1236
+   ],
+   "size": [
+    0.9429,
+    1.0644,
+    0.2991
+   ],
+   "radius": 0.7034,
+   "mass_kg_hint": 416.71532,
+   "volume_m3": 0.17363,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 8,
+   "ucx": "UCX_Shard_Concrete_M_04_00",
+   "pca_axes": [
+    [
+     -0.5561,
+     -0.83085,
+     -0.02096
+    ],
+    [
+     -0.83101,
+     0.55625,
+     -0.00203
+    ],
+    [
+     0.01335,
+     0.01629,
+     -0.99978
+    ]
+   ],
+   "pca_extents": [
+    1.3278,
+    1.1081,
+    0.305
+   ],
+   "old_face_normal": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_05",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -0.2616,
+    -0.6389,
+    -0.4499
+   ],
+   "bbox_max": [
+    0.3763,
+    0.6961,
+    0.5246
+   ],
+   "size": [
+    0.638,
+    1.335,
+    0.9745
+   ],
+   "radius": 0.8278,
+   "mass_kg_hint": 1004.76657,
+   "volume_m3": 0.41865,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_M_05_00",
+   "pca_axes": [
+    [
+     0.09685,
+     -0.90627,
+     -0.41145
+    ],
+    [
+     -0.40294,
+     -0.4137,
+     0.81639
+    ],
+    [
+     -0.91009,
+     0.08673,
+     -0.40524
+    ]
+   ],
+   "pca_extents": [
+    1.5761,
+    1.0178,
+    0.7874
+   ],
+   "old_face_normal": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_06",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -0.2497,
+    -0.6604,
+    -0.7977
+   ],
+   "bbox_max": [
+    0.1347,
+    0.5028,
+    0.6365
+   ],
+   "size": [
+    0.3844,
+    1.1632,
+    1.4342
+   ],
+   "radius": 0.9109,
+   "mass_kg_hint": 712.63499,
+   "volume_m3": 0.29693,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_M_06_00",
+   "pca_axes": [
+    [
+     -0.12198,
+     0.3292,
+     0.93635
+    ],
+    [
+     0.00683,
+     0.94365,
+     -0.33088
+    ],
+    [
+     -0.99251,
+     -0.03396,
+     -0.11736
+    ]
+   ],
+   "pca_extents": [
+    1.6215,
+    1.267,
+    0.4039
+   ],
+   "old_face_normal": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_07",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -0.1704,
+    -0.6689,
+    -0.5507
+   ],
+   "bbox_max": [
+    0.2137,
+    0.6883,
+    0.4713
+   ],
+   "size": [
+    0.3841,
+    1.3572,
+    1.022
+   ],
+   "radius": 0.792,
+   "mass_kg_hint": 736.55512,
+   "volume_m3": 0.3069,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_M_07_00",
+   "pca_axes": [
+    [
+     -0.00809,
+     -0.92916,
+     0.36959
+    ],
+    [
+     0.00955,
+     0.36951,
+     0.92918
+    ],
+    [
+     -0.99992,
+     0.01105,
+     0.00589
+    ]
+   ],
+   "pca_extents": [
+    1.4117,
+    1.1073,
+    0.3845
+   ],
+   "old_face_normal": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_08",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -0.4534,
+    -0.5877,
+    -0.2511
+   ],
+   "bbox_max": [
+    0.6225,
+    0.7569,
+    0.3702
+   ],
+   "size": [
+    1.0759,
+    1.3447,
+    0.6213
+   ],
+   "radius": 0.8809,
+   "mass_kg_hint": 1143.28393,
+   "volume_m3": 0.47637,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_M_08_00",
+   "pca_axes": [
+    [
+     -0.40965,
+     0.90257,
+     -0.13254
+    ],
+    [
+     0.86496,
+     0.33812,
+     -0.37084
+    ],
+    [
+     -0.28989,
+     -0.26655,
+     -0.91919
+    ]
+   ],
+   "pca_extents": [
+    1.5673,
+    1.3017,
+    0.8364
+   ],
+   "old_face_normal": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_M_09",
+   "category": "Shard_Concrete",
+   "size_class": "M",
+   "group": "Concrete",
+   "triangles": 192,
+   "vertices": 98,
+   "bbox_min": [
+    -0.956,
+    -0.1694,
+    -0.7424
+   ],
+   "bbox_max": [
+    0.8003,
+    0.2318,
+    0.8263
+   ],
+   "size": [
+    1.7564,
+    0.4012,
+    1.5688
+   ],
+   "radius": 1.1618,
+   "mass_kg_hint": 1119.93812,
+   "volume_m3": 0.46664,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 10,
+   "ucx": "UCX_Shard_Concrete_M_09_00",
+   "pca_axes": [
+    [
+     -0.85921,
+     0.00249,
+     -0.51162
+    ],
+    [
+     0.51078,
+     -0.05315,
+     -0.85807
+    ],
+    [
+     -0.02933,
+     -0.99858,
+     0.0444
+    ]
+   ],
+   "pca_extents": [
+    2.2143,
+    1.5305,
+    0.3802
+   ],
+   "old_face_normal": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_00",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -0.2663,
+    -1.0509,
+    -0.8596
+   ],
+   "bbox_max": [
+    0.3037,
+    1.0603,
+    0.6631
+   ],
+   "size": [
+    0.57,
+    2.1112,
+    1.5226
+   ],
+   "radius": 1.2451,
+   "mass_kg_hint": 2663.67159,
+   "volume_m3": 1.10986,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_L_00_00",
+   "pca_axes": [
+    [
+     -0.03539,
+     0.9973,
+     0.06442
+    ],
+    [
+     -0.04855,
+     0.06267,
+     -0.99685
+    ],
+    [
+     -0.99819,
+     -0.0384,
+     0.0462
+    ]
+   ],
+   "pca_extents": [
+    2.0953,
+    1.6012,
+    0.6411
+   ],
+   "old_face_normal": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_01",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -0.8187,
+    -1.0788,
+    -1.1301
+   ],
+   "bbox_max": [
+    0.6926,
+    1.1058,
+    1.0315
+   ],
+   "size": [
+    1.5113,
+    2.1847,
+    2.1616
+   ],
+   "radius": 1.5597,
+   "mass_kg_hint": 7973.84883,
+   "volume_m3": 3.32244,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_L_01_00",
+   "pca_axes": [
+    [
+     -0.42722,
+     -0.49981,
+     -0.75344
+    ],
+    [
+     0.29453,
+     -0.8648,
+     0.40667
+    ],
+    [
+     -0.85483,
+     -0.04817,
+     0.51667
+    ]
+   ],
+   "pca_extents": [
+    3.0251,
+    2.5018,
+    1.6445
+   ],
+   "old_face_normal": [
+    0.50374,
+    0.188,
+    -0.84315
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_02",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -1.1586,
+    -0.4881,
+    -1.0876
+   ],
+   "bbox_max": [
+    1.338,
+    0.3693,
+    0.9882
+   ],
+   "size": [
+    2.4966,
+    0.8575,
+    2.0758
+   ],
+   "radius": 1.6265,
+   "mass_kg_hint": 4862.38239,
+   "volume_m3": 2.02599,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_L_02_00",
+   "pca_axes": [
+    [
+     -0.9174,
+     -0.04335,
+     -0.3956
+    ],
+    [
+     -0.38771,
+     -0.12695,
+     0.913
+    ],
+    [
+     -0.0898,
+     0.99096,
+     0.09966
+    ]
+   ],
+   "pca_extents": [
+    2.8601,
+    1.8817,
+    0.9999
+   ],
+   "old_face_normal": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_03",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 120,
+   "vertices": 62,
+   "bbox_min": [
+    -1.168,
+    -0.3788,
+    -1.2366
+   ],
+   "bbox_max": [
+    1.179,
+    0.5326,
+    1.6512
+   ],
+   "size": [
+    2.347,
+    0.9114,
+    2.8878
+   ],
+   "radius": 1.9999,
+   "mass_kg_hint": 7688.80554,
+   "volume_m3": 3.20367,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 7,
+   "ucx": "UCX_Shard_Concrete_L_03_00",
+   "pca_axes": [
+    [
+     -0.6036,
+     -0.10959,
+     0.78972
+    ],
+    [
+     -0.79668,
+     0.12173,
+     -0.59202
+    ],
+    [
+     -0.03126,
+     -0.98649,
+     -0.16078
+    ]
+   ],
+   "pca_extents": [
+    3.6497,
+    2.9311,
+    1.1462
+   ],
+   "old_face_normal": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_04",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 144,
+   "vertices": 74,
+   "bbox_min": [
+    -0.5487,
+    -0.9697,
+    -1.6199
+   ],
+   "bbox_max": [
+    0.4488,
+    1.4117,
+    1.4045
+   ],
+   "size": [
+    0.9975,
+    2.3813,
+    3.0244
+   ],
+   "radius": 1.7908,
+   "mass_kg_hint": 8454.5979,
+   "volume_m3": 3.52275,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 8,
+   "ucx": "UCX_Shard_Concrete_L_04_00",
+   "pca_axes": [
+    [
+     -0.15658,
+     -0.24175,
+     0.95762
+    ],
+    [
+     -0.19099,
+     0.95869,
+     0.21079
+    ],
+    [
+     -0.96902,
+     -0.14989,
+     -0.19629
+    ]
+   ],
+   "pca_extents": [
+    3.2658,
+    2.7151,
+    1.4081
+   ],
+   "old_face_normal": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_05",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 192,
+   "vertices": 98,
+   "bbox_min": [
+    -1.9129,
+    -1.5173,
+    -1.0276
+   ],
+   "bbox_max": [
+    1.532,
+    1.6417,
+    0.9488
+   ],
+   "size": [
+    3.445,
+    3.1591,
+    1.9764
+   ],
+   "radius": 2.324,
+   "mass_kg_hint": 22181.59021,
+   "volume_m3": 9.24233,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 10,
+   "ucx": "UCX_Shard_Concrete_L_05_00",
+   "pca_axes": [
+    [
+     -0.86038,
+     -0.50423,
+     -0.07415
+    ],
+    [
+     0.42003,
+     -0.78393,
+     0.4572
+    ],
+    [
+     -0.28866,
+     0.36222,
+     0.88627
+    ]
+   ],
+   "pca_extents": [
+    4.229,
+    3.9263,
+    1.8437
+   ],
+   "old_face_normal": [
+    0.25223,
+    -0.2237,
+    -0.94146
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_06",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 192,
+   "vertices": 98,
+   "bbox_min": [
+    -0.7404,
+    -0.9293,
+    -1.6068
+   ],
+   "bbox_max": [
+    0.5209,
+    0.8118,
+    2.1539
+   ],
+   "size": [
+    1.2613,
+    1.7411,
+    3.7607
+   ],
+   "radius": 2.2734,
+   "mass_kg_hint": 10960.89598,
+   "volume_m3": 4.56704,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 10,
+   "ucx": "UCX_Shard_Concrete_L_06_00",
+   "pca_axes": [
+    [
+     0.0563,
+     0.21605,
+     0.97476
+    ],
+    [
+     0.31301,
+     0.92327,
+     -0.22272
+    ],
+    [
+     -0.94808,
+     0.31765,
+     -0.01565
+    ]
+   ],
+   "pca_extents": [
+    3.9675,
+    2.064,
+    1.6312
+   ],
+   "old_face_normal": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_07",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 216,
+   "vertices": 110,
+   "bbox_min": [
+    -1.9012,
+    -0.4383,
+    -1.7281
+   ],
+   "bbox_max": [
+    2.2445,
+    0.6445,
+    1.9946
+   ],
+   "size": [
+    4.1457,
+    1.0828,
+    3.7226
+   ],
+   "radius": 2.982,
+   "mass_kg_hint": 16893.52134,
+   "volume_m3": 7.03897,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 11,
+   "ucx": "UCX_Shard_Concrete_L_07_00",
+   "pca_axes": [
+    [
+     -0.70257,
+     0.06819,
+     -0.70834
+    ],
+    [
+     0.69584,
+     -0.14259,
+     -0.7039
+    ],
+    [
+     -0.14901,
+     -0.98743,
+     0.05273
+    ]
+   ],
+   "pca_extents": [
+    5.5292,
+    3.639,
+    1.3114
+   ],
+   "old_face_normal": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_08",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -1.2804,
+    -1.5183,
+    -2.018
+   ],
+   "bbox_max": [
+    0.8998,
+    1.5941,
+    2.038
+   ],
+   "size": [
+    2.1803,
+    3.1124,
+    4.056
+   ],
+   "radius": 2.5072,
+   "mass_kg_hint": 30611.11921,
+   "volume_m3": 12.75463,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_L_08_00",
+   "pca_axes": [
+    [
+     0.02273,
+     -0.42365,
+     0.90554
+    ],
+    [
+     0.26463,
+     0.87602,
+     0.4032
+    ],
+    [
+     -0.96408,
+     0.23047,
+     0.13203
+    ]
+   ],
+   "pca_extents": [
+    4.1154,
+    3.3661,
+    2.5589
+   ],
+   "old_face_normal": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_L_09",
+   "category": "Shard_Concrete",
+   "size_class": "L",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -1.3233,
+    -1.8347,
+    -2.5022
+   ],
+   "bbox_max": [
+    1.1666,
+    1.5891,
+    1.7489
+   ],
+   "size": [
+    2.4899,
+    3.4237,
+    4.2511
+   ],
+   "radius": 2.7363,
+   "mass_kg_hint": 33829.77521,
+   "volume_m3": 14.09574,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_L_09_00",
+   "pca_axes": [
+    [
+     0.32558,
+     0.25913,
+     -0.90931
+    ],
+    [
+     0.001,
+     -0.96181,
+     -0.27373
+    ],
+    [
+     -0.94551,
+     0.08822,
+     -0.3134
+    ]
+   ],
+   "pca_extents": [
+    4.4007,
+    3.2271,
+    2.4008
+   ],
+   "old_face_normal": [
+    -0.94444,
+    -0.0257,
+    -0.32769
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_00",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 216,
+   "vertices": 110,
+   "bbox_min": [
+    -2.2586,
+    -1.3066,
+    -0.566
+   ],
+   "bbox_max": [
+    2.3023,
+    1.5251,
+    0.4647
+   ],
+   "size": [
+    4.561,
+    2.8316,
+    1.0307
+   ],
+   "radius": 2.3492,
+   "mass_kg_hint": 14085.03332,
+   "volume_m3": 5.86876,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 11,
+   "ucx": "UCX_Shard_Concrete_XL_00_00",
+   "pca_axes": [
+    [
+     -0.94269,
+     -0.32773,
+     0.06267
+    ],
+    [
+     -0.32714,
+     0.94477,
+     0.01965
+    ],
+    [
+     -0.06565,
+     -0.00198,
+     -0.99784
+    ]
+   ],
+   "pca_extents": [
+    4.3341,
+    3.0129,
+    1.1775
+   ],
+   "old_face_normal": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_01",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 264,
+   "vertices": 134,
+   "bbox_min": [
+    -2.3668,
+    -2.382,
+    -2.5787
+   ],
+   "bbox_max": [
+    2.023,
+    3.4437,
+    2.5024
+   ],
+   "size": [
+    4.3898,
+    5.8258,
+    5.0812
+   ],
+   "radius": 3.9525,
+   "mass_kg_hint": 126937.22715,
+   "volume_m3": 52.89051,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 13,
+   "ucx": "UCX_Shard_Concrete_XL_01_00",
+   "pca_axes": [
+    [
+     -0.33688,
+     0.76567,
+     0.54795
+    ],
+    [
+     0.31775,
+     -0.45538,
+     0.83167
+    ],
+    [
+     0.88631,
+     0.45428,
+     -0.08989
+    ]
+   ],
+   "pca_extents": [
+    7.3037,
+    4.9315,
+    4.8657
+   ],
+   "old_face_normal": [
+    -0.80328,
+    0.03988,
+    -0.59427
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_02",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 192,
+   "vertices": 98,
+   "bbox_min": [
+    -1.9851,
+    -2.5993,
+    -0.7761
+   ],
+   "bbox_max": [
+    2.5092,
+    3.1531,
+    1.203
+   ],
+   "size": [
+    4.4943,
+    5.7524,
+    1.9791
+   ],
+   "radius": 3.3202,
+   "mass_kg_hint": 60606.12903,
+   "volume_m3": 25.25255,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 10,
+   "ucx": "UCX_Shard_Concrete_XL_02_00",
+   "pca_axes": [
+    [
+     0.18958,
+     -0.96929,
+     0.15663
+    ],
+    [
+     0.97544,
+     0.16771,
+     -0.14279
+    ],
+    [
+     0.11214,
+     0.17985,
+     0.97728
+    ]
+   ],
+   "pca_extents": [
+    5.71,
+    5.1828,
+    2.6507
+   ],
+   "old_face_normal": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_03",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 216,
+   "vertices": 110,
+   "bbox_min": [
+    -1.5371,
+    -2.1252,
+    -3.5263
+   ],
+   "bbox_max": [
+    2.2442,
+    2.3139,
+    3.905
+   ],
+   "size": [
+    3.7813,
+    4.4391,
+    7.4313
+   ],
+   "radius": 4.5452,
+   "mass_kg_hint": 128729.30004,
+   "volume_m3": 53.63721,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 11,
+   "ucx": "UCX_Shard_Concrete_XL_03_00",
+   "pca_axes": [
+    [
+     -0.19349,
+     0.40832,
+     0.8921
+    ],
+    [
+     0.8257,
+     0.55887,
+     -0.07671
+    ],
+    [
+     -0.52989,
+     0.72176,
+     -0.44529
+    ]
+   ],
+   "pca_extents": [
+    8.5699,
+    4.1638,
+    4.2559
+   ],
+   "old_face_normal": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_04",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 192,
+   "vertices": 98,
+   "bbox_min": [
+    -1.7069,
+    -3.7649,
+    -3.2961
+   ],
+   "bbox_max": [
+    1.5297,
+    4.4336,
+    2.4923
+   ],
+   "size": [
+    3.2366,
+    8.1985,
+    5.7884
+   ],
+   "radius": 5.2252,
+   "mass_kg_hint": 240461.72018,
+   "volume_m3": 100.19238,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 10,
+   "ucx": "UCX_Shard_Concrete_XL_04_00",
+   "pca_axes": [
+    [
+     0.02792,
+     -0.92775,
+     -0.37215
+    ],
+    [
+     -0.08304,
+     -0.37316,
+     0.92404
+    ],
+    [
+     -0.99615,
+     0.0051,
+     -0.08746
+    ]
+   ],
+   "pca_extents": [
+    9.2782,
+    7.26,
+    3.5412
+   ],
+   "old_face_normal": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_05",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 264,
+   "vertices": 134,
+   "bbox_min": [
+    -2.0617,
+    -0.9816,
+    -4.3998
+   ],
+   "bbox_max": [
+    2.6156,
+    0.8911,
+    3.147
+   ],
+   "size": [
+    4.6773,
+    1.8727,
+    7.5468
+   ],
+   "radius": 4.7798,
+   "mass_kg_hint": 56343.52066,
+   "volume_m3": 23.47647,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 13,
+   "ucx": "UCX_Shard_Concrete_XL_05_00",
+   "pca_axes": [
+    [
+     0.01637,
+     0.02278,
+     0.99961
+    ],
+    [
+     0.99271,
+     -0.11975,
+     -0.01352
+    ],
+    [
+     0.11939,
+     0.99254,
+     -0.02457
+    ]
+   ],
+   "pca_extents": [
+    7.5538,
+    4.7379,
+    2.0938
+   ],
+   "old_face_normal": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_06",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 216,
+   "vertices": 110,
+   "bbox_min": [
+    -4.7548,
+    -3.8954,
+    -1.0089
+   ],
+   "bbox_max": [
+    3.8365,
+    4.1924,
+    1.1341
+   ],
+   "size": [
+    8.5913,
+    8.0877,
+    2.143
+   ],
+   "radius": 5.8969,
+   "mass_kg_hint": 158636.25454,
+   "volume_m3": 66.09844,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 11,
+   "ucx": "UCX_Shard_Concrete_XL_06_00",
+   "pca_axes": [
+    [
+     -0.72983,
+     0.68363,
+     -0.00145
+    ],
+    [
+     0.68304,
+     0.72912,
+     -0.04295
+    ],
+    [
+     -0.0283,
+     -0.03234,
+     -0.99908
+    ]
+   ],
+   "pca_extents": [
+    11.0342,
+    7.7717,
+    2.3149
+   ],
+   "old_face_normal": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_07",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 168,
+   "vertices": 86,
+   "bbox_min": [
+    -4.9535,
+    -2.4506,
+    -4.4307
+   ],
+   "bbox_max": [
+    3.8673,
+    2.0795,
+    5.0032
+   ],
+   "size": [
+    8.8208,
+    4.53,
+    9.4339
+   ],
+   "radius": 5.9861,
+   "mass_kg_hint": 563519.9317,
+   "volume_m3": 234.79997,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 9,
+   "ucx": "UCX_Shard_Concrete_XL_07_00",
+   "pca_axes": [
+    [
+     -0.5514,
+     -0.02632,
+     0.83382
+    ],
+    [
+     -0.8327,
+     -0.04339,
+     -0.55203
+    ],
+    [
+     0.05071,
+     -0.99871,
+     0.00201
+    ]
+   ],
+   "pca_extents": [
+    10.6455,
+    9.8372,
+    4.6819
+   ],
+   "old_face_normal": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_08",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 240,
+   "vertices": 122,
+   "bbox_min": [
+    -5.082,
+    -2.6211,
+    -4.2442
+   ],
+   "bbox_max": [
+    4.4669,
+    2.6313,
+    2.9055
+   ],
+   "size": [
+    9.5488,
+    5.2524,
+    7.1497
+   ],
+   "radius": 5.6968,
+   "mass_kg_hint": 396225.0365,
+   "volume_m3": 165.09377,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 12,
+   "ucx": "UCX_Shard_Concrete_XL_08_00",
+   "pca_axes": [
+    [
+     -0.88098,
+     -0.10307,
+     -0.4618
+    ],
+    [
+     -0.46591,
+     0.35916,
+     0.80866
+    ],
+    [
+     0.08251,
+     0.92757,
+     -0.36443
+    ]
+   ],
+   "pca_extents": [
+    10.5228,
+    9.7153,
+    5.0621
+   ],
+   "old_face_normal": [
+    -0.25717,
+    -0.61865,
+    0.74239
+   ]
+  },
+  {
+   "name": "Shard_Concrete_XL_09",
+   "category": "Shard_Concrete",
+   "size_class": "XL",
+   "group": "Concrete",
+   "triangles": 216,
+   "vertices": 110,
+   "bbox_min": [
+    -2.4108,
+    -4.6766,
+    -2.8473
+   ],
+   "bbox_max": [
+    2.2526,
+    5.4931,
+    4.4431
+   ],
+   "size": [
+    4.6634,
+    10.1697,
+    7.2903
+   ],
+   "radius": 5.6696,
+   "mass_kg_hint": 241499.28607,
+   "volume_m3": 100.6247,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture"
+   ],
+   "uv_islands": 11,
+   "ucx": "UCX_Shard_Concrete_XL_09_00",
+   "pca_axes": [
+    [
+     -0.17747,
+     0.95925,
+     0.21986
+    ],
+    [
+     -0.10653,
+     0.20337,
+     -0.97329
+    ],
+    [
+     -0.97834,
+     -0.19615,
+     0.06609
+    ]
+   ],
+   "pca_extents": [
+    10.2812,
+    6.7924,
+    4.2089
+   ],
+   "old_face_normal": [
+    -0.59807,
+    -0.74313,
+    0.30012
+   ]
+  },
+  {
+   "name": "Slab_Concrete_00",
+   "category": "Slab_Concrete",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 1386,
+   "vertices": 749,
+   "bbox_min": [
+    -2.7589,
+    -1.6309,
+    -0.2029
+   ],
+   "bbox_max": [
+    2.5759,
+    1.5502,
+    0.3451
+   ],
+   "size": [
+    5.3348,
+    3.1812,
+    0.548
+   ],
+   "radius": 2.8249,
+   "mass_kg_hint": 3500.17937,
+   "volume_m3": 1.45841,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 89,
+   "ucx": "UCX_Slab_Concrete_00_00",
+   "pca_axes": [
+    [
+     -0.99749,
+     0.06843,
+     -0.01842
+    ],
+    [
+     0.06857,
+     0.99762,
+     -0.00711
+    ],
+    [
+     0.01789,
+     -0.00836,
+     -0.99981
+    ]
+   ],
+   "pca_extents": [
+    5.37,
+    3.2452,
+    0.5473
+   ]
+  },
+  {
+   "name": "Slab_Concrete_01",
+   "category": "Slab_Concrete",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 1226,
+   "vertices": 661,
+   "bbox_min": [
+    -2.2352,
+    -1.7209,
+    -0.3858
+   ],
+   "bbox_max": [
+    2.4413,
+    1.9133,
+    0.429
+   ],
+   "size": [
+    4.6765,
+    3.6343,
+    0.8147
+   ],
+   "radius": 2.5679,
+   "mass_kg_hint": 2546.82018,
+   "volume_m3": 1.06118,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 78,
+   "ucx": "UCX_Slab_Concrete_01_00",
+   "pca_axes": [
+    [
+     -0.87309,
+     0.48754,
+     -0.00408
+    ],
+    [
+     0.487,
+     0.87248,
+     0.04014
+    ],
+    [
+     0.02313,
+     0.03305,
+     -0.99919
+    ]
+   ],
+   "pca_extents": [
+    4.5958,
+    3.5015,
+    0.8383
+   ]
+  },
+  {
+   "name": "Slab_Concrete_02",
+   "category": "Slab_Concrete",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 948,
+   "vertices": 512,
+   "bbox_min": [
+    -1.8627,
+    -1.8716,
+    -0.3829
+   ],
+   "bbox_max": [
+    2.1977,
+    1.8586,
+    0.3269
+   ],
+   "size": [
+    4.0604,
+    3.7302,
+    0.7098
+   ],
+   "radius": 2.5064,
+   "mass_kg_hint": 4049.43342,
+   "volume_m3": 1.68726,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 61,
+   "ucx": "UCX_Slab_Concrete_02_00",
+   "pca_axes": [
+    [
+     -0.96387,
+     0.2662,
+     0.00991
+    ],
+    [
+     0.26626,
+     0.96388,
+     0.00641
+    ],
+    [
+     -0.00785,
+     0.00882,
+     -0.99993
+    ]
+   ],
+   "pca_extents": [
+    4.2412,
+    3.7523,
+    0.6669
+   ]
+  },
+  {
+   "name": "Slab_Concrete_03",
+   "category": "Slab_Concrete",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 996,
+   "vertices": 536,
+   "bbox_min": [
+    -2.4515,
+    -1.7823,
+    -0.3429
+   ],
+   "bbox_max": [
+    2.2665,
+    1.4641,
+    0.351
+   ],
+   "size": [
+    4.7181,
+    3.2465,
+    0.6939
+   ],
+   "radius": 2.4724,
+   "mass_kg_hint": 4424.47967,
+   "volume_m3": 1.84353,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 63,
+   "ucx": "UCX_Slab_Concrete_03_00",
+   "pca_axes": [
+    [
+     -0.99714,
+     0.07543,
+     -0.00434
+    ],
+    [
+     0.07543,
+     0.99715,
+     0.00182
+    ],
+    [
+     0.00447,
+     0.00149,
+     -0.99999
+    ]
+   ],
+   "pca_extents": [
+    4.6618,
+    3.0817,
+    0.7012
+   ]
+  },
+  {
+   "name": "Slab_Concrete_04",
+   "category": "Slab_Concrete",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 1388,
+   "vertices": 748,
+   "bbox_min": [
+    -2.4468,
+    -2.0374,
+    -0.4795
+   ],
+   "bbox_max": [
+    2.6405,
+    2.3464,
+    0.2749
+   ],
+   "size": [
+    5.0874,
+    4.3838,
+    0.7545
+   ],
+   "radius": 2.7377,
+   "mass_kg_hint": 5896.31778,
+   "volume_m3": 2.4568,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 88,
+   "ucx": "UCX_Slab_Concrete_04_00",
+   "pca_axes": [
+    [
+     -0.99993,
+     0.00926,
+     0.00702
+    ],
+    [
+     -0.00928,
+     -0.99995,
+     -0.00345
+    ],
+    [
+     0.00699,
+     -0.00351,
+     0.99997
+    ]
+   ],
+   "pca_extents": [
+    5.0919,
+    4.3751,
+    0.7512
+   ]
+  },
+  {
+   "name": "Slab_Concrete_05",
+   "category": "Slab_Concrete",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 1018,
+   "vertices": 549,
+   "bbox_min": [
+    -2.3895,
+    -1.6092,
+    -0.3927
+   ],
+   "bbox_max": [
+    2.3898,
+    1.434,
+    0.352
+   ],
+   "size": [
+    4.7793,
+    3.0432,
+    0.7448
+   ],
+   "radius": 2.5381,
+   "mass_kg_hint": 2977.93128,
+   "volume_m3": 1.2408,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 65,
+   "ucx": "UCX_Slab_Concrete_05_00",
+   "pca_axes": [
+    [
+     -0.98706,
+     -0.1595,
+     -0.01673
+    ],
+    [
+     -0.15863,
+     0.98634,
+     -0.04428
+    ],
+    [
+     0.02357,
+     -0.04105,
+     -0.99888
+    ]
+   ],
+   "pca_extents": [
+    4.7855,
+    3.0289,
+    0.6701
+   ]
+  },
+  {
+   "name": "Slab_Concrete_06",
+   "category": "Slab_Concrete",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 858,
+   "vertices": 461,
+   "bbox_min": [
+    -1.96,
+    -2.5819,
+    -0.1959
+   ],
+   "bbox_max": [
+    2.1584,
+    2.2777,
+    0.2435
+   ],
+   "size": [
+    4.1183,
+    4.8596,
+    0.4394
+   ],
+   "radius": 2.6359,
+   "mass_kg_hint": 3928.28682,
+   "volume_m3": 1.63679,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 54,
+   "ucx": "UCX_Slab_Concrete_06_00",
+   "pca_axes": [
+    [
+     -0.85283,
+     0.52211,
+     -0.00862
+    ],
+    [
+     0.52211,
+     0.85287,
+     0.00245
+    ],
+    [
+     0.00863,
+     -0.00241,
+     -0.99996
+    ]
+   ],
+   "pca_extents": [
+    4.8763,
+    4.8012,
+    0.4418
+   ]
+  },
+  {
+   "name": "Slab_Concrete_07",
+   "category": "Slab_Concrete",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 1180,
+   "vertices": 636,
+   "bbox_min": [
+    -2.4613,
+    -1.6121,
+    -0.2516
+   ],
+   "bbox_max": [
+    2.4137,
+    1.5841,
+    0.3466
+   ],
+   "size": [
+    4.875,
+    3.1962,
+    0.5981
+   ],
+   "radius": 2.54,
+   "mass_kg_hint": 3423.86723,
+   "volume_m3": 1.42661,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 75,
+   "ucx": "UCX_Slab_Concrete_07_00",
+   "pca_axes": [
+    [
+     -0.9977,
+     0.06713,
+     0.00968
+    ],
+    [
+     0.06706,
+     0.99772,
+     -0.00779
+    ],
+    [
+     -0.01018,
+     -0.00712,
+     -0.99992
+    ]
+   ],
+   "pca_extents": [
+    4.8773,
+    3.0795,
+    0.5622
+   ]
+  },
+  {
+   "name": "Column_Broken_00",
+   "category": "Column_Broken",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 632,
+   "vertices": 338,
+   "bbox_min": [
+    -0.3237,
+    -0.4722,
+    -1.499
+   ],
+   "bbox_max": [
+    0.3149,
+    0.5958,
+    2.2226
+   ],
+   "size": [
+    0.6386,
+    1.068,
+    3.7216
+   ],
+   "radius": 2.2689,
+   "mass_kg_hint": 1143.86422,
+   "volume_m3": 0.47661,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 33,
+   "ucx": "UCX_Column_Broken_00_00",
+   "pca_axes": [
+    [
+     -0.00348,
+     0.00815,
+     0.99996
+    ],
+    [
+     0.20338,
+     0.97907,
+     -0.00727
+    ],
+    [
+     -0.97909,
+     0.20335,
+     -0.00507
+    ]
+   ],
+   "pca_extents": [
+    3.7165,
+    1.0411,
+    0.6141
+   ]
+  },
+  {
+   "name": "Column_Broken_01",
+   "category": "Column_Broken",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 504,
+   "vertices": 266,
+   "bbox_min": [
+    -0.5405,
+    -0.2999,
+    -1.4174
+   ],
+   "bbox_max": [
+    0.2575,
+    0.3438,
+    1.7464
+   ],
+   "size": [
+    0.798,
+    0.6438,
+    3.1638
+   ],
+   "radius": 1.7784,
+   "mass_kg_hint": 1032.28488,
+   "volume_m3": 0.43012,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 25,
+   "ucx": "UCX_Column_Broken_01_00",
+   "pca_axes": [
+    [
+     -0.01085,
+     -0.00025,
+     0.99994
+    ],
+    [
+     0.84665,
+     0.53207,
+     0.00932
+    ],
+    [
+     -0.53204,
+     0.8467,
+     -0.00556
+    ]
+   ],
+   "pca_extents": [
+    3.1642,
+    0.8555,
+    0.5079
+   ]
+  },
+  {
+   "name": "Column_Broken_02",
+   "category": "Column_Broken",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 680,
+   "vertices": 362,
+   "bbox_min": [
+    -0.4114,
+    -0.3282,
+    -1.1445
+   ],
+   "bbox_max": [
+    0.4985,
+    0.284,
+    1.971
+   ],
+   "size": [
+    0.9099,
+    0.6121,
+    3.1155
+   ],
+   "radius": 1.996,
+   "mass_kg_hint": 658.44592,
+   "volume_m3": 0.27435,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 35,
+   "ucx": "UCX_Column_Broken_02_00",
+   "pca_axes": [
+    [
+     -0.00045,
+     -0.00273,
+     1.0
+    ],
+    [
+     0.92945,
+     -0.36896,
+     -0.00059
+    ],
+    [
+     0.36896,
+     0.92944,
+     0.00271
+    ]
+   ],
+   "pca_extents": [
+    3.1163,
+    0.95,
+    0.6839
+   ]
+  },
+  {
+   "name": "Column_Broken_03",
+   "category": "Column_Broken",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 728,
+   "vertices": 386,
+   "bbox_min": [
+    -0.3334,
+    -0.562,
+    -0.8047
+   ],
+   "bbox_max": [
+    0.3829,
+    0.4629,
+    1.4795
+   ],
+   "size": [
+    0.7163,
+    1.025,
+    2.2842
+   ],
+   "radius": 1.5255,
+   "mass_kg_hint": 388.69365,
+   "volume_m3": 0.16196,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 37,
+   "ucx": "UCX_Column_Broken_03_00",
+   "pca_axes": [
+    [
+     -0.02902,
+     -0.01972,
+     0.99938
+    ],
+    [
+     0.19348,
+     0.98079,
+     0.02498
+    ],
+    [
+     -0.98068,
+     0.19408,
+     -0.02465
+    ]
+   ],
+   "pca_extents": [
+    2.2774,
+    1.0211,
+    0.6891
+   ]
+  },
+  {
+   "name": "Column_Broken_04",
+   "category": "Column_Broken",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 456,
+   "vertices": 242,
+   "bbox_min": [
+    -0.1901,
+    -0.2371,
+    -0.7865
+   ],
+   "bbox_max": [
+    0.426,
+    0.3564,
+    1.5369
+   ],
+   "size": [
+    0.6161,
+    0.5935,
+    2.3234
+   ],
+   "radius": 1.5739,
+   "mass_kg_hint": 557.3781,
+   "volume_m3": 0.23224,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 23,
+   "ucx": "UCX_Column_Broken_04_00",
+   "pca_axes": [
+    [
+     -0.01088,
+     0.04108,
+     0.9991
+    ],
+    [
+     -0.66536,
+     0.74556,
+     -0.0379
+    ],
+    [
+     -0.74644,
+     -0.66518,
+     0.01923
+    ]
+   ],
+   "pca_extents": [
+    2.3401,
+    0.7555,
+    0.5752
+   ]
+  },
+  {
+   "name": "Column_Broken_05",
+   "category": "Column_Broken",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 672,
+   "vertices": 356,
+   "bbox_min": [
+    -0.4233,
+    -0.3819,
+    -1.4957
+   ],
+   "bbox_max": [
+    0.3727,
+    0.2249,
+    2.2761
+   ],
+   "size": [
+    0.796,
+    0.6068,
+    3.7718
+   ],
+   "radius": 2.295,
+   "mass_kg_hint": 701.37316,
+   "volume_m3": 0.29224,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 34,
+   "ucx": "UCX_Column_Broken_05_00",
+   "pca_axes": [
+    [
+     0.00795,
+     -0.01341,
+     0.99988
+    ],
+    [
+     0.99615,
+     0.08737,
+     -0.00675
+    ],
+    [
+     -0.08727,
+     0.99609,
+     0.01405
+    ]
+   ],
+   "pca_extents": [
+    3.7733,
+    0.7821,
+    0.6112
+   ]
+  },
+  {
+   "name": "Column_Broken_06",
+   "category": "Column_Broken",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 600,
+   "vertices": 320,
+   "bbox_min": [
+    -0.2737,
+    -0.3923,
+    -1.3008
+   ],
+   "bbox_max": [
+    0.4841,
+    0.4075,
+    2.0093
+   ],
+   "size": [
+    0.7578,
+    0.7998,
+    3.3101
+   ],
+   "radius": 2.0629,
+   "mass_kg_hint": 1682.17639,
+   "volume_m3": 0.70091,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 31,
+   "ucx": "UCX_Column_Broken_06_00",
+   "pca_axes": [
+    [
+     0.01803,
+     -0.00946,
+     0.99979
+    ],
+    [
+     0.92188,
+     -0.38694,
+     -0.02029
+    ],
+    [
+     0.38706,
+     0.92205,
+     0.00174
+    ]
+   ],
+   "pca_extents": [
+    3.3188,
+    0.78,
+    0.6983
+   ]
+  },
+  {
+   "name": "Column_Broken_07",
+   "category": "Column_Broken",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 696,
+   "vertices": 368,
+   "bbox_min": [
+    -0.4507,
+    -0.3397,
+    -0.757
+   ],
+   "bbox_max": [
+    0.3832,
+    0.3401,
+    1.5451
+   ],
+   "size": [
+    0.8339,
+    0.6798,
+    2.3021
+   ],
+   "radius": 1.5953,
+   "mass_kg_hint": 830.21,
+   "volume_m3": 0.34592,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Rebar"
+   ],
+   "uv_islands": 35,
+   "ucx": "UCX_Column_Broken_07_00",
+   "pca_axes": [
+    [
+     0.04111,
+     -0.01041,
+     0.9991
+    ],
+    [
+     0.9753,
+     0.21764,
+     -0.03787
+    ],
+    [
+     -0.21705,
+     0.97597,
+     0.0191
+    ]
+   ],
+   "pca_extents": [
+    2.3166,
+    0.8816,
+    0.6959
+   ]
+  },
+  {
+   "name": "Rebar_Bundle_00",
+   "category": "Rebar_Bundle",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 622,
+   "vertices": 325,
+   "bbox_min": [
+    -0.757,
+    -0.1321,
+    -0.3777
+   ],
+   "bbox_max": [
+    0.7044,
+    0.247,
+    0.1472
+   ],
+   "size": [
+    1.4614,
+    0.379,
+    0.5249
+   ],
+   "radius": 0.8025,
+   "mass_kg_hint": 28.26812,
+   "volume_m3": 0.0036,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99473,
+     -0.04288,
+     0.09311
+    ],
+    [
+     -0.102,
+     0.32329,
+     -0.94079
+    ],
+    [
+     0.01024,
+     -0.94533,
+     -0.32596
+    ]
+   ],
+   "pca_extents": [
+    1.5024,
+    0.4971,
+    0.3424
+   ]
+  },
+  {
+   "name": "Rebar_Bundle_01",
+   "category": "Rebar_Bundle",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 794,
+   "vertices": 415,
+   "bbox_min": [
+    -0.9113,
+    -0.4397,
+    -0.3837
+   ],
+   "bbox_max": [
+    0.8008,
+    0.1704,
+    0.1848
+   ],
+   "size": [
+    1.7121,
+    0.6101,
+    0.5684
+   ],
+   "radius": 0.9401,
+   "mass_kg_hint": 53.1672,
+   "volume_m3": 0.00677,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 23,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99098,
+     0.12291,
+     0.05333
+    ],
+    [
+     0.12844,
+     0.75819,
+     0.63926
+    ],
+    [
+     0.03814,
+     0.64035,
+     -0.76714
+    ]
+   ],
+   "pca_extents": [
+    1.7784,
+    0.6607,
+    0.3849
+   ]
+  },
+  {
+   "name": "Rebar_Bundle_02",
+   "category": "Rebar_Bundle",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 622,
+   "vertices": 325,
+   "bbox_min": [
+    -0.5974,
+    -0.5215,
+    -0.5987
+   ],
+   "bbox_max": [
+    0.5604,
+    0.3329,
+    0.374
+   ],
+   "size": [
+    1.1577,
+    0.8544,
+    0.9727
+   ],
+   "radius": 0.8363,
+   "mass_kg_hint": 23.95729,
+   "volume_m3": 0.00305,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.76838,
+     0.41383,
+     0.4882
+    ],
+    [
+     0.02131,
+     -0.74585,
+     0.66577
+    ],
+    [
+     0.63964,
+     0.52197,
+     0.56428
+    ]
+   ],
+   "pca_extents": [
+    1.5655,
+    0.5097,
+    0.3298
+   ]
+  },
+  {
+   "name": "Rebar_Bundle_03",
+   "category": "Rebar_Bundle",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 622,
+   "vertices": 325,
+   "bbox_min": [
+    -0.4874,
+    -0.3571,
+    -0.3671
+   ],
+   "bbox_max": [
+    0.4452,
+    0.2211,
+    0.5509
+   ],
+   "size": [
+    0.9326,
+    0.5781,
+    0.9181
+   ],
+   "radius": 0.7231,
+   "mass_kg_hint": 17.35369,
+   "volume_m3": 0.00221,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.72781,
+     0.31443,
+     -0.60944
+    ],
+    [
+     -0.01129,
+     0.88308,
+     0.46909
+    ],
+    [
+     0.68568,
+     0.34829,
+     -0.63917
+    ]
+   ],
+   "pca_extents": [
+    1.3354,
+    0.3638,
+    0.2532
+   ]
+  },
+  {
+   "name": "Rebar_Bundle_04",
+   "category": "Rebar_Bundle",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 622,
+   "vertices": 325,
+   "bbox_min": [
+    -0.5881,
+    -0.4211,
+    -0.1807
+   ],
+   "bbox_max": [
+    0.4705,
+    0.6962,
+    0.1291
+   ],
+   "size": [
+    1.0586,
+    1.1173,
+    0.3097
+   ],
+   "radius": 0.8313,
+   "mass_kg_hint": 15.14498,
+   "volume_m3": 0.00193,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.69643,
+     -0.71708,
+     0.02785
+    ],
+    [
+     -0.71761,
+     0.69614,
+     -0.02074
+    ],
+    [
+     -0.00452,
+     -0.03442,
+     -0.9994
+    ]
+   ],
+   "pca_extents": [
+    1.5179,
+    0.3564,
+    0.3094
+   ]
+  },
+  {
+   "name": "Rebar_Bundle_05",
+   "category": "Rebar_Bundle",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 622,
+   "vertices": 325,
+   "bbox_min": [
+    -0.7849,
+    -0.7031,
+    -0.3509
+   ],
+   "bbox_max": [
+    0.5405,
+    0.2669,
+    0.1456
+   ],
+   "size": [
+    1.3253,
+    0.97,
+    0.4965
+   ],
+   "radius": 0.9138,
+   "mass_kg_hint": 24.76105,
+   "volume_m3": 0.00315,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.87463,
+     0.46084,
+     0.15051
+    ],
+    [
+     0.48439,
+     0.81797,
+     0.3103
+    ],
+    [
+     0.01989,
+     0.3443,
+     -0.93865
+    ]
+   ],
+   "pca_extents": [
+    1.6383,
+    0.711,
+    0.2951
+   ]
+  },
+  {
+   "name": "Rebar_Single_00",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 92,
+   "vertices": 48,
+   "bbox_min": [
+    -0.6196,
+    -0.1165,
+    -0.8409
+   ],
+   "bbox_max": [
+    0.3525,
+    0.0817,
+    0.7304
+   ],
+   "size": [
+    0.9721,
+    0.1981,
+    1.5713
+   ],
+   "radius": 0.9524,
+   "mass_kg_hint": 5.74366,
+   "volume_m3": 0.00073,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.56045,
+     -0.09976,
+     0.82216
+    ],
+    [
+     -0.81175,
+     -0.13068,
+     -0.5692
+    ],
+    [
+     0.16422,
+     -0.98639,
+     -0.00774
+    ]
+   ],
+   "pca_extents": [
+    1.8433,
+    0.3407,
+    0.0479
+   ]
+  },
+  {
+   "name": "Rebar_Single_01",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 92,
+   "vertices": 48,
+   "bbox_min": [
+    -0.7171,
+    -0.9411,
+    -0.5887
+   ],
+   "bbox_max": [
+    0.6697,
+    0.6742,
+    0.445
+   ],
+   "size": [
+    1.3867,
+    1.6153,
+    1.0337
+   ],
+   "radius": 1.2978,
+   "mass_kg_hint": 19.25356,
+   "volume_m3": 0.00245,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.59697,
+     -0.72506,
+     -0.34338
+    ],
+    [
+     -0.41209,
+     -0.09011,
+     0.90668
+    ],
+    [
+     -0.68834,
+     0.68277,
+     -0.245
+    ]
+   ],
+   "pca_extents": [
+    2.2535,
+    0.6854,
+    0.1287
+   ]
+  },
+  {
+   "name": "Rebar_Single_02",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 116,
+   "vertices": 60,
+   "bbox_min": [
+    -0.0282,
+    -0.0451,
+    -0.4468
+   ],
+   "bbox_max": [
+    0.0292,
+    0.1522,
+    0.3959
+   ],
+   "size": [
+    0.0574,
+    0.1973,
+    0.8427
+   ],
+   "radius": 0.4474,
+   "mass_kg_hint": 6.48932,
+   "volume_m3": 0.00083,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.0132,
+     0.09603,
+     0.99529
+    ],
+    [
+     0.11133,
+     0.98933,
+     -0.09397
+    ],
+    [
+     -0.9937,
+     0.10956,
+     -0.02375
+    ]
+   ],
+   "pca_extents": [
+    0.8538,
+    0.1859,
+    0.0477
+   ]
+  },
+  {
+   "name": "Rebar_Single_03",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 104,
+   "vertices": 54,
+   "bbox_min": [
+    -0.1602,
+    -0.1022,
+    -0.4829
+   ],
+   "bbox_max": [
+    0.3838,
+    0.0433,
+    0.3327
+   ],
+   "size": [
+    0.544,
+    0.1455,
+    0.8156
+   ],
+   "radius": 0.5094,
+   "mass_kg_hint": 2.38331,
+   "volume_m3": 0.0003,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.54916,
+     0.10998,
+     -0.82845
+    ],
+    [
+     0.79315,
+     -0.24375,
+     -0.55812
+    ],
+    [
+     -0.26332,
+     -0.96358,
+     0.04663
+    ]
+   ],
+   "pca_extents": [
+    0.9812,
+    0.3112,
+    0.0306
+   ]
+  },
+  {
+   "name": "Rebar_Single_04",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 104,
+   "vertices": 54,
+   "bbox_min": [
+    -0.2265,
+    -0.199,
+    -1.3908
+   ],
+   "bbox_max": [
+    0.4867,
+    0.1369,
+    1.3313
+   ],
+   "size": [
+    0.7132,
+    0.3359,
+    2.7221
+   ],
+   "radius": 1.4232,
+   "mass_kg_hint": 7.38985,
+   "volume_m3": 0.00094,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.25553,
+     0.1116,
+     -0.96034
+    ],
+    [
+     0.85372,
+     -0.44013,
+     -0.27831
+    ],
+    [
+     -0.45373,
+     -0.89097,
+     0.01719
+    ]
+   ],
+   "pca_extents": [
+    2.8167,
+    0.3563,
+    0.0705
+   ]
+  },
+  {
+   "name": "Rebar_Single_05",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 92,
+   "vertices": 48,
+   "bbox_min": [
+    -0.6158,
+    -0.4736,
+    -0.5971
+   ],
+   "bbox_max": [
+    0.7294,
+    0.6216,
+    0.4822
+   ],
+   "size": [
+    1.3452,
+    1.0953,
+    1.0793
+   ],
+   "radius": 1.0491,
+   "mass_kg_hint": 14.80381,
+   "volume_m3": 0.00189,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.69412,
+     -0.54748,
+     -0.46739
+    ],
+    [
+     -0.36255,
+     -0.29505,
+     0.88403
+    ],
+    [
+     -0.62189,
+     0.78308,
+     0.00631
+    ]
+   ],
+   "pca_extents": [
+    2.0072,
+    0.2932,
+    0.0943
+   ]
+  },
+  {
+   "name": "Rebar_Single_06",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 128,
+   "vertices": 66,
+   "bbox_min": [
+    -0.1871,
+    -0.1349,
+    -1.3604
+   ],
+   "bbox_max": [
+    0.1446,
+    0.0938,
+    1.3538
+   ],
+   "size": [
+    0.3317,
+    0.2287,
+    2.7143
+   ],
+   "radius": 1.3683,
+   "mass_kg_hint": 14.28654,
+   "volume_m3": 0.00182,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.10998,
+     -0.07537,
+     0.99107
+    ],
+    [
+     0.39336,
+     0.91241,
+     0.11304
+    ],
+    [
+     -0.91278,
+     0.40228,
+     -0.0707
+    ]
+   ],
+   "pca_extents": [
+    2.7359,
+    0.0953,
+    0.0523
+   ]
+  },
+  {
+   "name": "Rebar_Single_07",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 92,
+   "vertices": 48,
+   "bbox_min": [
+    -0.2897,
+    -0.1643,
+    -0.8242
+   ],
+   "bbox_max": [
+    0.156,
+    0.0518,
+    0.7587
+   ],
+   "size": [
+    0.4457,
+    0.2161,
+    1.5828
+   ],
+   "radius": 0.8366,
+   "mass_kg_hint": 6.48462,
+   "volume_m3": 0.00083,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.27143,
+     -0.06688,
+     0.96013
+    ],
+    [
+     -0.92402,
+     0.2972,
+     -0.24052
+    ],
+    [
+     -0.26927,
+     -0.95247,
+     -0.14247
+    ]
+   ],
+   "pca_extents": [
+    1.6301,
+    0.2702,
+    0.1558
+   ]
+  },
+  {
+   "name": "Rebar_Single_08",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 128,
+   "vertices": 66,
+   "bbox_min": [
+    -0.4312,
+    -0.0714,
+    -1.2944
+   ],
+   "bbox_max": [
+    0.9521,
+    0.0424,
+    1.0521
+   ],
+   "size": [
+    1.3833,
+    0.1138,
+    2.3465
+   ],
+   "radius": 1.4037,
+   "mass_kg_hint": 21.09086,
+   "volume_m3": 0.00269,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.5298,
+     0.02553,
+     -0.84774
+    ],
+    [
+     0.84705,
+     -0.03436,
+     -0.5304
+    ],
+    [
+     -0.04268,
+     -0.99908,
+     -0.00342
+    ]
+   ],
+   "pca_extents": [
+    2.6992,
+    0.6806,
+    0.0604
+   ]
+  },
+  {
+   "name": "Rebar_Single_09",
+   "category": "Rebar_Single",
+   "size_class": "",
+   "group": "Structure",
+   "triangles": 116,
+   "vertices": 60,
+   "bbox_min": [
+    -0.0658,
+    -0.3228,
+    -1.419
+   ],
+   "bbox_max": [
+    0.1424,
+    0.1949,
+    1.3987
+   ],
+   "size": [
+    0.2082,
+    0.5177,
+    2.8176
+   ],
+   "radius": 1.4353,
+   "mass_kg_hint": 12.94501,
+   "volume_m3": 0.00165,
+   "materials": [
+    "M_Rebar"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.05669,
+     0.1864,
+     -0.98084
+    ],
+    [
+     -0.48673,
+     0.85261,
+     0.19016
+    ],
+    [
+     0.87171,
+     0.48818,
+     0.04239
+    ]
+   ],
+   "pca_extents": [
+    2.8649,
+    0.1815,
+    0.0667
+   ]
+  },
+  {
+   "name": "Glass_Shard_00",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.0129,
+    -0.0066,
+    -0.0025
+   ],
+   "bbox_max": [
+    0.0071,
+    0.0035,
+    0.0025
+   ],
+   "size": [
+    0.02,
+    0.0101,
+    0.005
+   ],
+   "radius": 0.0135,
+   "mass_kg_hint": 0.00125,
+   "volume_m3": 0.0,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.96485,
+     0.26281,
+     0.0
+    ],
+    [
+     0.26281,
+     0.96485,
+     0.0
+    ],
+    [
+     -0.0,
+     0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.0207,
+    0.0101,
+    0.005
+   ]
+  },
+  {
+   "name": "Glass_Shard_01",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 16,
+   "vertices": 10,
+   "bbox_min": [
+    -0.0119,
+    -0.0024,
+    -0.0028
+   ],
+   "bbox_max": [
+    0.0125,
+    0.0028,
+    0.0028
+   ],
+   "size": [
+    0.0244,
+    0.0052,
+    0.0057
+   ],
+   "radius": 0.0129,
+   "mass_kg_hint": 0.00132,
+   "volume_m3": 0.0,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 7,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99801,
+     0.06301,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ],
+    [
+     0.06301,
+     0.99801,
+     0.0
+    ]
+   ],
+   "pca_extents": [
+    0.0245,
+    0.0057,
+    0.0058
+   ]
+  },
+  {
+   "name": "Glass_Shard_02",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.0106,
+    -0.0162,
+    -0.0017
+   ],
+   "bbox_max": [
+    0.0126,
+    0.0141,
+    0.0017
+   ],
+   "size": [
+    0.0232,
+    0.0303,
+    0.0033
+   ],
+   "radius": 0.0194,
+   "mass_kg_hint": 0.00228,
+   "volume_m3": 0.0,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.50687,
+     0.86202,
+     0.0
+    ],
+    [
+     -0.86202,
+     0.50687,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "pca_extents": [
+    0.0305,
+    0.0187,
+    0.0033
+   ]
+  },
+  {
+   "name": "Glass_Shard_03",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 16,
+   "vertices": 10,
+   "bbox_min": [
+    -0.0209,
+    -0.0216,
+    -0.0015
+   ],
+   "bbox_max": [
+    0.0234,
+    0.0175,
+    0.0015
+   ],
+   "size": [
+    0.0443,
+    0.0391,
+    0.0031
+   ],
+   "radius": 0.0255,
+   "mass_kg_hint": 0.00878,
+   "volume_m3": 0.0,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 7,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99097,
+     0.13409,
+     0.0
+    ],
+    [
+     0.13409,
+     0.99097,
+     -0.0
+    ],
+    [
+     -0.0,
+     -0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.0467,
+    0.0404,
+    0.0031
+   ]
+  },
+  {
+   "name": "Glass_Shard_04",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 16,
+   "vertices": 10,
+   "bbox_min": [
+    -0.0323,
+    -0.0102,
+    -0.0023
+   ],
+   "bbox_max": [
+    0.0253,
+    0.0137,
+    0.0023
+   ],
+   "size": [
+    0.0576,
+    0.0239,
+    0.0047
+   ],
+   "radius": 0.0332,
+   "mass_kg_hint": 0.01075,
+   "volume_m3": 0.0,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 7,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98033,
+     -0.19736,
+     0.0
+    ],
+    [
+     -0.19736,
+     0.98033,
+     -0.0
+    ],
+    [
+     -0.0,
+     -0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.0562,
+    0.0279,
+    0.0047
+   ]
+  },
+  {
+   "name": "Glass_Shard_05",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.0389,
+    -0.0248,
+    -0.0018
+   ],
+   "bbox_max": [
+    0.0387,
+    0.025,
+    0.0018
+   ],
+   "size": [
+    0.0776,
+    0.0499,
+    0.0035
+   ],
+   "radius": 0.0462,
+   "mass_kg_hint": 0.01276,
+   "volume_m3": 1e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.91509,
+     -0.40324,
+     -0.0
+    ],
+    [
+     0.40324,
+     -0.91509,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "pca_extents": [
+    0.081,
+    0.0386,
+    0.0035
+   ]
+  },
+  {
+   "name": "Glass_Shard_06",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.0313,
+    -0.0221,
+    -0.0017
+   ],
+   "bbox_max": [
+    0.0517,
+    0.0147,
+    0.0017
+   ],
+   "size": [
+    0.083,
+    0.0368,
+    0.0034
+   ],
+   "radius": 0.0522,
+   "mass_kg_hint": 0.0127,
+   "volume_m3": 1e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99389,
+     -0.11041,
+     -0.0
+    ],
+    [
+     0.11041,
+     -0.99389,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "pca_extents": [
+    0.0817,
+    0.0378,
+    0.0034
+   ]
+  },
+  {
+   "name": "Glass_Shard_07",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 16,
+   "vertices": 10,
+   "bbox_min": [
+    -0.0495,
+    -0.0231,
+    -0.0027
+   ],
+   "bbox_max": [
+    0.0494,
+    0.0188,
+    0.0027
+   ],
+   "size": [
+    0.0989,
+    0.0419,
+    0.0054
+   ],
+   "radius": 0.0498,
+   "mass_kg_hint": 0.02973,
+   "volume_m3": 1e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 7,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98254,
+     0.18607,
+     0.0
+    ],
+    [
+     0.18607,
+     0.98254,
+     0.0
+    ],
+    [
+     -0.0,
+     0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.0964,
+    0.034,
+    0.0054
+   ]
+  },
+  {
+   "name": "Glass_Shard_08",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.0574,
+    -0.0438,
+    -0.0021
+   ],
+   "bbox_max": [
+    0.0674,
+    0.0565,
+    0.0021
+   ],
+   "size": [
+    0.1248,
+    0.1003,
+    0.0043
+   ],
+   "radius": 0.0722,
+   "mass_kg_hint": 0.05928,
+   "volume_m3": 2e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.94161,
+     -0.3367,
+     -0.0
+    ],
+    [
+     0.3367,
+     -0.94161,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "pca_extents": [
+    0.128,
+    0.0913,
+    0.0043
+   ]
+  },
+  {
+   "name": "Glass_Shard_09",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 16,
+   "vertices": 10,
+   "bbox_min": [
+    -0.0608,
+    -0.0584,
+    -0.0026
+   ],
+   "bbox_max": [
+    0.1057,
+    0.0485,
+    0.0026
+   ],
+   "size": [
+    0.1664,
+    0.1069,
+    0.0051
+   ],
+   "radius": 0.1071,
+   "mass_kg_hint": 0.13209,
+   "volume_m3": 5e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 7,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.97118,
+     -0.23835,
+     0.0
+    ],
+    [
+     -0.23835,
+     0.97118,
+     0.0
+    ],
+    [
+     -0.0,
+     0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.1759,
+    0.104,
+    0.0051
+   ]
+  },
+  {
+   "name": "Glass_Shard_10",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 16,
+   "vertices": 10,
+   "bbox_min": [
+    -0.0796,
+    -0.0641,
+    -0.0018
+   ],
+   "bbox_max": [
+    0.0807,
+    0.0499,
+    0.0018
+   ],
+   "size": [
+    0.1603,
+    0.114,
+    0.0035
+   ],
+   "radius": 0.0838,
+   "mass_kg_hint": 0.08838,
+   "volume_m3": 4e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 7,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.93533,
+     -0.35378,
+     0.0
+    ],
+    [
+     -0.35378,
+     0.93533,
+     -0.0
+    ],
+    [
+     -0.0,
+     -0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.1438,
+    0.1002,
+    0.0035
+   ]
+  },
+  {
+   "name": "Glass_Shard_11",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.0973,
+    -0.0449,
+    -0.0018
+   ],
+   "bbox_max": [
+    0.1222,
+    0.0598,
+    0.0018
+   ],
+   "size": [
+    0.2196,
+    0.1047,
+    0.0036
+   ],
+   "radius": 0.1302,
+   "mass_kg_hint": 0.08465,
+   "volume_m3": 3e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.96621,
+     0.25776,
+     0.0
+    ],
+    [
+     -0.25776,
+     -0.96621,
+     -0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "pca_extents": [
+    0.2199,
+    0.0909,
+    0.0036
+   ]
+  },
+  {
+   "name": "Glass_Shard_12",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 16,
+   "vertices": 10,
+   "bbox_min": [
+    -0.1053,
+    -0.0562,
+    -0.0028
+   ],
+   "bbox_max": [
+    0.1408,
+    0.0624,
+    0.0028
+   ],
+   "size": [
+    0.2461,
+    0.1185,
+    0.0056
+   ],
+   "radius": 0.1408,
+   "mass_kg_hint": 0.22685,
+   "volume_m3": 9e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 7,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99992,
+     0.0125,
+     0.0
+    ],
+    [
+     0.0125,
+     0.99992,
+     0.0
+    ],
+    [
+     -0.0,
+     0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.2469,
+    0.1172,
+    0.0056
+   ]
+  },
+  {
+   "name": "Glass_Shard_13",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.0872,
+    -0.0792,
+    -0.0026
+   ],
+   "bbox_max": [
+    0.1341,
+    0.0615,
+    0.0026
+   ],
+   "size": [
+    0.2213,
+    0.1407,
+    0.0052
+   ],
+   "radius": 0.1353,
+   "mass_kg_hint": 0.19092,
+   "volume_m3": 8e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.9991,
+     -0.04234,
+     -0.0
+    ],
+    [
+     0.04234,
+     -0.9991,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "pca_extents": [
+    0.2193,
+    0.1423,
+    0.0052
+   ]
+  },
+  {
+   "name": "Glass_Shard_14",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.0868,
+    -0.163,
+    -0.0026
+   ],
+   "bbox_max": [
+    0.0734,
+    0.1049,
+    0.0026
+   ],
+   "size": [
+    0.1602,
+    0.268,
+    0.0051
+   ],
+   "radius": 0.1788,
+   "mass_kg_hint": 0.18931,
+   "volume_m3": 8e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.40871,
+     0.91266,
+     0.0
+    ],
+    [
+     -0.91266,
+     -0.40871,
+     -0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "pca_extents": [
+    0.2691,
+    0.1106,
+    0.0051
+   ]
+  },
+  {
+   "name": "Glass_Shard_15",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 16,
+   "vertices": 10,
+   "bbox_min": [
+    -0.1869,
+    -0.1008,
+    -0.0024
+   ],
+   "bbox_max": [
+    0.1554,
+    0.1135,
+    0.0024
+   ],
+   "size": [
+    0.3422,
+    0.2143,
+    0.0049
+   ],
+   "radius": 0.1885,
+   "mass_kg_hint": 0.58208,
+   "volume_m3": 0.00023,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 7,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99405,
+     0.10888,
+     -0.0
+    ],
+    [
+     0.10888,
+     0.99405,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.3485,
+    0.2149,
+    0.0049
+   ]
+  },
+  {
+   "name": "Glass_Shard_16",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.1782,
+    -0.0897,
+    -0.0017
+   ],
+   "bbox_max": [
+    0.1823,
+    0.0591,
+    0.0017
+   ],
+   "size": [
+    0.3605,
+    0.1487,
+    0.0033
+   ],
+   "radius": 0.1916,
+   "mass_kg_hint": 0.20106,
+   "volume_m3": 8e-05,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99431,
+     -0.10653,
+     -0.0
+    ],
+    [
+     -0.10653,
+     0.99431,
+     0.0
+    ],
+    [
+     -0.0,
+     0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.3614,
+    0.1381,
+    0.0033
+   ]
+  },
+  {
+   "name": "Glass_Shard_17",
+   "category": "Glass_Shard",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 8,
+   "vertices": 6,
+   "bbox_min": [
+    -0.1526,
+    -0.2463,
+    -0.0026
+   ],
+   "bbox_max": [
+    0.219,
+    0.1537,
+    0.0026
+   ],
+   "size": [
+    0.3716,
+    0.4,
+    0.0052
+   ],
+   "radius": 0.2551,
+   "mass_kg_hint": 0.94073,
+   "volume_m3": 0.00038,
+   "materials": [
+    "M_Glass_Shard"
+   ],
+   "uv_islands": 5,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.4758,
+     -0.87955,
+     0.0
+    ],
+    [
+     -0.87955,
+     0.4758,
+     0.0
+    ],
+    [
+     -0.0,
+     0.0,
+     -1.0
+    ]
+   ],
+   "pca_extents": [
+    0.4338,
+    0.3559,
+    0.0052
+   ]
+  },
+  {
+   "name": "Window_Frame_Broken_00",
+   "category": "Window_Frame_Broken",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 52,
+   "vertices": 52,
+   "bbox_min": [
+    -0.8168,
+    -0.043,
+    -0.6875
+   ],
+   "bbox_max": [
+    0.0964,
+    0.0429,
+    0.78
+   ],
+   "size": [
+    0.9132,
+    0.0859,
+    1.4675
+   ],
+   "radius": 1.0685,
+   "mass_kg_hint": 69.47661,
+   "volume_m3": 0.00885,
+   "materials": [
+    "M_Glass_Shard",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 28,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.37144,
+     -0.00389,
+     -0.92845
+    ],
+    [
+     -0.92846,
+     0.0007,
+     0.37144
+    ],
+    [
+     -0.0008,
+     0.99999,
+     -0.00387
+    ]
+   ],
+   "pca_extents": [
+    1.702,
+    0.87,
+    0.0922
+   ]
+  },
+  {
+   "name": "Window_Frame_Broken_01",
+   "category": "Window_Frame_Broken",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 68,
+   "vertices": 62,
+   "bbox_min": [
+    -0.4907,
+    -0.0266,
+    -0.445
+   ],
+   "bbox_max": [
+    0.9115,
+    0.0266,
+    0.7891
+   ],
+   "size": [
+    1.4022,
+    0.0531,
+    1.2341
+   ],
+   "radius": 1.1157,
+   "mass_kg_hint": 65.3,
+   "volume_m3": 0.00832,
+   "materials": [
+    "M_Glass_Shard",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 38,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.9894,
+     6e-05,
+     0.14522
+    ],
+    [
+     0.14522,
+     5e-05,
+     0.9894
+    ],
+    [
+     5e-05,
+     1.0,
+     -6e-05
+    ]
+   ],
+   "pca_extents": [
+    1.5666,
+    1.3976,
+    0.0533
+   ]
+  },
+  {
+   "name": "Window_Frame_Broken_02",
+   "category": "Window_Frame_Broken",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 72,
+   "vertices": 74,
+   "bbox_min": [
+    -0.6937,
+    -0.0267,
+    -0.9857
+   ],
+   "bbox_max": [
+    0.6313,
+    0.0267,
+    0.7556
+   ],
+   "size": [
+    1.3251,
+    0.0533,
+    1.7413
+   ],
+   "radius": 1.2056,
+   "mass_kg_hint": 136.50513,
+   "volume_m3": 0.01739,
+   "materials": [
+    "M_Glass_Shard",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 42,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.05561,
+     -1e-05,
+     0.99845
+    ],
+    [
+     -0.99845,
+     2e-05,
+     0.05561
+    ],
+    [
+     -2e-05,
+     -1.0,
+     -1e-05
+    ]
+   ],
+   "pca_extents": [
+    1.8123,
+    1.4199,
+    0.0534
+   ]
+  },
+  {
+   "name": "Window_Frame_Broken_03",
+   "category": "Window_Frame_Broken",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 64,
+   "vertices": 66,
+   "bbox_min": [
+    -0.7321,
+    -0.0372,
+    -0.9731
+   ],
+   "bbox_max": [
+    0.3228,
+    0.0372,
+    0.9608
+   ],
+   "size": [
+    1.0549,
+    0.0744,
+    1.9339
+   ],
+   "radius": 1.2183,
+   "mass_kg_hint": 138.63399,
+   "volume_m3": 0.01766,
+   "materials": [
+    "M_Glass_Shard",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 37,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.13509,
+     0.00014,
+     0.99083
+    ],
+    [
+     -0.99083,
+     -0.00046,
+     -0.13509
+    ],
+    [
+     0.00044,
+     -1.0,
+     0.0002
+    ]
+   ],
+   "pca_extents": [
+    2.0587,
+    1.3065,
+    0.0752
+   ]
+  },
+  {
+   "name": "Window_Frame_Broken_04",
+   "category": "Window_Frame_Broken",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 72,
+   "vertices": 72,
+   "bbox_min": [
+    -0.5991,
+    -0.0372,
+    -0.7033
+   ],
+   "bbox_max": [
+    0.5525,
+    0.0372,
+    0.4582
+   ],
+   "size": [
+    1.1516,
+    0.0744,
+    1.1616
+   ],
+   "radius": 0.9246,
+   "mass_kg_hint": 105.33853,
+   "volume_m3": 0.01342,
+   "materials": [
+    "M_Glass_Shard",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 42,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.35284,
+     2e-05,
+     -0.93568
+    ],
+    [
+     -0.93568,
+     3e-05,
+     -0.35284
+    ],
+    [
+     3e-05,
+     1.0,
+     3e-05
+    ]
+   ],
+   "pca_extents": [
+    1.4932,
+    1.4873,
+    0.0745
+   ]
+  },
+  {
+   "name": "Window_Frame_Broken_05",
+   "category": "Window_Frame_Broken",
+   "size_class": "",
+   "group": "Glass",
+   "triangles": 56,
+   "vertices": 54,
+   "bbox_min": [
+    -0.4576,
+    -0.0398,
+    -0.6405
+   ],
+   "bbox_max": [
+    0.6083,
+    0.0398,
+    0.6716
+   ],
+   "size": [
+    1.0659,
+    0.0796,
+    1.3121
+   ],
+   "radius": 0.907,
+   "mass_kg_hint": 108.42082,
+   "volume_m3": 0.01381,
+   "materials": [
+    "M_Glass_Shard",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.01954,
+     0.00015,
+     -0.99981
+    ],
+    [
+     -0.99981,
+     0.0001,
+     -0.01954
+    ],
+    [
+     0.0001,
+     1.0,
+     0.00016
+    ]
+   ],
+   "pca_extents": [
+    1.3327,
+    1.0913,
+    0.0799
+   ]
+  },
+  {
+   "name": "Pebble_00",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 28,
+   "vertices": 16,
+   "bbox_min": [
+    -0.0404,
+    -0.0551,
+    -0.0353
+   ],
+   "bbox_max": [
+    0.0527,
+    0.0737,
+    0.0321
+   ],
+   "size": [
+    0.0931,
+    0.1287,
+    0.0674
+   ],
+   "radius": 0.0947,
+   "mass_kg_hint": 0.98469,
+   "volume_m3": 0.00038,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 10,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.57942,
+     -0.80304,
+     0.13929
+    ],
+    [
+     -0.0545,
+     0.2087,
+     0.97646
+    ],
+    [
+     -0.8132,
+     0.55819,
+     -0.16469
+    ]
+   ],
+   "pca_extents": [
+    0.165,
+    0.0816,
+    0.0877
+   ]
+  },
+  {
+   "name": "Pebble_01",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 40,
+   "vertices": 22,
+   "bbox_min": [
+    -0.035,
+    -0.0239,
+    -0.0319
+   ],
+   "bbox_max": [
+    0.0437,
+    0.0243,
+    0.0395
+   ],
+   "size": [
+    0.0787,
+    0.0482,
+    0.0714
+   ],
+   "radius": 0.0474,
+   "mass_kg_hint": 0.37262,
+   "volume_m3": 0.00014,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 13,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99214,
+     0.099,
+     0.07657
+    ],
+    [
+     0.09885,
+     0.24467,
+     0.96455
+    ],
+    [
+     0.07676,
+     0.96454,
+     -0.25253
+    ]
+   ],
+   "pca_extents": [
+    0.0813,
+    0.0757,
+    0.0579
+   ]
+  },
+  {
+   "name": "Pebble_02",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 44,
+   "vertices": 24,
+   "bbox_min": [
+    -0.051,
+    -0.0386,
+    -0.0454
+   ],
+   "bbox_max": [
+    0.0452,
+    0.0385,
+    0.0357
+   ],
+   "size": [
+    0.0962,
+    0.0771,
+    0.0811
+   ],
+   "radius": 0.0626,
+   "mass_kg_hint": 0.70151,
+   "volume_m3": 0.00027,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 14,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.54858,
+     -0.62278,
+     -0.55786
+    ],
+    [
+     -0.73571,
+     0.67655,
+     -0.03182
+    ],
+    [
+     0.39724,
+     0.39296,
+     -0.82933
+    ]
+   ],
+   "pca_extents": [
+    0.1109,
+    0.095,
+    0.0928
+   ]
+  },
+  {
+   "name": "Pebble_03",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 28,
+   "vertices": 16,
+   "bbox_min": [
+    -0.0362,
+    -0.0422,
+    -0.0209
+   ],
+   "bbox_max": [
+    0.0345,
+    0.0374,
+    0.0168
+   ],
+   "size": [
+    0.0707,
+    0.0796,
+    0.0377
+   ],
+   "radius": 0.0547,
+   "mass_kg_hint": 0.26301,
+   "volume_m3": 0.0001,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 10,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.56311,
+     0.79221,
+     0.23516
+    ],
+    [
+     0.82338,
+     0.56209,
+     0.07808
+    ],
+    [
+     -0.07033,
+     0.2376,
+     -0.96881
+    ]
+   ],
+   "pca_extents": [
+    0.1034,
+    0.0868,
+    0.0383
+   ]
+  },
+  {
+   "name": "Pebble_04",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 52,
+   "vertices": 28,
+   "bbox_min": [
+    -0.0282,
+    -0.0397,
+    -0.0423
+   ],
+   "bbox_max": [
+    0.0292,
+    0.0377,
+    0.0405
+   ],
+   "size": [
+    0.0574,
+    0.0774,
+    0.0829
+   ],
+   "radius": 0.0621,
+   "mass_kg_hint": 0.41379,
+   "volume_m3": 0.00016,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 16,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.35625,
+     0.65651,
+     0.66489
+    ],
+    [
+     0.00351,
+     0.71251,
+     -0.70165
+    ],
+    [
+     -0.93439,
+     -0.24763,
+     -0.25613
+    ]
+   ],
+   "pca_extents": [
+    0.1068,
+    0.0766,
+    0.0587
+   ]
+  },
+  {
+   "name": "Pebble_05",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 40,
+   "vertices": 22,
+   "bbox_min": [
+    -0.0372,
+    -0.0357,
+    -0.0223
+   ],
+   "bbox_max": [
+    0.0363,
+    0.033,
+    0.024
+   ],
+   "size": [
+    0.0736,
+    0.0687,
+    0.0463
+   ],
+   "radius": 0.0511,
+   "mass_kg_hint": 0.31345,
+   "volume_m3": 0.00012,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 13,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.624,
+     0.73043,
+     0.27766
+    ],
+    [
+     0.7813,
+     0.58933,
+     0.20556
+    ],
+    [
+     -0.01349,
+     0.3452,
+     -0.93843
+    ]
+   ],
+   "pca_extents": [
+    0.0973,
+    0.0834,
+    0.0496
+   ]
+  },
+  {
+   "name": "Pebble_06",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 32,
+   "vertices": 18,
+   "bbox_min": [
+    -0.0268,
+    -0.028,
+    -0.0332
+   ],
+   "bbox_max": [
+    0.0266,
+    0.0302,
+    0.0225
+   ],
+   "size": [
+    0.0535,
+    0.0582,
+    0.0557
+   ],
+   "radius": 0.0461,
+   "mass_kg_hint": 0.29197,
+   "volume_m3": 0.00011,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 11,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.5276,
+     -0.69503,
+     -0.48844
+    ],
+    [
+     0.14114,
+     -0.63871,
+     0.75639
+    ],
+    [
+     -0.83768,
+     0.33014,
+     0.43508
+    ]
+   ],
+   "pca_extents": [
+    0.0851,
+    0.0748,
+    0.064
+   ]
+  },
+  {
+   "name": "Pebble_07",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 40,
+   "vertices": 22,
+   "bbox_min": [
+    -0.0129,
+    -0.0191,
+    -0.0263
+   ],
+   "bbox_max": [
+    0.0124,
+    0.0195,
+    0.0293
+   ],
+   "size": [
+    0.0253,
+    0.0386,
+    0.0556
+   ],
+   "radius": 0.033,
+   "mass_kg_hint": 0.07179,
+   "volume_m3": 3e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 13,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.02071,
+     0.45591,
+     0.88979
+    ],
+    [
+     0.13433,
+     0.88318,
+     -0.44939
+    ],
+    [
+     -0.99072,
+     0.11021,
+     -0.07953
+    ]
+   ],
+   "pca_extents": [
+    0.0646,
+    0.0491,
+    0.0274
+   ]
+  },
+  {
+   "name": "Pebble_08",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 44,
+   "vertices": 24,
+   "bbox_min": [
+    -0.0576,
+    -0.0447,
+    -0.0582
+   ],
+   "bbox_max": [
+    0.0566,
+    0.0391,
+    0.0603
+   ],
+   "size": [
+    0.1142,
+    0.0839,
+    0.1185
+   ],
+   "radius": 0.0806,
+   "mass_kg_hint": 1.54604,
+   "volume_m3": 0.00059,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 14,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.83938,
+     -0.31231,
+     0.44485
+    ],
+    [
+     0.45936,
+     0.02989,
+     0.88775
+    ],
+    [
+     -0.29055,
+     0.94951,
+     0.11837
+    ]
+   ],
+   "pca_extents": [
+    0.1491,
+    0.1342,
+    0.0864
+   ]
+  },
+  {
+   "name": "Pebble_09",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 32,
+   "vertices": 18,
+   "bbox_min": [
+    -0.0225,
+    -0.0141,
+    -0.0165
+   ],
+   "bbox_max": [
+    0.0308,
+    0.0122,
+    0.016
+   ],
+   "size": [
+    0.0533,
+    0.0263,
+    0.0326
+   ],
+   "radius": 0.0363,
+   "mass_kg_hint": 0.05381,
+   "volume_m3": 2e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 11,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.89937,
+     -0.10754,
+     -0.42376
+    ],
+    [
+     0.21136,
+     -0.95543,
+     -0.20611
+    ],
+    [
+     -0.38271,
+     -0.27493,
+     0.88201
+    ]
+   ],
+   "pca_extents": [
+    0.0637,
+    0.0316,
+    0.0306
+   ]
+  },
+  {
+   "name": "Pebble_10",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 44,
+   "vertices": 24,
+   "bbox_min": [
+    -0.0211,
+    -0.021,
+    -0.0282
+   ],
+   "bbox_max": [
+    0.0165,
+    0.0165,
+    0.0278
+   ],
+   "size": [
+    0.0376,
+    0.0374,
+    0.056
+   ],
+   "radius": 0.0361,
+   "mass_kg_hint": 0.10631,
+   "volume_m3": 4e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 14,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.05519,
+     0.01581,
+     0.99835
+    ],
+    [
+     0.51059,
+     0.85881,
+     -0.04183
+    ],
+    [
+     -0.85805,
+     0.51206,
+     0.03933
+    ]
+   ],
+   "pca_extents": [
+    0.0564,
+    0.0468,
+    0.0341
+   ]
+  },
+  {
+   "name": "Pebble_11",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 44,
+   "vertices": 24,
+   "bbox_min": [
+    -0.0458,
+    -0.0525,
+    -0.0473
+   ],
+   "bbox_max": [
+    0.0371,
+    0.0475,
+    0.0483
+   ],
+   "size": [
+    0.0829,
+    0.1,
+    0.0957
+   ],
+   "radius": 0.0714,
+   "mass_kg_hint": 0.96425,
+   "volume_m3": 0.00037,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 14,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.17723,
+     0.12661,
+     0.97599
+    ],
+    [
+     0.38912,
+     0.90187,
+     -0.18765
+    ],
+    [
+     -0.90398,
+     0.41304,
+     0.11057
+    ]
+   ],
+   "pca_extents": [
+    0.1071,
+    0.1006,
+    0.086
+   ]
+  },
+  {
+   "name": "Pebble_12",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 24,
+   "vertices": 14,
+   "bbox_min": [
+    -0.0456,
+    -0.0476,
+    -0.0324
+   ],
+   "bbox_max": [
+    0.0251,
+    0.0454,
+    0.0282
+   ],
+   "size": [
+    0.0707,
+    0.093,
+    0.0606
+   ],
+   "radius": 0.0612,
+   "mass_kg_hint": 0.6441,
+   "volume_m3": 0.00025,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 9,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.00462,
+     0.99998,
+     -0.00468
+    ],
+    [
+     -0.58875,
+     -0.0065,
+     -0.80829
+    ],
+    [
+     -0.8083,
+     -0.00098,
+     0.58877
+    ]
+   ],
+   "pca_extents": [
+    0.0934,
+    0.0761,
+    0.0779
+   ]
+  },
+  {
+   "name": "Pebble_13",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 40,
+   "vertices": 22,
+   "bbox_min": [
+    -0.0309,
+    -0.0477,
+    -0.0284
+   ],
+   "bbox_max": [
+    0.0266,
+    0.0357,
+    0.0259
+   ],
+   "size": [
+    0.0575,
+    0.0834,
+    0.0543
+   ],
+   "radius": 0.0495,
+   "mass_kg_hint": 0.33793,
+   "volume_m3": 0.00013,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 13,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.05466,
+     0.99062,
+     -0.12527
+    ],
+    [
+     -0.62646,
+     -0.13172,
+     -0.76824
+    ],
+    [
+     -0.77753,
+     0.03648,
+     0.62778
+    ]
+   ],
+   "pca_extents": [
+    0.0823,
+    0.0732,
+    0.0688
+   ]
+  },
+  {
+   "name": "Pebble_14",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 40,
+   "vertices": 22,
+   "bbox_min": [
+    -0.0394,
+    -0.0384,
+    -0.0163
+   ],
+   "bbox_max": [
+    0.0409,
+    0.0379,
+    0.0155
+   ],
+   "size": [
+    0.0803,
+    0.0762,
+    0.0319
+   ],
+   "radius": 0.0502,
+   "mass_kg_hint": 0.29623,
+   "volume_m3": 0.00011,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 13,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.99711,
+     0.01204,
+     0.07502
+    ],
+    [
+     -0.02561,
+     0.98286,
+     0.18257
+    ],
+    [
+     -0.07153,
+     -0.18396,
+     0.98033
+    ]
+   ],
+   "pca_extents": [
+    0.0815,
+    0.0814,
+    0.0412
+   ]
+  },
+  {
+   "name": "Pebble_15",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 28,
+   "vertices": 16,
+   "bbox_min": [
+    -0.0661,
+    -0.0424,
+    -0.0467
+   ],
+   "bbox_max": [
+    0.0425,
+    0.0482,
+    0.0501
+   ],
+   "size": [
+    0.1086,
+    0.0906,
+    0.0968
+   ],
+   "radius": 0.0794,
+   "mass_kg_hint": 1.43068,
+   "volume_m3": 0.00055,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 10,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.17423,
+     -0.57617,
+     0.79854
+    ],
+    [
+     0.97522,
+     -0.21327,
+     0.05889
+    ],
+    [
+     0.13637,
+     0.78901,
+     0.59905
+    ]
+   ],
+   "pca_extents": [
+    0.139,
+    0.1201,
+    0.0979
+   ]
+  },
+  {
+   "name": "Pebble_16",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 48,
+   "vertices": 26,
+   "bbox_min": [
+    -0.0189,
+    -0.0155,
+    -0.0214
+   ],
+   "bbox_max": [
+    0.0145,
+    0.0183,
+    0.0265
+   ],
+   "size": [
+    0.0334,
+    0.0338,
+    0.0479
+   ],
+   "radius": 0.0315,
+   "mass_kg_hint": 0.08795,
+   "volume_m3": 3e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 15,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.15269,
+     0.01364,
+     0.98818
+    ],
+    [
+     0.83769,
+     0.53232,
+     0.12209
+    ],
+    [
+     -0.52437,
+     0.84643,
+     -0.09271
+    ]
+   ],
+   "pca_extents": [
+    0.0523,
+    0.0439,
+    0.0396
+   ]
+  },
+  {
+   "name": "Pebble_17",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 48,
+   "vertices": 26,
+   "bbox_min": [
+    -0.0685,
+    -0.0484,
+    -0.0259
+   ],
+   "bbox_max": [
+    0.0655,
+    0.0384,
+    0.0242
+   ],
+   "size": [
+    0.134,
+    0.0868,
+    0.0502
+   ],
+   "radius": 0.0724,
+   "mass_kg_hint": 0.65284,
+   "volume_m3": 0.00025,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 15,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99962,
+     0.012,
+     0.02501
+    ],
+    [
+     -0.01022,
+     -0.99748,
+     0.07022
+    ],
+    [
+     0.02579,
+     0.06993,
+     0.99722
+    ]
+   ],
+   "pca_extents": [
+    0.1341,
+    0.0867,
+    0.0521
+   ]
+  },
+  {
+   "name": "Pebble_18",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 24,
+   "vertices": 14,
+   "bbox_min": [
+    -0.0315,
+    -0.0393,
+    -0.0127
+   ],
+   "bbox_max": [
+    0.0215,
+    0.0294,
+    0.0133
+   ],
+   "size": [
+    0.053,
+    0.0687,
+    0.026
+   ],
+   "radius": 0.0417,
+   "mass_kg_hint": 0.13925,
+   "volume_m3": 5e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 9,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.19556,
+     0.98039,
+     -0.02441
+    ],
+    [
+     0.97862,
+     0.19346,
+     -0.06982
+    ],
+    [
+     -0.06373,
+     -0.03754,
+     -0.99726
+    ]
+   ],
+   "pca_extents": [
+    0.0752,
+    0.0619,
+    0.0285
+   ]
+  },
+  {
+   "name": "Pebble_19",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 48,
+   "vertices": 26,
+   "bbox_min": [
+    -0.039,
+    -0.0552,
+    -0.0593
+   ],
+   "bbox_max": [
+    0.0292,
+    0.0569,
+    0.0564
+   ],
+   "size": [
+    0.0682,
+    0.112,
+    0.1157
+   ],
+   "radius": 0.0826,
+   "mass_kg_hint": 1.14873,
+   "volume_m3": 0.00044,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 15,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.03044,
+     -0.58787,
+     0.80838
+    ],
+    [
+     0.57714,
+     0.67065,
+     0.46598
+    ],
+    [
+     -0.81608,
+     0.45237,
+     0.3597
+    ]
+   ],
+   "pca_extents": [
+    0.1511,
+    0.1147,
+    0.0723
+   ]
+  },
+  {
+   "name": "Pebble_20",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 44,
+   "vertices": 24,
+   "bbox_min": [
+    -0.0173,
+    -0.0365,
+    -0.039
+   ],
+   "bbox_max": [
+    0.018,
+    0.041,
+    0.0421
+   ],
+   "size": [
+    0.0353,
+    0.0774,
+    0.0811
+   ],
+   "radius": 0.0553,
+   "mass_kg_hint": 0.33413,
+   "volume_m3": 0.00013,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 14,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.03279,
+     -0.57578,
+     0.81695
+    ],
+    [
+     0.1979,
+     0.80494,
+     0.55938
+    ],
+    [
+     -0.97967,
+     0.14333,
+     0.14034
+    ]
+   ],
+   "pca_extents": [
+    0.1019,
+    0.0879,
+    0.0432
+   ]
+  },
+  {
+   "name": "Pebble_21",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 32,
+   "vertices": 18,
+   "bbox_min": [
+    -0.0257,
+    -0.0307,
+    -0.0301
+   ],
+   "bbox_max": [
+    0.0437,
+    0.0262,
+    0.0275
+   ],
+   "size": [
+    0.0694,
+    0.057,
+    0.0576
+   ],
+   "radius": 0.0531,
+   "mass_kg_hint": 0.34813,
+   "volume_m3": 0.00013,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 11,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.8193,
+     -0.19003,
+     -0.54096
+    ],
+    [
+     0.07166,
+     -0.97002,
+     0.23221
+    ],
+    [
+     -0.56886,
+     0.15148,
+     0.80836
+    ]
+   ],
+   "pca_extents": [
+    0.0945,
+    0.0664,
+    0.0698
+   ]
+  },
+  {
+   "name": "Pebble_22",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 44,
+   "vertices": 24,
+   "bbox_min": [
+    -0.0391,
+    -0.0372,
+    -0.0263
+   ],
+   "bbox_max": [
+    0.0398,
+    0.0491,
+    0.0254
+   ],
+   "size": [
+    0.0789,
+    0.0863,
+    0.0517
+   ],
+   "radius": 0.0561,
+   "mass_kg_hint": 0.46949,
+   "volume_m3": 0.00018,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 14,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.96328,
+     -0.03323,
+     0.26645
+    ],
+    [
+     0.0167,
+     0.98298,
+     0.18296
+    ],
+    [
+     -0.26799,
+     0.18069,
+     -0.94633
+    ]
+   ],
+   "pca_extents": [
+    0.0907,
+    0.0879,
+    0.0551
+   ]
+  },
+  {
+   "name": "Pebble_23",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 40,
+   "vertices": 22,
+   "bbox_min": [
+    -0.0348,
+    -0.0386,
+    -0.0603
+   ],
+   "bbox_max": [
+    0.0365,
+    0.0384,
+    0.0574
+   ],
+   "size": [
+    0.0712,
+    0.077,
+    0.1177
+   ],
+   "radius": 0.0714,
+   "mass_kg_hint": 0.77633,
+   "volume_m3": 0.0003,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 13,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.40483,
+     0.24171,
+     0.88187
+    ],
+    [
+     0.42149,
+     0.80653,
+     -0.41454
+    ],
+    [
+     -0.81146,
+     0.53952,
+     0.22463
+    ]
+   ],
+   "pca_extents": [
+    0.1339,
+    0.0873,
+    0.0774
+   ]
+  },
+  {
+   "name": "Pebble_24",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 32,
+   "vertices": 18,
+   "bbox_min": [
+    -0.0521,
+    -0.0346,
+    -0.0377
+   ],
+   "bbox_max": [
+    0.0393,
+    0.0357,
+    0.0332
+   ],
+   "size": [
+    0.0914,
+    0.0703,
+    0.0709
+   ],
+   "radius": 0.067,
+   "mass_kg_hint": 0.40475,
+   "volume_m3": 0.00016,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 11,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.84314,
+     -0.0588,
+     -0.53447
+    ],
+    [
+     0.39972,
+     0.73338,
+     0.54989
+    ],
+    [
+     0.35964,
+     -0.67727,
+     0.64184
+    ]
+   ],
+   "pca_extents": [
+    0.1122,
+    0.0908,
+    0.0495
+   ]
+  },
+  {
+   "name": "Pebble_25",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 44,
+   "vertices": 24,
+   "bbox_min": [
+    -0.0195,
+    -0.0159,
+    -0.0339
+   ],
+   "bbox_max": [
+    0.0213,
+    0.0174,
+    0.0274
+   ],
+   "size": [
+    0.0407,
+    0.0333,
+    0.0613
+   ],
+   "radius": 0.0348,
+   "mass_kg_hint": 0.10214,
+   "volume_m3": 4e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 14,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.1718,
+     0.10399,
+     0.97963
+    ],
+    [
+     0.75941,
+     -0.61945,
+     0.19893
+    ],
+    [
+     0.62752,
+     0.77812,
+     0.02745
+    ]
+   ],
+   "pca_extents": [
+    0.0624,
+    0.0454,
+    0.0402
+   ]
+  },
+  {
+   "name": "Pebble_26",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 48,
+   "vertices": 26,
+   "bbox_min": [
+    -0.0189,
+    -0.0364,
+    -0.0259
+   ],
+   "bbox_max": [
+    0.0181,
+    0.0324,
+    0.0245
+   ],
+   "size": [
+    0.037,
+    0.0688,
+    0.0504
+   ],
+   "radius": 0.0411,
+   "mass_kg_hint": 0.15362,
+   "volume_m3": 6e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 15,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.38665,
+     0.913,
+     -0.13013
+    ],
+    [
+     0.34222,
+     -0.27307,
+     -0.89907
+    ],
+    [
+     -0.85638,
+     0.30309,
+     -0.41802
+    ]
+   ],
+   "pca_extents": [
+    0.0792,
+    0.0604,
+    0.0467
+   ]
+  },
+  {
+   "name": "Pebble_27",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 40,
+   "vertices": 22,
+   "bbox_min": [
+    -0.0682,
+    -0.0509,
+    -0.0452
+   ],
+   "bbox_max": [
+    0.0662,
+    0.0452,
+    0.0481
+   ],
+   "size": [
+    0.1344,
+    0.0961,
+    0.0933
+   ],
+   "radius": 0.0978,
+   "mass_kg_hint": 1.52694,
+   "volume_m3": 0.00059,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 13,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.80039,
+     -0.38643,
+     0.45831
+    ],
+    [
+     -0.59276,
+     0.62429,
+     -0.50882
+    ],
+    [
+     -0.08949,
+     -0.67892,
+     -0.72874
+    ]
+   ],
+   "pca_extents": [
+    0.1875,
+    0.135,
+    0.0653
+   ]
+  },
+  {
+   "name": "Pebble_28",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 52,
+   "vertices": 28,
+   "bbox_min": [
+    -0.0247,
+    -0.012,
+    -0.0285
+   ],
+   "bbox_max": [
+    0.0272,
+    0.0157,
+    0.0303
+   ],
+   "size": [
+    0.052,
+    0.0276,
+    0.0588
+   ],
+   "radius": 0.0398,
+   "mass_kg_hint": 0.10244,
+   "volume_m3": 4e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 16,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.82898,
+     -0.11,
+     0.54836
+    ],
+    [
+     -0.5445,
+     -0.06519,
+     -0.83622
+    ],
+    [
+     0.12773,
+     -0.99179,
+     -0.00585
+    ]
+   ],
+   "pca_extents": [
+    0.0718,
+    0.0559,
+    0.0256
+   ]
+  },
+  {
+   "name": "Pebble_29",
+   "category": "Pebble",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 40,
+   "vertices": 22,
+   "bbox_min": [
+    -0.0215,
+    -0.0226,
+    -0.0296
+   ],
+   "bbox_max": [
+    0.0251,
+    0.0202,
+    0.035
+   ],
+   "size": [
+    0.0466,
+    0.0428,
+    0.0646
+   ],
+   "radius": 0.0446,
+   "mass_kg_hint": 0.18891,
+   "volume_m3": 7e-05,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 13,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.50726,
+     -0.26312,
+     -0.82065
+    ],
+    [
+     -0.51779,
+     -0.66816,
+     0.53428
+    ],
+    [
+     -0.6889,
+     0.69594,
+     0.20269
+    ]
+   ],
+   "pca_extents": [
+    0.0792,
+    0.0546,
+    0.0505
+   ]
+  },
+  {
+   "name": "Gravel_Cluster_00",
+   "category": "Gravel_Cluster",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 1408,
+   "vertices": 842,
+   "bbox_min": [
+    -0.2282,
+    -0.1897,
+    -0.0439
+   ],
+   "bbox_max": [
+    0.2428,
+    0.2687,
+    0.0743
+   ],
+   "size": [
+    0.471,
+    0.4584,
+    0.1182
+   ],
+   "radius": 0.2696,
+   "mass_kg_hint": 13.23156,
+   "volume_m3": 0.00509,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 559,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.2186,
+     -0.97561,
+     0.02012
+    ],
+    [
+     -0.97578,
+     -0.21838,
+     0.01255
+    ],
+    [
+     -0.00785,
+     -0.02237,
+     -0.99972
+    ]
+   ],
+   "pca_extents": [
+    0.4368,
+    0.4711,
+    0.1217
+   ]
+  },
+  {
+   "name": "Gravel_Cluster_01",
+   "category": "Gravel_Cluster",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 1436,
+   "vertices": 852,
+   "bbox_min": [
+    -0.317,
+    -0.3283,
+    -0.0494
+   ],
+   "bbox_max": [
+    0.3488,
+    0.2676,
+    0.0771
+   ],
+   "size": [
+    0.6658,
+    0.5959,
+    0.1265
+   ],
+   "radius": 0.3713,
+   "mass_kg_hint": 13.58599,
+   "volume_m3": 0.00523,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 560,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.71793,
+     -0.6961,
+     -0.00426
+    ],
+    [
+     -0.69609,
+     0.71794,
+     -0.00359
+    ],
+    [
+     0.00555,
+     0.00038,
+     -0.99998
+    ]
+   ],
+   "pca_extents": [
+    0.6645,
+    0.6073,
+    0.128
+   ]
+  },
+  {
+   "name": "Gravel_Cluster_02",
+   "category": "Gravel_Cluster",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 1136,
+   "vertices": 676,
+   "bbox_min": [
+    -0.2344,
+    -0.2367,
+    -0.0572
+   ],
+   "bbox_max": [
+    0.2322,
+    0.2566,
+    0.0854
+   ],
+   "size": [
+    0.4666,
+    0.4934,
+    0.1426
+   ],
+   "radius": 0.2599,
+   "mass_kg_hint": 14.77849,
+   "volume_m3": 0.00568,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 446,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.3799,
+     -0.92481,
+     -0.02012
+    ],
+    [
+     -0.92479,
+     0.38021,
+     -0.01459
+    ],
+    [
+     0.02114,
+     0.01306,
+     -0.99969
+    ]
+   ],
+   "pca_extents": [
+    0.4786,
+    0.4194,
+    0.1466
+   ]
+  },
+  {
+   "name": "Gravel_Cluster_03",
+   "category": "Gravel_Cluster",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 1144,
+   "vertices": 678,
+   "bbox_min": [
+    -0.2919,
+    -0.2549,
+    -0.0511
+   ],
+   "bbox_max": [
+    0.2152,
+    0.2375,
+    0.0868
+   ],
+   "size": [
+    0.5071,
+    0.4924,
+    0.1379
+   ],
+   "radius": 0.3106,
+   "mass_kg_hint": 11.59273,
+   "volume_m3": 0.00446,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 445,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.97974,
+     0.19899,
+     0.02275
+    ],
+    [
+     0.19907,
+     0.97999,
+     0.00106
+    ],
+    [
+     -0.02208,
+     0.00557,
+     -0.99974
+    ]
+   ],
+   "pca_extents": [
+    0.4855,
+    0.4748,
+    0.1408
+   ]
+  },
+  {
+   "name": "Gravel_Cluster_04",
+   "category": "Gravel_Cluster",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 1396,
+   "vertices": 828,
+   "bbox_min": [
+    -0.2869,
+    -0.2357,
+    -0.0477
+   ],
+   "bbox_max": [
+    0.2672,
+    0.2758,
+    0.0702
+   ],
+   "size": [
+    0.5542,
+    0.5115,
+    0.1179
+   ],
+   "radius": 0.293,
+   "mass_kg_hint": 15.19745,
+   "volume_m3": 0.00585,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 544,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.92442,
+     0.38138,
+     -0.00131
+    ],
+    [
+     0.38128,
+     0.92423,
+     0.02057
+    ],
+    [
+     0.00906,
+     0.01852,
+     -0.99979
+    ]
+   ],
+   "pca_extents": [
+    0.5241,
+    0.4957,
+    0.1192
+   ]
+  },
+  {
+   "name": "Gravel_Cluster_05",
+   "category": "Gravel_Cluster",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 772,
+   "vertices": 460,
+   "bbox_min": [
+    -0.2233,
+    -0.1953,
+    -0.0465
+   ],
+   "bbox_max": [
+    0.1944,
+    0.1632,
+    0.0774
+   ],
+   "size": [
+    0.4177,
+    0.3585,
+    0.1239
+   ],
+   "radius": 0.2581,
+   "mass_kg_hint": 6.98126,
+   "volume_m3": 0.00269,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 304,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.82541,
+     -0.56431,
+     -0.01608
+    ],
+    [
+     -0.56438,
+     0.82418,
+     0.04701
+    ],
+    [
+     -0.01328,
+     0.04788,
+     -0.99876
+    ]
+   ],
+   "pca_extents": [
+    0.4174,
+    0.3412,
+    0.126
+   ]
+  },
+  {
+   "name": "Gravel_Cluster_06",
+   "category": "Gravel_Cluster",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 1320,
+   "vertices": 784,
+   "bbox_min": [
+    -0.2848,
+    -0.2467,
+    -0.0487
+   ],
+   "bbox_max": [
+    0.2901,
+    0.264,
+    0.081
+   ],
+   "size": [
+    0.5748,
+    0.5106,
+    0.1297
+   ],
+   "radius": 0.3024,
+   "mass_kg_hint": 13.51912,
+   "volume_m3": 0.0052,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 516,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99572,
+     0.09219,
+     -0.00586
+    ],
+    [
+     0.09222,
+     0.99572,
+     -0.00565
+    ],
+    [
+     0.00531,
+     -0.00617,
+     -0.99997
+    ]
+   ],
+   "pca_extents": [
+    0.5769,
+    0.5099,
+    0.1321
+   ]
+  },
+  {
+   "name": "Gravel_Cluster_07",
+   "category": "Gravel_Cluster",
+   "size_class": "",
+   "group": "Gravel",
+   "triangles": 1056,
+   "vertices": 624,
+   "bbox_min": [
+    -0.2672,
+    -0.3025,
+    -0.0518
+   ],
+   "bbox_max": [
+    0.362,
+    0.3154,
+    0.075
+   ],
+   "size": [
+    0.6292,
+    0.6179,
+    0.1268
+   ],
+   "radius": 0.3761,
+   "mass_kg_hint": 9.35241,
+   "volume_m3": 0.0036,
+   "materials": [
+    "M_Gravel"
+   ],
+   "uv_islands": 408,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.16413,
+     -0.98624,
+     -0.01974
+    ],
+    [
+     -0.98627,
+     -0.16444,
+     0.01498
+    ],
+    [
+     -0.01802,
+     0.01701,
+     -0.99969
+    ]
+   ],
+   "pca_extents": [
+    0.6103,
+    0.63,
+    0.1349
+   ]
+  },
+  {
+   "name": "Steel_Plate_Bent_00",
+   "category": "Steel_Plate_Bent",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 276,
+   "vertices": 140,
+   "bbox_min": [
+    -0.6804,
+    -0.5961,
+    -0.0744
+   ],
+   "bbox_max": [
+    0.6627,
+    0.5974,
+    0.272
+   ],
+   "size": [
+    1.3431,
+    1.1935,
+    0.3464
+   ],
+   "radius": 0.924,
+   "mass_kg_hint": 174.71651,
+   "volume_m3": 0.02226,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98258,
+     0.01256,
+     -0.18543
+    ],
+    [
+     0.01272,
+     0.99992,
+     0.00032
+    ],
+    [
+     0.18542,
+     -0.00205,
+     -0.98266
+    ]
+   ],
+   "pca_extents": [
+    1.3891,
+    1.209,
+    0.2436
+   ]
+  },
+  {
+   "name": "Steel_Plate_Bent_01",
+   "category": "Steel_Plate_Bent",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 276,
+   "vertices": 140,
+   "bbox_min": [
+    -1.1016,
+    -0.6739,
+    -0.0592
+   ],
+   "bbox_max": [
+    1.0984,
+    0.674,
+    0.2912
+   ],
+   "size": [
+    2.2,
+    1.3479,
+    0.3504
+   ],
+   "radius": 1.2917,
+   "mass_kg_hint": 494.84235,
+   "volume_m3": 0.06304,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99486,
+     0.00227,
+     -0.10121
+    ],
+    [
+     0.00228,
+     1.0,
+     1e-05
+    ],
+    [
+     0.10121,
+     -0.00022,
+     -0.99486
+    ]
+   ],
+   "pca_extents": [
+    2.2222,
+    1.351,
+    0.2813
+   ]
+  },
+  {
+   "name": "Steel_Plate_Bent_02",
+   "category": "Steel_Plate_Bent",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 276,
+   "vertices": 140,
+   "bbox_min": [
+    -0.694,
+    -0.3518,
+    -0.1333
+   ],
+   "bbox_max": [
+    0.6636,
+    0.3536,
+    0.29
+   ],
+   "size": [
+    1.3576,
+    0.7054,
+    0.4233
+   ],
+   "radius": 0.796,
+   "mass_kg_hint": 81.06646,
+   "volume_m3": 0.01033,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.95365,
+     0.00114,
+     -0.30093
+    ],
+    [
+     -0.0002,
+     0.99999,
+     0.00441
+    ],
+    [
+     0.30093,
+     0.00427,
+     -0.95364
+    ]
+   ],
+   "pca_extents": [
+    1.4192,
+    0.7065,
+    0.1826
+   ]
+  },
+  {
+   "name": "Steel_Plate_Bent_03",
+   "category": "Steel_Plate_Bent",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 276,
+   "vertices": 140,
+   "bbox_min": [
+    -0.712,
+    -0.5372,
+    -0.1099
+   ],
+   "bbox_max": [
+    0.5363,
+    0.54,
+    0.406
+   ],
+   "size": [
+    1.2483,
+    1.0772,
+    0.5159
+   ],
+   "radius": 0.8954,
+   "mass_kg_hint": 320.6126,
+   "volume_m3": 0.04084,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.96532,
+     -0.00158,
+     0.26106
+    ],
+    [
+     0.0015,
+     1.0,
+     0.00051
+    ],
+    [
+     -0.26106,
+     -0.0001,
+     0.96532
+    ]
+   ],
+   "pca_extents": [
+    1.3356,
+    1.0769,
+    0.4266
+   ]
+  },
+  {
+   "name": "Steel_Plate_Bent_04",
+   "category": "Steel_Plate_Bent",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 276,
+   "vertices": 140,
+   "bbox_min": [
+    -0.7012,
+    -0.45,
+    -0.0632
+   ],
+   "bbox_max": [
+    0.6517,
+    0.4524,
+    0.2443
+   ],
+   "size": [
+    1.3529,
+    0.9024,
+    0.3075
+   ],
+   "radius": 0.8349,
+   "mass_kg_hint": 114.15104,
+   "volume_m3": 0.01454,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98748,
+     0.00046,
+     -0.15772
+    ],
+    [
+     -0.00019,
+     0.99999,
+     0.00408
+    ],
+    [
+     0.15772,
+     0.00406,
+     -0.98747
+    ]
+   ],
+   "pca_extents": [
+    1.3824,
+    0.9025,
+    0.239
+   ]
+  },
+  {
+   "name": "Steel_Plate_Bent_05",
+   "category": "Steel_Plate_Bent",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 276,
+   "vertices": 140,
+   "bbox_min": [
+    -0.8678,
+    -0.6654,
+    -0.269
+   ],
+   "bbox_max": [
+    0.569,
+    0.6653,
+    0.7183
+   ],
+   "size": [
+    1.4369,
+    1.3307,
+    0.9873
+   ],
+   "radius": 1.1252,
+   "mass_kg_hint": 544.62182,
+   "volume_m3": 0.06938,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.8351,
+     0.00053,
+     -0.55009
+    ],
+    [
+     0.00023,
+     1.0,
+     0.00061
+    ],
+    [
+     0.55009,
+     0.00039,
+     -0.8351
+    ]
+   ],
+   "pca_extents": [
+    1.7359,
+    1.3306,
+    0.5521
+   ]
+  },
+  {
+   "name": "Steel_Plate_Bent_06",
+   "category": "Steel_Plate_Bent",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 276,
+   "vertices": 140,
+   "bbox_min": [
+    -0.5199,
+    -0.2939,
+    -0.1905
+   ],
+   "bbox_max": [
+    0.3707,
+    0.2975,
+    0.4533
+   ],
+   "size": [
+    0.8906,
+    0.5914,
+    0.6438
+   ],
+   "radius": 0.643,
+   "mass_kg_hint": 149.08637,
+   "volume_m3": 0.01899,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.80714,
+     -0.0039,
+     -0.59034
+    ],
+    [
+     -0.01416,
+     0.99982,
+     0.01276
+    ],
+    [
+     0.59019,
+     0.01866,
+     -0.80705
+    ]
+   ],
+   "pca_extents": [
+    1.0886,
+    0.5976,
+    0.3667
+   ]
+  },
+  {
+   "name": "Steel_Plate_Bent_07",
+   "category": "Steel_Plate_Bent",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 276,
+   "vertices": 140,
+   "bbox_min": [
+    -0.5399,
+    -0.6971,
+    -0.151
+   ],
+   "bbox_max": [
+    0.4413,
+    0.7022,
+    0.3909
+   ],
+   "size": [
+    0.9812,
+    1.3993,
+    0.5418
+   ],
+   "radius": 0.9002,
+   "mass_kg_hint": 257.33507,
+   "volume_m3": 0.03278,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 32,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.00889,
+     0.99992,
+     -0.00909
+    ],
+    [
+     0.8812,
+     0.01213,
+     0.47259
+    ],
+    [
+     0.47266,
+     -0.00381,
+     -0.88124
+    ]
+   ],
+   "pca_extents": [
+    1.4117,
+    1.1159,
+    0.2802
+   ]
+  },
+  {
+   "name": "Girder_Twisted_00",
+   "category": "Girder_Twisted",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 308,
+   "vertices": 156,
+   "bbox_min": [
+    -1.1434,
+    -0.2876,
+    -0.5071
+   ],
+   "bbox_max": [
+    1.2852,
+    0.4863,
+    0.2856
+   ],
+   "size": [
+    2.4286,
+    0.7739,
+    0.7928
+   ],
+   "radius": 1.321,
+   "mass_kg_hint": 193.26276,
+   "volume_m3": 0.02462,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98151,
+     -0.1518,
+     0.11657
+    ],
+    [
+     -0.15521,
+     0.98766,
+     -0.0207
+    ],
+    [
+     -0.11199,
+     -0.03841,
+     -0.99297
+    ]
+   ],
+   "pca_extents": [
+    2.4662,
+    0.592,
+    0.6425
+   ]
+  },
+  {
+   "name": "Girder_Twisted_01",
+   "category": "Girder_Twisted",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 356,
+   "vertices": 180,
+   "bbox_min": [
+    -2.2614,
+    -0.65,
+    -0.82
+   ],
+   "bbox_max": [
+    2.2134,
+    0.3463,
+    0.4586
+   ],
+   "size": [
+    4.4748,
+    0.9963,
+    1.2786
+   ],
+   "radius": 2.3275,
+   "mass_kg_hint": 344.40822,
+   "volume_m3": 0.04387,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.97876,
+     -0.14529,
+     0.14467
+    ],
+    [
+     0.10003,
+     0.27752,
+     0.9555
+    ],
+    [
+     -0.17897,
+     0.94967,
+     -0.25709
+    ]
+   ],
+   "pca_extents": [
+    4.5234,
+    1.0326,
+    0.3897
+   ]
+  },
+  {
+   "name": "Girder_Twisted_02",
+   "category": "Girder_Twisted",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 284,
+   "vertices": 144,
+   "bbox_min": [
+    -2.0567,
+    -0.8312,
+    -0.7231
+   ],
+   "bbox_max": [
+    1.7673,
+    0.4431,
+    0.4275
+   ],
+   "size": [
+    3.824,
+    1.2743,
+    1.1506
+   ],
+   "radius": 2.1229,
+   "mass_kg_hint": 457.88172,
+   "volume_m3": 0.05833,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98067,
+     -0.1446,
+     0.1318
+    ],
+    [
+     -0.02404,
+     0.75757,
+     0.65231
+    ],
+    [
+     -0.19417,
+     0.63653,
+     -0.74641
+    ]
+   ],
+   "pca_extents": [
+    3.8569,
+    1.2291,
+    0.5826
+   ]
+  },
+  {
+   "name": "Girder_Twisted_03",
+   "category": "Girder_Twisted",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 356,
+   "vertices": 180,
+   "bbox_min": [
+    -1.5293,
+    -0.6462,
+    -0.3554
+   ],
+   "bbox_max": [
+    1.4315,
+    0.3797,
+    0.5387
+   ],
+   "size": [
+    2.9609,
+    1.0258,
+    0.894
+   ],
+   "radius": 1.5741,
+   "mass_kg_hint": 353.49906,
+   "volume_m3": 0.04503,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98314,
+     -0.14914,
+     -0.10577
+    ],
+    [
+     0.05607,
+     -0.79653,
+     0.60199
+    ],
+    [
+     -0.17403,
+     0.58591,
+     0.79147
+    ]
+   ],
+   "pca_extents": [
+    3.0196,
+    0.9523,
+    0.4629
+   ]
+  },
+  {
+   "name": "Girder_Twisted_04",
+   "category": "Girder_Twisted",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 308,
+   "vertices": 156,
+   "bbox_min": [
+    -1.7868,
+    -0.7663,
+    -0.6152
+   ],
+   "bbox_max": [
+    1.9202,
+    0.4504,
+    0.3837
+   ],
+   "size": [
+    3.707,
+    1.2167,
+    0.999
+   ],
+   "radius": 1.9775,
+   "mass_kg_hint": 325.62614,
+   "volume_m3": 0.04148,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98236,
+     -0.15058,
+     0.11085
+    ],
+    [
+     -0.05492,
+     0.79904,
+     0.59877
+    ],
+    [
+     -0.17874,
+     0.58212,
+     -0.79321
+    ]
+   ],
+   "pca_extents": [
+    3.7829,
+    1.1429,
+    0.4049
+   ]
+  },
+  {
+   "name": "Girder_Twisted_05",
+   "category": "Girder_Twisted",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 284,
+   "vertices": 144,
+   "bbox_min": [
+    -1.8015,
+    -0.4431,
+    -0.195
+   ],
+   "bbox_max": [
+    2.1248,
+    0.9097,
+    0.2896
+   ],
+   "size": [
+    3.9262,
+    1.3528,
+    0.4846
+   ],
+   "radius": 2.2145,
+   "mass_kg_hint": 221.50775,
+   "volume_m3": 0.02822,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98728,
+     -0.15665,
+     -0.0271
+    ],
+    [
+     -0.15898,
+     0.97297,
+     0.1675
+    ],
+    [
+     0.00013,
+     0.16968,
+     -0.9855
+    ]
+   ],
+   "pca_extents": [
+    3.9618,
+    1.0533,
+    0.378
+   ]
+  },
+  {
+   "name": "Pipe_Broken_00",
+   "category": "Pipe_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 560,
+   "vertices": 280,
+   "bbox_min": [
+    -0.9975,
+    -0.3725,
+    -0.1579
+   ],
+   "bbox_max": [
+    0.9359,
+    0.661,
+    0.1469
+   ],
+   "size": [
+    1.9334,
+    1.0335,
+    0.3048
+   ],
+   "radius": 1.0476,
+   "mass_kg_hint": 292.61025,
+   "volume_m3": 0.03728,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.90921,
+     -0.41607,
+     0.01477
+    ],
+    [
+     -0.41633,
+     0.90865,
+     -0.03198
+    ],
+    [
+     -0.00012,
+     -0.03523,
+     -0.99938
+    ]
+   ],
+   "pca_extents": [
+    2.0518,
+    0.5786,
+    0.2775
+   ]
+  },
+  {
+   "name": "Pipe_Broken_01",
+   "category": "Pipe_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 504,
+   "vertices": 252,
+   "bbox_min": [
+    -1.0359,
+    -0.1742,
+    -0.0555
+   ],
+   "bbox_max": [
+    0.93,
+    0.4987,
+    0.0509
+   ],
+   "size": [
+    1.9659,
+    0.6729,
+    0.1064
+   ],
+   "radius": 1.0505,
+   "mass_kg_hint": 30.01068,
+   "volume_m3": 0.00382,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.96451,
+     -0.264,
+     0.00382
+    ],
+    [
+     -0.26403,
+     0.96441,
+     -0.01434
+    ],
+    [
+     0.0001,
+     -0.01483,
+     -0.99989
+    ]
+   ],
+   "pca_extents": [
+    2.0526,
+    0.4173,
+    0.0981
+   ]
+  },
+  {
+   "name": "Pipe_Broken_02",
+   "category": "Pipe_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 504,
+   "vertices": 252,
+   "bbox_min": [
+    -0.7077,
+    -0.1663,
+    -0.1483
+   ],
+   "bbox_max": [
+    0.6586,
+    0.3558,
+    0.0914
+   ],
+   "size": [
+    1.3663,
+    0.5221,
+    0.2397
+   ],
+   "radius": 0.7232,
+   "mass_kg_hint": 44.16682,
+   "volume_m3": 0.00563,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.95123,
+     -0.2958,
+     0.0876
+    ],
+    [
+     -0.30849,
+     0.91204,
+     -0.27022
+    ],
+    [
+     4e-05,
+     -0.28407,
+     -0.9588
+    ]
+   ],
+   "pca_extents": [
+    1.4347,
+    0.3074,
+    0.117
+   ]
+  },
+  {
+   "name": "Pipe_Broken_03",
+   "category": "Pipe_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 616,
+   "vertices": 308,
+   "bbox_min": [
+    -1.3384,
+    -0.6366,
+    -0.4443
+   ],
+   "bbox_max": [
+    1.133,
+    1.1142,
+    0.3073
+   ],
+   "size": [
+    2.4714,
+    1.7507,
+    0.7516
+   ],
+   "radius": 1.4831,
+   "mass_kg_hint": 883.2711,
+   "volume_m3": 0.11252,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.82383,
+     -0.5498,
+     0.13793
+    ],
+    [
+     -0.56683,
+     0.79827,
+     -0.20363
+    ],
+    [
+     0.00185,
+     -0.24594,
+     -0.96928
+    ]
+   ],
+   "pca_extents": [
+    2.9151,
+    0.9346,
+    0.3822
+   ]
+  },
+  {
+   "name": "Pipe_Broken_04",
+   "category": "Pipe_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 504,
+   "vertices": 252,
+   "bbox_min": [
+    -1.424,
+    -0.2927,
+    -0.2118
+   ],
+   "bbox_max": [
+    1.2544,
+    0.7538,
+    0.1005
+   ],
+   "size": [
+    2.6784,
+    1.0464,
+    0.3123
+   ],
+   "radius": 1.4554,
+   "mass_kg_hint": 26.28243,
+   "volume_m3": 0.00335,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.93662,
+     -0.34088,
+     0.08085
+    ],
+    [
+     -0.35034,
+     0.91136,
+     -0.21606
+    ],
+    [
+     -3e-05,
+     -0.23069,
+     -0.97303
+    ]
+   ],
+   "pca_extents": [
+    2.8683,
+    0.5456,
+    0.0791
+   ]
+  },
+  {
+   "name": "Pipe_Broken_05",
+   "category": "Pipe_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 728,
+   "vertices": 364,
+   "bbox_min": [
+    -0.9346,
+    -0.2406,
+    -0.2152
+   ],
+   "bbox_max": [
+    0.9515,
+    0.4213,
+    0.1816
+   ],
+   "size": [
+    1.8861,
+    0.6619,
+    0.3969
+   ],
+   "radius": 0.9702,
+   "mass_kg_hint": 395.60101,
+   "volume_m3": 0.0504,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 3,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98291,
+     -0.18174,
+     0.02929
+    ],
+    [
+     -0.18407,
+     0.96849,
+     -0.16777
+    ],
+    [
+     0.00212,
+     -0.17029,
+     -0.98539
+    ]
+   ],
+   "pca_extents": [
+    1.9082,
+    0.5077,
+    0.3351
+   ]
+  },
+  {
+   "name": "Cable_Dangling_00",
+   "category": "Cable_Dangling",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 227,
+   "vertices": 125,
+   "bbox_min": [
+    -1.2911,
+    -0.0756,
+    -0.5586
+   ],
+   "bbox_max": [
+    2.1342,
+    0.0617,
+    0.9317
+   ],
+   "size": [
+    3.4253,
+    0.1373,
+    1.4903
+   ],
+   "radius": 2.3241,
+   "mass_kg_hint": 8.46484,
+   "volume_m3": 0.00108,
+   "materials": [
+    "M_Steel_Rust",
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.98434,
+     -0.00549,
+     -0.1762
+    ],
+    [
+     -0.17626,
+     0.01232,
+     0.98427
+    ],
+    [
+     -0.00324,
+     0.99991,
+     -0.01309
+    ]
+   ],
+   "pca_extents": [
+    3.3932,
+    1.6637,
+    0.1382
+   ]
+  },
+  {
+   "name": "Cable_Dangling_01",
+   "category": "Cable_Dangling",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 227,
+   "vertices": 125,
+   "bbox_min": [
+    -0.79,
+    -0.0983,
+    -0.1215
+   ],
+   "bbox_max": [
+    1.7503,
+    0.0304,
+    0.3262
+   ],
+   "size": [
+    2.5403,
+    0.1288,
+    0.4476
+   ],
+   "radius": 1.7732,
+   "mass_kg_hint": 5.45028,
+   "volume_m3": 0.00069,
+   "materials": [
+    "M_Steel_Rust",
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.9982,
+     0.01196,
+     -0.05876
+    ],
+    [
+     0.05886,
+     0.00813,
+     -0.99823
+    ],
+    [
+     -0.01146,
+     -0.9999,
+     -0.00882
+    ]
+   ],
+   "pca_extents": [
+    2.5397,
+    0.4647,
+    0.1181
+   ]
+  },
+  {
+   "name": "Cable_Dangling_02",
+   "category": "Cable_Dangling",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 227,
+   "vertices": 125,
+   "bbox_min": [
+    -1.2562,
+    -0.1194,
+    -0.0935
+   ],
+   "bbox_max": [
+    2.2744,
+    0.0411,
+    0.4812
+   ],
+   "size": [
+    3.5306,
+    0.1604,
+    0.5747
+   ],
+   "radius": 2.3089,
+   "mass_kg_hint": 12.76167,
+   "volume_m3": 0.00163,
+   "materials": [
+    "M_Steel_Rust",
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.9988,
+     0.01269,
+     -0.04734
+    ],
+    [
+     0.04772,
+     0.03206,
+     -0.99835
+    ],
+    [
+     -0.01115,
+     -0.99941,
+     -0.03263
+    ]
+   ],
+   "pca_extents": [
+    3.5301,
+    0.5625,
+    0.1276
+   ]
+  },
+  {
+   "name": "Cable_Dangling_03",
+   "category": "Cable_Dangling",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 227,
+   "vertices": 125,
+   "bbox_min": [
+    -0.5909,
+    -0.0466,
+    -0.2119
+   ],
+   "bbox_max": [
+    1.079,
+    0.0678,
+    0.3704
+   ],
+   "size": [
+    1.6699,
+    0.1144,
+    0.5823
+   ],
+   "radius": 1.1362,
+   "mass_kg_hint": 6.09982,
+   "volume_m3": 0.00078,
+   "materials": [
+    "M_Steel_Rust",
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99163,
+     -0.00162,
+     -0.12907
+    ],
+    [
+     -0.12907,
+     -0.00021,
+     0.99164
+    ],
+    [
+     -0.00164,
+     1.0,
+     0.0
+    ]
+   ],
+   "pca_extents": [
+    1.6634,
+    0.6371,
+    0.1144
+   ]
+  },
+  {
+   "name": "Cable_Dangling_04",
+   "category": "Cable_Dangling",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 227,
+   "vertices": 125,
+   "bbox_min": [
+    -0.3099,
+    -0.027,
+    -0.1069
+   ],
+   "bbox_max": [
+    1.0613,
+    0.0413,
+    0.2186
+   ],
+   "size": [
+    1.3712,
+    0.0683,
+    0.3255
+   ],
+   "radius": 1.0729,
+   "mass_kg_hint": 2.61881,
+   "volume_m3": 0.00033,
+   "materials": [
+    "M_Steel_Rust",
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99633,
+     -0.00643,
+     -0.0853
+    ],
+    [
+     -0.08522,
+     -0.01112,
+     0.9963
+    ],
+    [
+     -0.00735,
+     0.99992,
+     0.01053
+    ]
+   ],
+   "pca_extents": [
+    1.3743,
+    0.271,
+    0.0704
+   ]
+  },
+  {
+   "name": "Cable_Dangling_05",
+   "category": "Cable_Dangling",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 227,
+   "vertices": 125,
+   "bbox_min": [
+    -1.1428,
+    -0.0383,
+    -0.1855
+   ],
+   "bbox_max": [
+    1.823,
+    0.0608,
+    0.6474
+   ],
+   "size": [
+    2.9658,
+    0.0991,
+    0.8329
+   ],
+   "radius": 1.9186,
+   "mass_kg_hint": 15.51738,
+   "volume_m3": 0.00198,
+   "materials": [
+    "M_Steel_Rust",
+    "M_Rebar"
+   ],
+   "uv_islands": 17,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99558,
+     -0.00625,
+     -0.09372
+    ],
+    [
+     -0.09376,
+     0.00553,
+     0.99558
+    ],
+    [
+     -0.00571,
+     0.99997,
+     -0.00609
+    ]
+   ],
+   "pca_extents": [
+    2.9586,
+    0.8465,
+    0.0889
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_S_00",
+   "category": "Panel_Facade_Torn",
+   "size_class": "S",
+   "group": "Structure",
+   "triangles": 312,
+   "vertices": 164,
+   "bbox_min": [
+    -0.9816,
+    -0.1298,
+    -1.1962
+   ],
+   "bbox_max": [
+    1.0184,
+    0.1299,
+    1.4288
+   ],
+   "size": [
+    2.0,
+    0.2597,
+    2.625
+   ],
+   "radius": 1.7374,
+   "mass_kg_hint": 2315.30272,
+   "volume_m3": 0.96471,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 153,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.00211,
+     0.00211,
+     -1.0
+    ],
+    [
+     0.99999,
+     -0.00345,
+     -0.00212
+    ],
+    [
+     -0.00345,
+     -0.99999,
+     -0.0021
+    ]
+   ],
+   "pca_extents": [
+    2.6278,
+    2.0064,
+    0.2704
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_S_01",
+   "category": "Panel_Facade_Torn",
+   "size_class": "S",
+   "group": "Structure",
+   "triangles": 260,
+   "vertices": 136,
+   "bbox_min": [
+    -0.9972,
+    -0.1609,
+    -1.2748
+   ],
+   "bbox_max": [
+    1.0028,
+    0.1604,
+    1.2919
+   ],
+   "size": [
+    2.0,
+    0.3213,
+    2.5667
+   ],
+   "radius": 1.6418,
+   "mass_kg_hint": 2492.50098,
+   "volume_m3": 1.03854,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 128,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.38515,
+     2e-05,
+     -0.92285
+    ],
+    [
+     -0.92285,
+     -0.00024,
+     0.38515
+    ],
+    [
+     -0.00021,
+     1.0,
+     0.00011
+    ]
+   ],
+   "pca_extents": [
+    3.0674,
+    2.4449,
+    0.3219
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_S_02",
+   "category": "Panel_Facade_Torn",
+   "size_class": "S",
+   "group": "Structure",
+   "triangles": 268,
+   "vertices": 142,
+   "bbox_min": [
+    -1.038,
+    -0.1518,
+    -1.0753
+   ],
+   "bbox_max": [
+    0.962,
+    0.1517,
+    1.2633
+   ],
+   "size": [
+    2.0,
+    0.3035,
+    2.3387
+   ],
+   "radius": 1.5952,
+   "mass_kg_hint": 2414.66907,
+   "volume_m3": 1.00611,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 133,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.32395,
+     -0.00021,
+     -0.94607
+    ],
+    [
+     -0.94607,
+     4e-05,
+     0.32395
+    ],
+    [
+     -3e-05,
+     1.0,
+     -0.00021
+    ]
+   ],
+   "pca_extents": [
+    2.7186,
+    2.5761,
+    0.304
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_M_00",
+   "category": "Panel_Facade_Torn",
+   "size_class": "M",
+   "group": "Structure",
+   "triangles": 548,
+   "vertices": 288,
+   "bbox_min": [
+    -1.6405,
+    -0.1547,
+    -1.8144
+   ],
+   "bbox_max": [
+    1.5595,
+    0.1548,
+    2.1106
+   ],
+   "size": [
+    3.2,
+    0.3095,
+    3.925
+   ],
+   "radius": 2.6279,
+   "mass_kg_hint": 5747.46521,
+   "volume_m3": 2.39478,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 272,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.39023,
+     -0.0,
+     -0.92072
+    ],
+    [
+     -0.92072,
+     -1e-05,
+     0.39023
+    ],
+    [
+     -1e-05,
+     1.0,
+     0.0
+    ]
+   ],
+   "pca_extents": [
+    4.8626,
+    3.7519,
+    0.3095
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_M_01",
+   "category": "Panel_Facade_Torn",
+   "size_class": "M",
+   "group": "Structure",
+   "triangles": 524,
+   "vertices": 284,
+   "bbox_min": [
+    -1.4434,
+    -0.1584,
+    -1.9004
+   ],
+   "bbox_max": [
+    1.2639,
+    0.1585,
+    2.0246
+   ],
+   "size": [
+    2.7072,
+    0.317,
+    3.925
+   ],
+   "radius": 2.3917,
+   "mass_kg_hint": 4723.98409,
+   "volume_m3": 1.96833,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 260,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.18723,
+     -1e-05,
+     0.98232
+    ],
+    [
+     -0.98232,
+     0.0002,
+     0.18723
+    ],
+    [
+     -0.0002,
+     -1.0,
+     3e-05
+    ]
+   ],
+   "pca_extents": [
+    4.3625,
+    2.9955,
+    0.3176
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_M_02",
+   "category": "Panel_Facade_Torn",
+   "size_class": "M",
+   "group": "Structure",
+   "triangles": 578,
+   "vertices": 304,
+   "bbox_min": [
+    -1.6038,
+    -0.123,
+    -1.7539
+   ],
+   "bbox_max": [
+    1.5962,
+    0.123,
+    2.1711
+   ],
+   "size": [
+    3.2,
+    0.2461,
+    3.925
+   ],
+   "radius": 2.4068,
+   "mass_kg_hint": 4822.45455,
+   "volume_m3": 2.00936,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 288,
+   "ucx": null,
+   "pca_axes": [
+    [
+     0.02232,
+     -1e-05,
+     -0.99975
+    ],
+    [
+     -0.99975,
+     2e-05,
+     -0.02232
+    ],
+    [
+     2e-05,
+     1.0,
+     -1e-05
+    ]
+   ],
+   "pca_extents": [
+    3.9827,
+    3.2758,
+    0.2462
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_L_00",
+   "category": "Panel_Facade_Torn",
+   "size_class": "L",
+   "group": "Structure",
+   "triangles": 980,
+   "vertices": 518,
+   "bbox_min": [
+    -2.5011,
+    -0.152,
+    -2.4893
+   ],
+   "bbox_max": [
+    2.2989,
+    0.1521,
+    3.1357
+   ],
+   "size": [
+    4.8,
+    0.3041,
+    5.625
+   ],
+   "radius": 3.422,
+   "mass_kg_hint": 11152.52064,
+   "volume_m3": 4.64688,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 484,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.17183,
+     -0.0,
+     0.98513
+    ],
+    [
+     -0.98513,
+     -0.0,
+     -0.17183
+    ],
+    [
+     0.0,
+     -1.0,
+     -0.0
+    ]
+   ],
+   "pca_extents": [
+    6.0878,
+    5.2176,
+    0.3041
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_L_01",
+   "category": "Panel_Facade_Torn",
+   "size_class": "L",
+   "group": "Structure",
+   "triangles": 956,
+   "vertices": 506,
+   "bbox_min": [
+    -2.2812,
+    -0.1138,
+    -2.7814
+   ],
+   "bbox_max": [
+    2.5188,
+    0.1139,
+    2.8436
+   ],
+   "size": [
+    4.8,
+    0.2277,
+    5.625
+   ],
+   "radius": 3.8001,
+   "mass_kg_hint": 8833.68808,
+   "volume_m3": 3.6807,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 479,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.16878,
+     0.0,
+     -0.98565
+    ],
+    [
+     -0.98565,
+     -0.0,
+     0.16878
+    ],
+    [
+     -0.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "pca_extents": [
+    6.3544,
+    5.2231,
+    0.2278
+   ]
+  },
+  {
+   "name": "Panel_Facade_Torn_L_02",
+   "category": "Panel_Facade_Torn",
+   "size_class": "L",
+   "group": "Structure",
+   "triangles": 824,
+   "vertices": 440,
+   "bbox_min": [
+    -2.4127,
+    -0.1257,
+    -2.4669
+   ],
+   "bbox_max": [
+    2.3873,
+    0.1257,
+    3.1282
+   ],
+   "size": [
+    4.8,
+    0.2514,
+    5.5951
+   ],
+   "radius": 3.453,
+   "mass_kg_hint": 9828.95678,
+   "volume_m3": 4.0954,
+   "materials": [
+    "M_Concrete_Old",
+    "M_Fracture",
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 413,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.58407,
+     -2e-05,
+     0.8117
+    ],
+    [
+     -0.8117,
+     -0.0,
+     -0.58407
+    ],
+    [
+     1e-05,
+     -1.0,
+     -1e-05
+    ]
+   ],
+   "pca_extents": [
+    6.6392,
+    6.682,
+    0.2516
+   ]
+  },
+  {
+   "name": "AC_Unit_Broken_00",
+   "category": "AC_Unit_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 368,
+   "vertices": 203,
+   "bbox_min": [
+    -0.508,
+    -0.2712,
+    -0.6983
+   ],
+   "bbox_max": [
+    0.4074,
+    0.5167,
+    0.3059
+   ],
+   "size": [
+    0.9153,
+    0.7879,
+    1.0042
+   ],
+   "radius": 0.8773,
+   "mass_kg_hint": 1247.33221,
+   "volume_m3": 0.1589,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 26,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.09214,
+     0.6333,
+     -0.7684
+    ],
+    [
+     0.99161,
+     0.12866,
+     -0.01287
+    ],
+    [
+     0.09072,
+     -0.76314,
+     -0.63984
+    ]
+   ],
+   "pca_extents": [
+    1.202,
+    0.8868,
+    0.715
+   ]
+  },
+  {
+   "name": "AC_Unit_Broken_01",
+   "category": "AC_Unit_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 372,
+   "vertices": 205,
+   "bbox_min": [
+    -0.3718,
+    -0.2444,
+    -0.6749
+   ],
+   "bbox_max": [
+    0.3808,
+    0.512,
+    0.3028
+   ],
+   "size": [
+    0.7525,
+    0.7565,
+    0.9777
+   ],
+   "radius": 0.9073,
+   "mass_kg_hint": 1192.28779,
+   "volume_m3": 0.15188,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 27,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.11274,
+     -0.62818,
+     0.76986
+    ],
+    [
+     -0.98782,
+     -0.01274,
+     -0.15506
+    ],
+    [
+     0.10721,
+     -0.77796,
+     -0.61909
+    ]
+   ],
+   "pca_extents": [
+    1.2539,
+    0.8588,
+    0.7083
+   ]
+  },
+  {
+   "name": "AC_Unit_Broken_02",
+   "category": "AC_Unit_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 352,
+   "vertices": 193,
+   "bbox_min": [
+    -0.4048,
+    -0.2613,
+    -0.7723
+   ],
+   "bbox_max": [
+    0.4557,
+    0.6202,
+    0.3451
+   ],
+   "size": [
+    0.8605,
+    0.8815,
+    1.1175
+   ],
+   "radius": 0.907,
+   "mass_kg_hint": 1418.49987,
+   "volume_m3": 0.1807,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 24,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.11256,
+     -0.56445,
+     0.81776
+    ],
+    [
+     0.95655,
+     0.16122,
+     0.24295
+    ],
+    [
+     -0.26897,
+     0.80957,
+     0.52178
+    ]
+   ],
+   "pca_extents": [
+    1.2887,
+    0.9878,
+    0.8081
+   ]
+  },
+  {
+   "name": "AC_Unit_Broken_03",
+   "category": "AC_Unit_Broken",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 348,
+   "vertices": 191,
+   "bbox_min": [
+    -0.3836,
+    -0.266,
+    -0.7372
+   ],
+   "bbox_max": [
+    0.4052,
+    0.493,
+    0.3228
+   ],
+   "size": [
+    0.7889,
+    0.759,
+    1.06
+   ],
+   "radius": 0.8069,
+   "mass_kg_hint": 1361.04865,
+   "volume_m3": 0.17338,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 23,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.19791,
+     0.57948,
+     -0.79059
+    ],
+    [
+     0.97042,
+     0.22962,
+     -0.07462
+    ],
+    [
+     0.1383,
+     -0.78197,
+     -0.60778
+    ]
+   ],
+   "pca_extents": [
+    1.1629,
+    0.8949,
+    0.7689
+   ]
+  },
+  {
+   "name": "Sign_Torn_00",
+   "category": "Sign_Torn",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 408,
+   "vertices": 216,
+   "bbox_min": [
+    -0.8455,
+    -0.4823,
+    -0.5819
+   ],
+   "bbox_max": [
+    0.834,
+    0.5325,
+    0.2561
+   ],
+   "size": [
+    1.6794,
+    1.0148,
+    0.838
+   ],
+   "radius": 0.9501,
+   "mass_kg_hint": 417.82645,
+   "volume_m3": 0.05323,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 56,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99025,
+     -0.11976,
+     -0.07122
+    ],
+    [
+     -0.12097,
+     0.99257,
+     0.01297
+    ],
+    [
+     0.06914,
+     0.02145,
+     -0.99738
+    ]
+   ],
+   "pca_extents": [
+    1.7475,
+    1.1161,
+    0.7313
+   ]
+  },
+  {
+   "name": "Sign_Torn_01",
+   "category": "Sign_Torn",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 408,
+   "vertices": 216,
+   "bbox_min": [
+    -0.746,
+    -0.5026,
+    -0.5763
+   ],
+   "bbox_max": [
+    0.7605,
+    0.5332,
+    0.1405
+   ],
+   "size": [
+    1.5065,
+    1.0358,
+    0.7167
+   ],
+   "radius": 0.9122,
+   "mass_kg_hint": 400.89854,
+   "volume_m3": 0.05107,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 56,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99582,
+     -0.02456,
+     -0.08801
+    ],
+    [
+     0.01851,
+     -0.99745,
+     0.06895
+    ],
+    [
+     -0.08947,
+     0.06704,
+     0.99373
+    ]
+   ],
+   "pca_extents": [
+    1.532,
+    1.0601,
+    0.6357
+   ]
+  },
+  {
+   "name": "Sign_Torn_02",
+   "category": "Sign_Torn",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 412,
+   "vertices": 218,
+   "bbox_min": [
+    -1.2045,
+    -0.5995,
+    -0.6135
+   ],
+   "bbox_max": [
+    1.4109,
+    0.6523,
+    0.2485
+   ],
+   "size": [
+    2.6154,
+    1.2518,
+    0.8621
+   ],
+   "radius": 1.5213,
+   "mass_kg_hint": 752.42239,
+   "volume_m3": 0.09585,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 57,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99874,
+     -0.0011,
+     -0.05026
+    ],
+    [
+     -0.00197,
+     -0.99813,
+     0.06105
+    ],
+    [
+     -0.05023,
+     0.06107,
+     0.99687
+    ]
+   ],
+   "pca_extents": [
+    2.6151,
+    1.2574,
+    0.781
+   ]
+  },
+  {
+   "name": "Sign_Torn_03",
+   "category": "Sign_Torn",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 408,
+   "vertices": 216,
+   "bbox_min": [
+    -1.3261,
+    -0.4646,
+    -0.5196
+   ],
+   "bbox_max": [
+    1.396,
+    0.4953,
+    0.4246
+   ],
+   "size": [
+    2.7222,
+    0.9598,
+    0.9441
+   ],
+   "radius": 1.4726,
+   "mass_kg_hint": 645.67078,
+   "volume_m3": 0.08225,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 56,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99855,
+     0.00549,
+     -0.05363
+    ],
+    [
+     0.00922,
+     0.99754,
+     -0.06945
+    ],
+    [
+     0.05312,
+     -0.06984,
+     -0.99614
+    ]
+   ],
+   "pca_extents": [
+    2.7264,
+    0.9725,
+    0.9501
+   ]
+  },
+  {
+   "name": "Sign_Torn_04",
+   "category": "Sign_Torn",
+   "size_class": "",
+   "group": "Metal",
+   "triangles": 408,
+   "vertices": 216,
+   "bbox_min": [
+    -1.2533,
+    -0.7656,
+    -0.6871
+   ],
+   "bbox_max": [
+    1.3379,
+    0.8408,
+    0.3491
+   ],
+   "size": [
+    2.5911,
+    1.6064,
+    1.0362
+   ],
+   "radius": 1.5025,
+   "mass_kg_hint": 994.33111,
+   "volume_m3": 0.12667,
+   "materials": [
+    "M_Steel_Rust"
+   ],
+   "uv_islands": 56,
+   "ucx": null,
+   "pca_axes": [
+    [
+     -0.99851,
+     -0.03147,
+     -0.04461
+    ],
+    [
+     0.02934,
+     -0.99843,
+     0.04763
+    ],
+    [
+     -0.04604,
+     0.04625,
+     0.99787
+    ]
+   ],
+   "pca_extents": [
+    2.6242,
+    1.6297,
+    0.9501
+   ]
+  }
+ ]
+}
