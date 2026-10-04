@@ -103,9 +103,55 @@ schema = {
     "definitions": defs,
 }
 
+# ---------------------------------------------------------------------------------------------------------------------------
+# schema_version 2 (Tokyo style, TASK-015): a superset of v1 in structure; new optional fields and wider enums. schema.json (v1) is left untouched.
+# ---------------------------------------------------------------------------------------------------------------------------
+def make_v2():
+    import copy
+    d = copy.deepcopy(defs)
+    d["road"]["properties"]["kind"] = {"enum": ["promenade", "avenue", "street", "alley", "embankment"]}
+    d["road"]["properties"]["width"] = {"type": "number", "minimum": 24, "maximum": 90}
+    d["building"]["properties"]["hero_kind"] = {"enum": ["glass_tower", "tower_lattice", "twin_tower_hall", "brick_station", "sphere_building", "temple_gate", "scramble_crossing",
+                                                          "port_crane", "expressway", "suspension_bridge", "stadium", "residential_complex", "overpass", "power_station"]}
+    d["building"]["properties"]["building_type"] = {"enum": ["office", "residential", "industrial", "parking", "stadium", "overpass", "crane", "apartment_tower", "office_tower",
+                                                              "low_shop", "temple", "station", "landmark"]}
+    d["building"]["properties"]["height"] = {"type": "number", "minimum": 8, "maximum": 340}
+    d["prop"]["properties"]["kind"] = {"enum": ["car", "tree", "lamp", "bench", "vending", "lantern", "utility_pole", "sign", "traffic_light", "bus_stop", "cone", "bicycle",
+                                                "scooter", "sakura"]}
+    d["prop"]["properties"].update({"size": P2, "emissive": {"type": "boolean"}, "building_id": STR})
+    d["poi"]["properties"]["kind"] = {"enum": ["spawn_player", "spawn_enemy", "spawn_duel_a", "spawn_duel_b", "duel_point", "camera"]}
+    d["hazard"]["properties"]["kind"] = {"enum": ["electrical", "flood", "metro_collapse", "expressway_collapse", "canal_flood"]}
+    d["light"] = obj({"id": {"$ref": "#/definitions/id"}, "kind": {"enum": ["street", "neon_sign", "window_block", "billboard"]}, "pos": {"$ref": "#/definitions/point3"},
+                      "color": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 255}, "minItems": 3, "maxItems": 3}, "intensity_hint": {"type": "number", "minimum": 0}})
+    d["wire"] = obj({"id": {"$ref": "#/definitions/id"}, "kind": STR, "from": {"$ref": "#/definitions/id"}, "to": {"$ref": "#/definitions/id"},
+                     "points": {"type": "array", "items": P3, "minItems": 2}})
+    canal = obj({"id": {"$ref": "#/definitions/id"}, "centre": {"$ref": "#/definitions/polyline"}, "south_bank": {"$ref": "#/definitions/polyline"},
+                 "north_bank": {"$ref": "#/definitions/polyline"}, "depth": N, "width_min": N, "width_max": N})
+    bridge = obj({"id": {"$ref": "#/definitions/id"}, "road_id": {"$ref": "#/definitions/id"}, "name": STR, "width": N, "deck_z": N, "from": P2, "to": P2, "length": N})
+    infra2 = obj({"canal": canal, "bridges": {"type": "array", "items": bridge, "minItems": 2}, "expressway_id": {"$ref": "#/definitions/id"},
+                  "suspension_bridge_id": {"$ref": "#/definitions/id"},
+                  "port": obj({k: v for k, v in port["properties"].items() if k != "block_id"}),
+                  "guardrails": {"type": "array", "items": obj({"id": {"$ref": "#/definitions/id"}, "points": {"type": "array", "items": P3, "minItems": 2}, "height": N})},
+                  "wires": {"type": "array", "items": {"$ref": "#/definitions/wire"}}})
+    s2 = copy.deepcopy(schema)
+    s2["description"] = ("Contract between worldgen/ (generator) and the Unreal project. Units: metres; x right, y from the sea toward the city, z up. "
+                         "schema_version 2 = Tokyo style (TASK-015).")
+    s2["properties"]["schema_version"] = {"const": 2}
+    s2["properties"]["style"] = {"enum": ["tokyo"]}
+    s2["properties"]["infrastructure"] = infra2
+    s2["properties"]["lights"] = {"type": "array", "items": {"$ref": "#/definitions/light"}, "minItems": 600}
+    s2["properties"]["buildings"]["minItems"] = 100
+    s2["required"] = s2["required"] + ["style", "lights"]
+    s2["definitions"] = d
+    return s2
+
+
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(here, "schema.json"), "w", encoding="utf-8") as f:
         json.dump(schema, f, indent=2, ensure_ascii=False)
         f.write("\n")
-    print("schema.json written")
+    with open(os.path.join(here, "schema_v2.json"), "w", encoding="utf-8") as f:
+        json.dump(make_v2(), f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    print("schema.json (v1) and schema_v2.json written")

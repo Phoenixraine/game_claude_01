@@ -318,7 +318,7 @@ class Previews(unittest.TestCase):
     def test_png_previews_are_valid(self):
         import struct
         with tempfile.TemporaryDirectory() as d:
-            generate.main(["--seed", "1", "--out", d])
+            generate.main(["--seed", "1", "--out", d, "--style", "generic"])      # the default style is Tokyo since TASK-015
             for name, size in (("preview_topdown.png", (1600, 1320)), ("preview_skyline.png", (1600, 430))):
                 with open(os.path.join(d, name), "rb") as f:
                     data = f.read()
