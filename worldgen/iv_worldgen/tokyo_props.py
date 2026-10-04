@@ -44,7 +44,7 @@ def _polyline_runs(pts, spacing, rng):
     return out
 
 
-def make_props(layout, terrain, rng, building_polys, buildings, heroes):
+def make_props(layout, terrain, rng, building_polys, buildings, heroes, return_placer=False):
     P = TokyoPropPlacer(terrain, rng.fork("props"), building_polys)
     rr = P.rng
     roads = layout.roads
@@ -126,7 +126,8 @@ def make_props(layout, terrain, rng, building_polys, buildings, heroes):
         n_signs = rr.randint(1, 3) if b["building_type"] == "low_shop" else (rr.randint(1, 2) if b["building_type"] != "parking" else 1)
         for _sign in range(n_signs):
             _place_sign(P, rr, layout, b)
-    return _finish_props(P, layout, terrain, rr, main, alleys, heroes, gc, wires)
+    props, wires = _finish_props(P, layout, terrain, rr, main, alleys, heroes, gc, wires)
+    return (P, wires) if return_placer else (props, wires)
 
 
 def _place_sign(P, rr, layout, b):

@@ -1,0 +1,336 @@
+{
+ "total": 3106,
+ "by_kind": {
+  "street": 1238,
+  "neon_sign": 376,
+  "neon_tube": 1078,
+  "window_block": 288,
+  "beacon": 58,
+  "under_tower": 27,
+  "billboard": 25,
+  "plaza": 16
+ },
+ "by_type": {
+  "point": 2636,
+  "rect": 443,
+  "spot": 27
+ },
+ "by_priority": {
+  "3": 1020,
+  "5": 399,
+  "4": 513,
+  "1": 130,
+  "2": 1044
+ },
+ "hue_share": {
+  "amber": 0.127,
+  "cyan": 0.176,
+  "magenta": 0.156,
+  "red": 0.169,
+  "tungsten": 0.372
+ },
+ "dominant_neon_hues_per_block": {
+  "block_01": [
+   "magenta",
+   "red"
+  ],
+  "block_08": [
+   "red"
+  ],
+  "block_10": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_26": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_30": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_44": [
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_46": [
+   "amber",
+   "magenta"
+  ],
+  "block_55": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_59": [
+   "cyan",
+   "magenta"
+  ],
+  "block_02": [
+   "amber",
+   "magenta"
+  ],
+  "block_20": [
+   "amber",
+   "cyan",
+   "red"
+  ],
+  "block_21": [
+   "amber",
+   "cyan",
+   "red"
+  ],
+  "block_37": [
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_38": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_09": [
+   "amber",
+   "cyan",
+   "magenta"
+  ],
+  "block_12": [
+   "magenta"
+  ],
+  "block_03": [],
+  "block_13": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_16": [
+   "magenta"
+  ],
+  "block_05": [
+   "amber",
+   "cyan"
+  ],
+  "block_18": [],
+  "block_07": [
+   "magenta"
+  ],
+  "block_11": [
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_14": [],
+  "block_22": [
+   "amber"
+  ],
+  "block_15": [
+   "magenta",
+   "red"
+  ],
+  "block_24": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_17": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_25": [],
+  "block_19": [
+   "magenta"
+  ],
+  "block_27": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_28": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_23": [
+   "amber",
+   "cyan",
+   "magenta"
+  ],
+  "block_29": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_34": [
+   "magenta"
+  ],
+  "block_36": [
+   "amber",
+   "cyan",
+   "red"
+  ],
+  "block_31": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_32": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_39": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_33": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_41": [
+   "amber",
+   "cyan",
+   "magenta"
+  ],
+  "block_35": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_43": [
+   "amber",
+   "cyan",
+   "red"
+  ],
+  "block_45": [
+   "amber",
+   "magenta"
+  ],
+  "block_48": [
+   "amber",
+   "cyan",
+   "magenta"
+  ],
+  "block_40": [
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_49": [
+   "amber",
+   "cyan",
+   "magenta"
+  ],
+  "block_42": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_52": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_53": [
+   "magenta"
+  ],
+  "block_47": [
+   "amber",
+   "cyan",
+   "red"
+  ],
+  "block_50": [],
+  "block_56": [],
+  "block_51": [
+   "amber",
+   "cyan",
+   "magenta"
+  ],
+  "block_57": [
+   "amber",
+   "magenta",
+   "red"
+  ],
+  "block_54": [
+   "amber",
+   "cyan",
+   "magenta"
+  ],
+  "block_58": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_60": [
+   "cyan",
+   "magenta"
+  ],
+  "block_61": [
+   "amber",
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_62": [
+   "cyan",
+   "magenta",
+   "red"
+  ],
+  "block_63": [
+   "magenta",
+   "red"
+  ],
+  "block_04": [],
+  "block_06": [
+   "magenta",
+   "red"
+  ]
+ },
+ "max_dominant_hues_in_a_block": 5,
+ "shadow_default": false,
+ "palette": {
+  "cyan": [
+   60,
+   230,
+   255
+  ],
+  "magenta": [
+   255,
+   70,
+   200
+  ],
+  "amber": [
+   255,
+   180,
+   50
+  ],
+  "red": [
+   255,
+   60,
+   50
+  ],
+  "tungsten": [
+   255,
+   200,
+   130
+  ]
+ }
+}

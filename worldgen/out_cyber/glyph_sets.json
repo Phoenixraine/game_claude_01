@@ -1,0 +1,1026 @@
+{
+ "version": 1,
+ "note": "Invented pseudo-Japanese glyph identifiers and pictograms. They are not real characters, words or brands: the material draws a stroke shape from `seed`.",
+ "sets": {
+  "kana_like": [
+   {
+    "id": "g_kana_00",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 33769
+   },
+   {
+    "id": "g_kana_01",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 50775
+   },
+   {
+    "id": "g_kana_02",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 25878
+   },
+   {
+    "id": "g_kana_03",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 44845
+   },
+   {
+    "id": "g_kana_04",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 12739
+   },
+   {
+    "id": "g_kana_05",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 30162
+   },
+   {
+    "id": "g_kana_06",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 49194
+   },
+   {
+    "id": "g_kana_07",
+    "strokes": 4,
+    "width_units": 0.8,
+    "seed": 12057
+   },
+   {
+    "id": "g_kana_08",
+    "strokes": 4,
+    "width_units": 0.8,
+    "seed": 37768
+   },
+   {
+    "id": "g_kana_09",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 33094
+   },
+   {
+    "id": "g_kana_10",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 49154
+   },
+   {
+    "id": "g_kana_11",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 55733
+   },
+   {
+    "id": "g_kana_12",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 1735
+   },
+   {
+    "id": "g_kana_13",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 21967
+   },
+   {
+    "id": "g_kana_14",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 53312
+   },
+   {
+    "id": "g_kana_15",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 9171
+   },
+   {
+    "id": "g_kana_16",
+    "strokes": 2,
+    "width_units": 0.8,
+    "seed": 54237
+   },
+   {
+    "id": "g_kana_17",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 8801
+   },
+   {
+    "id": "g_kana_18",
+    "strokes": 2,
+    "width_units": 1.2,
+    "seed": 20215
+   },
+   {
+    "id": "g_kana_19",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 23988
+   },
+   {
+    "id": "g_kana_20",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 47752
+   },
+   {
+    "id": "g_kana_21",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 4556
+   },
+   {
+    "id": "g_kana_22",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 64850
+   },
+   {
+    "id": "g_kana_23",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 716
+   },
+   {
+    "id": "g_kana_24",
+    "strokes": 2,
+    "width_units": 0.8,
+    "seed": 57438
+   },
+   {
+    "id": "g_kana_25",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 14337
+   },
+   {
+    "id": "g_kana_26",
+    "strokes": 4,
+    "width_units": 0.8,
+    "seed": 52536
+   },
+   {
+    "id": "g_kana_27",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 56366
+   },
+   {
+    "id": "g_kana_28",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 18714
+   },
+   {
+    "id": "g_kana_29",
+    "strokes": 2,
+    "width_units": 0.8,
+    "seed": 20768
+   },
+   {
+    "id": "g_kana_30",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 41106
+   },
+   {
+    "id": "g_kana_31",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 21013
+   },
+   {
+    "id": "g_kana_32",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 39587
+   },
+   {
+    "id": "g_kana_33",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 33278
+   },
+   {
+    "id": "g_kana_34",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 28045
+   },
+   {
+    "id": "g_kana_35",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 53838
+   },
+   {
+    "id": "g_kana_36",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 44357
+   },
+   {
+    "id": "g_kana_37",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 54486
+   },
+   {
+    "id": "g_kana_38",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 38118
+   },
+   {
+    "id": "g_kana_39",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 24940
+   },
+   {
+    "id": "g_kana_40",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 8110
+   },
+   {
+    "id": "g_kana_41",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 49451
+   },
+   {
+    "id": "g_kana_42",
+    "strokes": 2,
+    "width_units": 1.2,
+    "seed": 62006
+   },
+   {
+    "id": "g_kana_43",
+    "strokes": 4,
+    "width_units": 0.8,
+    "seed": 55322
+   },
+   {
+    "id": "g_kana_44",
+    "strokes": 4,
+    "width_units": 1.2,
+    "seed": 15958
+   },
+   {
+    "id": "g_kana_45",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 39639
+   },
+   {
+    "id": "g_kana_46",
+    "strokes": 3,
+    "width_units": 1.2,
+    "seed": 23377
+   },
+   {
+    "id": "g_kana_47",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 63456
+   }
+  ],
+  "kanji_like": [
+   {
+    "id": "g_kanji_00",
+    "strokes": 5,
+    "width_units": 0.8,
+    "seed": 13979
+   },
+   {
+    "id": "g_kanji_01",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 34521
+   },
+   {
+    "id": "g_kanji_02",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 48661
+   },
+   {
+    "id": "g_kanji_03",
+    "strokes": 10,
+    "width_units": 0.8,
+    "seed": 22533
+   },
+   {
+    "id": "g_kanji_04",
+    "strokes": 13,
+    "width_units": 1.0,
+    "seed": 29112
+   },
+   {
+    "id": "g_kanji_05",
+    "strokes": 10,
+    "width_units": 1.0,
+    "seed": 11524
+   },
+   {
+    "id": "g_kanji_06",
+    "strokes": 12,
+    "width_units": 0.8,
+    "seed": 20031
+   },
+   {
+    "id": "g_kanji_07",
+    "strokes": 8,
+    "width_units": 1.0,
+    "seed": 22612
+   },
+   {
+    "id": "g_kanji_08",
+    "strokes": 9,
+    "width_units": 1.2,
+    "seed": 32782
+   },
+   {
+    "id": "g_kanji_09",
+    "strokes": 6,
+    "width_units": 1.2,
+    "seed": 35176
+   },
+   {
+    "id": "g_kanji_10",
+    "strokes": 6,
+    "width_units": 0.8,
+    "seed": 20121
+   },
+   {
+    "id": "g_kanji_11",
+    "strokes": 5,
+    "width_units": 1.2,
+    "seed": 29590
+   },
+   {
+    "id": "g_kanji_12",
+    "strokes": 9,
+    "width_units": 0.8,
+    "seed": 3438
+   },
+   {
+    "id": "g_kanji_13",
+    "strokes": 14,
+    "width_units": 1.2,
+    "seed": 2463
+   },
+   {
+    "id": "g_kanji_14",
+    "strokes": 14,
+    "width_units": 1.0,
+    "seed": 466
+   },
+   {
+    "id": "g_kanji_15",
+    "strokes": 7,
+    "width_units": 1.0,
+    "seed": 32611
+   },
+   {
+    "id": "g_kanji_16",
+    "strokes": 8,
+    "width_units": 1.2,
+    "seed": 2054
+   },
+   {
+    "id": "g_kanji_17",
+    "strokes": 13,
+    "width_units": 1.0,
+    "seed": 43888
+   },
+   {
+    "id": "g_kanji_18",
+    "strokes": 11,
+    "width_units": 1.0,
+    "seed": 14837
+   },
+   {
+    "id": "g_kanji_19",
+    "strokes": 12,
+    "width_units": 1.2,
+    "seed": 23578
+   },
+   {
+    "id": "g_kanji_20",
+    "strokes": 14,
+    "width_units": 1.0,
+    "seed": 63152
+   },
+   {
+    "id": "g_kanji_21",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 29547
+   },
+   {
+    "id": "g_kanji_22",
+    "strokes": 11,
+    "width_units": 1.0,
+    "seed": 45782
+   },
+   {
+    "id": "g_kanji_23",
+    "strokes": 10,
+    "width_units": 1.0,
+    "seed": 10774
+   },
+   {
+    "id": "g_kanji_24",
+    "strokes": 13,
+    "width_units": 1.0,
+    "seed": 50637
+   },
+   {
+    "id": "g_kanji_25",
+    "strokes": 10,
+    "width_units": 1.2,
+    "seed": 53956
+   },
+   {
+    "id": "g_kanji_26",
+    "strokes": 5,
+    "width_units": 1.2,
+    "seed": 19384
+   },
+   {
+    "id": "g_kanji_27",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 43465
+   },
+   {
+    "id": "g_kanji_28",
+    "strokes": 7,
+    "width_units": 1.0,
+    "seed": 1145
+   },
+   {
+    "id": "g_kanji_29",
+    "strokes": 10,
+    "width_units": 1.0,
+    "seed": 55261
+   },
+   {
+    "id": "g_kanji_30",
+    "strokes": 14,
+    "width_units": 1.2,
+    "seed": 33730
+   },
+   {
+    "id": "g_kanji_31",
+    "strokes": 11,
+    "width_units": 0.8,
+    "seed": 65461
+   },
+   {
+    "id": "g_kanji_32",
+    "strokes": 13,
+    "width_units": 1.0,
+    "seed": 50577
+   },
+   {
+    "id": "g_kanji_33",
+    "strokes": 12,
+    "width_units": 1.0,
+    "seed": 16229
+   },
+   {
+    "id": "g_kanji_34",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 44195
+   },
+   {
+    "id": "g_kanji_35",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 3900
+   },
+   {
+    "id": "g_kanji_36",
+    "strokes": 10,
+    "width_units": 1.0,
+    "seed": 59115
+   },
+   {
+    "id": "g_kanji_37",
+    "strokes": 13,
+    "width_units": 1.2,
+    "seed": 5712
+   },
+   {
+    "id": "g_kanji_38",
+    "strokes": 12,
+    "width_units": 1.0,
+    "seed": 64607
+   },
+   {
+    "id": "g_kanji_39",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 22072
+   },
+   {
+    "id": "g_kanji_40",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 27297
+   },
+   {
+    "id": "g_kanji_41",
+    "strokes": 5,
+    "width_units": 1.2,
+    "seed": 57752
+   },
+   {
+    "id": "g_kanji_42",
+    "strokes": 8,
+    "width_units": 1.0,
+    "seed": 51383
+   },
+   {
+    "id": "g_kanji_43",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 54919
+   },
+   {
+    "id": "g_kanji_44",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 41902
+   },
+   {
+    "id": "g_kanji_45",
+    "strokes": 8,
+    "width_units": 1.2,
+    "seed": 52790
+   },
+   {
+    "id": "g_kanji_46",
+    "strokes": 10,
+    "width_units": 1.0,
+    "seed": 37172
+   },
+   {
+    "id": "g_kanji_47",
+    "strokes": 10,
+    "width_units": 0.8,
+    "seed": 21050
+   },
+   {
+    "id": "g_kanji_48",
+    "strokes": 8,
+    "width_units": 1.0,
+    "seed": 4218
+   },
+   {
+    "id": "g_kanji_49",
+    "strokes": 10,
+    "width_units": 1.2,
+    "seed": 33229
+   },
+   {
+    "id": "g_kanji_50",
+    "strokes": 12,
+    "width_units": 0.8,
+    "seed": 54762
+   },
+   {
+    "id": "g_kanji_51",
+    "strokes": 14,
+    "width_units": 1.0,
+    "seed": 25240
+   },
+   {
+    "id": "g_kanji_52",
+    "strokes": 14,
+    "width_units": 1.0,
+    "seed": 54100
+   },
+   {
+    "id": "g_kanji_53",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 39932
+   },
+   {
+    "id": "g_kanji_54",
+    "strokes": 13,
+    "width_units": 1.2,
+    "seed": 415
+   },
+   {
+    "id": "g_kanji_55",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 24018
+   },
+   {
+    "id": "g_kanji_56",
+    "strokes": 12,
+    "width_units": 1.0,
+    "seed": 20487
+   },
+   {
+    "id": "g_kanji_57",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 41208
+   },
+   {
+    "id": "g_kanji_58",
+    "strokes": 11,
+    "width_units": 0.8,
+    "seed": 11
+   },
+   {
+    "id": "g_kanji_59",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 22982
+   },
+   {
+    "id": "g_kanji_60",
+    "strokes": 10,
+    "width_units": 1.0,
+    "seed": 47308
+   },
+   {
+    "id": "g_kanji_61",
+    "strokes": 8,
+    "width_units": 1.2,
+    "seed": 3010
+   },
+   {
+    "id": "g_kanji_62",
+    "strokes": 11,
+    "width_units": 0.8,
+    "seed": 58208
+   },
+   {
+    "id": "g_kanji_63",
+    "strokes": 14,
+    "width_units": 1.2,
+    "seed": 48894
+   }
+  ],
+  "pictograms": [
+   {
+    "id": "g_pictograms_00",
+    "strokes": 1,
+    "width_units": 1.0,
+    "seed": 42528,
+    "pictogram": "bowl"
+   },
+   {
+    "id": "g_pictograms_01",
+    "strokes": 2,
+    "width_units": 1.2,
+    "seed": 15250,
+    "pictogram": "cherry"
+   },
+   {
+    "id": "g_pictograms_02",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 27285,
+    "pictogram": "sword"
+   },
+   {
+    "id": "g_pictograms_03",
+    "strokes": 4,
+    "width_units": 1.2,
+    "seed": 26820,
+    "pictogram": "heart"
+   },
+   {
+    "id": "g_pictograms_04",
+    "strokes": 1,
+    "width_units": 1.0,
+    "seed": 44929,
+    "pictogram": "star"
+   },
+   {
+    "id": "g_pictograms_05",
+    "strokes": 5,
+    "width_units": 0.8,
+    "seed": 25643,
+    "pictogram": "moon"
+   },
+   {
+    "id": "g_pictograms_06",
+    "strokes": 3,
+    "width_units": 1.2,
+    "seed": 44934,
+    "pictogram": "fish"
+   },
+   {
+    "id": "g_pictograms_07",
+    "strokes": 1,
+    "width_units": 1.0,
+    "seed": 16770,
+    "pictogram": "cat"
+   },
+   {
+    "id": "g_pictograms_08",
+    "strokes": 2,
+    "width_units": 1.2,
+    "seed": 47487,
+    "pictogram": "bolt"
+   },
+   {
+    "id": "g_pictograms_09",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 11140,
+    "pictogram": "drop"
+   },
+   {
+    "id": "g_pictograms_10",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 25949,
+    "pictogram": "leaf"
+   },
+   {
+    "id": "g_pictograms_11",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 64081,
+    "pictogram": "gem"
+   },
+   {
+    "id": "g_pictograms_12",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 19025,
+    "pictogram": "cup"
+   },
+   {
+    "id": "g_pictograms_13",
+    "strokes": 1,
+    "width_units": 1.0,
+    "seed": 34953,
+    "pictogram": "key"
+   },
+   {
+    "id": "g_pictograms_14",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 5732,
+    "pictogram": "eye"
+   },
+   {
+    "id": "g_pictograms_15",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 29979,
+    "pictogram": "gear"
+   },
+   {
+    "id": "g_pictograms_16",
+    "strokes": 5,
+    "width_units": 1.2,
+    "seed": 25422,
+    "pictogram": "wave"
+   },
+   {
+    "id": "g_pictograms_17",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 18847,
+    "pictogram": "flame"
+   },
+   {
+    "id": "g_pictograms_18",
+    "strokes": 4,
+    "width_units": 1.2,
+    "seed": 18562,
+    "pictogram": "cloud"
+   },
+   {
+    "id": "g_pictograms_19",
+    "strokes": 6,
+    "width_units": 1.0,
+    "seed": 56105,
+    "pictogram": "arrow"
+   },
+   {
+    "id": "g_pictograms_20",
+    "strokes": 2,
+    "width_units": 1.0,
+    "seed": 43726,
+    "pictogram": "gate"
+   },
+   {
+    "id": "g_pictograms_21",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 44446,
+    "pictogram": "lantern"
+   },
+   {
+    "id": "g_pictograms_22",
+    "strokes": 4,
+    "width_units": 1.2,
+    "seed": 21438,
+    "pictogram": "fan"
+   },
+   {
+    "id": "g_pictograms_23",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 36101,
+    "pictogram": "crane_bird"
+   },
+   {
+    "id": "g_pictograms_24",
+    "strokes": 2,
+    "width_units": 1.2,
+    "seed": 8152,
+    "pictogram": "koi"
+   },
+   {
+    "id": "g_pictograms_25",
+    "strokes": 5,
+    "width_units": 1.2,
+    "seed": 39909,
+    "pictogram": "mask"
+   },
+   {
+    "id": "g_pictograms_26",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 65324,
+    "pictogram": "drum"
+   },
+   {
+    "id": "g_pictograms_27",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 44237,
+    "pictogram": "dango"
+   },
+   {
+    "id": "g_pictograms_28",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 28181,
+    "pictogram": "sun"
+   },
+   {
+    "id": "g_pictograms_29",
+    "strokes": 6,
+    "width_units": 1.2,
+    "seed": 25780,
+    "pictogram": "snow"
+   },
+   {
+    "id": "g_pictograms_30",
+    "strokes": 5,
+    "width_units": 1.2,
+    "seed": 21352,
+    "pictogram": "clover"
+   },
+   {
+    "id": "g_pictograms_31",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 47334,
+    "pictogram": "note"
+   },
+   {
+    "id": "g_pictograms_32",
+    "strokes": 1,
+    "width_units": 1.2,
+    "seed": 36572,
+    "pictogram": "crown"
+   },
+   {
+    "id": "g_pictograms_33",
+    "strokes": 1,
+    "width_units": 0.8,
+    "seed": 50547,
+    "pictogram": "skull"
+   },
+   {
+    "id": "g_pictograms_34",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 34067,
+    "pictogram": "bell"
+   },
+   {
+    "id": "g_pictograms_35",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 52918,
+    "pictogram": "ring"
+   },
+   {
+    "id": "g_pictograms_36",
+    "strokes": 4,
+    "width_units": 0.8,
+    "seed": 19231,
+    "pictogram": "dice"
+   },
+   {
+    "id": "g_pictograms_37",
+    "strokes": 5,
+    "width_units": 1.2,
+    "seed": 23286,
+    "pictogram": "cube"
+   },
+   {
+    "id": "g_pictograms_38",
+    "strokes": 5,
+    "width_units": 1.0,
+    "seed": 14724,
+    "pictogram": "orb"
+   },
+   {
+    "id": "g_pictograms_39",
+    "strokes": 6,
+    "width_units": 0.8,
+    "seed": 6215,
+    "pictogram": "spiral"
+   }
+  ],
+  "digits_like": [
+   {
+    "id": "g_digits_00",
+    "strokes": 5,
+    "width_units": 0.8,
+    "seed": 28033
+   },
+   {
+    "id": "g_digits_01",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 53065
+   },
+   {
+    "id": "g_digits_02",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 53474
+   },
+   {
+    "id": "g_digits_03",
+    "strokes": 5,
+    "width_units": 1.2,
+    "seed": 10152
+   },
+   {
+    "id": "g_digits_04",
+    "strokes": 4,
+    "width_units": 1.0,
+    "seed": 11595
+   },
+   {
+    "id": "g_digits_05",
+    "strokes": 2,
+    "width_units": 1.2,
+    "seed": 29400
+   },
+   {
+    "id": "g_digits_06",
+    "strokes": 3,
+    "width_units": 0.8,
+    "seed": 49354
+   },
+   {
+    "id": "g_digits_07",
+    "strokes": 4,
+    "width_units": 1.2,
+    "seed": 13330
+   },
+   {
+    "id": "g_digits_08",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 56084
+   },
+   {
+    "id": "g_digits_09",
+    "strokes": 3,
+    "width_units": 1.0,
+    "seed": 56063
+   }
+  ]
+ }
+}

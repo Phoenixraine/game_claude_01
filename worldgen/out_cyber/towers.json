@@ -1,0 +1,478 @@
+{
+ "version": 1,
+ "presets": [
+  {
+   "id": "tower_00",
+   "name": "slab_mirror",
+   "crown": "flat",
+   "setbacks": [],
+   "tint": [
+    90,
+    150,
+    190
+   ],
+   "reflectivity": [
+    0.7,
+    0.85
+   ],
+   "mullion_spacing_m": [
+    1.4,
+    1.8
+   ],
+   "panel_w": 1.5,
+   "spandrel_ratio": 0.16,
+   "emissive": {
+    "pattern": "random",
+    "density": 0.35
+   },
+   "rooftop_lights": 4,
+   "aspect": [
+    1.0,
+    1.4
+   ],
+   "height_range": [
+    120,
+    220
+   ]
+  },
+  {
+   "id": "tower_01",
+   "name": "ziggurat",
+   "crown": "stepped",
+   "setbacks": [
+    {
+     "at": 0.45,
+     "inset_m": 4.0
+    },
+    {
+     "at": 0.7,
+     "inset_m": 4.0
+    },
+    {
+     "at": 0.88,
+     "inset_m": 3.0
+    }
+   ],
+   "tint": [
+    120,
+    170,
+    190
+   ],
+   "reflectivity": [
+    0.6,
+    0.8
+   ],
+   "mullion_spacing_m": [
+    1.5,
+    2.0
+   ],
+   "panel_w": 1.8,
+   "spandrel_ratio": 0.2,
+   "emissive": {
+    "pattern": "bands",
+    "density": 0.5
+   },
+   "rooftop_lights": 6,
+   "aspect": [
+    1.0,
+    1.2
+   ],
+   "height_range": [
+    140,
+    260
+   ]
+  },
+  {
+   "id": "tower_02",
+   "name": "slant_roof",
+   "crown": "slanted",
+   "setbacks": [],
+   "tint": [
+    70,
+    130,
+    170
+   ],
+   "reflectivity": [
+    0.75,
+    0.9
+   ],
+   "mullion_spacing_m": [
+    1.2,
+    1.6
+   ],
+   "panel_w": 1.4,
+   "spandrel_ratio": 0.14,
+   "emissive": {
+    "pattern": "columns",
+    "density": 0.3
+   },
+   "rooftop_lights": 3,
+   "aspect": [
+    1.0,
+    1.6
+   ],
+   "height_range": [
+    130,
+    240
+   ]
+  },
+  {
+   "id": "tower_03",
+   "name": "needle",
+   "crown": "spire",
+   "setbacks": [
+    {
+     "at": 0.8,
+     "inset_m": 5.0
+    }
+   ],
+   "tint": [
+    110,
+    140,
+    200
+   ],
+   "reflectivity": [
+    0.7,
+    0.9
+   ],
+   "mullion_spacing_m": [
+    1.0,
+    1.4
+   ],
+   "panel_w": 1.2,
+   "spandrel_ratio": 0.12,
+   "emissive": {
+    "pattern": "top_heavy",
+    "density": 0.55
+   },
+   "rooftop_lights": 8,
+   "aspect": [
+    1.0,
+    1.1
+   ],
+   "height_range": [
+    180,
+    300
+   ]
+  },
+  {
+   "id": "tower_04",
+   "name": "halo_ring",
+   "crown": "halo",
+   "setbacks": [
+    {
+     "at": 0.92,
+     "inset_m": 2.0
+    }
+   ],
+   "tint": [
+    60,
+    110,
+    150
+   ],
+   "reflectivity": [
+    0.8,
+    0.95
+   ],
+   "mullion_spacing_m": [
+    1.4,
+    1.9
+   ],
+   "panel_w": 1.6,
+   "spandrel_ratio": 0.15,
+   "emissive": {
+    "pattern": "checker",
+    "density": 0.3
+   },
+   "rooftop_lights": 12,
+   "aspect": [
+    1.0,
+    1.3
+   ],
+   "height_range": [
+    150,
+    260
+   ]
+  },
+  {
+   "id": "tower_05",
+   "name": "antenna_cluster",
+   "crown": "antenna_cluster",
+   "setbacks": [],
+   "tint": [
+    100,
+    125,
+    150
+   ],
+   "reflectivity": [
+    0.55,
+    0.75
+   ],
+   "mullion_spacing_m": [
+    1.6,
+    2.2
+   ],
+   "panel_w": 2.0,
+   "spandrel_ratio": 0.22,
+   "emissive": {
+    "pattern": "random",
+    "density": 0.45
+   },
+   "rooftop_lights": 9,
+   "aspect": [
+    1.0,
+    1.5
+   ],
+   "height_range": [
+    120,
+    200
+   ]
+  },
+  {
+   "id": "tower_06",
+   "name": "notched_corner",
+   "crown": "flat",
+   "setbacks": [
+    {
+     "at": 0.62,
+     "inset_m": 9.0,
+     "side": "corner"
+    }
+   ],
+   "tint": [
+    85,
+    160,
+    175
+   ],
+   "reflectivity": [
+    0.65,
+    0.85
+   ],
+   "mullion_spacing_m": [
+    1.3,
+    1.7
+   ],
+   "panel_w": 1.5,
+   "spandrel_ratio": 0.17,
+   "emissive": {
+    "pattern": "bands",
+    "density": 0.4
+   },
+   "rooftop_lights": 5,
+   "aspect": [
+    1.0,
+    1.3
+   ],
+   "height_range": [
+    140,
+    250
+   ]
+  },
+  {
+   "id": "tower_07",
+   "name": "tapered",
+   "crown": "stepped",
+   "setbacks": [
+    {
+     "at": 0.25,
+     "inset_m": 2.0
+    },
+    {
+     "at": 0.45,
+     "inset_m": 2.0
+    },
+    {
+     "at": 0.65,
+     "inset_m": 2.0
+    },
+    {
+     "at": 0.85,
+     "inset_m": 2.0
+    }
+   ],
+   "tint": [
+    130,
+    150,
+    185
+   ],
+   "reflectivity": [
+    0.6,
+    0.8
+   ],
+   "mullion_spacing_m": [
+    1.5,
+    2.0
+   ],
+   "panel_w": 1.7,
+   "spandrel_ratio": 0.18,
+   "emissive": {
+    "pattern": "top_heavy",
+    "density": 0.4
+   },
+   "rooftop_lights": 4,
+   "aspect": [
+    1.0,
+    1.2
+   ],
+   "height_range": [
+    160,
+    280
+   ]
+  },
+  {
+   "id": "tower_08",
+   "name": "gold_curtain",
+   "crown": "flat",
+   "setbacks": [],
+   "tint": [
+    190,
+    160,
+    100
+   ],
+   "reflectivity": [
+    0.6,
+    0.8
+   ],
+   "mullion_spacing_m": [
+    1.8,
+    2.4
+   ],
+   "panel_w": 1.8,
+   "spandrel_ratio": 0.3,
+   "emissive": {
+    "pattern": "columns",
+    "density": 0.5
+   },
+   "rooftop_lights": 4,
+   "aspect": [
+    1.0,
+    1.5
+   ],
+   "height_range": [
+    120,
+    210
+   ]
+  },
+  {
+   "id": "tower_09",
+   "name": "mono_black",
+   "crown": "halo",
+   "setbacks": [],
+   "tint": [
+    30,
+    40,
+    55
+   ],
+   "reflectivity": [
+    0.9,
+    0.98
+   ],
+   "mullion_spacing_m": [
+    1.0,
+    1.3
+   ],
+   "panel_w": 1.1,
+   "spandrel_ratio": 0.1,
+   "emissive": {
+    "pattern": "bands",
+    "density": 0.25
+   },
+   "rooftop_lights": 10,
+   "aspect": [
+    1.0,
+    1.2
+   ],
+   "height_range": [
+    170,
+    300
+   ]
+  },
+  {
+   "id": "tower_10",
+   "name": "pagoda_crown",
+   "crown": "stepped",
+   "setbacks": [
+    {
+     "at": 0.84,
+     "inset_m": 4.0
+    },
+    {
+     "at": 0.91,
+     "inset_m": 4.0
+    },
+    {
+     "at": 0.96,
+     "inset_m": 3.0
+    }
+   ],
+   "tint": [
+    140,
+    90,
+    120
+   ],
+   "reflectivity": [
+    0.6,
+    0.8
+   ],
+   "mullion_spacing_m": [
+    1.4,
+    1.9
+   ],
+   "panel_w": 1.6,
+   "spandrel_ratio": 0.2,
+   "emissive": {
+    "pattern": "random",
+    "density": 0.5
+   },
+   "rooftop_lights": 7,
+   "aspect": [
+    1.0,
+    1.3
+   ],
+   "height_range": [
+    130,
+    230
+   ]
+  },
+  {
+   "id": "tower_11",
+   "name": "sail",
+   "crown": "slanted",
+   "setbacks": [
+    {
+     "at": 0.5,
+     "inset_m": 3.0,
+     "side": "back"
+    }
+   ],
+   "tint": [
+    95,
+    170,
+    200
+   ],
+   "reflectivity": [
+    0.7,
+    0.9
+   ],
+   "mullion_spacing_m": [
+    1.2,
+    1.6
+   ],
+   "panel_w": 1.4,
+   "spandrel_ratio": 0.15,
+   "emissive": {
+    "pattern": "checker",
+    "density": 0.35
+   },
+   "rooftop_lights": 6,
+   "aspect": [
+    1.2,
+    1.8
+   ],
+   "height_range": [
+    150,
+    270
+   ]
+  }
+ ]
+}
