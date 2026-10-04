@@ -180,6 +180,12 @@ class Ai {
   bool weaponDodged_ = false;
   int weaponJitter_ = 0;
   int moving_ = 0;          // -1 opening, 0 holding, +1 closing (hysteresis state)
+  // v5
+  bool lungeJump_ = false;      // decided to jump over the incoming lunge
+  bool jumpPressed_ = false;
+  bool chopSlide_ = false;      // decided to slide under the incoming aerial chop
+  bool chopSlid_ = false;
+  int lungeLeft_ = 0;           // ticks of charge still to hold
 };
 
 }  // namespace iv

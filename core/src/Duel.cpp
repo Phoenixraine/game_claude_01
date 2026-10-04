@@ -18,6 +18,10 @@ void Duel::Reset(uint64_t seed) {
   tick_ = 0;
   chain_ = Chain();
   clinch_ = ClinchState();
+  lock_ = LockState();
+  berserk_ = BerserkState();
+  gpHeld_[0] = gpHeld_[1] = false;
+  gpTick_[0] = gpTick_[1] = -100000;
   cinematic_ = CinematicState();
   dummy_[0].Reset();
   dummy_[1].Reset();
@@ -79,7 +83,17 @@ void Duel::Step(const Input& a, const Input& b, const World& world) {
     }
   }
 
+  for (int i = 0; i < 2; ++i)   // v5: the berserk grab
+    if (in[i]->berserk) TryStartBerserk(i);
+  for (int i = 0; i < 2; ++i) {   // v5: raw guard presses (the berserk parry reads them)
+    if (in[i]->guardHeld && (!gpHeld_[i] || in[i]->guardSide != gpSide_[i])) gpTick_[i] = tick_;
+    gpHeld_[i] = in[i]->guardHeld;
+    gpSide_[i] = in[i]->guardSide;
+  }
   for (int i = 0; i < 2; ++i) f_[i].Step(*in[i], Ctx(i, world));
+  for (int i = 0; i < 2; ++i) {   // v5: an AI mech repairs its own breakdown after a while
+    if (aiLevel_[i] >= 0 && f_[i].breakdown > 0 && f_[i].breakdownAge >= tune::kBreakdownAiRepairTicks) f_[i].RepairBreakdown(1, Ctx(i, world));
+  }
 
   distance_ = Clamp(distance_ + f_[0].moveDelta + f_[1].moveDelta, tune::kMinDistance, tune::kMaxDistance);
 
@@ -91,7 +105,11 @@ void Duel::Step(const Input& a, const Input& b, const World& world) {
     }
   }
 
-  if (clinch_.active) {
+  if (lock_.active) {
+    StepLock(in);
+  } else if (berserk_.active) {
+    StepBerserk(in);
+  } else if (clinch_.active) {
     if (++clinch_.ticks >= tune::kClinchTicks) ResolveClinch(world);
   } else {
     if (chain_.active) StepChain(in, world);
@@ -146,6 +164,18 @@ Duel::Decision Duel::Decide(int ai) const {
     return d;
   }
   const bool grab = s.kind == StrikeKind::Grab;
+  const bool lunge = s.kind == StrikeKind::Lunge;
+  const bool chop = s.kind == StrikeKind::AirChop;
+  const bool special = lunge || chop;
+  // v5: the jetpack jump goes over the rush, the slide goes under the aerial chop; neither can be dodged sideways
+  if (lunge && def.JumpEvading()) {
+    d.outcome = Outcome::Jumped;
+    return d;
+  }
+  if (chop && def.SlideEvading()) {
+    d.outcome = Outcome::Slid;
+    return d;
+  }
 
   // v3: two blades arrive within a few ticks of each other on the same line: they clash (double block).
   if (s.kind == StrikeKind::Heavy && def.phase == Phase::Strike && def.strike.kind == StrikeKind::Heavy && !def.contactPending && !s.innerLine &&
@@ -159,18 +189,37 @@ Duel::Decision Duel::Decide(int ai) const {
   }
 
   // pitch §7 "Перехват": the defender committed a strike just now, on a line that meets this one.
-  if (!grab && def.phase == Phase::Strike && def.strike.kind != StrikeKind::Grab && def.strike.strikeTick >= 1 &&
+  if (!grab && !special && def.phase == Phase::Strike && def.strike.kind != StrikeKind::Grab && def.strike.kind != StrikeKind::Lunge && def.strike.strikeTick >= 1 &&
       def.strike.strikeTick <= tune::kInterceptWindowTicks && IsInterceptLine(s.side, def.strike.side)) {
     d.outcome = Outcome::Intercepted;
     return d;
   }
   // v3 "Уклонение": the torso turn + half step gets out of lateral slashes; chops and rising cuts follow the mech; grabs too.
-  if (!grab && def.Evading() && IsLateralSwing(s.side)) {
+  if (!grab && !special && def.Evading() && IsLateralSwing(s.side)) {
     d.outcome = Outcome::Evaded;
     return d;
   }
   const Modifiers& dm = def.body.modifiers();
   const bool defHasArm = dm.arm[0].blockStrength > 0.f || dm.arm[1].blockStrength > 0.f;
+  if (lunge) {   // v5: any lateral guard stops the rush: the blades lock. A late press still counts as a parry.
+    if (def.GuardReady() && !def.guard.hard && defHasArm && IsLateralSwing(def.guard.side) && tick_ - def.guard.pressTick < tune::kParryWindowTicks) {
+      d.outcome = Outcome::Locked;
+      d.lockKind = 1;
+      return d;
+    }
+    if (def.HardStanceActive() && def.posture == Posture::Standing) {
+      d.outcome = Outcome::Locked;
+      d.lockKind = 2;
+      return d;
+    }
+    if (def.GuardReady() && def.guard.age >= tune::kBlockRaiseTicks && IsLateralSwing(def.guard.side) && defHasArm) {
+      d.outcome = Outcome::Locked;
+      d.lockKind = 0;
+      return d;
+    }
+    d.outcome = Outcome::Hit;
+    return d;
+  }
   // pitch §6 "Парирование": LT pressed right before contact on the right sector. Not against inner-line counters (pitch §7).
   if (def.GuardReady() && !def.guard.hard && defHasArm && !s.innerLine && tick_ - def.guard.pressTick < tune::kParryWindowTicks &&
       (grab || def.guard.side == s.side)) {
@@ -241,7 +290,7 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
       break;
     }
     case Outcome::Hit: {
-      const float stab = kind == StrikeKind::Quick ? tune::kQuickStabilityHit : d.raw * tune::kHitStabilityFactor;
+      const float stab = kind == StrikeKind::Quick ? tune::kQuickStabilityHit : (kind == StrikeKind::Lunge ? tune::kLungeStabilityHit : (kind == StrikeKind::AirChop ? tune::kAirChopStabilityHit : d.raw * tune::kHitStabilityFactor));
       const HitReport hr = def.TakeHit(d.zone, d.raw, kind, stab, dctx);
       EmitHit(def, as, d.zone, hr, stab, atk.strike.side, false, false);
       if (hr.dealt > 0.f) {
@@ -270,6 +319,18 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
       break;
     }
     case Outcome::Clashed:   // resolved by ApplyClash before Apply is reached; listed so -Werror=switch passes on gcc
+      break;
+    case Outcome::Jumped:
+      Emit(EventType::JumpEvadedLunge, ds, d.zone, 1);
+      atk.LoseStability(tune::kLungeWhiffStability, actx);
+      break;
+    case Outcome::Slid:
+      Emit(EventType::SlideEvadedChop, ds, d.zone);
+      atk.LoseStability(tune::kChopWhiffStability, actx);
+      def.counterTicks = tune::kCounterWindowTicks;
+      break;
+    case Outcome::Locked:
+      StartLock(ai, d.lockKind);
       break;
     case Outcome::Grabbed: {
       Emit(EventType::GrabHit, as, d.zone);

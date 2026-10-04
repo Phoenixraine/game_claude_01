@@ -297,13 +297,14 @@ void Ai::ChooseReaction(const OppView& seen, const SelfView& self) {
 
 bool Ai::Defend(const OppView& seen, const Observation& cur, Input* in) {
   const SelfView& self = cur.self;
-  const bool threat = (seen.phase == Phase::Windup || seen.phase == Phase::Strike) && seen.posture == Posture::Standing;
+  const bool threat = (seen.phase == Phase::Windup || seen.phase == Phase::Strike) && (seen.posture == Posture::Standing || seen.posture == Posture::Airborne);
   if (!threat) {
     oppAttacking_ = false;
     parryPressed_ = false;
     reacted_ = false;
     grabAnswered_ = false;
     reaction_ = Reaction::None;
+    lungeJump_ = jumpPressed_ = chopSlide_ = chopSlid_ = false;
     return false;
   }
   if (!oppAttacking_) {
@@ -329,6 +330,39 @@ bool Ai::Defend(const OppView& seen, const Observation& cur, Input* in) {
   }
   if (self.phase != Phase::Idle && self.phase != Phase::Recovery) return false;  // busy: nothing to do now
 
+  // v5: a charged lunge cannot be sidestepped: block it (the blades lock) or, for good pilots, jump over it at the right moment.
+  if (seen.kind == StrikeKind::Lunge && (seen.phase == Phase::Windup || seen.phase == Phase::Strike)) {
+    const int di = static_cast<int>(difficulty_);
+    if (!reacted_) {
+      reacted_ = true;
+      lungeJump_ = Roll() < tune::kAiJumpChance[di];
+    }
+    if (seen.phase == Phase::Strike && lungeJump_ && !jumpPressed_ && seen.strikeTicksLeft >= 0) {
+      const int eta = seen.strikeTicksLeft - delay_;
+      if (eta <= 22 + parryJitter_ && eta >= 4) {
+        in->jump = true;
+        jumpPressed_ = true;
+      }
+    }
+    in->guardHeld = !jumpPressed_;
+    in->guardSide = (seen.side == SwingSide::Left || seen.side == SwingSide::Right) ? seen.side : SwingSide::Left;
+    return true;
+  }
+  if (seen.kind == StrikeKind::AirChop && seen.phase == Phase::Strike) {
+    const int di = static_cast<int>(difficulty_);
+    if (!reacted_) {
+      reacted_ = true;
+      chopSlide_ = Roll() < tune::kAiSlideChance[di];
+    }
+    if (chopSlide_ && !chopSlid_) {
+      in->slide = true;
+      chopSlid_ = true;
+    } else if (!chopSlide_) {
+      in->guardHeld = true;
+      in->guardSide = SwingSide::Up;
+    }
+    return true;
+  }
   // A grab is a slow, visible reach (pitch §12): hit the grabbing arm before it closes, a block does not help.
   if (seen.kind == StrikeKind::Grab && (seen.phase == Phase::Windup || seen.phase == Phase::Strike)) {
     const float skill = tune::kAnalysisDepth[static_cast<int>(difficulty_)];
@@ -531,7 +565,23 @@ void Ai::Offend(const Observation& cur, const OppView& seen, Input* in) {
     return;
   }
 
-  if (self.phase != Phase::Idle) return;
+  if (self.phase != Phase::Idle) { lungeLeft_ = 0; return; }
+  // v5: charging / releasing a lunge
+  if (lungeLeft_ > 0) {
+    in->lungeHeld = true;
+    --lungeLeft_;
+    return;
+  }
+  if (cooldown_ == 0 && self.posture == Posture::Standing && cur.distance >= 16.f && cur.distance <= tune::kLungeReach - tune::kLungeRushDistance + 14.f &&
+      self.stability > 55.f && self.energy > 45.f && !seen.guardUp && (seen.phase == Phase::Idle || seen.phase == Phase::Recovery) && seen.posture == Posture::Standing) {
+    const float mult = archetype_ == Archetype::Breaker ? 2.f : (archetype_ == Archetype::Gunner ? 0.3f : (archetype_ == Archetype::Grappler ? 1.5f : 1.f));
+    if (Roll() < tune::kAiLungePerTick[static_cast<int>(difficulty_)] * mult) {
+      lungeLeft_ = tune::kLungeChargeTicks + 6 + static_cast<int>(rng_.Below(10));
+      in->lungeHeld = true;
+      cooldown_ = st.cooldown * 3;
+      return;
+    }
+  }
   const float reach = tune::kHeavyReach + (st.stepIn ? tune::kStepInReachBonus : 0.f) - 4.f;
 
   // ---- counter window after a parry (pitch §6): the inner-line counter is the Counterpuncher's bread and butter ----

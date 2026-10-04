@@ -343,6 +343,76 @@ constexpr float kSwatArchetypeMult[kArchetypeCount] = {1.2f, 1.0f, 1.0f, 0.9f, 0
 constexpr float kAutopilotDamageMult = 1.8f;           // STATUS §6B 3: the mech without its pilot takes more damage
 constexpr bool kAiBoardingEnabled = false;                // STATUS §6B: the enemy cannot board the player (yet); the API is symmetric by Side
 
+// ---------------------------------------------------------------- v5: lunge, jump, slide, sword lock, berserk, breakdown
+// Lunge: hold the rush button for ~1 s, release: a horizontal rush slash. Only a block (-> sword lock) or a jetpack jump avoids it.
+constexpr int kLungeChargeTicks = MsToTicks(1000);
+constexpr int kLungeCommitTicks = MsToTicks(120);
+constexpr int kLungeStrikeTicks = MsToTicks(480);
+constexpr int kLungeRecoveryTicks = MsToTicks(1500);
+constexpr float kLungeDamage = 34.f;                      // about two heavy strikes (kHeavyDamage = 17.5)
+constexpr float kLungeReach = 46.f;
+constexpr float kLungeRushDistance = 26.f;                // gap closed during the rush
+constexpr float kLungeEnergy = 18.f;
+constexpr float kLungeWhiffStability = 42.f;              // the rusher that is jumped over stumbles
+constexpr float kLungeStabilityHit = 30.f;
+// Jetpack jump: the only counter to the lunge besides the block; from the air an overhead chop is possible.
+constexpr int kJumpAirTicks = MsToTicks(1000);
+constexpr int kJumpEvadeFromTicks = MsToTicks(110);
+constexpr int kJumpEvadeToTicks = MsToTicks(720);
+constexpr float kJumpEnergy = 16.f;
+constexpr int kJumpCooldownTicks = MsToTicks(2600);
+constexpr int kAirChopMinTicks = MsToTicks(250);
+constexpr int kAirChopStrikeTicks = MsToTicks(280);
+constexpr int kAirChopRecoveryTicks = MsToTicks(1000);
+constexpr float kAirChopDamage = 27.f;
+constexpr float kAirChopReach = 34.f;
+constexpr float kAirChopStabilityHit = 24.f;
+// Slide: ducks under the aerial chop.
+constexpr int kSlideTicks = MsToTicks(760);
+constexpr int kSlideEvadeTicks = MsToTicks(560);
+constexpr float kSlideEnergy = 9.f;
+constexpr float kChopWhiffStability = 40.f;
+// Sword lock (a blocked lunge): both mash the button; the leader strikes the other.
+constexpr int kLockTicks = MsToTicks(3400);
+constexpr int kLockMinTicks = MsToTicks(900);
+constexpr float kLockLead = 16.f;                          // presses of lead that end the lock early
+constexpr float kLockBonusBlock = 2.f;                     // starting points of the defender
+constexpr float kLockBonusParry = 6.f;
+constexpr float kLockBonusHard = 4.f;
+constexpr float kLockWinDamage = 30.f;
+constexpr float kLockWinStability = 60.f;
+constexpr float kLockArmDamage = 12.f;
+constexpr float kLockAiMashPerTick[kDifficultyCount] = {0.10f, 0.14f, 0.17f};
+// Berserk: the attacker grabs the foe and strikes with a timing QTE; the foe must parry every blow, a single miss = a piercing blow.
+constexpr float kBerserkMinEnergy = 50.f;
+constexpr float kBerserkMinStability = 30.f;
+constexpr float kBerserkRange = 30.f;
+constexpr int kBerserkMaxTicks = MsToTicks(15000);
+constexpr int kBerserkRounds = 5;                          // all parried -> overload
+constexpr int kBerserkPromptTicks = MsToTicks(1100);       // the ring closes after this long
+constexpr int kBerserkPerfectTick = MsToTicks(800);        // best moment to press
+constexpr int kBerserkPressWindowTicks = MsToTicks(220);   // +- around the perfect tick
+constexpr int kBerserkSwingTicks = MsToTicks(620);         // from the press to the contact
+constexpr int kBerserkParryWindowTicks = MsToTicks(520);   // the defender's guard must be (re)pressed this late or later after the swing starts
+constexpr int kBerserkParryLeadTicks = MsToTicks(120);     // ...but not earlier than this before the swing starts
+constexpr float kBerserkParryEnergy = 6.f;
+constexpr float kPierceDamage = 62.f;
+constexpr float kPierceStability = 100.f;
+constexpr int kBerserkCooldownTicks = MsToTicks(45000);
+constexpr int kOverloadTicks = MsToTicks(4200);
+constexpr float kCounterPunchDamage = 32.f;
+constexpr float kCounterPunchStability = 100.f;
+constexpr float kBerserkAiParry[kDifficultyCount] = {0.55f, 0.75f, 0.90f};
+// Breakdown (damaged systems keep eating the mech until the pilot goes below deck and repairs them).
+constexpr int kBreakdownPeriodTicks = MsToTicks(5000);
+constexpr float kBreakdownDamage = 3.5f;                   // per level
+constexpr int kBreakdownMaxLevel = 3;
+constexpr int kBreakdownAiRepairTicks = MsToTicks(9000);
+// AI use of the new moves.
+constexpr float kAiJumpChance[kDifficultyCount] = {0.12f, 0.35f, 0.65f};     // jumps over a lunge instead of blocking it
+constexpr float kAiSlideChance[kDifficultyCount] = {0.15f, 0.40f, 0.70f};    // slides under an aerial chop
+constexpr float kAiLungePerTick[kDifficultyCount] = {0.0004f, 0.0007f, 0.0010f};   // chance per free tick to start charging a lunge
+
 // ---------------------------------------------------------------- movement (pitch §11)
 constexpr float kMoveSpeedPerTick = 0.09f;             // distance units per tick at full leg condition
 constexpr float kRetreatSpeedMult = 0.6f;              // pitch §11: backing away is slower than closing in

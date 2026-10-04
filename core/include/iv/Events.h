@@ -86,6 +86,27 @@ enum class EventType : uint8_t {
   BoardingSwatImpact,     // a: 1 = the pilot was on the shoulder (Smashed follows), 0 = missed, b: shoulder
   BoardingSwatAdjusted,   // the swing was pressed too early: the enemy re-aims, a: new shoulder, b: ticks to impact
   BoardingShock,          // the mech was hit while the pilot was outside: value: ticks lost
+  // ---- v5: lunge / jump / slide / sword lock / berserk / breakdown (STATUS, owner's ideas of 2026-10-04). Appended. ----
+  LungeCharging,          // actor: the rusher started the charge
+  JumpStarted,            // actor: jetpack jump
+  JumpEvadedLunge,        // actor: the jumper, the rush went under
+  AirChopStarted,         // actor: the overhead chop from the air begins
+  SlideStarted,           // actor
+  SlideEvadedChop,        // actor: the slider
+  LockStarted,            // actor: the attacker, a: 0 plain block, 1 parry, 2 hard stance - the blades lock, mash the button
+  LockResolved,           // actor: the winner, value: margin of presses, a: 1 if the margin was a landslide
+  BerserkStarted,         // actor: the berserker
+  BerserkPrompt,          // actor: attacker, a: round (0-based), b: ticks until the perfect press
+  BerserkSwing,           // actor: attacker, a: round, b: SwingSide, value: timing quality 0..1
+  BerserkParryPrompt,     // actor: defender, a: SwingSide to guard, b: ticks until contact
+  BerserkParried,         // actor: defender, a: round
+  BerserkPierce,          // actor: attacker, zone, value: damage - the defender missed a parry
+  BerserkOverload,        // actor: the berserker is out of power, a: 0 missed press, 1 time over, 2 everything was parried
+  CounterPunch,           // actor: the punisher, value: damage
+  BerserkEnded,           // actor: berserker, a: 0 pierce, 1 overload
+  BreakdownStarted,       // actor: the damaged side, a: level 1..3
+  BreakdownTick,          // actor, value: damage dealt
+  BreakdownRepaired,      // actor
 };
 
 struct Event {

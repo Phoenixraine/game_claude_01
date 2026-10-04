@@ -36,6 +36,11 @@ struct AnimState {
   float stability01 = 1.f;
   float heat01 = 0.f;
   float ultimate01 = 0.f;
+  // v5
+  float airProgress = 0.f;              // 0..1 of the jetpack jump
+  float slideProgress = 0.f;
+  float lungeCharge01 = 0.f;            // while charging the rush
+  int breakdown = 0;
 };
 
 AnimState MakeAnimState(const Fighter& f);

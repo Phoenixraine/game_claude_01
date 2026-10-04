@@ -46,6 +46,29 @@ struct MatchResult {
   EndReason reason = EndReason::None;
 };
 
+// v5: the blades locked after a blocked lunge: both sides mash the button, the leader strikes the other.
+struct LockState {
+  bool active = false;
+  Side attacker = Side::A;   // the one who rushed
+  int kind = 0;              // 0 plain block, 1 parry, 2 hard stance
+  int ticks = 0;
+  float score[2] = {0.f, 0.f};
+};
+
+// v5: berserk: the attacker holds the foe; each blow needs a timing press, the foe must parry every one.
+enum class BerserkStage : uint8_t { Prompt, Swing };
+struct BerserkState {
+  bool active = false;
+  Side who = Side::A;
+  BerserkStage stage = BerserkStage::Prompt;
+  int round = 0;
+  int ticks = 0;
+  int stageTicks = 0;
+  SwingSide side = SwingSide::Up;
+  float quality = 0.f;
+  Tick swingStart = 0;
+};
+
 class Duel {
  public:
   explicit Duel(uint64_t seed = 1, bool keepEvents = true);
@@ -70,8 +93,16 @@ class Duel {
   // v3: damage that comes from the world (thrown debris, a crash into a building, a fall). `source`: 0 debris, 1 crash, 2 fall.
   HitReport ExternalHit(Side victim, Zone zone, float damage, float stability, int source, StatusKind status = StatusKind::Count, int statusTicks = 0);
   Dummy& dummy(Side s) { return dummy_[Index(s)]; }
+  // v4: ends the match from outside (boarding: the pilot was crushed). No-op once the match is over.
+  void ForceEnd(Side loser, EndReason reason);
   EventLog& log() { return log_; }
   const EventLog& log() const { return log_; }
+  // v5. aiLevel: -1 = a human (all presses come from the Input), 0..2 = Duel plays the lock mashing, the berserk parries and the repairs by itself.
+  void SetAiLevel(Side s, int aiLevel) { aiLevel_[Index(s)] = aiLevel; }
+  int ai_level(Side s) const { return aiLevel_[Index(s)]; }
+  const LockState& lock() const { return lock_; }
+  const BerserkState& berserk() const { return berserk_; }
+  void RepairBreakdown(Side s, int levels);
   // Headless sims: end the match as a draw after this many ticks (0 = no limit).
   void set_time_limit(int ticks) { timeLimit_ = ticks; }
 
@@ -80,6 +111,7 @@ class Duel {
     Outcome outcome = Outcome::Whiff;
     Zone zone = Zone::Torso;
     float raw = 0.f;
+    int lockKind = 0;
   };
 
   StepContext Ctx(int i, const World& w) const;
@@ -95,6 +127,14 @@ class Duel {
   void StartCinematic(CinematicKind k, Side who, int length, bool stun);
   void StepCinematic();
   void ResolveUltimate(int ai, const World& w);
+  // v5 (Special.cpp)
+  void StartLock(int atk, int kind);
+  void StepLock(const Input* const* in);
+  void ResolveLock();
+  bool TryStartBerserk(int who);
+  void StepBerserk(const Input* const* in);
+  void EndBerserk(bool overload, int reason);
+  void BerserkPrompt();
   void EmitHit(const Fighter& def, Side attacker, Zone zone, const HitReport& r, float stability, SwingSide dir, bool blocked, bool parried);
   void GainUltimate(int who, float amount, const World& w);
   void Emit(EventType t, Side actor, Zone z = Zone::Torso, int a = 0, int b = 0, float v = 0.f);
@@ -110,6 +150,12 @@ class Duel {
   EventLog log_;
   Rng rng_;
   int timeLimit_ = 0;
+  int aiLevel_[2] = {-1, -1};
+  LockState lock_;
+  BerserkState berserk_;
+  bool gpHeld_[2] = {false, false};
+  SwingSide gpSide_[2] = {SwingSide::Up, SwingSide::Up};
+  Tick gpTick_[2] = {-100000, -100000};
 };
 
 }  // namespace iv

@@ -68,6 +68,45 @@ enum class EventType : uint8_t {
   UltimateSever,     // actor: the attacker, zone: the severed arm; the target can no longer use its ultimate
   ExternalHit,       // actor: the victim, zone, a: source (0 debris thrown, 1 crash into a building, 2 fall), value: damage
   BurnTick,          // actor: the burning fighter, value: damage
+  // ---- v4: boarding (TASK-017). actor = the side that owns the boarding. Appended: order above is a contract. ----
+  BoardingStarted,        // a: target shoulder (0 = ShoulderL, 1 = ShoulderR)
+  BoardingPhase,          // a: BoardPhase entered, b: its length in ticks (0 = open-ended, e.g. Hacking)
+  BoardingDenied,         // a: BoardingDenied reason
+  HookFired,              // a: target shoulder; the grapple leaves the wrist launcher
+  HookLanded,             // a: shoulder the pilot landed on
+  HackStarted,            // a: hack difficulty 1..10, b: time limit in ticks
+  HackProgress,           // value: progress 0..1 (emitted when it changes by >= 5 %)
+  HackResultEvt,          // a: HackState (Success / Fail / Timeout), value: quality 0..1
+  BoardingSwatTelegraph,  // actor: the pilot's side, a: shoulder under the hand (0 L / 1 R), b: ticks to impact, value: swat index (0-based) - drives the corner camera
+  BoardingSwingOk,        // a: new shoulder, value: hack progress kept
+  BoardingSmashed,        // the pilot was crushed (defeat)
+  GrenadeThrown,
+  BoardingBlast,          // zone: zone hit, value: damage dealt
+  BoardingEnded,          // a: BoardingOutcome, value: 0
+  BoardingSwatImpact,     // a: 1 = the pilot was on the shoulder (Smashed follows), 0 = missed, b: shoulder
+  BoardingSwatAdjusted,   // the swing was pressed too early: the enemy re-aims, a: new shoulder, b: ticks to impact
+  BoardingShock,          // the mech was hit while the pilot was outside: value: ticks lost
+  // ---- v5: lunge / jump / slide / sword lock / berserk / breakdown (STATUS, owner's ideas of 2026-10-04). Appended. ----
+  LungeCharging,          // actor: the rusher started the charge
+  JumpStarted,            // actor: jetpack jump
+  JumpEvadedLunge,        // actor: the jumper, the rush went under
+  AirChopStarted,         // actor: the overhead chop from the air begins
+  SlideStarted,           // actor
+  SlideEvadedChop,        // actor: the slider
+  LockStarted,            // actor: the attacker, a: 0 plain block, 1 parry, 2 hard stance - the blades lock, mash the button
+  LockResolved,           // actor: the winner, value: margin of presses, a: 1 if the margin was a landslide
+  BerserkStarted,         // actor: the berserker
+  BerserkPrompt,          // actor: attacker, a: round (0-based), b: ticks until the perfect press
+  BerserkSwing,           // actor: attacker, a: round, b: SwingSide, value: timing quality 0..1
+  BerserkParryPrompt,     // actor: defender, a: SwingSide to guard, b: ticks until contact
+  BerserkParried,         // actor: defender, a: round
+  BerserkPierce,          // actor: attacker, zone, value: damage - the defender missed a parry
+  BerserkOverload,        // actor: the berserker is out of power, a: 0 missed press, 1 time over, 2 everything was parried
+  CounterPunch,           // actor: the punisher, value: damage
+  BerserkEnded,           // actor: berserker, a: 0 pierce, 1 overload
+  BreakdownStarted,       // actor: the damaged side, a: level 1..3
+  BreakdownTick,          // actor, value: damage dealt
+  BreakdownRepaired,      // actor
 };
 
 struct Event {

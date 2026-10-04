@@ -68,7 +68,13 @@ AnimState MakeAnimState(const Fighter& f) {
     a.postureProgress = Ratio(f.postureTicks, tune::kStaggerTicks);
   } else if (f.posture == Posture::KnockedDown) {
     a.postureProgress = Ratio(f.postureTicks, tune::kKnockdownTicks);
+  } else if (f.posture == Posture::Overloaded) {
+    a.postureProgress = Ratio(f.postureTicks, tune::kOverloadTicks);
   }
+  a.airProgress = f.posture == Posture::Airborne ? Ratio(f.airTicks, tune::kJumpAirTicks) : 0.f;
+  a.slideProgress = f.posture == Posture::Sliding ? Ratio(f.slideTicks, tune::kSlideTicks) : 0.f;
+  a.lungeCharge01 = (f.phase == Phase::Windup && f.strike.kind == StrikeKind::Lunge) ? Ratio(f.strike.held, tune::kLungeChargeTicks) : 0.f;
+  a.breakdown = f.breakdown;
   return a;
 }
 

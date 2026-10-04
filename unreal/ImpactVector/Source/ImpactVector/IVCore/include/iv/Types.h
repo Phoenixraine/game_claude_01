@@ -43,13 +43,15 @@ constexpr Arm Other(Arm a) { return a == Arm::L ? Arm::R : Arm::L; }
 // pitch §5.2 (3), §11: result of the foot placement under a strike.
 enum class FootPlant : uint8_t { Planted, Stepped, Overextended, Turned, Retreated };
 
-enum class StrikeKind : uint8_t { Heavy, Quick, Grab };
+// v5: Lunge = the charged horizontal rush (blocked -> sword lock, only a jetpack jump avoids it), AirChop = the overhead chop from the jump.
+enum class StrikeKind : uint8_t { Heavy, Quick, Grab, Lunge, AirChop };
 
 // pitch §5: Idle -> Windup -> (commit point) -> Strike -> Contact -> Recovery.
 enum class Phase : uint8_t { Idle, Windup, Strike, Contact, Recovery };
 
 // Whole-body states that override the strike state machine.
-enum class Posture : uint8_t { Standing, Staggered, KnockedDown, Dodging, Clinched, ShutDown };
+// v5: Airborne = jetpack jump, Sliding = the slide under an aerial chop, Overloaded = powered down after a berserk.
+enum class Posture : uint8_t { Standing, Staggered, KnockedDown, Dodging, Clinched, ShutDown, Airborne, Sliding, Overloaded };
 
 // pitch §5.4: where an arm is left after a strike; decides which swings may follow.
 enum class ArmPose : uint8_t { Neutral, Raised, CrossedLeft, CrossedRight, Low };
@@ -67,6 +69,7 @@ enum class EndReason : uint8_t {
   PowerLoss,
   ArmsLostImmobilised,
   TimeLimit,
+  PilotLost,   // v4: the pilot was crushed by the enemy hand while boarding (TASK-017)
 };
 
 // v2: heavy weapons with a long cooldown (each one triggers an external cinematic cut when fired).
@@ -106,7 +109,7 @@ inline const char* Name(ZoneState s) {
 }
 inline const char* Name(EndReason r) {
   static const char* const kNames[] = {"None",         "ReactorDestroyed",    "CockpitCritical", "TotalImmobility",
-                                       "PowerLoss",    "ArmsLostImmobilised", "TimeLimit"};
+                                       "PowerLoss",    "ArmsLostImmobilised", "TimeLimit", "PilotLost"};
   return kNames[static_cast<int>(r)];
 }
 inline const char* Name(WeaponKind k) {

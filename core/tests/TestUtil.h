@@ -10,6 +10,7 @@ using namespace iv;
 
 inline void ClearEdges(Input& in) {
   in.quick = in.cancel = in.toGrab = in.switchArm = in.reverse = in.dodge = in.setPriority = false;
+  in.jump = in.chop = in.slide = in.mash = in.berserk = in.qte = false;
 }
 
 struct Rig {

@@ -388,6 +388,8 @@ int main(int argc, char** argv) {
           duel.set_time_limit(tune::kMatchTimeLimitTicks);
           Ai aiA(static_cast<Archetype>(a), diff, seed * 2 + 1);
           Ai aiB(static_cast<Archetype>(b), diff, seed * 2 + 2);
+          duel.SetAiLevel(Side::A, static_cast<int>(diff));
+          duel.SetAiLevel(Side::B, static_cast<int>(diff));
           while (!duel.result().over) {
             const Input ia = aiA.Decide(MakeObservation(duel, Side::A));
             const Input ib = aiB.Decide(MakeObservation(duel, Side::B));

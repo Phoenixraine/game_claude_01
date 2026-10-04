@@ -37,6 +37,14 @@ struct Input {
   bool ultimate = false;              // edge: v2 ultimate button (needs a full gauge)
   bool setPriority = false;           // d-pad
   EnergyPriority priority = EnergyPriority::Guard;
+  // v5.
+  bool lungeHeld = false;             // hold ~1 s, release: the rush slash
+  bool jump = false;                  // edge: jetpack jump
+  bool chop = false;                  // edge: overhead chop while airborne
+  bool slide = false;                 // edge: slide (ducks under an aerial chop)
+  bool mash = false;                  // edge: sword lock button mashing
+  bool berserk = false;               // edge: start berserk
+  bool qte = false;                   // edge: berserk strike confirm
 };
 
 // What happened when a strike reached its target. Reported in StrikeContact events.
@@ -51,6 +59,9 @@ enum class Outcome : uint8_t {
   Grabbed,
   GrabParried,
   Clashed,      // v3: two blades met on the same line; both strikes stopped
+  Jumped,       // v5: the lunge went under a jetpack jump
+  Slid,         // v5: the aerial chop was slid under
+  Locked,       // v5: the lunge was blocked: sword lock
 };
 
 // Per-tick data handed to a Fighter by whoever owns the world (Duel or the game layer).
@@ -139,6 +150,14 @@ class Fighter {
   void set_autopilot(bool on) { autopilot = on; }
   // Two blades met: the strike (or windup) is dropped into a long recovery.
   void ClashBreak(const StepContext& ctx);
+  // v5
+  bool TryJump(const StepContext& ctx);
+  bool TrySlide(const StepContext& ctx);
+  bool JumpEvading() const { return posture == Posture::Airborne && airTicks >= tune::kJumpEvadeFromTicks && airTicks <= tune::kJumpEvadeToTicks; }
+  bool SlideEvading() const { return posture == Posture::Sliding && slideTicks < tune::kSlideEvadeTicks; }
+  void EnterOverload(const StepContext& ctx);
+  void AddBreakdown(int levels, const StepContext& ctx);
+  void RepairBreakdown(int levels, const StepContext& ctx);
 
   // ---- queries ---------------------------------------------------------------------------
   Side side() const { return side_; }
@@ -198,6 +217,13 @@ class Fighter {
   int burnTicks = 0;            // v3 status: burning (plasma)
   bool ultimateLocked = false;  // v3: the off-hand arm was cut off, the ultimate is gone
   bool autopilot = false;       // v4: the pilot is outside (boarding): Duel strips every offensive input of this fighter
+  int airTicks = 0;             // v5: ticks since the jump started
+  int slideTicks = 0;           // v5
+  int jumpCooldown = 0;         // v5
+  int berserkCooldown = 0;      // v5
+  int breakdown = 0;            // v5: level 0..3, drains the mech until repaired
+  int breakdownAcc = 0;
+  int breakdownAge = 0;
   Tick lastHitTick = -100000;
   // Bookkeeping the pilot can feel or see; feeds the AI observation (never the opponent's intent).
   Outcome lastOwnOutcome = Outcome::Whiff;       // result of this fighter's last strike
@@ -216,6 +242,7 @@ class Fighter {
   void HandleStrike(const Input& in, const StepContext& ctx);
   void HandleWindup(const Input& in, const StepContext& ctx);
   void HandleWeapon(const Input& in, const StepContext& ctx);
+  void StepAirSlide(const Input& in, const StepContext& ctx);
   void TryDodge(const Input& in, const StepContext& ctx);
   void RegisterFeint(const StepContext& ctx);
   void EnterStagger(const StepContext& ctx);
