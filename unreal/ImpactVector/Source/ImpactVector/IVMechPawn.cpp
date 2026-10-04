@@ -1028,7 +1028,7 @@ void AIVMechPawn::OnCombatHit(iv::Zone Z, float Strength01, bool bBlocked, bool 
 	}
 	if (IsLocallyControlled() && !bBlocked && Strength01 > 0.3f && GlassMID)
 	{
-		GlassCrack = FMath::Min(GlassCrack + 0.06f + 0.14f * Strength01, 0.95f);
+		GlassCrack = FMath::Min(GlassCrack + 0.035f + 0.09f * Strength01, 0.85f);
 		GlassMID->SetScalarParameterValue(TEXT("Crack"), GlassCrack);
 		IVAudio::Play2D(GetWorld(), TEXT("cockpit_panel_burst"), 0.5f, 1.6f);
 	}

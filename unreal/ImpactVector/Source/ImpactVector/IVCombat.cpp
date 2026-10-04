@@ -1,5 +1,6 @@
 #include "IVCombat.h"
 #include "IVMechPawn.h"
+#include "IVPlayerController.h"
 #include "IVFXManager.h"
 #include "IVHelicopter.h"
 #include "IVBoarding.h"
@@ -750,6 +751,14 @@ void AIVCombatDirector::HandleBoardingEvent(const iv::Event& Ev)
 	AIVMechPawn* E = Enemy.Get();
 	UWorld* W = GetWorld();
 	if (!P || !E) return;
+	AIVPlayerController* Pc = P ? Cast<AIVPlayerController>(P->GetController()) : nullptr;
+	if (Pc)
+	{
+		if (Ev.type == EventType::BoardingSwatTelegraph) Pc->Rumble(0.5f, 0.3f);
+		else if (Ev.type == EventType::BoardingBlast) Pc->Rumble(1.f, 0.6f);
+		else if (Ev.type == EventType::BoardingSwatImpact) Pc->Rumble(1.f, 0.5f);
+		else if (Ev.type == EventType::HookLanded) Pc->Rumble(0.6f, 0.25f);
+	}
 	switch (Ev.type)
 	{
 	case EventType::BoardingStarted:
