@@ -1,0 +1,217 @@
+{
+ "title": "cockpit effects",
+ "type": "object",
+ "required": [
+  "version",
+  "red_light",
+  "siren",
+  "voice",
+  "fire",
+  "severity"
+ ],
+ "properties": {
+  "version": {
+   "type": "integer"
+  },
+  "red_light": {
+   "type": "object",
+   "required": [
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "S4"
+   ],
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "period_s",
+     "peak",
+     "base",
+     "fade_s"
+    ],
+    "properties": {
+     "period_s": {
+      "type": "number",
+      "minimum": 0.0
+     },
+     "peak": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     },
+     "base": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     },
+     "fade_s": {
+      "type": "number",
+      "minimum": 0
+     }
+    }
+   }
+  },
+  "siren": {
+   "type": "object",
+   "required": [
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "S4"
+   ],
+   "additionalProperties": {
+    "oneOf": [
+     {
+      "type": "null"
+     },
+     {
+      "type": "object",
+      "required": [
+       "sound",
+       "duration_s"
+      ]
+     }
+    ]
+   }
+  },
+  "voice": {
+   "type": "object",
+   "required": [
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "S4"
+   ],
+   "additionalProperties": {
+    "oneOf": [
+     {
+      "type": "null"
+     },
+     {
+      "type": "object",
+      "required": [
+       "id",
+       "delay_s"
+      ]
+     }
+    ]
+   }
+  },
+  "fire": {
+   "type": "object",
+   "required": [
+    "spread_per_s",
+    "burn_s",
+    "extinguish_after_s",
+    "extinguish_below",
+    "max_simultaneous"
+   ],
+   "properties": {
+    "spread_per_s": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 1
+    },
+    "burn_s": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "extinguish_after_s": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "extinguish_below": {
+     "enum": [
+      "S0",
+      "S1",
+      "S2",
+      "S3",
+      "S4"
+     ]
+    },
+    "max_simultaneous": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 8
+    }
+   }
+  },
+  "severity": {
+   "type": "object",
+   "required": [
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "S4"
+   ],
+   "additionalProperties": {
+    "type": "array",
+    "items": {
+     "type": "object",
+     "required": [
+      "target",
+      "action",
+      "probability",
+      "count",
+      "delay_s",
+      "duration_s",
+      "params"
+     ],
+     "properties": {
+      "target": {
+       "type": "string"
+      },
+      "action": {
+       "type": "string"
+      },
+      "probability": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      },
+      "count": {
+       "type": "array",
+       "minItems": 2,
+       "maxItems": 2,
+       "items": {
+        "type": "integer"
+       }
+      },
+      "delay_s": {
+       "type": "array",
+       "minItems": 2,
+       "maxItems": 2,
+       "items": {
+        "type": "number"
+       }
+      },
+      "duration_s": {
+       "type": "array",
+       "minItems": 2,
+       "maxItems": 2,
+       "items": {
+        "type": "number"
+       }
+      },
+      "params": {
+       "type": "object"
+      }
+     }
+    }
+   }
+  }
+ },
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

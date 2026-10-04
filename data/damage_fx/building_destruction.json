@@ -1,0 +1,917 @@
+{
+ "version": 1,
+ "budgets": {
+  "large_shards": 400,
+  "small_shards": 6000,
+  "smoke_puffs": 80,
+  "cpu_particle_tick_hz": 30
+ },
+ "classes": {
+  "Shard_Concrete_S": "small",
+  "Shard_Concrete_M": "small",
+  "Shard_Concrete_L": "large",
+  "Shard_Concrete_XL": "large",
+  "Slab_Concrete": "large",
+  "Column_Broken": "large",
+  "Panel_Facade_Torn": "large",
+  "Girder_Twisted": "large",
+  "Steel_Plate_Bent": "large",
+  "AC_Unit_Broken": "large",
+  "Sign_Torn": "large",
+  "Glass_Shard": "small",
+  "Gravel_Cluster": "small",
+  "Pebble": "small",
+  "Rebar_Single": "small",
+  "Rebar_Bundle": "small",
+  "Pipe_Broken": "small",
+  "Cable_Dangling": "small",
+  "Window_Frame_Broken": "small"
+ },
+ "dust": {
+  "concrete": {
+   "color": [
+    0.55,
+    0.54,
+    0.5
+   ],
+   "density": [
+    [
+     0,
+     0.0
+    ],
+    [
+     0.4,
+     0.5
+    ],
+    [
+     1.5,
+     1.0
+    ],
+    [
+     6.0,
+     0.7
+    ],
+    [
+     14.0,
+     0.25
+    ],
+    [
+     24.0,
+     0.0
+    ]
+   ]
+  },
+  "glass_curtain": {
+   "color": [
+    0.62,
+    0.7,
+    0.74
+   ],
+   "density": [
+    [
+     0,
+     0.0
+    ],
+    [
+     0.3,
+     0.4
+    ],
+    [
+     1.2,
+     0.8
+    ],
+    [
+     5.0,
+     0.5
+    ],
+    [
+     11.0,
+     0.15
+    ],
+    [
+     18.0,
+     0.0
+    ]
+   ]
+  },
+  "brick": {
+   "color": [
+    0.55,
+    0.38,
+    0.32
+   ],
+   "density": [
+    [
+     0,
+     0.0
+    ],
+    [
+     0.4,
+     0.5
+    ],
+    [
+     1.6,
+     1.0
+    ],
+    [
+     6.0,
+     0.7
+    ],
+    [
+     14.0,
+     0.25
+    ],
+    [
+     24.0,
+     0.0
+    ]
+   ]
+  },
+  "steel_frame": {
+   "color": [
+    0.3,
+    0.3,
+    0.32
+   ],
+   "density": [
+    [
+     0,
+     0.0
+    ],
+    [
+     0.5,
+     0.4
+    ],
+    [
+     2.0,
+     0.9
+    ],
+    [
+     7.0,
+     0.6
+    ],
+    [
+     16.0,
+     0.2
+    ],
+    [
+     26.0,
+     0.0
+    ]
+   ]
+  }
+ },
+ "scenarios": {
+  "sword_hit": {
+   "energy_ref_kj": 800.0,
+   "stages": [
+    {
+     "name": "contact",
+     "t0": 0.0,
+     "t1": 0.1,
+     "spawns": [
+      {
+       "t_s": 0.0,
+       "class": "Shard_Concrete_M",
+       "count": 14,
+       "speed_mps": [
+        8,
+        24
+       ],
+       "cone_deg": 70,
+       "mass_kg": [
+        8,
+        60
+       ],
+       "life_s": [
+        3,
+        6
+       ]
+      },
+      {
+       "t_s": 0.0,
+       "class": "Glass_Shard",
+       "count": 120,
+       "speed_mps": [
+        6,
+        22
+       ],
+       "cone_deg": 85,
+       "mass_kg": [
+        0.02,
+        0.2
+       ],
+       "life_s": [
+        2,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "name": "facade_crush",
+     "t0": 0.1,
+     "t1": 0.7,
+     "spawns": [
+      {
+       "t_s": 0.15,
+       "class": "Shard_Concrete_L",
+       "count": 6,
+       "speed_mps": [
+        6,
+        16
+       ],
+       "cone_deg": 60,
+       "mass_kg": [
+        120,
+        600
+       ],
+       "life_s": [
+        4,
+        8
+       ]
+      },
+      {
+       "t_s": 0.2,
+       "class": "Pebble",
+       "count": 360,
+       "speed_mps": [
+        5,
+        24
+       ],
+       "cone_deg": 80,
+       "mass_kg": [
+        0.3,
+        3.0
+       ],
+       "life_s": [
+        3,
+        7
+       ]
+      },
+      {
+       "t_s": 0.3,
+       "class": "Panel_Facade_Torn",
+       "count": 2,
+       "speed_mps": [
+        4,
+        12
+       ],
+       "cone_deg": 50,
+       "mass_kg": [
+        200,
+        900
+       ],
+       "life_s": [
+        5,
+        9
+       ]
+      }
+     ]
+    },
+    {
+     "name": "floor_collapse",
+     "t0": 0.5,
+     "t1": 2.5,
+     "spawns": [
+      {
+       "t_s": 0.8,
+       "class": "Slab_Concrete",
+       "count": 2,
+       "speed_mps": [
+        1,
+        6
+       ],
+       "cone_deg": 40,
+       "mass_kg": [
+        600,
+        3000
+       ],
+       "life_s": [
+        6,
+        12
+       ]
+      }
+     ]
+    },
+    {
+     "name": "dust_cloud",
+     "t0": 0.4,
+     "t1": 24.0,
+     "spawns": []
+    }
+   ]
+  },
+  "mech_crash": {
+   "energy_ref_kj": 6000.0,
+   "stages": [
+    {
+     "name": "contact",
+     "t0": 0.0,
+     "t1": 0.15,
+     "spawns": [
+      {
+       "t_s": 0.0,
+       "class": "Shard_Concrete_M",
+       "count": 30,
+       "speed_mps": [
+        10,
+        30
+       ],
+       "cone_deg": 80,
+       "mass_kg": [
+        8,
+        60
+       ],
+       "life_s": [
+        3,
+        6
+       ]
+      },
+      {
+       "t_s": 0.0,
+       "class": "Glass_Shard",
+       "count": 320,
+       "speed_mps": [
+        8,
+        30
+       ],
+       "cone_deg": 90,
+       "mass_kg": [
+        0.02,
+        0.2
+       ],
+       "life_s": [
+        2,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "name": "facade_crush",
+     "t0": 0.15,
+     "t1": 1.0,
+     "spawns": [
+      {
+       "t_s": 0.2,
+       "class": "Shard_Concrete_L",
+       "count": 12,
+       "speed_mps": [
+        8,
+        20
+       ],
+       "cone_deg": 70,
+       "mass_kg": [
+        120,
+        600
+       ],
+       "life_s": [
+        4,
+        9
+       ]
+      },
+      {
+       "t_s": 0.3,
+       "class": "Shard_Concrete_XL",
+       "count": 3,
+       "speed_mps": [
+        4,
+        12
+       ],
+       "cone_deg": 50,
+       "mass_kg": [
+        900,
+        4000
+       ],
+       "life_s": [
+        6,
+        12
+       ]
+      },
+      {
+       "t_s": 0.25,
+       "class": "Pebble",
+       "count": 1200,
+       "speed_mps": [
+        6,
+        28
+       ],
+       "cone_deg": 85,
+       "mass_kg": [
+        0.3,
+        3.0
+       ],
+       "life_s": [
+        3,
+        8
+       ]
+      },
+      {
+       "t_s": 0.4,
+       "class": "Panel_Facade_Torn",
+       "count": 5,
+       "speed_mps": [
+        4,
+        14
+       ],
+       "cone_deg": 55,
+       "mass_kg": [
+        200,
+        900
+       ],
+       "life_s": [
+        5,
+        10
+       ]
+      },
+      {
+       "t_s": 0.4,
+       "class": "Rebar_Single",
+       "count": 60,
+       "speed_mps": [
+        4,
+        16
+       ],
+       "cone_deg": 70,
+       "mass_kg": [
+        3,
+        20
+       ],
+       "life_s": [
+        4,
+        8
+       ]
+      }
+     ]
+    },
+    {
+     "name": "floor_collapse",
+     "t0": 0.6,
+     "t1": 4.0,
+     "spawns": [
+      {
+       "t_s": 0.9,
+       "class": "Slab_Concrete",
+       "count": 6,
+       "speed_mps": [
+        1,
+        8
+       ],
+       "cone_deg": 45,
+       "mass_kg": [
+        600,
+        3000
+       ],
+       "life_s": [
+        8,
+        14
+       ]
+      },
+      {
+       "t_s": 1.3,
+       "class": "Column_Broken",
+       "count": 2,
+       "speed_mps": [
+        1,
+        5
+       ],
+       "cone_deg": 35,
+       "mass_kg": [
+        1500,
+        6000
+       ],
+       "life_s": [
+        8,
+        14
+       ]
+      },
+      {
+       "t_s": 1.5,
+       "class": "Gravel_Cluster",
+       "count": 80,
+       "speed_mps": [
+        2,
+        12
+       ],
+       "cone_deg": 70,
+       "mass_kg": [
+        5,
+        40
+       ],
+       "life_s": [
+        5,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "name": "dust_cloud",
+     "t0": 0.5,
+     "t1": 26.0,
+     "spawns": []
+    }
+   ]
+  },
+  "thrown_debris": {
+   "energy_ref_kj": 1200.0,
+   "stages": [
+    {
+     "name": "contact",
+     "t0": 0.0,
+     "t1": 0.1,
+     "spawns": [
+      {
+       "t_s": 0.0,
+       "class": "Shard_Concrete_M",
+       "count": 18,
+       "speed_mps": [
+        8,
+        26
+       ],
+       "cone_deg": 75,
+       "mass_kg": [
+        8,
+        60
+       ],
+       "life_s": [
+        3,
+        6
+       ]
+      },
+      {
+       "t_s": 0.0,
+       "class": "Glass_Shard",
+       "count": 160,
+       "speed_mps": [
+        6,
+        24
+       ],
+       "cone_deg": 85,
+       "mass_kg": [
+        0.02,
+        0.2
+       ],
+       "life_s": [
+        2,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "name": "facade_crush",
+     "t0": 0.1,
+     "t1": 0.8,
+     "spawns": [
+      {
+       "t_s": 0.2,
+       "class": "Shard_Concrete_L",
+       "count": 7,
+       "speed_mps": [
+        6,
+        16
+       ],
+       "cone_deg": 60,
+       "mass_kg": [
+        120,
+        600
+       ],
+       "life_s": [
+        4,
+        8
+       ]
+      },
+      {
+       "t_s": 0.25,
+       "class": "Pebble",
+       "count": 520,
+       "speed_mps": [
+        5,
+        26
+       ],
+       "cone_deg": 80,
+       "mass_kg": [
+        0.3,
+        3.0
+       ],
+       "life_s": [
+        3,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "name": "floor_collapse",
+     "t0": 0.6,
+     "t1": 2.8,
+     "spawns": [
+      {
+       "t_s": 0.9,
+       "class": "Slab_Concrete",
+       "count": 3,
+       "speed_mps": [
+        1,
+        6
+       ],
+       "cone_deg": 40,
+       "mass_kg": [
+        600,
+        3000
+       ],
+       "life_s": [
+        6,
+        12
+       ]
+      }
+     ]
+    },
+    {
+     "name": "dust_cloud",
+     "t0": 0.4,
+     "t1": 22.0,
+     "spawns": []
+    }
+   ]
+  },
+  "plasma": {
+   "energy_ref_kj": 2500.0,
+   "stages": [
+    {
+     "name": "contact",
+     "t0": 0.0,
+     "t1": 0.1,
+     "spawns": [
+      {
+       "t_s": 0.0,
+       "class": "Shard_Concrete_S",
+       "count": 40,
+       "speed_mps": [
+        10,
+        34
+       ],
+       "cone_deg": 90,
+       "mass_kg": [
+        1,
+        8
+       ],
+       "life_s": [
+        2,
+        5
+       ]
+      },
+      {
+       "t_s": 0.0,
+       "class": "Glass_Shard",
+       "count": 260,
+       "speed_mps": [
+        8,
+        30
+       ],
+       "cone_deg": 95,
+       "mass_kg": [
+        0.02,
+        0.2
+       ],
+       "life_s": [
+        2,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "name": "facade_crush",
+     "t0": 0.1,
+     "t1": 0.9,
+     "spawns": [
+      {
+       "t_s": 0.2,
+       "class": "Shard_Concrete_L",
+       "count": 8,
+       "speed_mps": [
+        6,
+        18
+       ],
+       "cone_deg": 65,
+       "mass_kg": [
+        120,
+        600
+       ],
+       "life_s": [
+        4,
+        8
+       ]
+      },
+      {
+       "t_s": 0.2,
+       "class": "Pebble",
+       "count": 700,
+       "speed_mps": [
+        6,
+        30
+       ],
+       "cone_deg": 90,
+       "mass_kg": [
+        0.3,
+        3.0
+       ],
+       "life_s": [
+        3,
+        7
+       ]
+      },
+      {
+       "t_s": 0.3,
+       "class": "Cable_Dangling",
+       "count": 6,
+       "speed_mps": [
+        2,
+        8
+       ],
+       "cone_deg": 60,
+       "mass_kg": [
+        2,
+        12
+       ],
+       "life_s": [
+        4,
+        8
+       ]
+      }
+     ]
+    },
+    {
+     "name": "floor_collapse",
+     "t0": 0.7,
+     "t1": 3.0,
+     "spawns": [
+      {
+       "t_s": 1.0,
+       "class": "Slab_Concrete",
+       "count": 3,
+       "speed_mps": [
+        1,
+        6
+       ],
+       "cone_deg": 40,
+       "mass_kg": [
+        600,
+        3000
+       ],
+       "life_s": [
+        6,
+        12
+       ]
+      }
+     ]
+    },
+    {
+     "name": "dust_cloud",
+     "t0": 0.4,
+     "t1": 24.0,
+     "spawns": []
+    }
+   ]
+  },
+  "rockets": {
+   "energy_ref_kj": 500.0,
+   "stages": [
+    {
+     "name": "contact",
+     "t0": 0.0,
+     "t1": 0.08,
+     "spawns": [
+      {
+       "t_s": 0.0,
+       "class": "Shard_Concrete_S",
+       "count": 24,
+       "speed_mps": [
+        10,
+        30
+       ],
+       "cone_deg": 90,
+       "mass_kg": [
+        1,
+        8
+       ],
+       "life_s": [
+        2,
+        5
+       ]
+      },
+      {
+       "t_s": 0.0,
+       "class": "Glass_Shard",
+       "count": 200,
+       "speed_mps": [
+        8,
+        28
+       ],
+       "cone_deg": 95,
+       "mass_kg": [
+        0.02,
+        0.2
+       ],
+       "life_s": [
+        2,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "name": "facade_crush",
+     "t0": 0.08,
+     "t1": 0.6,
+     "spawns": [
+      {
+       "t_s": 0.12,
+       "class": "Shard_Concrete_M",
+       "count": 14,
+       "speed_mps": [
+        8,
+        22
+       ],
+       "cone_deg": 70,
+       "mass_kg": [
+        8,
+        60
+       ],
+       "life_s": [
+        3,
+        7
+       ]
+      },
+      {
+       "t_s": 0.15,
+       "class": "Pebble",
+       "count": 300,
+       "speed_mps": [
+        6,
+        24
+       ],
+       "cone_deg": 85,
+       "mass_kg": [
+        0.3,
+        3.0
+       ],
+       "life_s": [
+        3,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "name": "floor_collapse",
+     "t0": 0.5,
+     "t1": 1.8,
+     "spawns": []
+    },
+    {
+     "name": "dust_cloud",
+     "t0": 0.3,
+     "t1": 18.0,
+     "spawns": []
+    }
+   ]
+  }
+ },
+ "smoke_puffs": {
+  "base": 20,
+  "per_energy_unit": 40,
+  "max": 80,
+  "lifetime_s": [
+   6.0,
+   22.0
+  ]
+ },
+ "sounds": {
+  "contact": "fx_building_crack",
+  "facade_crush": "fx_building_collapse",
+  "floor_collapse": "fx_building_collapse",
+  "dust_cloud": "fx_dust_whoosh",
+  "debris_rain": "fx_debris_rain",
+  "glass_rain": "fx_glass_rain"
+ },
+ "material_scale": {
+  "concrete": {
+   "Glass_Shard": 0.15
+  },
+  "glass_curtain": {
+   "Glass_Shard": 3.0,
+   "Shard_Concrete_L": 0.3,
+   "Pebble": 0.6
+  },
+  "brick": {
+   "Pebble": 1.4
+  },
+  "steel_frame": {
+   "Girder_Twisted": 1.0,
+   "Steel_Plate_Bent": 1.0
+  }
+ }
+}

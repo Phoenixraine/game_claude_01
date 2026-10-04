@@ -1,0 +1,55 @@
+{
+ "title": "event coverage",
+ "type": "object",
+ "required": [
+  "version",
+  "shake",
+  "warnings_only",
+  "chunks",
+  "cockpit_by_severity",
+  "no_cockpit_effect"
+ ],
+ "properties": {
+  "version": {
+   "type": "integer"
+  },
+  "shake": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "warnings_only": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "chunks": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "cockpit_by_severity": {
+   "oneOf": [
+    {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    {
+     "type": "object"
+    }
+   ]
+  },
+  "no_cockpit_effect": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  }
+ },
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

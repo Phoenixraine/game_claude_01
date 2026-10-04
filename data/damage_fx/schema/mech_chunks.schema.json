@@ -1,0 +1,267 @@
+{
+ "title": "mech chunks",
+ "type": "object",
+ "required": [
+  "version",
+  "ballistics",
+  "event_rules",
+  "limb_part",
+  "zones"
+ ],
+ "properties": {
+  "version": {
+   "type": "integer"
+  },
+  "ballistics": {
+   "type": "object",
+   "required": [
+    "gravity",
+    "drag_per_s",
+    "max_range_m",
+    "spawn_offset_m",
+    "min_up_mps",
+    "spread_deg",
+    "speed_scale_by_severity"
+   ],
+   "properties": {
+    "gravity": {
+     "type": "number",
+     "minimum": 1
+    },
+    "drag_per_s": {
+     "type": "number",
+     "minimum": 0
+    },
+    "max_range_m": {
+     "type": "number",
+     "maximum": 120
+    },
+    "speed_scale_by_severity": {
+     "type": "array",
+     "minItems": 5,
+     "maxItems": 5,
+     "items": {
+      "type": "number"
+     }
+    }
+   }
+  },
+  "event_rules": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "count_mult"
+    ]
+   }
+  },
+  "limb_part": {
+   "type": "object",
+   "required": [
+    "type",
+    "mesh_hint",
+    "count",
+    "mass_kg",
+    "speed_mps",
+    "spin_rad_s",
+    "life_s",
+    "fire_prob",
+    "fire_s",
+    "smoke_s",
+    "ground_sparks"
+   ],
+   "properties": {
+    "type": {
+     "type": "string"
+    },
+    "mesh_hint": {
+     "type": "string"
+    },
+    "count": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "integer"
+     }
+    },
+    "mass_kg": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "speed_mps": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "spin_rad_s": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "life_s": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "fire_prob": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 1
+    },
+    "fire_s": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "smoke_s": {
+     "type": "array",
+     "minItems": 2,
+     "maxItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "ground_sparks": {
+     "type": "integer",
+     "minimum": 0,
+     "maximum": 40,
+     "description": "number of sparks emitted on first ground contact"
+    }
+   }
+  },
+  "zones": {
+   "type": "object",
+   "required": [
+    "Head",
+    "Torso",
+    "Reactor",
+    "ShoulderL",
+    "ShoulderR",
+    "ArmL",
+    "ArmR",
+    "LegL",
+    "LegR"
+   ],
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "Armor",
+     "Mechanism",
+     "System"
+    ],
+    "additionalProperties": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "type",
+       "mesh_hint",
+       "count",
+       "mass_kg",
+       "speed_mps",
+       "spin_rad_s",
+       "life_s",
+       "fire_prob",
+       "fire_s",
+       "smoke_s",
+       "ground_sparks"
+      ],
+      "properties": {
+       "type": {
+        "type": "string"
+       },
+       "mesh_hint": {
+        "type": "string"
+       },
+       "count": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+         "type": "integer"
+        }
+       },
+       "mass_kg": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+         "type": "number"
+        }
+       },
+       "speed_mps": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+         "type": "number"
+        }
+       },
+       "spin_rad_s": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+         "type": "number"
+        }
+       },
+       "life_s": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+         "type": "number"
+        }
+       },
+       "fire_prob": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+       },
+       "fire_s": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+         "type": "number"
+        }
+       },
+       "smoke_s": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+         "type": "number"
+        }
+       },
+       "ground_sparks": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 40,
+        "description": "number of sparks emitted on first ground contact"
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
