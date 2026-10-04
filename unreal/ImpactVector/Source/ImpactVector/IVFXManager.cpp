@@ -1,4 +1,6 @@
 #include "IVFXManager.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
@@ -111,6 +113,45 @@ void AIVFXManager::BeginPlay()
 	UE_LOG(LogTemp, Display, TEXT("IV chunks: %d meshes"), ChunkISM.Num());
 }
 
+void AIVFXManager::SpawnPiece(UStaticMesh* Mesh, UMaterialInterface* Mat, const FTransform& Xf, const FVector& Vel, const FVector& Spin, float Heat)
+{
+	if (!Mesh || Chunks.Num() >= MaxChunks) return;
+	int32* Found = PieceSlots.Find(Mesh);
+	int32 Slot;
+	if (Found) Slot = *Found;
+	else
+	{
+		UInstancedStaticMeshComponent* I = NewObject<UInstancedStaticMeshComponent>(this);
+		I->SetStaticMesh(Mesh);
+		I->SetupAttachment(RootComponent);
+		I->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		I->SetCastShadow(true);
+		I->NumCustomDataFloats = 3;
+		I->SetCullDistances(0, 0);
+		I->bUseAsOccluder = false;
+		I->SetCanEverAffectNavigation(false);
+		if (Mat) for (int32 s = 0; s < Mesh->GetStaticMaterials().Num(); ++s) I->SetMaterial(s, Mat);
+		I->RegisterComponent();
+		Slot = ChunkISM.Add(I);
+		ChunkRadius.Add(Mesh->GetBounds().SphereRadius);
+		PieceSlots.Add(Mesh, Slot);
+	}
+	FIVChunk C;
+	C.Slot = Slot;
+	C.Kind = 3.f;
+	C.Scale = 1.f;
+	C.Scale3 = Xf.GetScale3D();
+	C.Radius = ChunkRadius[Slot] * C.Scale3.GetMax() * 0.5f;
+	C.Pos = Xf.GetLocation();
+	C.Rot = Xf.GetRotation();
+	C.Vel = Vel;
+	C.AngVel = Spin;
+	C.Life = 18.f;
+	C.Heat = Heat;
+	C.Seed = Rng.FRand();
+	Chunks.Add(C);
+}
+
 void AIVFXManager::SpawnChunks(const FVector& Center, const FVector& Dir, int32 Count, EIVChunk Family, float Scale, float Speed, float Heat, float Spread)
 {
 	const int32 F = int32(Family);
@@ -139,6 +180,8 @@ void AIVFXManager::SpawnChunks(const FVector& Center, const FVector& Dir, int32 
 void AIVFXManager::TickChunks(float Dt)
 {
 	if (ChunkISM.Num() == 0) return;
+	FVector CamPos = FVector::ZeroVector;
+	if (APlayerCameraManager* Cam0 = UGameplayStatics::GetPlayerCameraManager(this, 0)) CamPos = Cam0->GetCameraLocation();
 	if (!Dist.IsValid()) for (TActorIterator<AIVDistrict> It(GetWorld()); It; ++It) { Dist = *It; break; }
 	for (int32 i = Chunks.Num() - 1; i >= 0; --i)
 	{
@@ -215,7 +258,9 @@ void AIVFXManager::TickChunks(float Dt)
 		{
 			const FIVChunk& C = Chunks[k];
 			const float Fade = FMath::Clamp((C.Life - C.Age) / 1.5f, 0.f, 1.f);
-			T.Add(FTransform(C.Rot, C.Pos, FVector(C.Scale * Fade)));
+			// nothing may fill the pilot's view: pieces that tumble close past the camera shrink away
+			const float Near = FMath::Clamp((FVector::Dist(C.Pos, CamPos) - 2500.f) / 3500.f, 0.f, 1.f);
+			T.Add(FTransform(C.Rot, C.Pos, C.Scale3 * (C.Scale * Fade * Near)));
 		}
 		if (I->GetInstanceCount() != T.Num())
 		{
@@ -276,7 +321,7 @@ void AIVFXManager::Tick(float Dt)
 	TickChunks(Dt);
 	{	// ground mist drifting along the street around the camera
 		MistAcc += Dt;
-		if (MistAcc > 0.18f && Puffs.Num() < MaxPuffs - 150)
+		if (MistAcc > 0.18f && Puffs.Num() < MaxPuffs - 150 && FParse::Param(FCommandLine::Get(), TEXT("IVMist")))
 		{
 			MistAcc = 0.f;
 			APlayerCameraManager* PCM = UGameplayStatics::GetPlayerCameraManager(this, 0);

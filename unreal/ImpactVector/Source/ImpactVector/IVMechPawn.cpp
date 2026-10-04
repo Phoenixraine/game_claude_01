@@ -1331,19 +1331,12 @@ void AIVMechPawn::OnArmorPlateLost(iv::Zone Z, int32 Index, int32 Count)
 		P.bGone = true;
 		const FTransform Xf = P.C->GetComponentTransform();
 		P.C->SetVisibility(false);
-		static UStaticMesh* PCube = []{ UStaticMesh* M = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube")); if (M) M->AddToRoot(); return M; }();
-		FActorSpawnParameters Sp2;
-		Sp2.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		FRandomStream R2(Index * 211 + int32(Z) * 29 + 3);
-		if (AIVDebris* D = GetWorld()->SpawnActor<AIVDebris>(Xf.GetLocation(), Xf.GetRotation().Rotator(), Sp2))
-		{
-			const FVector Out = (Xf.GetLocation() - GetActorLocation() + FVector(0, 0, 900.f)).GetSafeNormal();
-			D->Init(PCube, PlateMID, P.Size, (Out + R2.VRand() * 0.35f) * R2.FRandRange(1400.f, 2600.f) + FVector(0, 0, 700.f), R2.VRand() * R2.FRandRange(80.f, 240.f));
-		}
 		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
 		{
+			const FVector Out = (Xf.GetLocation() - GetActorLocation() + FVector(0, 0, 900.f)).GetSafeNormal();
+			FX->SpawnPiece(P.C->GetStaticMesh(), PlateMID, Xf, (Out + R2.VRand() * 0.35f) * R2.FRandRange(1600.f, 3200.f) + FVector(0, 0, 900.f), R2.VRand() * R2.FRandRange(1.f, 4.f), 0.9f);
 			FX->SpawnSparks(Xf.GetLocation(), FVector::UpVector, 50, 5500.f);
-			FX->SpawnChunks(Xf.GetLocation(), (Xf.GetLocation() - GetActorLocation()).GetSafeNormal() + FVector(0, 0, 0.6f), 3, EIVChunk::Armor, 2.4f, 3200.f, 0.8f);
 		}
 		IVAudio::Play3D(GetWorld(), TEXT("mech_armor_plate_tear"), Xf.GetLocation(), 1.f);
 		return;
@@ -1386,7 +1379,8 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 
 	auto P = [&](const FString& N) -> const FIVPoseAngles* { return D.FindPose(FName(*N)); };
 	auto Ease = [](float u) { u = FMath::Clamp(u, 0.f, 1.f); return 1.f - FMath::Pow(1.f - u, 2.6f); };
-	const FString Arm = (S.arm == iv::Arm::R) ? TEXT("r") : TEXT("l");
+	// the blade lives on the right arm: every sword strike uses it; the left arm only throws the quick strikes and grabs
+	const FString Arm = (S.kind == iv::StrikeKind::Quick) ? TEXT("l") : TEXT("r");
 	const FString Side = (S.kind == iv::StrikeKind::Lunge) ? FString(TEXT("right")) : ((S.kind == iv::StrikeKind::AirChop) ? FString(TEXT("up")) : FString(SideName(S.side)));
 
 	FIVPoseAngles Target = *Guard;
@@ -1411,13 +1405,22 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 	}
 	else if (S.posture == iv::Posture::Dodging)
 	{
+		// a dodge is a TURN, not a lean: the whole body swings round to the side like a man looking over his shoulder, one leg sweeps out to take
+		// the weight, the head stays locked on the opponent
 		bLegs = true;
-		const FString Dir = (S.lateralShift < 0.f) ? TEXT("left") : TEXT("right");
+		const float Sg = (S.lateralShift < 0.f) ? 1.f : -1.f;           // +z turns the mech towards its left
 		const float U = FMath::Clamp(S.postureProgress, 0.f, 1.f);
-		const FIVPoseAngles* A = P(FString::Printf(TEXT("dodge_%s_shift"), *Dir));
-		const FIVPoseAngles* B = P(FString::Printf(TEXT("dodge_%s_lift"), *Dir));
-		const FIVPoseAngles* C = P(FString::Printf(TEXT("dodge_%s_plant"), *Dir));
-		if (A && B && C) Target = (U < 0.35f) ? FIVPoseAngles::Lerp(*Guard, *A, Ease(U / 0.35f)) : (U < 0.7f ? FIVPoseAngles::Lerp(*A, *B, Ease((U - 0.35f) / 0.35f)) : FIVPoseAngles::Lerp(*B, *C, Ease((U - 0.7f) / 0.3f)));
+		const float W = (U < 0.32f) ? Ease(U / 0.32f) : (U < 0.68f ? 1.f : 1.f - Ease((U - 0.68f) / 0.32f));
+		Target.RootRotDeg.Z = Sg * 62.f * W;
+		Target.RootPosM.Z -= 0.05f * W;
+		if (FVector* T = Target.Joint.Find(FName(TEXT("torso")))) { T->Z += Sg * 16.f * W; T->X = 7.f * W; }
+		if (FVector* H2 = Target.Joint.Find(FName(TEXT("head")))) H2->Z -= Sg * 52.f * W;
+		const TCHAR* Lead = Sg > 0.f ? TEXT("thigh_l") : TEXT("thigh_r");
+		const TCHAR* LeadShin = Sg > 0.f ? TEXT("shin_l") : TEXT("shin_r");
+		const TCHAR* Trail = Sg > 0.f ? TEXT("thigh_r") : TEXT("thigh_l");
+		if (FVector* T1 = Target.Joint.Find(FName(Lead))) { T1->X -= 34.f * W; T1->Y += Sg * -22.f * W; T1->Z += Sg * 8.f * W; }
+		if (FVector* T2 = Target.Joint.Find(FName(LeadShin))) T2->X += 28.f * W;
+		if (FVector* T3 = Target.Joint.Find(FName(Trail))) { T3->X += 6.f * W; T3->Y += Sg * 10.f * W; }
 	}
 	else if (S.posture == iv::Posture::Clinched)
 	{
@@ -1528,7 +1531,7 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 			}
 		}
 		CombatPose.RootPosM = FMath::Lerp(CombatPose.RootPosM, Target.RootPosM, K);
-		CombatPose.RootRotDeg = FMath::Lerp(CombatPose.RootRotDeg, Target.RootRotDeg, K);
+		CombatPose.RootRotDeg = FMath::Lerp(CombatPose.RootRotDeg, Target.RootRotDeg, 1.f - FMath::Exp(-7.f * Dt));
 	}
 	// body english: a heavy swing drags the torso round and drops the pelvis; the dip is released as a footfall-like thump at contact
 	{
@@ -2231,6 +2234,21 @@ void AIVMechPawn::UpdateBladeContact(float Dt, FIVPoseAngles& Pose)
 			Pen = FMath::Max(Pen, K.R - (P1 - P2).Size());
 		}
 	}
+	// the opponent's blade: the two swords meet and stop each other instead of passing through
+	if (O && O->SwordMesh && O->bRigActive)
+	{
+		FVector OB0, OT0;
+		O->GetBladeSegment(OB0, OT0);
+		FVector P1, P2;
+		FMath::SegmentDistToSegment(Bm, T0, OB0, OT0, P1, P2);
+		const float Dd = (P1 - P2).Size();
+		if (Dd < 330.f)
+		{
+			Pen = FMath::Max(Pen, 330.f - Dd + 40.f);
+			if (BladeBlock < 0.35f && Pen > 60.f && CombatAnim.phase != iv::Phase::Idle)
+				if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) if (FMath::FRand() < 0.4f) FX->SpawnSparks((P1 + P2) * 0.5f, FVector::UpVector, 6, 4500.f);
+		}
+	}
 	// the city: a trace along the blade
 	{
 		FHitResult Hit;
@@ -2266,71 +2284,76 @@ void AIVMechPawn::UpdateBladeContact(float Dt, FIVPoseAngles& Pose)
 }
 
 
-// ---------------------------------------------------------------------------------------------------------- armour plates (they come off one by one as the zone takes damage)
+// ---------------------------------------------------------------------------------------------------------- armour plates
+// Curved shells authored in Blender (art/armor/build_armor.py): they hug the limbs, are bolted to the bones and come off in pieces
+// (the whole shell tumbles away, burning) as the zone beneath is damaged.
 void AIVMechPawn::BuildPlates()
 {
 	if (!RigMesh) return;
-	UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
 	UMaterialInterface* Armor = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_MechArmor.M_MechArmor"));
-	if (!Cube || !Armor) return;
+	if (!Armor) return;
 	PlateMID = UMaterialInstanceDynamic::Create(Armor, this);
-	PlateMID->SetVectorParameterValue(TEXT("Tint"), HullTint * 2.6f + FLinearColor(0.03f, 0.03f, 0.035f));
-	PlateMID->SetScalarParameterValue(TEXT("Metallic"), 0.7f);
-	PlateMID->SetScalarParameterValue(TEXT("Wear"), 0.8f);
+	PlateMID->SetVectorParameterValue(TEXT("Tint"), HullTint * 2.0f + FLinearColor(0.025f, 0.025f, 0.03f));
+	PlateMID->SetScalarParameterValue(TEXT("Metallic"), 0.8f);
+	PlateMID->SetScalarParameterValue(TEXT("Wear"), 0.7f);
+	auto Mesh = [](const TCHAR* N) { return LoadObject<UStaticMesh>(nullptr, *FString::Printf(TEXT("/Game/Armor/%s.%s"), N, N)); };
 	const FQuat Q = GetActorQuat();
 	const FVector Fw = Q.GetForwardVector(), Rt = Q.GetRightVector(), Up = FVector::UpVector;
-	struct FSpec { const TCHAR* A; const TCHAR* B; iv::Zone Z; FVector Local; FVector Size; float Roll; };   // Local: offset from the segment centre in (fwd, right, up); Size in cm
-	const FSpec Specs[] = {
-		// chest and back
-		{ TEXT("torso"), TEXT("torso"), iv::Zone::Torso, FVector(900, 0, 350), FVector(260, 1500, 1050), 0.f },
-		{ TEXT("torso"), TEXT("torso"), iv::Zone::Torso, FVector(850, -750, -450), FVector(240, 700, 640), 0.f },
-		{ TEXT("torso"), TEXT("torso"), iv::Zone::Torso, FVector(850, 750, -450), FVector(240, 700, 640), 0.f },
-		{ TEXT("torso"), TEXT("torso"), iv::Zone::Torso, FVector(-900, 0, 450), FVector(260, 1300, 1100), 0.f },
-		// head
-		{ TEXT("head"), TEXT("head"), iv::Zone::Head, FVector(380, -420, 80), FVector(180, 360, 520), 0.f },
-		{ TEXT("head"), TEXT("head"), iv::Zone::Head, FVector(380, 420, 80), FVector(180, 360, 520), 0.f },
-		// pauldrons
-		{ TEXT("shoulder_l"), TEXT("upperarm_l"), iv::Zone::ShoulderL, FVector(0, -330, 330), FVector(900, 780, 280), 0.f },
-		{ TEXT("shoulder_r"), TEXT("upperarm_r"), iv::Zone::ShoulderR, FVector(0, 330, 330), FVector(900, 780, 280), 0.f },
-		{ TEXT("shoulder_l"), TEXT("upperarm_l"), iv::Zone::ShoulderL, FVector(0, -520, 40), FVector(700, 200, 640), 0.f },
-		{ TEXT("shoulder_r"), TEXT("upperarm_r"), iv::Zone::ShoulderR, FVector(0, 520, 40), FVector(700, 200, 640), 0.f },
-		// bracers
-		{ TEXT("forearm_l"), TEXT("hand_l"), iv::Zone::ArmL, FVector(260, -90, 0), FVector(240, 500, 1250), 0.f },
-		{ TEXT("forearm_r"), TEXT("hand_r"), iv::Zone::ArmR, FVector(260, 90, 0), FVector(240, 500, 1250), 0.f },
-		{ TEXT("upperarm_l"), TEXT("forearm_l"), iv::Zone::ArmL, FVector(300, -80, 0), FVector(240, 560, 900), 0.f },
-		{ TEXT("upperarm_r"), TEXT("forearm_r"), iv::Zone::ArmR, FVector(300, 80, 0), FVector(240, 560, 900), 0.f },
-		// legs
-		{ TEXT("thigh_l"), TEXT("shin_l"), iv::Zone::LegL, FVector(420, -60, 0), FVector(260, 620, 1500), 0.f },
-		{ TEXT("thigh_r"), TEXT("shin_r"), iv::Zone::LegR, FVector(420, 60, 0), FVector(260, 620, 1500), 0.f },
-		{ TEXT("shin_l"), TEXT("foot_l"), iv::Zone::LegL, FVector(470, -40, 0), FVector(260, 620, 1500), 0.f },
-		{ TEXT("shin_r"), TEXT("foot_r"), iv::Zone::LegR, FVector(470, 40, 0), FVector(260, 620, 1500), 0.f },
-	};
-	for (const FSpec& S : Specs)
+	auto Bone = [&](const TCHAR* B) { return RigMesh->GetBoneLocation(FName(B), EBoneSpaces::WorldSpace); };
+	auto Add = [&](const TCHAR* MeshName, const TCHAR* AttachBone, iv::Zone Z, const FVector& Pos, const FVector& Axis, const FVector& Out, const FVector& Scale)
 	{
-		if (RigMesh->GetBoneIndex(FName(S.A)) == INDEX_NONE || RigMesh->GetBoneIndex(FName(S.B)) == INDEX_NONE) continue;
-		const FVector PA = RigMesh->GetBoneLocation(FName(S.A), EBoneSpaces::WorldSpace), PB = RigMesh->GetBoneLocation(FName(S.B), EBoneSpaces::WorldSpace);
-		const bool bSeg = S.A != S.B && (PB - PA).Size() > 300.f;
-		const FVector Mid = bSeg ? (PA + PB) * 0.5f : PA;
-		const FVector Pos = Mid + Fw * S.Local.X + Rt * S.Local.Y + Up * S.Local.Z;
-		// plates are laid out in actor space: thin along X (facing out), long along Z (or along the limb when it is a segment)
-		FQuat Rot = Q;
-		if (bSeg)
-		{
-			const FVector Ax = (PB - PA).GetSafeNormal();
-			Rot = FRotationMatrix::MakeFromZX(Ax, Fw).ToQuat();
-		}
+		UStaticMesh* M = Mesh(MeshName);
+		if (!M || RigMesh->GetBoneIndex(FName(AttachBone)) == INDEX_NONE) return;
 		UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this);
-		C->SetStaticMesh(Cube);
+		C->SetStaticMesh(M);
 		C->SetMaterial(0, PlateMID);
 		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		C->SetCastShadow(true);
 		C->RegisterComponent();
-		const FVector Size = S.Size;
-		C->SetWorldTransform(FTransform(Rot, Pos, Size / 100.f));
-		C->AttachToComponent(RigMesh, FAttachmentTransformRules::KeepWorldTransform, FName(S.A));
+		C->SetWorldTransform(FTransform(FRotationMatrix::MakeFromZX(Axis.GetSafeNormal(), Out).ToQuat(), Pos, Scale));
+		C->AttachToComponent(RigMesh, FAttachmentTransformRules::KeepWorldTransform, FName(AttachBone));
 		FIVPlate P;
-		P.C = C; P.Z = S.Z; P.Size = Size;
+		P.C = C; P.Z = Z; P.Size = Scale;
 		Plates.Add(P);
+	};
+	// torso
+	{
+		const FVector Ctr = Bone(TEXT("torso")) + Fw * -250.f + Up * 780.f;
+		Add(TEXT("Armor_Chest"), TEXT("torso"), iv::Zone::Torso, Ctr, Up, Fw, FVector(11.5f, 11.5f, 22.f));
+		Add(TEXT("Armor_Back"), TEXT("reactor"), iv::Zone::Reactor, Ctr - Fw * 80.f, Up, Fw, FVector(11.5f, 11.5f, 21.f));
+		Add(TEXT("Armor_Skirt"), TEXT("pelvis"), iv::Zone::Torso, Bone(TEXT("pelvis")) + Fw * -100.f - Up * 250.f, Up, Fw, FVector(19.f, 19.f, 9.f));
+		Add(TEXT("Armor_Head"), TEXT("head"), iv::Zone::Head, Bone(TEXT("head")) + Up * 220.f, Up, Fw, FVector(8.f, 8.f, 8.f));
+	}
+	for (int32 sd = -1; sd <= 1; sd += 2)
+	{
+		const bool L = sd < 0;
+		const FVector Side = Rt * float(sd);
+		const iv::Zone ZS = L ? iv::Zone::ShoulderL : iv::Zone::ShoulderR, ZA = L ? iv::Zone::ArmL : iv::Zone::ArmR, ZL = L ? iv::Zone::LegL : iv::Zone::LegR;
+		const TCHAR* BSh = L ? TEXT("shoulder_l") : TEXT("shoulder_r");
+		const TCHAR* BUa = L ? TEXT("upperarm_l") : TEXT("upperarm_r");
+		const TCHAR* BFa = L ? TEXT("forearm_l") : TEXT("forearm_r");
+		const TCHAR* BHa = L ? TEXT("hand_l") : TEXT("hand_r");
+		const TCHAR* BTh = L ? TEXT("thigh_l") : TEXT("thigh_r");
+		const TCHAR* BSn = L ? TEXT("shin_l") : TEXT("shin_r");
+		const TCHAR* BFt = L ? TEXT("foot_l") : TEXT("foot_r");
+		// pauldron on top of the shoulder, facing out and forward
+		Add(TEXT("Armor_Pauldron"), BSh, ZS, Bone(BSh) + Side * 380.f + Up * 260.f, (Up + Side * 0.9f).GetSafeNormal(), Fw, FVector(12.f, 12.f, 11.f));
+		// guards follow the real limb axis
+		auto Guard = [&](const TCHAR* MeshName, const TCHAR* A, const TCHAR* B, iv::Zone Z, float RadiusCm, float R0, const FVector& OutBias, float LenScale)
+		{
+			const FVector PA = Bone(A), PB = Bone(B);
+			const float Len = (PB - PA).Size();
+			const FVector Ax = (PB - PA).GetSafeNormal();
+			const FVector Out = (OutBias - Ax * FVector::DotProduct(OutBias, Ax)).GetSafeNormal();
+			const float S = RadiusCm / R0;
+			Add(MeshName, A, Z, (PA + PB) * 0.5f + Out * 60.f, Ax, Out, FVector(S, S, FMath::Max(Len * LenScale, 300.f) / 100.f));
+		};
+		Guard(TEXT("Armor_Bracer"), BUa, BFa, ZA, 560.f, 46.f, Fw * 0.7f + Side * 0.5f, 0.9f);
+		Guard(TEXT("Armor_Bracer"), BFa, BHa, ZA, 470.f, 46.f, Fw * 0.8f + Side * 0.3f, 1.0f);
+		Guard(TEXT("Armor_Thigh"), BTh, BSn, ZL, 650.f, 52.f, Fw, 0.95f);
+		Guard(TEXT("Armor_Shin"), BSn, BFt, ZL, 560.f, 50.f, Fw, 1.0f);
+		Add(TEXT("Armor_Cap"), BFa, ZA, Bone(BFa) + Fw * 140.f, Up, Fw + Side * 0.4f, FVector(8.f, 8.f, 8.f));
+		Add(TEXT("Armor_Cap"), BSn, ZL, Bone(BSn) + Fw * 260.f, Up, Fw, FVector(10.f, 10.f, 10.f));
 	}
 	UE_LOG(LogTemp, Display, TEXT("IV plates: %d"), Plates.Num());
 }

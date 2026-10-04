@@ -159,7 +159,9 @@ void AIVCombatDirector::Tick(float Dt)
 	// the enemy always faces the player
 	if (!bHumanB) E->SetAim((P->GetActorLocation() - E->GetActorLocation()).Rotation().Yaw, 0.f);
 
-	Acc += FMath::Min<double>(Dt, 0.1);
+	// the fight runs a little slower than the raw core clock: heavier, more monumental swings (-IVFightSpeed= overrides)
+	static const double FightSpeed = [] { float V = 0.82f; FParse::Value(FCommandLine::Get(), TEXT("-IVFightSpeed="), V); return double(V); }();
+	Acc += FMath::Min<double>(Dt, 0.1) * FightSpeed;
 	const double Step = 1.0 / double(iv::kTickHz);
 	bool bFirst = true;
 	for (int32 n = 0; Acc >= Step && n < 6; ++n)

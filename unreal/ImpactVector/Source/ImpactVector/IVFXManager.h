@@ -53,6 +53,7 @@ struct FIVChunk
 	FVector Pos = FVector::ZeroVector, Vel = FVector::ZeroVector, AngVel = FVector::ZeroVector;
 	FQuat Rot = FQuat::Identity;
 	float Scale = 1.f, Radius = 50.f;
+	FVector Scale3 = FVector::OneVector;
 	float Age = 0.f, Life = 10.f, Heat = 0.f, Seed = 0.f, FlameAcc = 0.f;
 	bool bRest = false;
 };
@@ -82,6 +83,8 @@ public:
 	void SpawnExplosion(const FVector& Center, float Scale = 1.f);
 	/** Flying debris from the shard library. Dir = main direction of the spray; Heat > 0 makes the pieces glow and burn while they fly. */
 	void SpawnChunks(const FVector& Center, const FVector& Dir, int32 Count, EIVChunk Family, float Scale, float Speed, float Heat = 0.f, float Spread = 0.8f);
+	/** A whole piece (armour shell) torn off: keeps its mesh, scale and orientation, tumbles, burns, lies on the street. */
+	void SpawnPiece(UStaticMesh* Mesh, UMaterialInterface* Mat, const FTransform& Xf, const FVector& Vel, const FVector& Spin, float Heat);
 	/** Short light flash (clashes, muzzle, lightning-like). */
 	void SpawnFlash(const FVector& Center, const FLinearColor& Color, float Candela, float Seconds, float Radius = 9000.f);
 
@@ -97,6 +100,7 @@ private:
 	TArray<FIVSpark> Sparks;
 	UPROPERTY() TArray<TObjectPtr<UInstancedStaticMeshComponent>> ChunkISM;
 	TArray<float> ChunkRadius;
+	TMap<UStaticMesh*, int32> PieceSlots;
 	TArray<int32> FamilyFirst, FamilyCount;
 	TArray<FIVChunk> Chunks;
 	float GroundZ = 0.f;

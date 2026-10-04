@@ -254,6 +254,7 @@ return normalize(float3(-g * 0.45 * fade, 1.0));
 def build_armor():
     """Grey-box / interim mech armour: tinted painted metal with panel lines from object-space position and edge dirt."""
     m = make_material("M_MechArmor")
+    m.set_editor_property("used_with_instanced_static_meshes", True)
     pos = expr(m, unreal.MaterialExpressionWorldPosition, -1200, 0)
     tint = vector(m, "Tint", (0.18, 0.19, 0.2, 1), -1200, 200)
     wear = scalar(m, "Wear", 0.5, -1200, 350)
@@ -409,7 +410,7 @@ float3 newP = Cam + R;
     wpo = custom(m, code_pos + "return newP - P0;", t.CMOT_FLOAT3, names, -900, 0, "rain_wpo")
     wire_custom(wpo, srcs)
     MEL.connect_material_property(wpo, "", unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
-    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(350.0, 2200.0, d) * (1.0 - smoothstep(6500.0, 10000.0, d)); float tw = 0.65 + 0.35 * frac(sin(dot(P0.xy, float2(12.9, 78.2))) * 43758.5); return 0.42 * fade * tw;",
+    op = custom(m, code_pos + "float d = length(R); float fade = smoothstep(1100.0, 3200.0, d) * (1.0 - smoothstep(6500.0, 10000.0, d)); float tw = 0.65 + 0.35 * frac(sin(dot(P0.xy, float2(12.9, 78.2))) * 43758.5); return 0.32 * fade * tw;",
                 t.CMOT_FLOAT1, names, -900, 300, "rain_opacity")
     wire_custom(op, srcs)
     MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
@@ -806,7 +807,7 @@ def build_puff():
     seed.set_editor_property("data_index", 1)
     dark = expr(m, unreal.MaterialExpressionPerInstanceCustomData, -1200, 380)
     dark.set_editor_property("data_index", 2)
-    bright = scalar(m, "Brightness", 0.55, -1200, 450)
+    bright = scalar(m, "Brightness", 0.2, -1200, 450)
     code = """
 float2 q = (UV - 0.5) * 2.0;
 float r = length(q);
@@ -830,7 +831,7 @@ float fadeIn = saturate(Age * 14.0);
 float fadeOut = pow(saturate(1.0 - Age), 1.6);
 float alpha = saturate(shape * (0.35 + 1.1 * n) - 0.12) * fadeIn * fadeOut;
 """
-    op = custom(m, code + "return alpha * 0.85;", unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["UV", "Age", "Seed"], -700, 0, "puff_alpha")
+    op = custom(m, code + "return alpha * 0.6;", unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["UV", "Age", "Seed"], -700, 0, "puff_alpha")
     wire_custom(op, [(uv, ""), (age, ""), (seed, "")])
     col = custom(m, "float3 c = lerp(float3(0.62, 0.6, 0.57), float3(0.28, 0.27, 0.27), frac(Seed * 7.13)); return c * B * (1.0 - 0.9 * Dark);",
                  unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["Seed", "B", "Dark"], -700, 250, "puff_color")

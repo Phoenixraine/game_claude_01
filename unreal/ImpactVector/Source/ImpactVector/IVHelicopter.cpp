@@ -220,14 +220,14 @@ void AIVHelicopter::BuildModel()
 	Search->SetupAttachment(Hull);
 	Search->SetRelativeLocation(FVector(1400, 0, -380));
 	Search->SetIntensityUnits(ELightUnits::Candelas);
-	Search->SetIntensity(2.4e6f);
+	Search->SetIntensity(3.5e5f);
 	Search->SetLightColor(FLinearColor(0.85f, 0.93f, 1.f));
 	Search->SetAttenuationRadius(60000.f);
 	Search->SetInnerConeAngle(3.5f);
 	Search->SetOuterConeAngle(9.f);
 	Search->SetSourceRadius(60.f);
 	Search->SetCastShadows(true);
-	Search->SetVolumetricScatteringIntensity(9.f);
+	Search->SetVolumetricScatteringIntensity(1.6f);
 	Search->RegisterComponent();
 
 	// rotor sound, audible within a few hundred metres
