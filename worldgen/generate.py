@@ -84,7 +84,11 @@ def _guardrails(layout, terrain, buildings, port):
     return rails
 
 
-def build(seed):
+def build(seed, style="generic"):
+    """style 'generic' = the v1 district (schema_version 1, unchanged); 'tokyo' = the Tokyo district (schema_version 2)."""
+    if style == "tokyo":
+        from iv_worldgen import tokyo_gen
+        return tokyo_gen.build_tokyo(seed)
     root = Rng(seed)
     basins = _basins(root)
     terrain = Tm.Terrain(seed, basins)
@@ -138,24 +142,32 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--out", default="worldgen/out")
     ap.add_argument("--no-preview", action="store_true")
+    ap.add_argument("--style", choices=("tokyo", "generic"), default="tokyo", help="tokyo = schema_version 2 (default); generic = the v1 coastal district")
     a = ap.parse_args(argv)
     t0 = time.time()
-    doc, terrain = build(a.seed)
+    doc, terrain = build(a.seed, a.style)
     os.makedirs(a.out, exist_ok=True)
     with open(os.path.join(a.out, "district.json"), "w", encoding="ascii") as f:
         f.write(canonical(doc))
     with open(os.path.join(a.out, "heightmap.r16"), "wb") as f:
         f.write(terrain.to_r16())
     if not a.no_preview:
-        cv = render.render_topdown(doc, terrain, None)
-        write_png(os.path.join(a.out, "preview_topdown.png"), cv.w, cv.h, cv.buf)
-        cv = render.render_skyline(doc, terrain)
-        write_png(os.path.join(a.out, "preview_skyline.png"), cv.w, cv.h, cv.buf)
+        if a.style == "tokyo":
+            from iv_worldgen import tokyo_render as R
+            cv = R.render_topdown(doc, terrain)
+            write_png(os.path.join(a.out, "preview_topdown.png"), cv.w, cv.h, cv.buf)
+            cv = R.render_skyline(doc, terrain)
+            write_png(os.path.join(a.out, "preview_skyline.png"), cv.w, cv.h, cv.buf)
+        else:
+            cv = render.render_topdown(doc, terrain, None)
+            write_png(os.path.join(a.out, "preview_topdown.png"), cv.w, cv.h, cv.buf)
+            cv = render.render_skyline(doc, terrain)
+            write_png(os.path.join(a.out, "preview_skyline.png"), cv.w, cv.h, cv.buf)
     d = digest(doc, terrain)
     with open(os.path.join(a.out, "district.sha256"), "w") as f:
         f.write(d + "\n")
     n_hero = sum(1 for b in doc["buildings"] if b["type"] == "hero")
-    print("seed %d: %d buildings (%d hero), %d roads, %d props, sha256 %s, %.1fs" % (a.seed, len(doc["buildings"]), n_hero, len(doc["roads"]),
+    print("seed %d [%s]: %d buildings (%d hero), %d roads, %d props, sha256 %s, %.1fs" % (a.seed, a.style, len(doc["buildings"]), n_hero, len(doc["roads"]),
                                                                                        len(doc["props"]), d[:16], time.time() - t0))
     return 0
 
