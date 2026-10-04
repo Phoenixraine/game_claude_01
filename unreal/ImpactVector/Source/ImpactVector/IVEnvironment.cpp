@@ -70,7 +70,7 @@ AIVEnvironment::AIVEnvironment()
 	Fog->SetFogHeightFalloff(0.012f);
 	Fog->SetVolumetricFog(true);
 	Fog->SetVolumetricFogDistance(30000.f);
-	Fog->VolumetricFogAlbedo = FColor(70, 78, 105);          // dark mist: it picks up the neon without turning milky
+	Fog->VolumetricFogAlbedo = FColor(100, 110, 145);          // dark mist: it picks up the neon without turning milky
 	Fog->VolumetricFogExtinctionScale = 0.8f;
 	Fog->VolumetricFogScatteringDistribution = 0.35f;
 	Fog->SetFogInscatteringColor(FLinearColor(0.07f, 0.06f, 0.13f));
@@ -95,7 +95,7 @@ AIVEnvironment::AIVEnvironment()
 	S.AutoExposureMethod = EAutoExposureMethod::AEM_Histogram;
 	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 1.25f;
 	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 1.25f;
-	S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.4f;
+	S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.8f;
 	S.bOverride_BloomIntensity = true; S.BloomIntensity = 0.8f;
 	S.bOverride_VignetteIntensity = true; S.VignetteIntensity = 0.45f;
 	S.bOverride_FilmGrainIntensity = true; S.FilmGrainIntensity = 0.08f;
@@ -144,7 +144,7 @@ void AIVEnvironment::ApplySettings(float FogMul, float EV, float Neon, float Blo
 	if (PostProcess)
 	{
 		FPostProcessSettings& S = PostProcess->Settings;
-		S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.4f + EV;
+		S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.8f + EV;
 		S.bOverride_BloomIntensity = true; S.BloomIntensity = Bloom;
 		S.bOverride_MotionBlurAmount = true; S.MotionBlurAmount = MotionBlur;
 	}
