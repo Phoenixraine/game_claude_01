@@ -18,6 +18,7 @@
 #include "iv/Ai.h"
 #include "iv/Boarding.h"
 #include "iv/Duel.h"
+#include "iv/HackBot.h"
 
 using namespace iv;
 
@@ -98,17 +99,16 @@ void Out(const char* fmt, ...) {
 
 // ------------------------------------------------------------------------------------------------ boarding mode (TASK-017)
 
-// A player bot: how well it plays the hack and how fast it answers the enemy hand.
+// A player bot: how well it plays the hack (HackBot profile of the same name) and how fast it answers the enemy hand.
 struct SkillBot {
   const char* name;
-  int hackDelay;        // ticks between the window opening and the press (reaction + hand)
-  float stray;          // chance per tick of a stray press (nerves)
+  int hackProfile;      // index into kHackBots
   int swingReaction;    // ticks from the telegraph to the swing attempt
   float swingMiss;      // chance that the bot never answers a given swat
 };
-const SkillBot kBots[] = {{"perfect", 0, 0.f, 20, 0.f}, {"good", 4, 0.0015f, 24, 0.03f}, {"average", 7, 0.004f, 36, 0.12f}, {"poor", 10, 0.010f, 52, 0.30f}};
+const SkillBot kBots[] = {{"perfect", 0, 20, 0.f}, {"good", 1, 24, 0.03f}, {"average", 2, 36, 0.12f}, {"poor", 3, 52, 0.30f}};
 
-enum class Policy { Never, Spam, Periodic };
+enum class Policy { Never, Spam, Periodic, Smart };
 
 struct BoardStats {
   int duels = 0, aWins = 0, bWins = 0, draws = 0;
@@ -121,32 +121,17 @@ struct BoardStats {
 struct BotDriver {
   const SkillBot* bot;
   Rng rng;
-  int pending = -1;
-  bool wantsPrev = false;
+  HackBot hackBot;
   bool answered = false;
   bool willAnswer = true;
   bool pressedInWindow = false;
   int swatSeen = -1;
-  explicit BotDriver(const SkillBot* b, uint64_t seed) : bot(b), rng(seed, 0x424f54ULL) {}
+  int reactionLeft = 0;
+  explicit BotDriver(const SkillBot* b, uint64_t seed) : bot(b), rng(seed, 0x424f54ULL), hackBot(kHackBots[b->hackProfile], seed ^ 0x4841ULL) {}
 
   void Decide(const Boarding& bd, BoardingInput* bi) {
-    if (bd.phase() == BoardPhase::Hacking) {
-      const bool w = bd.hack().WantsConfirm();
-      if (w && !wantsPrev) pending = bot->hackDelay > 0 ? std::max(1, bot->hackDelay + static_cast<int>(rng.Below(5)) - 2) : 0;   // human jitter: +-2 ticks
-      wantsPrev = w;
-      if (pending > 0) --pending;
-      else if (pending == 0) {
-        bi->hack.confirm = true;
-        pending = -1;
-      }
-      if (rng.Chance(bot->stray)) bi->hack.confirm = true;
-    } else {
-      wantsPrev = false;
-      pending = -1;
-    }
+    if (bd.phase() == BoardPhase::Hacking) bi->hack = hackBot.Next(bd.hack());
     if (bd.swatActive()) {
-      const int total = tune::kSwatWindupTicks[0];   // only used to detect a fresh swat below
-      (void)total;
       if (swatSeen != bd.swatsThisBoarding() * 1000 + static_cast<int>(bd.swatShoulder())) {
         swatSeen = bd.swatsThisBoarding() * 1000 + static_cast<int>(bd.swatShoulder());
         willAnswer = !rng.Chance(bot->swingMiss);
@@ -165,8 +150,8 @@ struct BotDriver {
       pressedInWindow = false;
     }
   }
-  int reactionLeft = 0;
 };
+
 
 void RunBoardingMode(int seeds, uint64_t seedBase, int diffMask) {
   Out("# Boarding balance (`ivsim --boarding`)\n\n");
@@ -175,7 +160,7 @@ void RunBoardingMode(int seeds, uint64_t seedBase, int diffMask) {
 
   struct Cell { BoardStats s[4][3]; };           // [bot][difficulty]
   static Cell byArch[kArchetypeCount];
-  BoardStats policyStats[3][4];                   // [policy][bot]: aggregated over everything
+  BoardStats policyStats[4][4];                   // [policy][bot]: aggregated over everything
 
   auto runOne = [&](Policy pol, const SkillBot& bot, Archetype arch, Difficulty diff, uint64_t seed, BoardStats* out, BoardStats* out2) {
     Duel duel(seed, true);
@@ -201,6 +186,11 @@ void RunBoardingMode(int seeds, uint64_t seedBase, int diffMask) {
       bi.shoulder = (seed & 1) ? Arm::L : Arm::R;
       if (pol == Policy::Spam) bi.start = !bd.Active() && bd.cooldownLeft() == 0;
       else if (pol == Policy::Periodic) bi.start = !bd.Active() && bd.cooldownLeft() == 0 && sinceLast >= 90 * kTickHz;
+      else if (pol == Policy::Smart) {   // only when it is safe: the enemy is far away or down, and the own mech is steady
+        const Fighter& foe = duel.fighter(Side::B);
+        const bool calm = duel.distance() >= 45.f || foe.posture != Posture::Standing;
+        bi.start = !bd.Active() && bd.cooldownLeft() == 0 && calm && duel.fighter(Side::A).res.stability >= 80.f && foe.phase == Phase::Idle;
+      }
       if (!duel.cinematic().active) drv.Decide(bd, &bi);   // inputs during an external cut are lost (the boarding is frozen too)
       lastPressedInWindow = drv.pressedInWindow;
       const bool wasActive = bd.Active();
@@ -253,7 +243,7 @@ void RunBoardingMode(int seeds, uint64_t seedBase, int diffMask) {
         }
       }
   // 2) the same fights with the policies Never / Periodic (the strategy comparison uses the good bot)
-  for (int pol = 0; pol < 3; ++pol) {
+  for (int pol = 0; pol < 4; ++pol) {
     if (pol == 1) continue;
     for (int b = 0; b < 4; ++b) {
       if (pol == 0 && b > 0) continue;
@@ -302,8 +292,8 @@ void RunBoardingMode(int seeds, uint64_t seedBase, int diffMask) {
   }
   Out("\n## Strategies: win rate of the player (side A) over all archetype x difficulty cells\n\n");
   Out("| Strategy | Duels | Player wins | Enemy wins | Draws | Mean minutes | Boardings per duel |\n|---|---|---|---|---|---|---|\n");
-  const char* kPolNames[3] = {"fencer only (never boards)", "boards whenever allowed", "boards every 90 s"};
-  for (int pol = 0; pol < 3; ++pol) {
+  const char* kPolNames[4] = {"fencer only (never boards)", "boards whenever allowed", "boards every 90 s", "boards only when safe (enemy far or down)"};
+  for (int pol = 0; pol < 4; ++pol) {
     for (int b = 0; b < 4; ++b) {
       if (pol == 0 && b > 0) continue;
       const BoardStats& t = policyStats[pol][b];

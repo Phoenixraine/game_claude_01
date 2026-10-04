@@ -26,6 +26,15 @@ add_executable(ivsim tools/ivsim.cpp)
 target_link_libraries(ivsim PRIVATE ivcore)
 target_compile_options(ivsim PRIVATE ${IV_FLAGS})
 
+# Hack mini-game calibration: bots x difficulties (docs/ux/hack_calibration.md).
+add_executable(hack_calib tools/hack_calib.cpp)
+target_link_libraries(hack_calib PRIVATE ivcore)
+target_compile_options(hack_calib PRIVATE ${IV_FLAGS})
+
+add_executable(hack_export tools/hack_export.cpp)
+target_link_libraries(hack_export PRIVATE ivcore)
+target_compile_options(hack_export PRIVATE ${IV_FLAGS})
+
 # The documented game loop (docs/CORE_API.md) as a runnable example, kept honest by CTest.
 add_executable(iv_example examples/game_loop.cpp)
 target_link_libraries(iv_example PRIVATE ivcore)
@@ -36,9 +45,11 @@ file(GLOB IV_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.
 add_executable(iv_tests ${IV_TEST_SOURCES})
 target_link_libraries(iv_tests PRIVATE ivcore)
 target_compile_options(iv_tests PRIVATE ${IV_FLAGS})
+# tests that compare the committed data/ files with the generators need the repository root
+target_compile_definitions(iv_tests PRIVATE IV_REPO_DIR="${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 # One ctest entry per module so a failure points at the module (filter = "Module.").
-foreach(module IN ITEMS Body Resources Strike Defense Ai Determinism Sim Weapons Ultimate Presentation Anim Dummy Clash Dodge Stun Status External Boarding Special Lunge Jump Lock AirChop Berserk Breakdown)
+foreach(module IN ITEMS Body Resources Strike Defense Ai Determinism Sim Weapons Ultimate Presentation Anim Dummy Clash Dodge Stun Status External Boarding Hack Special Lunge Jump Lock AirChop Berserk Breakdown)
   add_test(NAME ${module} COMMAND iv_tests "${module}.")
 endforeach()
 add_test(NAME Example COMMAND iv_example)

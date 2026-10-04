@@ -340,7 +340,7 @@ constexpr int kMaxSwatsPerBoarding = 2;
 constexpr int kMaxSwatAdjust = 1;                         // an early press makes the enemy re-aim once per swat
 constexpr float kSwatChance[kDifficultyCount] = {0.05f, 0.09f, 0.14f};   // per check, by enemy difficulty
 constexpr float kSwatArchetypeMult[kArchetypeCount] = {1.2f, 1.0f, 1.0f, 0.9f, 0.5f, 1.4f};  // Counterpuncher, Breaker, LimbHunter, Trickster, Gunner, Grappler
-constexpr float kAutopilotDamageMult = 1.8f;           // STATUS §6B 3: the mech without its pilot takes more damage
+constexpr float kAutopilotDamageMult = 1.4f;           // STATUS §6B 3: the mech without its pilot takes more damage
 constexpr bool kAiBoardingEnabled = false;                // STATUS §6B: the enemy cannot board the player (yet); the API is symmetric by Side
 
 // ---------------------------------------------------------------- v5: lunge, jump, slide, sword lock, berserk, breakdown
@@ -412,6 +412,42 @@ constexpr int kBreakdownAiRepairTicks = MsToTicks(9000);
 constexpr float kAiJumpChance[kDifficultyCount] = {0.12f, 0.35f, 0.65f};     // jumps over a lunge instead of blocking it
 constexpr float kAiSlideChance[kDifficultyCount] = {0.15f, 0.40f, 0.70f};    // slides under an aerial chop
 constexpr float kAiLungePerTick[kDifficultyCount] = {0.0004f, 0.0007f, 0.0010f};   // chance per free tick to start charging a lunge
+
+// ---------------------------------------------------------------- hack mini-game (STATUS §6B 4, TASK-018)
+// One row per hack difficulty 1..10 (data/hack/difficulty.json is the same table: a test keeps them equal).
+// Stages: 2 = Path + Frequency; 3 = Path + Rhythm + Frequency; 5 = ... + the boss phase (Rhythm + Frequency under a permanent alarm).
+struct HackLevel {
+  int level;
+  int stages;
+  int gridW, gridH, blocks, ice, keys;                       // path layer: nodes, blockers, ice nodes on the route, keys to collect in order
+  int lanes, impulses, gapMin, gapMax, hitWindow;            // rhythm layer: lanes, impulses, gap between impulses (ticks), +-window (ticks)
+  int locks;                                                 // frequency layer: locks to land
+  float lockHalfDeg, lockShrink, relSpeed;                   // first window half-width (deg), shrink per lock, hacker/ICE relative speed (deg per tick)
+  int timeLimitSec, penaltyMs, heatPerMistake;               // global time limit, time lost per mistake, ICE heat per mistake (100 = ICE trips)
+};
+constexpr HackLevel kHackLevels[10] = {
+    {1, 3, 5, 4, 4, 0, 1, 3, 10, 26, 44, 5, 3, 20.f, 0.88f, 5.0f, 25, 1500, 30},
+    {2, 3, 5, 4, 5, 0, 1, 3, 10, 24, 42, 5, 3, 20.f, 0.88f, 5.0f, 26, 1600, 31},
+    {3, 3, 6, 4, 6, 1, 1, 3, 12, 22, 40, 6, 4, 21.f, 0.88f, 5.1f, 28, 1700, 32},
+    {4, 3, 6, 5, 8, 1, 2, 3, 12, 22, 40, 6, 4, 20.f, 0.88f, 5.3f, 30, 1400, 26},
+    {5, 3, 7, 5, 9, 2, 2, 4, 14, 22, 40, 6, 4, 19.f, 0.87f, 5.6f, 34, 1450, 26},
+    {6, 3, 7, 5, 10, 2, 2, 4, 16, 20, 36, 5, 5, 18.f, 0.87f, 5.9f, 42, 1500, 27},
+    {7, 3, 8, 5, 12, 3, 3, 4, 18, 18, 32, 5, 5, 17.5f, 0.86f, 6.0f, 40, 1600, 28},
+    {8, 5, 8, 6, 13, 3, 3, 4, 18, 18, 32, 6, 5, 22.f, 0.90f, 5.1f, 45, 1500, 25},
+    {9, 5, 9, 6, 15, 4, 3, 5, 20, 17, 30, 6, 5, 21.5f, 0.90f, 5.1f, 44, 1600, 26},
+    {10, 5, 9, 6, 16, 4, 4, 5, 22, 16, 28, 5, 6, 22.5f, 0.90f, 4.9f, 48, 1700, 27},
+};
+constexpr int kHackLeadTicks = 60;                 // rhythm: the first impulse arrives this late
+constexpr int kHackTravelTicks = 90;               // rhythm: how long an impulse is visible before the hit line
+constexpr int kHackAlarmHeat = 70;                 // heat at which the alarm starts: the rhythm window shrinks by 1 tick, the frequency speed rises 12 %
+constexpr int kHackTripHeat = 100;                 // heat at which the ICE trips: the stage restarts
+constexpr int kHackTripHeatAfter = 40;
+constexpr float kHackHeatDecayPerTick = 0.10f;     // 6 heat per second
+constexpr int kHackTripPenaltyMult = 3;            // a trip costs this many mistake penalties of time
+constexpr int kHackUndoPenaltyTicks = 12;          // path: stepping back one node
+constexpr float kHackLockSpeedGain = 0.05f;        // frequency: speed rises by 5 % per landed lock
+constexpr float kHackAlarmSpeedMult = 1.12f;
+constexpr float kHackLockHalfMinDeg = 6.f;         // never narrower than this (also kept >= 1.2 x the per-tick travel so a window cannot be skipped)
 
 // ---------------------------------------------------------------- movement (pitch §11)
 constexpr float kMoveSpeedPerTick = 0.09f;             // distance units per tick at full leg condition
