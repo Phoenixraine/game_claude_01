@@ -464,8 +464,8 @@ dark = lerp(dark, float3(0.12, 0.12, 0.125), wear * 0.7);
 float3 grey = lerp(float3(0.06, 0.066, 0.075) * (0.7 + 0.6 * n), float3(0.16, 0.16, 0.165), wear);
 float3 org = lerp(float3(0.22, 0.05, 0.004) * (0.75 + 0.5 * n), float3(0.12, 0.09, 0.07), smoothstep(0.7, 0.85, n));
 float3 rub = float3(0.010, 0.010, 0.012) * (0.7 + 0.6 * fine);
-float3 suit = float3(0.06, 0.068, 0.09) * weave * (0.8 + 0.5 * n);
-float3 arm = lerp(float3(0.14, 0.15, 0.18) * (0.8 + 0.5 * n), float3(0.32, 0.32, 0.33), wear);
+float3 suit = float3(0.13, 0.15, 0.2) * weave * (0.8 + 0.5 * n);
+float3 arm = lerp(float3(0.24, 0.26, 0.3) * (0.8 + 0.5 * n), float3(0.42, 0.42, 0.43), wear);
 float3 col = dark * c0 + grey * c1 + org * c2 + rub * c3 + float3(0.005, 0.01, 0.012) * c4 + float3(0.02, 0.01, 0.005) * c5 + float3(0.0, 0.0, 0.0) * c6 + float3(0.02, 0.0, 0.0) * c7
     + lerp(float3(0.012, 0.012, 0.012), float3(0.6, 0.45, 0.0), haz) * c8 + float3(0.03, 0.03, 0.03) * c9 + float3(0.5, 0.5, 0.52) * c10 + float3(0.004, 0.02, 0.006) * c11
     + suit * c12 + arm * c13 + float3(0.01, 0.03, 0.04) * c14;
@@ -491,7 +491,7 @@ float3 org = float3(1.0, 0.33, 0.04) * (0.55 + 0.45 * blink);
 float3 red = float3(1.0, 0.03, 0.02) * (0.4 + 0.6 * blink) * (1.0 + 2.0 * Alert);
 float flick = Power * (0.92 + 0.08 * sin(T * 53.0)) * (1.0 - Damage * step(0.6, frac(T * 7.0 + cell)));
 float3 core = float3(0.25, 1.1, 1.6) * (3.5 + 1.5 * sin(T * 2.2));
-return (c4 * cyan * 1.8 + c5 * org * 3.0 + c7 * red * 3.0 + c9 * float3(1.0, 0.95, 0.85) * 2.8 + c11 * float3(0.12, 1.0, 0.25) * (1.5 + 1.2 * blink) + c14 * core) * flick + c2 * float3(0.4, 0.05, 0.0) * Alert * 0.2;
+return (c4 * cyan * 1.8 + c5 * org * 3.0 + c7 * red * 3.0 + c9 * float3(1.0, 0.95, 0.85) * 2.8 + c11 * float3(0.12, 1.0, 0.25) * (1.5 + 1.2 * blink) + c14 * core) * flick + c2 * float3(0.4, 0.05, 0.0) * Alert * 0.2 + c12 * float3(0.0, 0.5, 0.75) * grid * 0.28 * flick;
 """, t.CMOT_FLOAT3, names, -900, 900, "cockpit_emissive")
     wire_custom(emi, srcs)
     MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)

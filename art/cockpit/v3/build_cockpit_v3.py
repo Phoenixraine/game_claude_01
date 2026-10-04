@@ -556,7 +556,7 @@ def build_torso(b):
         b.cyl((0.0, sy * 0.21, 0.51), (0.0, sy * 0.3, 0.51), 0.045, cls=0, seg=12)     # shoulder joints
         b.box((0.0, sy * 0.24, 0.585), (0.15, 0.08, 0.016), cls=2)
         b.box((-0.05, sy * 0.1, 0.5), (0.04, 0.05, 0.3), cls=3)                         # harness straps (back)
-    b.box((0.1, 0, 0.62), (0.07, 0.34, 0.06), cls=0, bevel=0.01)                       # collar
+    b.box((0.1, 0, 0.62), (0.07, 0.34, 0.06), cls=13, bevel=0.01)                      # collar
     b.box((0.0, 0, 0.64), (0.08, 0.1, 0.07), cls=12)                                    # neck
     for k in range(5):
         b.box((0.16, -0.08 + 0.04 * k, 0.33), (0.012, 0.022, 0.016), cls=9 if k == 2 else 5)

@@ -325,6 +325,29 @@ void UIVCockpitComponent::EnsureBuilt()
 	FString Off;
 	FParse::Value(FCommandLine::Get(), TEXT("-IVCkOff="), Off, false);
 	if (!Off.Contains(TEXT("body"))) BuildBody();
+	if (!Off.Contains(TEXT("body")))
+	{
+		// soft fills so the pilot's own body reads when you look down (the room lamps are mostly overhead and on the consoles)
+		const FVector FillAt[2] = { FVector(34.f, 0.f, -36.f), FVector(-18.f, 0.f, 24.f) };
+		const FLinearColor FillCol[2] = { FLinearColor(0.62f, 0.8f, 1.f), FLinearColor(1.f, 0.62f, 0.34f) };
+		for (int32 i = 0; i < 2; ++i)
+		{
+			UPointLightComponent* L = NewObject<UPointLightComponent>(GetOwner());
+			L->SetupAttachment(this);
+			L->RegisterComponent();
+			L->SetRelativeLocation(FillAt[i]);
+			L->SetLightColor(FillCol[i]);
+			L->SetIntensityUnits(ELightUnits::Candelas);
+			L->SetIntensity(i == 0 ? 2.2f : 1.0f);
+			L->SetAttenuationRadius(170.f);
+			L->SetCastShadows(false);
+			L->SetSourceRadius(8.f);
+			L->SetLightingChannels(false, true, false);
+			Lamps.Add(L);
+			LampKinds.Add(TEXT("steady"));
+			LampBase.Add(i == 0 ? 2.2f : 1.0f);
+		}
+	}
 	if (!Off.Contains(TEXT("pipe"))) BuildPipes();
 	if (!Off.Contains(TEXT("wire"))) BuildWires();
 	if (!Off.Contains(TEXT("mon"))) BuildMonitors();
