@@ -1,0 +1,36 @@
+{
+ "triangles_total": 89868,
+ "triangles_visible_intact": 77064,
+ "triangles_max_part": 1720,
+ "limits": {
+  "part": 3000,
+  "total": 400000
+ },
+ "counts": {
+  "AlarmBeacon": 4,
+  "Btn": 85,
+  "Cap": 8,
+  "Console": 7,
+  "Dial": 12,
+  "Empty:AlarmBeaconAxis": 4,
+  "Empty:Fire_Socket": 8,
+  "Empty:LeakPoint": 12,
+  "Empty:MonitorAnchor": 14,
+  "Empty:SparkPort": 24,
+  "Empty:SteamPort": 14,
+  "Empty:WireAnchor": 64,
+  "Frame": 19,
+  "Glass": 4,
+  "Lamp": 44,
+  "Mon": 14,
+  "Pipe": 46,
+  "Pipe_Burst": 12,
+  "Scorch_Decal": 6,
+  "Slider": 5,
+  "StrobePanel": 4,
+  "Wire": 64,
+  "Wire_Snapped": 24
+ },
+ "glass_share_percent": 82.1,
+ "glass_share_required": 70.0
+}
