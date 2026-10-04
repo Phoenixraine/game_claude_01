@@ -1,0 +1,445 @@
+{
+ "version": 1,
+ "files": [
+  {
+   "path": "svg/alarm_frame.svg",
+   "bytes": 1351,
+   "sha256": "3a965d27fa49fb21"
+  },
+  {
+   "path": "svg/arm_armor_bars.svg",
+   "bytes": 14333,
+   "sha256": "469da5cd67b3a8c2"
+  },
+  {
+   "path": "svg/bar_armor.svg",
+   "bytes": 17635,
+   "sha256": "b74c34b02d8b619e"
+  },
+  {
+   "path": "svg/bar_energy.svg",
+   "bytes": 10081,
+   "sha256": "f162401d25d533ac"
+  },
+  {
+   "path": "svg/bar_heat.svg",
+   "bytes": 25435,
+   "sha256": "d22384f8c544663a"
+  },
+  {
+   "path": "svg/bar_stability.svg",
+   "bytes": 3574,
+   "sha256": "645334e5029adc70"
+  },
+  {
+   "path": "svg/clock_digits.svg",
+   "bytes": 17054,
+   "sha256": "7b89cb1629e7a930"
+  },
+  {
+   "path": "svg/compass_strip.svg",
+   "bytes": 20427,
+   "sha256": "f98415ac1d813a25"
+  },
+  {
+   "path": "svg/crosshair.svg",
+   "bytes": 1854,
+   "sha256": "2036befcae558fc4"
+  },
+  {
+   "path": "svg/digits_atlas.svg",
+   "bytes": 52519,
+   "sha256": "e906a3cde673bdc2"
+  },
+  {
+   "path": "svg/distance_digits.svg",
+   "bytes": 20546,
+   "sha256": "75610d0ae4ffe496"
+  },
+  {
+   "path": "svg/icon_warning.svg",
+   "bytes": 2420,
+   "sha256": "daedcd025715f5e5"
+  },
+  {
+   "path": "svg/lockon_corners.svg",
+   "bytes": 1254,
+   "sha256": "91433dc5a1be2cbb"
+  },
+  {
+   "path": "svg/lockon_zone_hexes.svg",
+   "bytes": 2209,
+   "sha256": "da07303b75e80d14"
+  },
+  {
+   "path": "svg/power_priority.svg",
+   "bytes": 4807,
+   "sha256": "edd93b04d39453a2"
+  },
+  {
+   "path": "svg/radar.svg",
+   "bytes": 14916,
+   "sha256": "2e671d9a891914c0"
+  },
+  {
+   "path": "svg/silhouette_body_enemy.svg",
+   "bytes": 12644,
+   "sha256": "c2dd04421547610a"
+  },
+  {
+   "path": "svg/silhouette_body_player.svg",
+   "bytes": 12646,
+   "sha256": "1419a2b57b33fc82"
+  },
+  {
+   "path": "svg/stability_bar_h.svg",
+   "bytes": 26025,
+   "sha256": "0f45af3feebc88c4"
+  },
+  {
+   "path": "svg/status_icons_blind.svg",
+   "bytes": 2448,
+   "sha256": "0d94678e715f859d"
+  },
+  {
+   "path": "svg/status_icons_burn.svg",
+   "bytes": 1442,
+   "sha256": "971d50ebb1d358db"
+  },
+  {
+   "path": "svg/status_icons_row.svg",
+   "bytes": 4923,
+   "sha256": "55797e74f12de86e"
+  },
+  {
+   "path": "svg/status_icons_strikelock.svg",
+   "bytes": 1228,
+   "sha256": "9842b47478070927"
+  },
+  {
+   "path": "svg/strike_arc.svg",
+   "bytes": 1846,
+   "sha256": "6d39083c089a6e1c"
+  },
+  {
+   "path": "svg/threat_arrows_down.svg",
+   "bytes": 1893,
+   "sha256": "febf0d52863c4a26"
+  },
+  {
+   "path": "svg/threat_arrows_left.svg",
+   "bytes": 1893,
+   "sha256": "5c46ef2fc044d116"
+  },
+  {
+   "path": "svg/threat_arrows_right.svg",
+   "bytes": 1893,
+   "sha256": "672ba5c641518392"
+  },
+  {
+   "path": "svg/threat_arrows_up.svg",
+   "bytes": 1889,
+   "sha256": "33d8267ba8e72e7e"
+  },
+  {
+   "path": "svg/ultimate_gauge.svg",
+   "bytes": 10077,
+   "sha256": "9226d66270accfa4"
+  },
+  {
+   "path": "svg/weapon_icons_plasma.svg",
+   "bytes": 3391,
+   "sha256": "3aac52f19925f7f9"
+  },
+  {
+   "path": "svg/weapon_icons_rail.svg",
+   "bytes": 1826,
+   "sha256": "8eb372d5baa52982"
+  },
+  {
+   "path": "svg/weapon_icons_rockets.svg",
+   "bytes": 3400,
+   "sha256": "42cc13f999d54b2f"
+  },
+  {
+   "path": "svg/weapon_icons_row.svg",
+   "bytes": 8388,
+   "sha256": "26ef66b84fa520dd"
+  },
+  {
+   "path": "svg/zone_layers_arcs.svg",
+   "bytes": 49545,
+   "sha256": "54e928d91ab8007d"
+  },
+  {
+   "path": "svg/zone_layers_arcs_enemy.svg",
+   "bytes": 49550,
+   "sha256": "f03d663c511ff006"
+  },
+  {
+   "path": "png/alarm_frame.png",
+   "bytes": 4276,
+   "sha256": "e7df1fb2b012b044"
+  },
+  {
+   "path": "png/bar_armor.png",
+   "bytes": 6655,
+   "sha256": "d519ca3a4ec6ee30"
+  },
+  {
+   "path": "png/bar_energy.png",
+   "bytes": 5970,
+   "sha256": "f4d4b7fb5841e79e"
+  },
+  {
+   "path": "png/bar_heat.png",
+   "bytes": 6814,
+   "sha256": "70c187d74090aeb7"
+  },
+  {
+   "path": "png/bar_stability.png",
+   "bytes": 5950,
+   "sha256": "3dd54c5bf6ce931b"
+  },
+  {
+   "path": "png/compass_strip.png",
+   "bytes": 4181,
+   "sha256": "5d71dced5cbac1d0"
+  },
+  {
+   "path": "png/crack_mask_00.png",
+   "bytes": 25775,
+   "sha256": "b1313bfb66873fe1"
+  },
+  {
+   "path": "png/crack_mask_01.png",
+   "bytes": 23128,
+   "sha256": "ecf514b96443effe"
+  },
+  {
+   "path": "png/crack_mask_02.png",
+   "bytes": 30770,
+   "sha256": "8183fa9a33e8b2d8"
+  },
+  {
+   "path": "png/crack_mask_03.png",
+   "bytes": 27601,
+   "sha256": "eecd3800c0df6102"
+  },
+  {
+   "path": "png/crack_mask_04.png",
+   "bytes": 36023,
+   "sha256": "4e66c7e37c2077fd"
+  },
+  {
+   "path": "png/crack_mask_05.png",
+   "bytes": 51785,
+   "sha256": "625c0630d1765ee1"
+  },
+  {
+   "path": "png/crack_mask_06.png",
+   "bytes": 36361,
+   "sha256": "f4761a3c64160610"
+  },
+  {
+   "path": "png/crack_mask_07.png",
+   "bytes": 37396,
+   "sha256": "8287aa89b486805e"
+  },
+  {
+   "path": "png/digits_atlas.png",
+   "bytes": 35406,
+   "sha256": "8fd1b0243d382890"
+  },
+  {
+   "path": "png/glitch_strip_00.png",
+   "bytes": 650,
+   "sha256": "7ca3ffe0c1dbf961"
+  },
+  {
+   "path": "png/glitch_strip_01.png",
+   "bytes": 740,
+   "sha256": "803e770818df10fe"
+  },
+  {
+   "path": "png/glitch_strip_02.png",
+   "bytes": 854,
+   "sha256": "4bef0739ba711a23"
+  },
+  {
+   "path": "png/glitch_strip_03.png",
+   "bytes": 657,
+   "sha256": "8f012e2aade4591d"
+  },
+  {
+   "path": "png/glitch_strip_04.png",
+   "bytes": 693,
+   "sha256": "6ce08425e5709bd5"
+  },
+  {
+   "path": "png/glitch_strip_05.png",
+   "bytes": 627,
+   "sha256": "e3de6e6c7950de02"
+  },
+  {
+   "path": "png/glitch_strip_06.png",
+   "bytes": 834,
+   "sha256": "bbeab935f910d84a"
+  },
+  {
+   "path": "png/glitch_strip_07.png",
+   "bytes": 641,
+   "sha256": "bcaf91f4a7c074f5"
+  },
+  {
+   "path": "png/icon_warning.png",
+   "bytes": 15022,
+   "sha256": "74a6ef7abc1ecac9"
+  },
+  {
+   "path": "png/lockon_corners.png",
+   "bytes": 9057,
+   "sha256": "f8ac93205c45c902"
+  },
+  {
+   "path": "png/lockon_ring_anim_strip.png",
+   "bytes": 128939,
+   "sha256": "4f8cfd9048381770"
+  },
+  {
+   "path": "png/lockon_zone_hexes.png",
+   "bytes": 54824,
+   "sha256": "69deb4619bdade99"
+  },
+  {
+   "path": "png/radar.png",
+   "bytes": 382767,
+   "sha256": "fdf344e4f7beeaa2"
+  },
+  {
+   "path": "png/rain_drops_atlas.png",
+   "bytes": 193537,
+   "sha256": "29b66aeca77a8c98"
+  },
+  {
+   "path": "png/silhouette_body_enemy.png",
+   "bytes": 327337,
+   "sha256": "fc708f295d12842e"
+  },
+  {
+   "path": "png/silhouette_body_player.png",
+   "bytes": 327284,
+   "sha256": "e312b301b28c5aa4"
+  },
+  {
+   "path": "png/soot_mask_00.png",
+   "bytes": 87767,
+   "sha256": "2b5e55206eb19674"
+  },
+  {
+   "path": "png/soot_mask_01.png",
+   "bytes": 86764,
+   "sha256": "651a3f87388e9cea"
+  },
+  {
+   "path": "png/soot_mask_02.png",
+   "bytes": 82312,
+   "sha256": "72a803b97294e4c3"
+  },
+  {
+   "path": "png/soot_mask_03.png",
+   "bytes": 80448,
+   "sha256": "5a024924d20a3c17"
+  },
+  {
+   "path": "png/status_icons_blind.png",
+   "bytes": 42466,
+   "sha256": "99dbe53e0ce87cb4"
+  },
+  {
+   "path": "png/status_icons_burn.png",
+   "bytes": 37641,
+   "sha256": "016588c3b955f50f"
+  },
+  {
+   "path": "png/status_icons_strikelock.png",
+   "bytes": 14238,
+   "sha256": "762822d3532f761a"
+  },
+  {
+   "path": "png/threat_arrows_down.png",
+   "bytes": 18187,
+   "sha256": "ccdf1d445ac5246e"
+  },
+  {
+   "path": "png/threat_arrows_left.png",
+   "bytes": 14519,
+   "sha256": "5a4d34f53ba74cc8"
+  },
+  {
+   "path": "png/threat_arrows_right.png",
+   "bytes": 14540,
+   "sha256": "144ada58995be8f9"
+  },
+  {
+   "path": "png/threat_arrows_up.png",
+   "bytes": 18906,
+   "sha256": "f270ebbf8f94a127"
+  },
+  {
+   "path": "png/ultimate_gauge.png",
+   "bytes": 5970,
+   "sha256": "f4d4b7fb5841e79e"
+  },
+  {
+   "path": "png/weapon_icons_plasma.png",
+   "bytes": 61071,
+   "sha256": "1e1789b3fc275b18"
+  },
+  {
+   "path": "png/weapon_icons_rail.png",
+   "bytes": 43576,
+   "sha256": "453a2e2f43969a54"
+  },
+  {
+   "path": "png/weapon_icons_rockets.png",
+   "bytes": 38214,
+   "sha256": "7ee83d6c72d1bfbf"
+  },
+  {
+   "path": "png/zone_layers_arcs.png",
+   "bytes": 211312,
+   "sha256": "19fb912e728822a5"
+  },
+  {
+   "path": "png/zone_layers_arcs_enemy.png",
+   "bytes": 211312,
+   "sha256": "19fb912e728822a5"
+  },
+  {
+   "path": "previews/hud_critical_alarm.jpg",
+   "bytes": 348657,
+   "sha256": "c71f31d3e6b8e5b3"
+  },
+  {
+   "path": "previews/hud_fight_ok.jpg",
+   "bytes": 212617,
+   "sha256": "802e431072dd1c97"
+  },
+  {
+   "path": "previews/hud_lock_on.jpg",
+   "bytes": 226247,
+   "sha256": "06773257c7e749d4"
+  },
+  {
+   "path": "previews/hud_medium_damage.jpg",
+   "bytes": 247652,
+   "sha256": "14857924af100a2a"
+  },
+  {
+   "path": "previews/layout_aspects.png",
+   "bytes": 66248,
+   "sha256": "7e0a62d74b00a79e"
+  }
+ ]
+}

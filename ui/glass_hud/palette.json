@@ -1,0 +1,32 @@
+{
+ "version": 1,
+ "note": "Pitch s.21 colour code: neutral = intact, yellow = exposed armour, orange = damaged mechanism, red = critical, black (grey outline) = lost. Hex values match data/damage_fx/warnings.json.",
+ "colors": {
+  "cyan": "#7fe4ff",
+  "white": "#e8fbff",
+  "red": "#ff4a3d",
+  "orange": "#ff9a2e",
+  "amber": "#ffd24a",
+  "pale_amber": "#f3e7a0",
+  "neutral": "#bfeeff",
+  "lost": "#7d8899",
+  "ink": "#0b1220",
+  "bg_dark": "#05080d",
+  "bg_mid": "#25324a",
+  "bg_light": "#c8d4de",
+  "ok": "#7fe4ff"
+ },
+ "zone_state": {
+  "Intact": "neutral",
+  "Dented": "pale_amber",
+  "Exposed": "amber",
+  "Damaged": "orange",
+  "Critical": "red",
+  "Destroyed": "lost",
+  "Severed": "lost"
+ },
+ "min_contrast": {
+  "core_on_dark": 3.0,
+  "halo_on_light": 3.0
+ }
+}

@@ -1,0 +1,149 @@
+{
+ "version": 1,
+ "zone_state_style": {
+  "Intact": {
+   "color": "neutral",
+   "dash": null,
+   "width": 2.4,
+   "blink_hz": 0.0,
+   "fill_opacity": 0.06
+  },
+  "Dented": {
+   "color": "pale_amber",
+   "dash": null,
+   "width": 2.5,
+   "blink_hz": 0.0,
+   "fill_opacity": 0.09
+  },
+  "Exposed": {
+   "color": "amber",
+   "dash": null,
+   "width": 2.9,
+   "blink_hz": 0.0,
+   "fill_opacity": 0.15
+  },
+  "Damaged": {
+   "color": "orange",
+   "dash": "9 3",
+   "width": 3.1,
+   "blink_hz": 0.0,
+   "fill_opacity": 0.18
+  },
+  "Critical": {
+   "color": "red",
+   "dash": null,
+   "width": 3.6,
+   "blink_hz": 2.5,
+   "fill_opacity": 0.26
+  },
+  "Destroyed": {
+   "color": "lost",
+   "dash": "2 5",
+   "width": 2.2,
+   "blink_hz": 0.0,
+   "fill_opacity": 0.0
+  },
+  "Severed": {
+   "color": "lost",
+   "dash": "2 5",
+   "width": 2.2,
+   "blink_hz": 0.0,
+   "fill_opacity": 0.0,
+   "slash": true
+  }
+ },
+ "layer_arc": {
+  "note": "A layer arc is drawn with the length = remaining fraction of that layer; the colour is that of the zone state; Destroyed/Severed zones show empty dotted arcs.",
+  "sweep_deg": 70.0,
+  "radius_step": 6.0
+ },
+ "gauges": {
+  "armor": {
+   "color": "neutral",
+   "low": 0.35,
+   "low_color": "orange",
+   "critical": 0.15,
+   "critical_color": "red",
+   "segments": 24
+  },
+  "stability": {
+   "color": "cyan",
+   "low": 0.35,
+   "low_color": "orange",
+   "critical": 0.15,
+   "critical_color": "red",
+   "segments": 0
+  },
+  "heat": {
+   "color": "cyan",
+   "warm": 0.6,
+   "warm_color": "orange",
+   "hot": 0.85,
+   "hot_color": "red",
+   "segments": 0,
+   "inverse": true
+  },
+  "energy": {
+   "color": "amber",
+   "low": 0.25,
+   "low_color": "red",
+   "segments": 12
+  },
+  "ultimate": {
+   "color": "cyan",
+   "ready_color": "white",
+   "segments": 12,
+   "ready_blink_hz": 2.0
+  }
+ },
+ "alarm": {
+  "red_edge_color": "red",
+  "blink_hz": {
+   "S2": 1.5,
+   "S3": 2.0,
+   "S4": 3.0
+  },
+  "vignette_alpha": {
+   "S0": 0.0,
+   "S1": 0.0,
+   "S2": 0.35,
+   "S3": 0.6,
+   "S4": 0.9
+  }
+ },
+ "glass_fx": {
+  "cracks_by_severity": {
+   "S2": 1,
+   "S3": 3,
+   "S4": 5
+  },
+  "soot_by_severity": {
+   "S3": 1,
+   "S4": 3
+  },
+  "glitch_by_severity": {
+   "S1": 0.1,
+   "S2": 0.25,
+   "S3": 0.5,
+   "S4": 0.85
+  },
+  "signal_loss_s": 0.6
+ },
+ "lockon": {
+  "quality_colors": [
+   [
+    0.0,
+    "red"
+   ],
+   [
+    0.4,
+    "amber"
+   ],
+   [
+    0.75,
+    "cyan"
+   ]
+  ],
+  "stability_warn": 0.35
+ }
+}
