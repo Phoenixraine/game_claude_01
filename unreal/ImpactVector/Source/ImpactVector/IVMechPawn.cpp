@@ -31,6 +31,8 @@ static TAutoConsoleVariable<int32> CVarIVCam(TEXT("iv.Cam"), 0,
 static TAutoConsoleVariable<int32> CVarRigApply(TEXT("iv.RigApply"), 1, TEXT("0 = leave the rig in its rest pose"), ECVF_Default);
 static TAutoConsoleVariable<float> CVarIVCamDist(TEXT("iv.CamDist"), 16000.f, TEXT("Debug camera distance (cm)"), ECVF_Default);
 
+static TAutoConsoleVariable<FString> CVarIVFreeCam(TEXT("iv.FreeCam"), TEXT("0 0 0 0 0"), TEXT("Free camera for iv.Cam=6: x y z (m, district frame y=forward) pitch yaw(ue)"), ECVF_Default);
+
 int32 GetIVCam() { return CVarIVCam.GetValueOnGameThread(); }
 float GetIVCamDist() { return CVarIVCamDist.GetValueOnGameThread(); }
 
@@ -173,21 +175,24 @@ void AIVMechPawn::BuildCockpit()
 		CockpitMeshes.Add(M);
 		return M;
 	};
-	CockpitShellMesh = CM(TEXT("CockpitShell"), TEXT("/Game/Cockpit/SM_Cockpit_Shell.SM_Cockpit_Shell"), true);
-	CockpitGlassMesh = CM(TEXT("CockpitGlass"), TEXT("/Game/Cockpit/SM_Cockpit_Glass.SM_Cockpit_Glass"), false);
+	CockpitShellMesh = CM(TEXT("CockpitShell"), TEXT("/Game/Cockpit/V3/SM_Cockpit_Shell.SM_Cockpit_Shell"), true);
+	CockpitGlassMesh = CM(TEXT("CockpitGlass"), TEXT("/Game/Cockpit/V3/SM_Cockpit_Glass.SM_Cockpit_Glass"), false);
 	for (int32 i = 0; i < 2; ++i)
 	{
 		const FString S = (i == 0) ? TEXT("L") : TEXT("R");
-		CockpitArm[i].Upper = CM(*(TEXT("RigUpper") + S), TEXT("/Game/Cockpit/SM_Rig_Upper.SM_Rig_Upper"), true);
-		CockpitArm[i].Fore = CM(*(TEXT("RigFore") + S), TEXT("/Game/Cockpit/SM_Rig_Fore.SM_Rig_Fore"), true);
-		CockpitArm[i].Glove = CM(*(TEXT("RigGlove") + S), TEXT("/Game/Cockpit/SM_Rig_Glove.SM_Rig_Glove"), true);
+		CockpitArm[i].Upper = CM(*(TEXT("RigUpper") + S), TEXT("/Game/Cockpit/V3/SM_Rig_Upper.SM_Rig_Upper"), true);
+		CockpitArm[i].Fore = CM(*(TEXT("RigFore") + S), TEXT("/Game/Cockpit/V3/SM_Rig_Fore.SM_Rig_Fore"), true);
+		CockpitArm[i].Glove = CM(*(TEXT("RigGlove") + S), TEXT("/Game/Cockpit/V3/SM_Rig_Glove.SM_Rig_Glove"), true);
 	}
+	CockpitFx = CreateDefaultSubobject<UIVCockpitComponent>(TEXT("CockpitFx"));
+	CockpitFx->SetupAttachment(CockpitSway);
 	struct FLamp { const TCHAR* N; FVector P; FLinearColor C; float I; float R; };
 	const FLamp Lamps[] = {
-		{ TEXT("LampDash"), FVector(20, 0, 14), FLinearColor(0.15f, 0.85f, 1.f), 7.f, 190.f },
-		{ TEXT("LampLeft"), FVector(40, -120, -20), FLinearColor(1.f, 0.4f, 0.1f), 5.f, 170.f },
-		{ TEXT("LampRight"), FVector(40, 120, -20), FLinearColor(1.f, 0.4f, 0.1f), 5.f, 170.f },
-		{ TEXT("LampTop"), FVector(10, 0, 62), FLinearColor(0.6f, 0.75f, 1.f), 6.f, 220.f },
+		{ TEXT("LampDash"), FVector(40, 0, -70), FLinearColor(0.15f, 0.85f, 1.f), 2.2f, 220.f },
+		{ TEXT("LampLeft"), FVector(60, -110, -40), FLinearColor(1.f, 0.4f, 0.1f), 1.4f, 200.f },
+		{ TEXT("LampRight"), FVector(60, 110, -40), FLinearColor(1.f, 0.4f, 0.1f), 1.4f, 200.f },
+		{ TEXT("LampTop"), FVector(10, 0, 80), FLinearColor(0.7f, 0.8f, 1.f), 2.f, 260.f },
+		{ TEXT("LampBody"), FVector(30, 0, -50), FLinearColor(0.9f, 0.95f, 1.f), 1.6f, 160.f },
 	};
 	for (const FLamp& L : Lamps)
 	{
@@ -251,6 +256,7 @@ void AIVMechPawn::BeginPlay()
 		{
 			CockpitMID = UMaterialInstanceDynamic::Create(CockM, this);
 			for (UStaticMeshComponent* M : CockpitMeshes) if (M != CockpitGlassMesh) M->SetMaterial(0, CockpitMID);
+			if (CockpitFx) CockpitFx->SetCockpitMaterial(CockpitMID);
 		}
 		if (GlassM && CockpitGlassMesh)
 		{
@@ -267,9 +273,17 @@ void AIVMechPawn::BeginPlay()
 		const bool bWater = Foot.Z < -50.f;
 		IVAudio::Play3D(GetWorld(), bWater ? IVAudio::Variant(TEXT("mech_step_water_"), 2) : IVAudio::Variant(TEXT("mech_step_heavy_"), 4), Foot, FMath::Clamp(0.55f + 0.5f * Strength, 0.4f, 1.1f), FMath::RandRange(0.9f, 1.05f));
 		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld())) FX->SpawnDust(Foot, 900.f, int32(2 + 4 * Strength), 0.35f);
-		if (IsLocallyControlled()) AddCockpitImpulse(0.f, -1.f, 0.22f * Strength);
+		if (IsLocallyControlled()) { AddCockpitImpulse(0.f, -1.f, 0.22f * Strength); if (CockpitFx) CockpitFx->Footfall(Strength); }
 	});
 
+	{
+		FString Lk;
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVLook="), Lk, false))
+		{
+			FString A, B;
+			if (Lk.Split(TEXT(","), &A, &B)) { LookPitchT = FCString::Atof(*A); LookYawT = FCString::Atof(*B); bDebugLook = true; }
+		}
+	}
 	AimYaw = GetActorRotation().Yaw;
 	CamPos = GetEyeLocation();
 	CamRot = FRotator(0, AimYaw, 0);
@@ -295,6 +309,7 @@ void AIVMechPawn::SetFirstPersonView(bool bFirstPerson)
 {
 	if (HeadMesh) HeadMesh->SetOwnerNoSee(bFirstPerson);
 	for (UStaticMeshComponent* M : CockpitMeshes) M->SetVisibility(bFirstPerson);
+	if (CockpitFx) CockpitFx->SetShown(bFirstPerson);
 }
 
 FVector AIVMechPawn::GetEyeLocation() const
@@ -319,7 +334,26 @@ void AIVMechPawn::Tick(float Dt)
 	UpdateDetached(Dt);
 	UpdateDamageFX(Dt);
 	UpdateBladeTrail(Dt);
-	if (IsLocallyControlled() || GetIVCam() != 0) { UpdateCockpitCamera(Dt); UpdateCockpitArms(Dt); }
+	if (IsLocallyControlled() || GetIVCam() != 0)
+	{
+		if (CockpitFx && GetIVCam() == 0)
+		{
+			CockpitFx->EnsureBuilt();
+			const FRotator Yaw(0.f, CamRot.Yaw, 0.f);
+			CockpitFx->SetMotion(Yaw.UnrotateVector(Velocity), GetSpeedRatio() * 0.55f, Yaw.UnrotateVector((Velocity - PrevVelocity) / FMath::Max(Dt, 1e-4f)), HitKick.X * -0.5f + (CombatAnim.phase == iv::Phase::Windup ? CombatAnim.progress : (CombatAnim.phase == iv::Phase::Strike ? 1.f - CombatAnim.progress : 0.f)) * 6.f, TorsoYawRel * 0.2f);
+			if (CockpitMID)
+			{
+				CockpitMID->SetScalarParameterValue(TEXT("Alert"), CockpitFx->GetAlert());
+				CockpitMID->SetScalarParameterValue(TEXT("Damage"), FMath::Clamp(CockpitFx->GetShake() * 0.6f + CockpitFx->GetAlert() * 0.25f, 0.f, 1.f));
+			}
+		}
+		{
+			static const float FailAt = [] { float V = -1.f; FParse::Value(FCommandLine::Get(), TEXT("-IVCkFailAt="), V); return V; }();
+			if (FailAt > 0.f && CockpitFx && CockpitFx->IsBuilt() && GetWorld()->GetTimeSeconds() > FailAt && !bDebugFailDone) { bDebugFailDone = true; CockpitFx->ForceFailures(3); CockpitFx->Hit(0.9f, FVector(0, 1, 0), false); }
+		}
+		UpdateCockpitCamera(Dt);
+		UpdateCockpitArms(Dt);
+	}
 }
 
 void AIVMechPawn::UpdateAI(float Dt)
@@ -463,8 +497,8 @@ void AIVMechPawn::UpdateCockpitArms(float Dt)
 	{
 		FCockpitArm& A = CockpitArm[i];
 		const float Sd = (i == 0) ? -1.f : 1.f;           // UE: left = -Y
-		const FVector Anchor(10.f, Sd * 104.f, -80.f);
-		const FVector Rest(66.f, Sd * 88.f, -46.f);
+		const FVector Anchor(-6.f, Sd * 25.f, -26.f);
+		const FVector Rest(58.f, Sd * 32.f, -44.f);
 		FVector Tgt = Rest;
 		FQuat GloveRot = FQuat::Identity;
 		if (bRigActive && RigMesh)
@@ -547,7 +581,13 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 	SwayRot.Roll += SwayRotVel.X * Dt;
 	SwayRot.Pitch += SwayRotVel.Y * Dt;
 	SwayRot.Yaw += SwayRotVel.Z * Dt;
-	CockpitSway->SetRelativeLocationAndRotation(SwayOffset, SwayRot);
+	if (bDebugLook) bFreeLook = true;
+	// head look inside the room: the camera turns, the room stays where it is (the inverse look is applied to the cockpit)
+	LookYaw = FMath::FInterpTo(LookYaw, bFreeLook ? LookYawT : 0.f, Dt, bFreeLook ? 18.f : 6.f);
+	LookPitch = FMath::FInterpTo(LookPitch, bFreeLook ? LookPitchT : 0.f, Dt, bFreeLook ? 18.f : 6.f);
+	if (!bFreeLook) { LookYawT = FMath::FInterpTo(LookYawT, 0.f, Dt, 6.f); LookPitchT = FMath::FInterpTo(LookPitchT, 0.f, Dt, 6.f); }
+	const FQuat LookQ = FRotator(LookPitch, LookYaw, 0.f).Quaternion();
+	CockpitSway->SetRelativeLocationAndRotation(LookQ.Inverse().RotateVector(SwayOffset), LookQ.Inverse() * SwayRot.Quaternion());
 
 	// world layer: stabilised horizon, low-passed vertical bob
 	const FVector Eye = GetEyeLocation();
@@ -588,10 +628,32 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 
 	if (Mode == 0)
 	{
-		Camera->SetWorldLocationAndRotation(CamPos, CamRot + FRotator(0.3f * SwayRot.Pitch, 0.3f * SwayRot.Yaw, 0.3f * SwayRot.Roll));
+		Camera->SetWorldLocationAndRotation(CamPos, (CamRot + FRotator(0.3f * SwayRot.Pitch, 0.3f * SwayRot.Yaw, 0.3f * SwayRot.Roll)).Quaternion() * LookQ);
 		return;
 	}
 
+	if (Mode == 6)
+	{
+		FString Spec = CVarIVFreeCam.GetValueOnGameThread();
+		FString Cli;
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVFreeCams="), Cli, false)) Spec = Cli;
+		TArray<FString> Cams;
+		Spec.ParseIntoArray(Cams, TEXT("|"));
+		float Dur = 3.f; FParse::Value(FCommandLine::Get(), TEXT("-IVFreeDur="), Dur);
+		if (Cams.Num() > 0)
+		{
+			const int32 Idx = FMath::Clamp(FMath::FloorToInt(GetWorld()->GetTimeSeconds() / Dur), 0, Cams.Num() - 1);
+			TArray<FString> P;
+			Cams[Idx].Replace(TEXT(","), TEXT(" ")).ParseIntoArray(P, TEXT(" "));
+			if (P.Num() >= 5)
+			{
+				const FVector At(FCString::Atof(*P[1]) * 100.f, FCString::Atof(*P[0]) * 100.f, FCString::Atof(*P[2]) * 100.f);
+				Camera->SetFieldOfView(P.Num() >= 6 ? FCString::Atof(*P[5]) : 70.f);
+				Camera->SetWorldLocationAndRotation(At, FRotator(FCString::Atof(*P[3]), FCString::Atof(*P[4]), 0.f));
+			}
+		}
+		return;
+	}
 	if (Mode == 5)
 	{
 		FVector Other = GetActorLocation();
@@ -922,7 +984,11 @@ void AIVMechPawn::OnCombatHit(iv::Zone Z, float Strength01, bool bBlocked, bool 
 	const float S = Strength01 * (bBlocked ? 0.55f : 1.f);
 	HitKick += FVector(-7.f * S, 4.f * S * Side, 6.f * S * Side);
 	HitKick = HitKick.GetClampedToSize(0.f, 18.f);
-	if (IsLocallyControlled()) AddCockpitImpulse(-Side, Z == iv::Zone::Head ? 0.8f : 0.f, S * (bParried ? 0.6f : 1.f));
+	if (IsLocallyControlled())
+	{
+		AddCockpitImpulse(-Side, Z == iv::Zone::Head ? 0.8f : 0.f, S * (bParried ? 0.6f : 1.f));
+		if (CockpitFx) CockpitFx->Hit(FMath::Clamp(Strength01 * 1.15f, 0.f, 1.f), FVector(0.f, Side, 0.f), bBlocked);
+	}
 }
 
 void AIVMechPawn::OnDefenceEffect(bool bParry, bool bIntercept)
@@ -938,6 +1004,7 @@ void AIVMechPawn::OnDefenceEffect(bool bParry, bool bIntercept)
 void AIVMechPawn::OnZoneState(iv::Zone Z, iv::ZoneState NewState, iv::ZoneState OldState)
 {
 	ZoneStates[iv::Index(Z)] = NewState;
+	if (IsLocallyControlled() && CockpitFx) CockpitFx->ZoneChanged(Z, NewState, OldState);
 	AIVFXManager* FX = AIVFXManager::Get(GetWorld());
 	const FVector Loc = GetZoneWorldLocation(Z);
 	if (FX)

@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Math/RandomStream.h"
 #include "IVDistrict.generated.h"
 
 class UProceduralMeshComponent;
@@ -24,7 +25,29 @@ struct FIVDistrictBuilding
 	bool bGlass = false;
 	bool bActive = false;
 	bool bHero = false;
+	int32 StyleId = 0;                      // 0 concrete, 1 glass tower, 2 shopfront
+	FLinearColor Tint = FLinearColor(0.2f, 0.21f, 0.22f);
+	float Seed = 0.f;
+	FString Crown;
 	TWeakObjectPtr<AIVBuilding> Actor;
+};
+
+/** One decoration instance (sign, LED strip, crown piece...) tied to a building so it can vanish when that building breaks. */
+struct FIVDeco
+{
+	int32 Bld = -1;
+	FTransform T;
+	float CD[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+};
+
+class UPointLightComponent;
+struct FIVNeonLight
+{
+	TObjectPtr<UPointLightComponent> L;
+	int32 Bld = -1;
+	float Base = 1.f;
+	int32 Flicker = 0;
+	float Phase = 0.f;
 };
 
 UCLASS()
@@ -34,6 +57,7 @@ class IMPACTVECTOR_API AIVDistrict : public AActor
 
 public:
 	AIVDistrict();
+	virtual void Tick(float Dt) override;
 
 	/** Returns false if files are missing or malformed. */
 	bool Load(const FString& JsonPath, const FString& HeightPath);
@@ -70,6 +94,12 @@ private:
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Lamps;
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Containers;
 	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Chimneys;
+	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Signs;       // neon signs (M_NeonSign)
+	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> TrimBox;     // emissive LED strips (M_Trim)
+	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> TrimBall;    // beads and beacons
+	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> ConcCyl;     // spires, antennas
+	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> ExtraGlass;  // crown pieces (glass tower material)
+	UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> ExtraConc;   // roof units, awnings (concrete material)
 	UPROPERTY() TObjectPtr<UStaticMesh> CubeMesh;
 	UPROPERTY() TObjectPtr<UStaticMesh> CylMesh;
 	UPROPERTY() TObjectPtr<UStaticMesh> SphereMesh;
@@ -88,4 +118,19 @@ private:
 	UMaterialInstanceDynamic* MakeMID(const TCHAR* Path, UMaterialInterface* Fallback);
 
 	TArray<FTransform> HeroStaticTransforms;
+
+	// decoration lists (rebuilt into the ISMs whenever a building breaks)
+	TArray<FIVDeco> DecoSigns, DecoTrimBox, DecoTrimBall, DecoCyl, DecoGlass, DecoConc;
+	TArray<FIVNeonLight> NeonLights;
+	void BuildDecor(const TSharedPtr<FJsonObject>& Rootj);
+	void DecorateBuilding(int32 Bi, const FString& Crown, FRandomStream& R);
+	void RebuildDeco();
+	void RebuildDecoOne(UInstancedStaticMeshComponent* C, const TArray<FIVDeco>& L, int32 NumCD);
+	int32 FindBuildingAt(const FVector& P, float Pad) const;
+	float NeonTime = 0.f;
+public:
+	/** Lights allowed (set before Load); the preset menu changes it. */
+	int32 MaxNeonLights = 70;
+	void SetLightBudget(int32 N);
+private:
 };

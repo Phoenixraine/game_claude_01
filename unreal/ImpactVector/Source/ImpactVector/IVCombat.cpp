@@ -133,6 +133,37 @@ void AIVCombatDirector::Tick(float Dt)
 	Anim[1] = iv::MakeAnimState(Duel->fighter(iv::Side::B));
 	P->SetCombatAnim(Anim[0]);
 	E->SetCombatAnim(Anim[1]);
+	{	// everything the cockpit monitors and alarms show
+		FIVCockpitFeed Fd;
+		const iv::Fighter& FA = Duel->fighter(iv::Side::A);
+		const iv::Fighter& FB = Duel->fighter(iv::Side::B);
+		for (int32 z = 0; z < iv::kZoneCount; ++z)
+		{
+			const iv::Zone Zn = static_cast<iv::Zone>(z);
+			Fd.Armor[z] = FMath::Clamp(FA.body.layer(Zn, iv::Layer::Armor) / iv::tune::kArmorMax[z], 0.f, 1.f);
+			Fd.Mech[z] = FMath::Clamp(FA.body.layer(Zn, iv::Layer::Mechanism) / iv::tune::kMechanismMax[z], 0.f, 1.f);
+			Fd.State[z] = uint8(FA.body.state(Zn));
+			Fd.EnemyArmor[z] = FMath::Clamp(FB.body.layer(Zn, iv::Layer::Armor) / iv::tune::kArmorMax[z], 0.f, 1.f);
+			Fd.EnemyState[z] = uint8(FB.body.state(Zn));
+		}
+		Fd.Overall = FA.body.Integrity(); Fd.EnemyOverall = FB.body.Integrity();
+		Fd.Stability = FA.res.stability / 100.f; Fd.Heat = FA.res.heat / 100.f; Fd.Energy = FA.res.energy / 100.f; Fd.Ultimate = FA.ultimate / 100.f;
+		Fd.EnemyStability = FB.res.stability / 100.f; Fd.EnemyEnergy = FB.res.energy / 100.f;
+		const FVector To = E->GetActorLocation() - P->GetActorLocation();
+		Fd.DistM = To.Size2D() / 100.f;
+		Fd.BearingDeg = FRotator::NormalizeAxis(To.Rotation().Yaw - P->GetAimYaw());
+		const iv::WeaponKind Ks[3] = { iv::WeaponKind::SuppressionRockets, iv::WeaponKind::RailSpear, iv::WeaponKind::PlasmaCannon };
+		for (int32 i = 0; i < 3; ++i)
+		{
+			Fd.WeaponReady[i] = FA.AmmoOf(Ks[i]) == 0 ? 0.f : 1.f - FMath::Clamp(float(FA.CooldownOf(Ks[i])) / float(iv::tune::kWeapons[iv::Index(Ks[i])].cooldownTicks), 0.f, 1.f);
+			if (FA.weapon == Ks[i]) Fd.Weapon = i;
+		}
+		Fd.Scoop = GetScoopReady01(iv::Side::A);
+		Fd.bBurn = FA.burnTicks > 0; Fd.bBlind = FA.Blind(); Fd.bStrikeLock = FA.strikeLockTicks > 0;
+		Fd.Speed01 = P->GetSpeedRatio();
+		Fd.bValid = true;
+		P->SetCockpitFeed(Fd);
+	}
 
 	const bool bFrozen = Duel->result().over || Duel->cinematic().active;
 	auto Locked = [&](const iv::AnimState& S) {

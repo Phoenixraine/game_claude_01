@@ -417,7 +417,16 @@ float c3 = step(2.5, cls) * step(cls, 3.5);
 float c4 = step(3.5, cls) * step(cls, 4.5);
 float c5 = step(4.5, cls) * step(cls, 5.5);
 float c6 = step(5.5, cls) * step(cls, 6.5);
-float c7 = step(6.5, cls);
+float c7 = step(6.5, cls) * step(cls, 7.5);
+float c8 = step(7.5, cls) * step(cls, 8.5);
+float c9 = step(8.5, cls) * step(cls, 9.5);
+float c10 = step(9.5, cls) * step(cls, 10.5);
+float c11 = step(10.5, cls) * step(cls, 11.5);
+float c12 = step(11.5, cls) * step(cls, 12.5);
+float c13 = step(12.5, cls) * step(cls, 13.5);
+float c14 = step(13.5, cls);
+float haz = step(0.5, frac((P.x + P.y + P.z) * 17.0));
+float weave = 0.75 + 0.25 * sin(P.x * 420.0) * sin(P.y * 380.0 + P.z * 300.0);
 float n = 0.0, a = 0.5; float3 p = P * 9.0;
 for (int i = 0; i < 4; i++)
 {
@@ -445,12 +454,16 @@ float streak = smoothstep(0.55, 0.9, frac(sin(floor(P.y * 140.0) * 91.7) * 437.5
 """
     t = unreal.CustomMaterialOutputType
     base = custom(m, common + """
-float3 dark = float3(0.022, 0.024, 0.027) * (0.7 + 0.8 * n);
+float3 dark = float3(0.016, 0.018, 0.021) * (0.7 + 0.8 * n);
 dark = lerp(dark, float3(0.12, 0.12, 0.125), wear * 0.7);
-float3 grey = lerp(float3(0.14, 0.15, 0.165) * (0.7 + 0.6 * n), float3(0.27, 0.27, 0.27), wear);
-float3 org = lerp(float3(0.33, 0.085, 0.006) * (0.75 + 0.5 * n), float3(0.16, 0.13, 0.1), smoothstep(0.7, 0.85, n));
+float3 grey = lerp(float3(0.06, 0.066, 0.075) * (0.7 + 0.6 * n), float3(0.16, 0.16, 0.165), wear);
+float3 org = lerp(float3(0.22, 0.05, 0.004) * (0.75 + 0.5 * n), float3(0.12, 0.09, 0.07), smoothstep(0.7, 0.85, n));
 float3 rub = float3(0.010, 0.010, 0.012) * (0.7 + 0.6 * fine);
-float3 col = dark * c0 + grey * c1 + org * c2 + rub * c3 + float3(0.005, 0.01, 0.012) * c4 + float3(0.02, 0.01, 0.005) * c5 + float3(0.0, 0.0, 0.0) * c6 + float3(0.02, 0.0, 0.0) * c7;
+float3 suit = float3(0.06, 0.068, 0.09) * weave * (0.8 + 0.5 * n);
+float3 arm = lerp(float3(0.14, 0.15, 0.18) * (0.8 + 0.5 * n), float3(0.32, 0.32, 0.33), wear);
+float3 col = dark * c0 + grey * c1 + org * c2 + rub * c3 + float3(0.005, 0.01, 0.012) * c4 + float3(0.02, 0.01, 0.005) * c5 + float3(0.0, 0.0, 0.0) * c6 + float3(0.02, 0.0, 0.0) * c7
+    + lerp(float3(0.012, 0.012, 0.012), float3(0.6, 0.45, 0.0), haz) * c8 + float3(0.03, 0.03, 0.03) * c9 + float3(0.5, 0.5, 0.52) * c10 + float3(0.004, 0.02, 0.006) * c11
+    + suit * c12 + arm * c13 + float3(0.01, 0.03, 0.04) * c14;
 col *= (1.0 - 0.35 * streak * Wet);
 col = lerp(col, col * 0.3, Damage * smoothstep(0.5, 0.9, n));
 return col;
@@ -458,13 +471,13 @@ return col;
     wire_custom(base, srcs)
     MEL.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
     rough = custom(m, common + """
-float r = c0 * (0.38 + 0.3 * wear) + c1 * (0.5 + 0.35 * wear) + c2 * 0.5 + c3 * 0.92 + c4 * 0.15 + c5 * 0.3 + c6 * 0.05 + c7 * 0.3;
+float r = c0 * (0.38 + 0.3 * wear) + c1 * (0.5 + 0.35 * wear) + c2 * 0.5 + c3 * 0.92 + c4 * 0.15 + c5 * 0.3 + c6 * 0.05 + c7 * 0.3 + c8 * 0.62 + c9 * 0.3 + c10 * 0.17 + c11 * 0.3 + c12 * 0.88 + c13 * (0.4 + 0.3 * wear) + c14 * 0.2;
 r = lerp(r, 0.12, Wet * 0.5 * streak * (1.0 - c3));
 return clamp(r, 0.04, 0.98);
 """, t.CMOT_FLOAT1, names, -900, 300, "cockpit_rough")
     wire_custom(rough, srcs)
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
-    metal = custom(m, common + "return c0 * 0.85 + c1 * (0.2 + 0.7 * wear) + c2 * 0.15 + c4 * 0.1;", t.CMOT_FLOAT1, names, -900, 600, "cockpit_metal")
+    metal = custom(m, common + "return c0 * 0.85 + c1 * (0.2 + 0.7 * wear) + c2 * 0.15 + c4 * 0.1 + c10 * 1.0 + c13 * (0.25 + 0.5 * wear);", t.CMOT_FLOAT1, names, -900, 600, "cockpit_metal")
     wire_custom(metal, srcs)
     MEL.connect_material_property(metal, "", unreal.MaterialProperty.MP_METALLIC)
     emi = custom(m, common + """
@@ -472,7 +485,8 @@ float3 cyan = float3(0.0, 0.9, 1.25) * (0.35 + 0.65 * scan) * (0.6 + 0.4 * grid 
 float3 org = float3(1.0, 0.33, 0.04) * (0.55 + 0.45 * blink);
 float3 red = float3(1.0, 0.03, 0.02) * (0.4 + 0.6 * blink) * (1.0 + 2.0 * Alert);
 float flick = Power * (0.92 + 0.08 * sin(T * 53.0)) * (1.0 - Damage * step(0.6, frac(T * 7.0 + cell)));
-return (c4 * cyan * 1.8 + c5 * org * 3.0 + c7 * red * 3.0) * flick + c2 * float3(0.4, 0.05, 0.0) * Alert * 0.2;
+float3 core = float3(0.25, 1.1, 1.6) * (3.5 + 1.5 * sin(T * 2.2));
+return (c4 * cyan * 1.8 + c5 * org * 3.0 + c7 * red * 3.0 + c9 * float3(1.0, 0.95, 0.85) * 2.8 + c11 * float3(0.12, 1.0, 0.25) * (1.5 + 1.2 * blink) + c14 * core) * flick + c2 * float3(0.4, 0.05, 0.0) * Alert * 0.2;
 """, t.CMOT_FLOAT3, names, -900, 900, "cockpit_emissive")
     wire_custom(emi, srcs)
     MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
@@ -764,7 +778,283 @@ def build_spark():
     return m
 
 
-for fn in (build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor):
+def _cd(m, idx, default, x, y):
+    e = expr(m, unreal.MaterialExpressionPerInstanceCustomData, x, y)
+    e.set_editor_property("data_index", idx)
+    e.set_editor_property("const_default_value", default)
+    return e
+
+
+HASH_FN = """
+#define h11(x) frac(sin((x) * 127.1) * 43758.5453)
+#define h21(p) frac(sin(dot((p), float2(127.1, 311.7))) * 43758.5453)
+"""
+
+
+def build_neon_sign():
+    """Building-sized neon signs. Per-instance custom data: 0-2 colour, 3-5 colour2, 6 = style + 10*anim, 7 = seed, 8 = aspect (w/h).
+    Styles: 0 vertical banner of pseudo-kanji, 1 animated LED billboard, 2 horizontal strip of glyphs, 3 plain glowing tube."""
+    m = make_material("M_NeonSign")
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_DEFAULT_LIT)
+    uv = expr(m, unreal.MaterialExpressionTextureCoordinate, -1500, 0)
+    tm = expr(m, unreal.MaterialExpressionTime, -1500, 120)
+    nrm = expr(m, unreal.MaterialExpressionVertexNormalWS, -1500, 240)
+    xf = nrm
+    cds = [_cd(m, i, d, -1500, 360 + 110 * i) for i, d in enumerate([1.0, 0.1, 0.5, 0.1, 0.9, 1.0, 0.0, 0.0, 0.3, 0.0])]
+    gain = scalar(m, "Gain", 1.0, -1500, 1400)
+    names = ["UV", "T", "NL", "R1", "G1", "B1", "R2", "G2", "B2", "SA", "Seed", "Asp", "Gain", "Yaw"]
+    srcs = [(uv, ""), (tm, ""), (xf, ""), (cds[0], ""), (cds[1], ""), (cds[2], ""), (cds[3], ""), (cds[4], ""), (cds[5], ""), (cds[6], ""), (cds[7], ""), (cds[8], ""), (gain, ""), (cds[9], "")]
+    common = HASH_FN + """
+float3 C1 = float3(R1, G1, B1), C2 = float3(R2, G2, B2);
+float style = fmod(SA, 10.0), anim = floor(SA / 10.0);
+float yawr = radians(Yaw);
+float face = step(0.55, dot(normalize(NL), float3(cos(yawr), sin(yawr), 0)));
+float2 uv = float2(UV.x, 1.0 - UV.y);
+float asp = max(Asp, 0.02);
+float flick = 1.0;
+if (anim > 0.5 && anim < 1.5) { float ft = floor(T * 7.0 + Seed); flick = (h11(ft + Seed * 3.1) > 0.82) ? 0.12 : 1.0; flick *= 0.9 + 0.1 * sin(T * 40.0); }
+float chase = 1.0;
+if (anim > 1.5) chase = 0.55 + 0.45 * sin(T * 3.0 - uv.y * 9.0 + Seed);
+float3 emis = float3(0, 0, 0);
+// ---- which glyph cell are we in?  (q = 0..1 inside the cell, gs = glyph seed, on = inside the drawn area)
+float2 q = float2(0, 0); float gs = 0; float on = 0; float rowid = 0;
+if (style < 0.5)
+{
+    float n = max(1.0, floor(1.0 / max(asp, 0.05)));
+    float py = uv.y * n;
+    rowid = floor(py);
+    q = float2((uv.x - 0.1) / 0.8, (frac(py) - 0.08) / 0.84);
+    gs = floor(h21(float2(rowid, Seed)) * 60.0) + Seed;
+    on = step(0.0, q.x) * step(q.x, 1.0) * step(0.0, q.y) * step(q.y, 1.0);
+}
+else if (style < 1.5)
+{
+    q = float2(frac(uv.x * asp * 5.0), frac(uv.y * 5.0));
+    float2 cid = float2(floor(uv.x * asp * 5.0), floor(uv.y * 5.0));
+    rowid = cid.x + cid.y * 7.0;
+    gs = floor(h21(cid + Seed) * 80.0);
+    on = step(0.22, uv.y) * step(uv.y, 0.78) * step(0.1, uv.x) * step(uv.x, 0.9) * step(0.55, h21(cid + Seed * 2.0));
+}
+else if (style < 2.5)
+{
+    float n = max(1.0, floor(asp));
+    float px = uv.x * n;
+    rowid = floor(px);
+    q = float2((frac(px) - 0.1) / 0.8, (uv.y - 0.12) / 0.76);
+    gs = floor(h21(float2(rowid, Seed)) * 60.0) + Seed;
+    on = step(0.0, q.x) * step(q.x, 1.0) * step(0.0, q.y) * step(q.y, 1.0);
+}
+// ---- the glyph: a few random strokes snapped to a 3x3 grid (kana / kanji look-alike)
+float gd = 1e3;
+for (int i = 0; i < 5; i++)
+{
+    float k = gs * 7.13 + i * 3.7;
+    float2 a = floor(float2(h11(k), h11(k + 1.3)) * 3.0) / 2.0 * 0.62 + 0.19;
+    float2 b = floor(float2(h11(k + 2.9), h11(k + 4.1)) * 3.0) / 2.0 * 0.62 + 0.19;
+    if (h11(k + 7.7) > 0.5) b.y = a.y; else b.x = a.x;
+    if (i == 4 && h11(gs) > 0.5) { a = float2(0.5, 0.15); b = float2(0.5, 0.85); }
+    float2 pa = q - a, ba = b - a;
+    float hh = saturate(dot(pa, ba) / max(dot(ba, ba), 1e-4));
+    gd = min(gd, length(pa - ba * hh));
+}
+if (style < 2.5)
+{
+    float bd = min(min(uv.x * asp, (1.0 - uv.x) * asp), min(uv.y, 1.0 - uv.y));
+    float bw = (style > 0.5 && style < 1.5) ? 0.012 : 0.02;
+    float tube = smoothstep(bw * 1.6, bw * 0.8, abs(bd - bw * 2.0));
+    emis += C2 * tube * 9.0 * flick;
+}
+if (style < 0.5)
+{
+    float stroke = smoothstep(0.075, 0.04, gd) * on;
+    float halo = exp(-gd * 18.0) * on * 0.35;
+    float3 col = (frac(rowid * 0.5) > 0.4) ? C1 : lerp(C1, C2, 0.65);
+    emis += col * (stroke * 11.0 + halo * 2.4) * flick * chase;
+}
+else if (style < 1.5)
+{
+    float t = T * (0.5 + 0.8 * h11(Seed));
+    float2 p = float2(uv.x * asp * 2.0, uv.y * 2.0);
+    float ring = abs(frac(length(p - float2(asp * (1.0 + 0.7 * sin(t)), 1.0)) * 1.6 - t * 0.6) - 0.5);
+    float bars = step(0.5, frac((uv.x * 6.0 * asp + uv.y * 2.0) - t * 0.7));
+    float cyc = 0.5 + 0.5 * sin(t * 1.3 + Seed);
+    float3 bg = lerp(C1, C2, cyc) * (0.25 + 0.55 * bars * smoothstep(0.1, 0.4, ring));
+    float txt = smoothstep(0.09, 0.05, gd) * on;
+    float scan = 0.85 + 0.15 * sin(uv.y * 400.0);
+    emis += (bg * 2.6 + lerp(C2, C1, cyc) * txt * 7.0) * scan * flick;
+}
+else if (style < 2.5)
+{
+    float stroke = smoothstep(0.08, 0.04, gd) * on;
+    float halo = exp(-gd * 14.0) * on * 0.35;
+    float3 col = (frac(rowid * 0.5) > 0.4) ? C1 : C2;
+    emis += col * (stroke * 10.0 + halo * 2.0) * flick * chase;
+}
+else
+{
+    emis += C1 * 7.0 * flick * chase * (0.8 + 0.2 * sin(uv.y * 30.0 + T * 2.0));
+}
+emis *= face * Gain;
+return emis;
+"""
+    t = unreal.CustomMaterialOutputType
+    emi = custom(m, common, t.CMOT_FLOAT3, names, -900, 0, "sign_emissive")
+    wire_custom(emi, srcs)
+    MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    base = scalar(m, "BaseDark", 0.02, -900, 600)
+    bc = expr(m, unreal.MaterialExpressionConstant3Vector, -900, 650)
+    bc.set_editor_property("constant", unreal.LinearColor(0.02, 0.02, 0.025, 1))
+    MEL.connect_material_property(bc, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = scalar(m, "Roughness", 0.35, -900, 800)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    metal = scalar(m, "Metallic", 0.6, -900, 900)
+    MEL.connect_material_property(metal, "", unreal.MaterialProperty.MP_METALLIC)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+def build_glass_tower():
+    """Curtain-wall glass tower: mullion grid, spandrel bands, lit offices, fake city-glow reflections; Lumen reflects the neon in it.
+    Per-instance custom data: 0-2 glass tint, 3 seed."""
+    m = make_material("M_GlassTower")
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    wp = expr(m, unreal.MaterialExpressionWorldPosition, -1500, 0)
+    nrm = expr(m, unreal.MaterialExpressionVertexNormalWS, -1500, 120)
+    cam = expr(m, unreal.MaterialExpressionCameraVectorWS, -1500, 240)
+    tm = expr(m, unreal.MaterialExpressionTime, -1500, 360)
+    r = _cd(m, 0, 0.08, -1500, 480)
+    g = _cd(m, 1, 0.2, -1500, 600)
+    b = _cd(m, 2, 0.3, -1500, 720)
+    sd = _cd(m, 3, 0.0, -1500, 840)
+    lit = scalar(m, "LitAmount", 1.0, -1500, 960)
+    bright = scalar(m, "Bright", 1.0, -1500, 1080)
+    names = ["WP", "Nrm", "Cam", "T", "R", "G", "B", "Seed", "Lit", "Bright"]
+    srcs = [(wp, ""), (nrm, ""), (cam, ""), (tm, ""), (r, ""), (g, ""), (b, ""), (sd, ""), (lit, ""), (bright, "")]
+    common = HASH_FN + """
+float3 n = normalize(Nrm);
+float3 tint = float3(R, G, B);
+float roof = step(0.7, abs(n.z));
+float hRaw = lerp(WP.x, WP.y, step(0.5, abs(n.x)));
+float cw = 150.0, fh = 400.0;
+float2 g2 = float2(hRaw / cw, WP.z / fh);
+float2 f = frac(g2);
+float2 id = floor(g2);
+float hs = h21(id + Seed * 13.7);
+float hf = h21(float2(id.y, Seed * 5.1));                 // floor-wide factor (whole storeys lit/dark)
+float mull = smoothstep(0.0, 0.05, f.x) * smoothstep(0.0, 0.05, 1.0 - f.x);
+float slab = smoothstep(0.17, 0.2, f.y) * smoothstep(1.0, 0.985, f.y);
+float glassM = mull * slab * (1.0 - roof);
+float fres = pow(1.0 - saturate(abs(dot(n, normalize(Cam)))), 2.5);
+"""
+    t = unreal.CustomMaterialOutputType
+    base = custom(m, common + """
+float3 frame = float3(0.025, 0.027, 0.032) * (0.8 + 0.4 * hs);
+float3 gl = tint * 0.12 * (0.8 + 0.4 * hs);
+float3 roofc = float3(0.045, 0.047, 0.05);
+return lerp(lerp(frame, gl, glassM), roofc, roof);
+""", t.CMOT_FLOAT3, names, -900, 0, "gt_base")
+    wire_custom(base, srcs)
+    MEL.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = custom(m, common + "return lerp(lerp(0.32, 0.045 + 0.06 * hs, glassM), 0.8, roof);", t.CMOT_FLOAT1, names, -900, 300, "gt_rough")
+    wire_custom(rough, srcs)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    met = custom(m, common + "return lerp(0.85, 0.0, glassM) * (1.0 - roof);", t.CMOT_FLOAT1, names, -900, 600, "gt_metal")
+    wire_custom(met, srcs)
+    MEL.connect_material_property(met, "", unreal.MaterialProperty.MP_METALLIC)
+    spec = custom(m, common + "return lerp(0.5, 1.0, glassM);", t.CMOT_FLOAT1, names, -900, 800, "gt_spec")
+    wire_custom(spec, srcs)
+    MEL.connect_material_property(spec, "", unreal.MaterialProperty.MP_SPECULAR)
+    emi = custom(m, common + """
+float cc = h21(id + Seed);
+float lit1 = step(0.88, hs) + step(0.74, hf) * step(0.3, hs) * 0.75;
+float on = saturate(lit1) * glassM * Lit;
+float3 warm = (cc < 0.6) ? float3(1.0, 0.78, 0.5) : ((cc < 0.9) ? float3(0.7, 0.86, 1.0) : float3(1.0, 0.4, 0.8));
+float3 e = warm * on * (1.2 + 1.8 * hs);
+// faked sky/city reflection: the glass glows in its own tint, brighter near the horizon and at grazing angles
+float hgt = saturate(WP.z / 22000.0);
+float streak = 0.5 + 0.5 * sin(hRaw / 1900.0 + Seed * 30.0 + WP.z / 9000.0);
+streak = pow(streak, 5.0);
+e += tint * glassM * (0.9 + 2.6 * fres) * (0.3 + 0.7 * hgt) * Bright * 2.0;
+e += lerp(tint, float3(1.0, 0.5, 0.9), 0.5) * glassM * streak * 1.6 * Bright;
+float3 street = lerp(float3(1.0, 0.25, 0.6), float3(0.1, 0.8, 1.0), h11(Seed * 3.3 + floor(WP.z / 1200.0) * 0.07));
+e += street * glassM * (1.0 - saturate(WP.z / 6000.0)) * 1.1 * (1.0 - roof);
+e *= 0.93 + 0.07 * sin(T * 0.7 + hs * 20.0);
+return e;
+""", t.CMOT_FLOAT3, names, -900, 1000, "gt_emissive")
+    wire_custom(emi, srcs)
+    MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+def build_trim():
+    """Emissive trim: LED strips, beads, beacons. Custom data: 0-2 colour, 3 intensity, 4 blink rate (0 = steady)."""
+    m = make_material("M_Trim")
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    tm = expr(m, unreal.MaterialExpressionTime, -900, 0)
+    cds = [_cd(m, i, d, -900, 120 + 110 * i) for i, d in enumerate([1.0, 0.2, 0.5, 6.0, 0.0])]
+    c = custom(m, """
+float3 col = float3(R, G, B) * I;
+if (Bl > 0.01) { col *= step(0.5, frac(T * Bl)); }
+return col;
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["R", "G", "B", "I", "Bl", "T"], -500, 100, "trim_emissive")
+    wire_custom(c, [(cds[0], ""), (cds[1], ""), (cds[2], ""), (cds[3], ""), (cds[4], ""), (tm, "")])
+    MEL.connect_material_property(c, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    bc = expr(m, unreal.MaterialExpressionConstant3Vector, -500, 400)
+    bc.set_editor_property("constant", unreal.LinearColor(0.02, 0.02, 0.02, 1))
+    MEL.connect_material_property(bc, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+
+def build_monitor():
+    """Cockpit monitor: the render target "Tex" (drawn by the game) with scanlines, vignette, glitch and a power fade."""
+    m = make_material("M_Monitor")
+    uv = expr(m, unreal.MaterialExpressionTextureCoordinate, -1200, 0)
+    tm = expr(m, unreal.MaterialExpressionTime, -1200, 120)
+    tex = expr(m, unreal.MaterialExpressionTextureObjectParameter, -1200, 240)
+    tex.set_editor_property("parameter_name", "Tex")
+    tex.set_editor_property("texture", unreal.load_asset("/Engine/EngineResources/WhiteSquareTexture"))
+    power = scalar(m, "Power", 1.0, -1200, 400)
+    glitch = scalar(m, "Glitch", 0.0, -1200, 500)
+    gain = scalar(m, "Gain", 1.7, -1200, 600)
+    c = custom(m, """
+float2 uv = UV;
+float row = floor(uv.y * 26.0);
+float jit = frac(sin(row * 91.7 + floor(T * 11.0) * 13.1) * 437.5) - 0.5;
+float hit = step(0.82, frac(sin(row * 12.3 + floor(T * 7.0) * 3.7) * 91.0));
+uv.x += jit * 0.05 * Gl * hit;
+float3 c = Tex.Sample(TexSampler, uv).rgb;
+c.r = Tex.Sample(TexSampler, uv + float2(0.005 * Gl, 0)).r;
+float scan = 0.86 + 0.14 * sin(uv.y * 420.0 + T * 5.0);
+float vig = smoothstep(0.0, 0.08, uv.x) * smoothstep(1.0, 0.92, uv.x) * smoothstep(0.0, 0.08, uv.y) * smoothstep(1.0, 0.92, uv.y);
+float on = Pw * (1.0 - Gl * step(0.93, frac(T * 2.3 + uv.y * 1.7)));
+return c * Gn * scan * (0.5 + 0.5 * vig) * on;
+""", unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["Tex", "UV", "T", "Pw", "Gl", "Gn"], -800, 100, "monitor_emissive")
+    wire_custom(c, [(tex, ""), (uv, ""), (tm, ""), (power, ""), (glitch, ""), (gain, "")])
+    MEL.connect_material_property(c, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    bc = expr(m, unreal.MaterialExpressionConstant3Vector, -800, 400)
+    bc.set_editor_property("constant", unreal.LinearColor(0.004, 0.006, 0.008, 1))
+    MEL.connect_material_property(bc, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    r = scalar(m, "Roughness", 0.1, -800, 500)
+    MEL.connect_material_property(r, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
+ALL = [build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor,
+       build_neon_sign, build_glass_tower, build_trim, build_monitor]
+import os
+_only = [x for x in os.environ.get("IV_ONLY", "").split(",") if x]
+for fn in ALL:
+    if _only and fn.__name__ not in _only:
+        continue
     try:
         fn()
         unreal.log("IV material OK: %s" % fn.__name__)

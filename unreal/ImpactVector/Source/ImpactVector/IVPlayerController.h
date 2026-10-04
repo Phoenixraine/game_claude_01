@@ -69,6 +69,7 @@ private:
 	void OnAct5() { DoAction(TEXT("dodge_left")); }
 	void OnAct6() { DoAction(TEXT("quick_piston_r")); }
 
+	bool WantsFreeLook() const;
 	AIVMechPawn* Mech() const;
 	AIVCombatDirector* GetDirector();
 	void UpdateCombatInput(float Dt);

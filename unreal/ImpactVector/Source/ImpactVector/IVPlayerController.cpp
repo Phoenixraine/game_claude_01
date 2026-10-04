@@ -10,6 +10,11 @@
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 
+bool AIVPlayerController::WantsFreeLook() const
+{
+	return IsInputKeyDown(EKeys::Z) || IsInputKeyDown(EKeys::LeftAlt) || IsInputKeyDown(EKeys::Gamepad_Special_Left);
+}
+
 AIVMechPawn* AIVPlayerController::Mech() const
 {
 	return Cast<AIVMechPawn>(GetPawn());
@@ -144,6 +149,11 @@ void AIVPlayerController::OnLook(const FInputActionValue& V)
 	AIVMechPawn* M = Mech();
 	if (!M) return;
 	const bool bMouse = FMath::Abs(L.X) > 1.001f || FMath::Abs(L.Y) > 1.001f;
+	if (WantsFreeLook())
+	{
+		if (bMouse) M->AddLook(L.X * LookSensitivity, L.Y * LookSensitivity); else LookStick = L;
+		return;
+	}
 	const bool bVectorMode = IsInputKeyDown(EKeys::LeftMouseButton) || IsInputKeyDown(EKeys::RightMouseButton) || GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.2f || GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.2f;
 	if (bMouse)
 	{
@@ -317,6 +327,8 @@ void AIVPlayerController::PlayerTick(float Dt)
 	}
 	M->SetMoveIntent(Move);
 	M->SetSprint(bSpr);
+	const bool bFL = WantsFreeLook();
+	M->SetFreeLook(bFL);
 
 	AIVCombatDirector* Dir = GetDirector();
 	if (Dir && !bAuto && bCombatEnabled)
@@ -337,7 +349,11 @@ void AIVPlayerController::PlayerTick(float Dt)
 			LockOffYaw *= Back; LockOffPitch *= Back;
 		}
 	}
-	if (!LookStick.IsNearlyZero(0.05f) && !(Dir && (IsInputKeyDown(EKeys::Gamepad_RightTriggerAxis) || GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.2f)))
+	if (bFL)
+	{
+		if (!LookStick.IsNearlyZero(0.05f)) M->AddLook(LookStick.X * StickLookRate * Dt, LookStick.Y * StickLookRate * Dt);
+	}
+	else if (!LookStick.IsNearlyZero(0.05f) && !(Dir && (IsInputKeyDown(EKeys::Gamepad_RightTriggerAxis) || GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.2f)))
 	{
 		M->AddAim(LookStick.X * StickLookRate * Dt, LookStick.Y * StickLookRate * Dt);
 	}

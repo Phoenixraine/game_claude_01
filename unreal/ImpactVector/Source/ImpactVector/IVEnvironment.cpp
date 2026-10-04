@@ -61,11 +61,11 @@ AIVEnvironment::AIVEnvironment()
 
 	Fog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("Fog"));
 	Fog->SetupAttachment(Root);
-	Fog->SetFogDensity(0.17f);
+	Fog->SetFogDensity(0.1f);
 	Fog->SetFogHeightFalloff(0.012f);
 	Fog->SetVolumetricFog(true);
 	Fog->SetVolumetricFogDistance(30000.f);
-	Fog->SetFogInscatteringColor(FLinearColor(0.10f, 0.13f, 0.19f));
+	Fog->SetFogInscatteringColor(FLinearColor(0.13f, 0.12f, 0.22f));
 	Fog->SkyAtmosphereAmbientContributionColorScale = FLinearColor(0.12f, 0.16f, 0.26f);
 	Fog->SetFogMaxOpacity(1.f);
 	Fog->SetStartDistance(0.f);
@@ -81,8 +81,8 @@ AIVEnvironment::AIVEnvironment()
 	FPostProcessSettings& S = PostProcess->Settings;
 	S.bOverride_AutoExposureMethod = true;
 	S.AutoExposureMethod = EAutoExposureMethod::AEM_Histogram;
-	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 3.0f;
-	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 3.0f;
+	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 1.6f;
+	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 1.6f;
 	S.bOverride_AutoExposureBias = true; S.AutoExposureBias = 0.4f;
 	S.bOverride_BloomIntensity = true; S.BloomIntensity = 0.45f;
 	S.bOverride_VignetteIntensity = true; S.VignetteIntensity = 0.45f;
@@ -168,8 +168,13 @@ void AIVEnvironment::BeginPlay()
 		M->SetScalarParameterValue(TEXT("Glassiness"), 0.9f);
 		M->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.04f, 0.07f, 0.1f));
 	});
-	const FString JsonPath = FPaths::ProjectContentDir() / TEXT("Data/district.json");
-	const FString HeightPath = FPaths::ProjectContentDir() / TEXT("Data/heightmap.r16");
+	FString JsonPath = FPaths::ProjectContentDir() / TEXT("Data/district_arena.json");
+	FString HeightPath = FPaths::ProjectContentDir() / TEXT("Data/heightmap_arena.r16");
+	if (FParse::Param(FCommandLine::Get(), TEXT("IVBayMap")) || !FPaths::FileExists(JsonPath))
+	{
+		JsonPath = FPaths::ProjectContentDir() / TEXT("Data/district.json");
+		HeightPath = FPaths::ProjectContentDir() / TEXT("Data/heightmap.r16");
+	}
 	if (FPaths::FileExists(JsonPath) && FPaths::FileExists(HeightPath))
 	{
 		District = GetWorld()->SpawnActor<AIVDistrict>(FVector::ZeroVector, FRotator::ZeroRotator);

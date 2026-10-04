@@ -12,6 +12,8 @@
 #include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Components/PointLightComponent.h"
+#include "HAL/IConsoleManager.h"
 
 namespace
 {
@@ -45,7 +47,7 @@ namespace
 
 AIVDistrict::AIVDistrict()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeF(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylF(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphF(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
@@ -74,6 +76,22 @@ AIVDistrict::AIVDistrict()
 	{
 		C->NumCustomDataFloats = 3;
 	}
+	Signs = ISM(TEXT("Signs"), CubeMesh, false);
+	TrimBox = ISM(TEXT("TrimBox"), CubeMesh, false);
+	TrimBall = ISM(TEXT("TrimBall"), SphereMesh, false);
+	ConcCyl = ISM(TEXT("ConcCyl"), CylMesh, false);
+	ExtraGlass = ISM(TEXT("ExtraGlass"), CubeMesh, false);
+	ExtraConc = ISM(TEXT("ExtraConc"), CubeMesh, false);
+	Signs->NumCustomDataFloats = 10;
+	TrimBox->NumCustomDataFloats = 5;
+	TrimBall->NumCustomDataFloats = 5;
+	ConcCyl->NumCustomDataFloats = 4;
+	ExtraGlass->NumCustomDataFloats = 4;
+	ExtraConc->NumCustomDataFloats = 4;
+	Concrete->NumCustomDataFloats = 4;
+	Glass->NumCustomDataFloats = 4;
+	for (UInstancedStaticMeshComponent* C : { Signs.Get(), TrimBox.Get(), TrimBall.Get() }) { C->SetCastShadow(false); }
+	PrimaryActorTick.bCanEverTick = true;
 
 	Terrain = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Terrain"));
 	Terrain->SetupAttachment(Root);
@@ -173,6 +191,15 @@ bool AIVDistrict::Load(const FString& JsonPath, const FString& HeightPath)
 		FacadeGlass->SetScalarParameterValue(TEXT("Glassiness"), 0.9f);
 		Glass->SetMaterial(0, FacadeGlass);
 	}
+	if (UMaterialInstanceDynamic* Gt = MakeMID(TEXT("/Game/Materials/M_GlassTower.M_GlassTower"), nullptr))
+	{
+		FacadeGlass = Gt;
+		Glass->SetMaterial(0, Gt);
+		ExtraGlass->SetMaterial(0, Gt);
+	}
+	if (FacadeConcrete) ExtraConc->SetMaterial(0, FacadeConcrete), ConcCyl->SetMaterial(0, FacadeConcrete);
+	if (UMaterialInstanceDynamic* Ns = MakeMID(TEXT("/Game/Materials/M_NeonSign.M_NeonSign"), Fb)) Signs->SetMaterial(0, Ns);
+	if (UMaterialInstanceDynamic* Tr = MakeMID(TEXT("/Game/Materials/M_Trim.M_Trim"), Fb)) { TrimBox->SetMaterial(0, Tr); TrimBall->SetMaterial(0, Tr); }
 	if (UMaterialInstanceDynamic* Prop = MakeMID(TEXT("/Game/Materials/M_PropColor.M_PropColor"), Fb))
 	{
 		for (UInstancedStaticMeshComponent* C : { Cars.Get(), TreeTrunks.Get(), TreeCrowns.Get(), Lamps.Get() })
@@ -195,6 +222,7 @@ bool AIVDistrict::Load(const FString& JsonPath, const FString& HeightPath)
 	BuildRoads(Rootj->GetArrayField(TEXT("roads")));
 	BuildBuildings(Rootj->GetArrayField(TEXT("buildings")));
 	BuildProps(Rootj->GetArrayField(TEXT("props")));
+	BuildDecor(Rootj);
 	if (Rootj->HasTypedField<EJson::Object>(TEXT("infrastructure"))) BuildPort(Rootj->GetObjectField(TEXT("infrastructure")));
 
 	// sea slab: top at z = 0, covers the sea and runs under the land
@@ -365,6 +393,14 @@ void AIVDistrict::BuildBuildings(const TArray<TSharedPtr<FJsonValue>>& Buildings
 		D.bHero = (Type == TEXT("hero"));
 		const FString Facade = B->GetStringField(TEXT("facade_style"));
 		D.bGlass = Facade.Contains(TEXT("glass")) || Kind == TEXT("glass_tower");
+		{
+			FString Style;
+			if (B->TryGetStringField(TEXT("style"), Style)) { D.StyleId = Style == TEXT("glass_tower") ? 1 : (Style == TEXT("shop") ? 2 : 0); D.bGlass = (D.StyleId == 1); }
+			const TArray<TSharedPtr<FJsonValue>>* Tn = nullptr;
+			if (B->TryGetArrayField(TEXT("tint"), Tn) && Tn->Num() >= 3) D.Tint = FLinearColor((*Tn)[0]->AsNumber(), (*Tn)[1]->AsNumber(), (*Tn)[2]->AsNumber());
+			B->TryGetStringField(TEXT("crown"), D.Crown);
+			D.Seed = float(FCrc::StrCrc32(*Id) % 1000) / 1000.f;
+		}
 
 		const bool bQuad = (Poly.Num() == 4);
 		if (bQuad && !D.bHero)
@@ -405,14 +441,27 @@ void AIVDistrict::RebuildStaticInstances()
 	Concrete->ClearInstances();
 	Glass->ClearInstances();
 	TArray<FTransform> C, G;
+	TArray<const FIVDistrictBuilding*> CB, GB;
 	for (const FIVDistrictBuilding& D : Buildings)
 	{
 		if (D.bActive) continue;
 		const FTransform T(FRotator(0, D.YawDeg, 0), D.Center, D.Size / 100.f);
-		(D.bGlass ? G : C).Add(T);
+		if (D.bGlass) { G.Add(T); GB.Add(&D); } else { C.Add(T); CB.Add(&D); }
 	}
-	Concrete->AddInstances(C, false, true);
-	Glass->AddInstances(G, false, true);
+	auto Fill = [](UInstancedStaticMeshComponent* Comp, const TArray<FTransform>& Tr, const TArray<const FIVDistrictBuilding*>& Bl)
+	{
+		if (Tr.Num() == 0) return;
+		Comp->AddInstances(Tr, false, true);
+		for (int32 i = 0; i < Bl.Num(); ++i)
+		{
+			const float CD[4] = { Bl[i]->Tint.R, Bl[i]->Tint.G, Bl[i]->Tint.B, Bl[i]->Seed };
+			Comp->SetCustomData(i, MakeArrayView(CD, 4), false);
+		}
+		Comp->MarkRenderStateDirty();
+	};
+	Fill(Concrete, C, CB);
+	Fill(Glass, G, GB);
+	if (bLoaded) RebuildDeco();
 }
 
 void AIVDistrict::BuildHeroStatics(const TSharedPtr<FJsonObject>& B)

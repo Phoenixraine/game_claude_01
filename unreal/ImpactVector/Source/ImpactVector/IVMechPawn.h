@@ -7,6 +7,7 @@
 #include "IVRigAnim.h"
 #include "iv/Anim.h"
 #include "iv/Events.h"
+#include "IVCockpit.h"
 #include "IVMechPawn.generated.h"
 
 class UCapsuleComponent;
@@ -109,6 +110,13 @@ public:
 	void OnLimbSevered(iv::Zone Z);
 	void OnArmorPlateLost(iv::Zone Z, int32 Index, int32 Count);
 	void AddCockpitImpulse(float Right, float Up, float Strength);
+	/** Free look inside the cockpit (hold the key): the head turns, the room stays. Pitch down far enough to see the pilot's own body. */
+	void SetFreeLook(bool b) { bFreeLook = b; }
+	bool IsFreeLook() const { return bFreeLook; }
+	void AddLook(float DYaw, float DPitch) { LookYawT = FMath::Clamp(LookYawT + DYaw, -115.f, 115.f); LookPitchT = FMath::Clamp(LookPitchT + DPitch, -82.f, 58.f); }
+	float GetLookAmount() const { return FMath::Max(FMath::Abs(LookYaw) / 40.f, FMath::Abs(LookPitch) / 28.f); }
+	UIVCockpitComponent* GetCockpitFx() const { return CockpitFx; }
+	void SetCockpitFeed(const FIVCockpitFeed& F) { if (CockpitFx) CockpitFx->SetFeed(F); }
 	void StartCinematic(AIVMechPawn* Subject, float Seconds, int32 Kind);
 	void StopCinematic();
 	bool IsInCinematic() const { return bCine; }
@@ -170,6 +178,9 @@ protected:
 	UPROPERTY() TObjectPtr<UStaticMeshComponent> CockpitGlassMesh;
 	UPROPERTY() TArray<TObjectPtr<class UPointLightComponent>> CockpitLights;
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> CockpitMID;
+	UPROPERTY() TObjectPtr<UIVCockpitComponent> CockpitFx;
+	bool bFreeLook = false, bDebugLook = false, bDebugFailDone = false;
+	float LookYaw = 0.f, LookPitch = 0.f, LookYawT = 0.f, LookPitchT = 0.f;
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> GlassMID;
 
 	void UpdateLocomotion(float Dt);
