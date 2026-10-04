@@ -224,7 +224,7 @@ namespace
 	// monitor pages inside the one atlas render target (1024 x 1152)
 	const FIntRect kTiles[8] = {
 		FIntRect(0, 0, 512, 512), FIntRect(512, 0, 1024, 512), FIntRect(0, 512, 512, 768), FIntRect(512, 512, 1024, 768),
-		FIntRect(0, 768, 256, 1024), FIntRect(256, 768, 640, 1024), FIntRect(640, 768, 1024, 1024), FIntRect(0, 1024, 1024, 1152) };
+		FIntRect(0, 768, 384, 1024), FIntRect(384, 768, 704, 1024), FIntRect(704, 768, 1024, 1024), FIntRect(0, 1024, 1024, 1152) };
 }
 
 // =====================================================================================================================
@@ -912,6 +912,11 @@ void UIVCockpitComponent::BuildMonitors()
 		else if (M.Id == TEXT("aux_L")) Fd = 2;
 		else if (M.Id == TEXT("aux_R")) Fd = 3;
 		else if (M.Id == TEXT("overhead")) Fd = 7;
+			else if (M.Id == TEXT("radar_C")) Fd = 4;
+			else if (M.Id == TEXT("side_c1")) Fd = 5;
+			else if (M.Id == TEXT("side_c2")) Fd = 6;
+			else if (M.Id == TEXT("side_1")) Fd = 3;
+			else if (M.Id == TEXT("side_3")) Fd = 2;
 		else { const uint32 H = GetTypeHash(M.Id); static const int32 Map[4] = { 4, 5, 6, 7 }; Fd = Map[H % 4]; if (M.Id.StartsWith(TEXT("wall"))) { static const int32 W[4] = { 6, 5, 2, 4 }; Fd = W[H % 4]; } }
 		M.Feed = Fd;
 		UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(GetOwner());

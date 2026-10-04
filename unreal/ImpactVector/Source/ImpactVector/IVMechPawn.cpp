@@ -189,11 +189,11 @@ void AIVMechPawn::BuildCockpit()
 	CockpitFx->SetupAttachment(CockpitSway);
 	struct FLamp { const TCHAR* N; FVector P; FLinearColor C; float I; float R; };
 	const FLamp Lamps[] = {
-		{ TEXT("LampDash"), FVector(40, 0, -70), FLinearColor(0.15f, 0.85f, 1.f), 2.2f, 220.f },
-		{ TEXT("LampLeft"), FVector(60, -110, -40), FLinearColor(1.f, 0.4f, 0.1f), 1.4f, 200.f },
-		{ TEXT("LampRight"), FVector(60, 110, -40), FLinearColor(1.f, 0.4f, 0.1f), 1.4f, 200.f },
-		{ TEXT("LampTop"), FVector(10, 0, 80), FLinearColor(0.7f, 0.8f, 1.f), 2.f, 260.f },
-		{ TEXT("LampBody"), FVector(30, 0, -50), FLinearColor(0.9f, 0.95f, 1.f), 1.6f, 160.f },
+		{ TEXT("LampDash"), FVector(40, 0, -70), FLinearColor(0.2f, 0.6f, 0.9f), 1.0f, 200.f },
+		{ TEXT("LampLeft"), FVector(60, -110, -40), FLinearColor(1.f, 0.45f, 0.15f), 1.0f, 200.f },
+		{ TEXT("LampRight"), FVector(60, 110, -40), FLinearColor(1.f, 0.45f, 0.15f), 1.0f, 200.f },
+		{ TEXT("LampTop"), FVector(10, 0, 80), FLinearColor(0.8f, 0.78f, 0.75f), 0.9f, 260.f },
+		{ TEXT("LampBody"), FVector(30, 0, -50), FLinearColor(0.95f, 0.85f, 0.75f), 0.5f, 160.f },
 	};
 	for (const FLamp& L : Lamps)
 	{
@@ -323,13 +323,16 @@ void AIVMechPawn::SetPlayerLamps(bool bOn)
 void AIVMechPawn::SetFirstPersonView(bool bFirstPerson)
 {
 	if (HeadMesh) HeadMesh->SetOwnerNoSee(bFirstPerson);
+	if (RigMesh) RigMesh->SetOwnerNoSee(bFirstPerson);
+	for (UStaticMeshComponent* G : GreebleComps) if (G) G->SetOwnerNoSee(bFirstPerson);
+	for (UStaticMeshComponent* G : GrowthComps) if (G) G->SetOwnerNoSee(bFirstPerson);
 	for (UStaticMeshComponent* M : CockpitMeshes) M->SetVisibility(bFirstPerson);
 	if (CockpitFx) CockpitFx->SetShown(bFirstPerson);
 }
 
 FVector AIVMechPawn::GetEyeLocation() const
 {
-	return HeadPivot->GetComponentTransform().TransformPosition(FVector(450.f, 0, 420.f));
+	return HeadPivot->GetComponentTransform().TransformPosition(FVector(450.f, 0, 420.f - 1620.f));
 }
 
 FVector AIVMechPawn::MoveIntentToWorld() const
@@ -613,6 +616,15 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 	CamPos.X = Eye.X;
 	CamPos.Y = Eye.Y;
 	CamPos.Z = FMath::FInterpTo(CamPos.Z, Eye.Z, Dt, 5.f);
+	{
+		static float EyeLogT = 0.f; EyeLogT += Dt;
+		if (EyeLogT > 3.f && !bAIControlled && RigMesh)
+		{
+			EyeLogT = 0.f;
+			UE_LOG(LogTemp, Display, TEXT("IV eye: aimPitch=%.1f camPitch=%.1f eyeZ=%.0f headBoneZ=%.0f torsoZ=%.0f footZ=%.0f actorZ=%.0f"), AimPitch, CamRot.Pitch, Eye.Z, RigMesh->GetBoneLocation(FName(TEXT("head")), EBoneSpaces::WorldSpace).Z, RigMesh->GetBoneLocation(FName(TEXT("torso")), EBoneSpaces::WorldSpace).Z, RigMesh->GetBoneLocation(FName(TEXT("foot_l")), EBoneSpaces::WorldSpace).Z, GetActorLocation().Z);
+			for (TActorIterator<AIVMechPawn> It(GetWorld()); It; ++It) if (*It != this && It->RigMesh) UE_LOG(LogTemp, Display, TEXT("IV eye: enemy headZ=%.0f torsoZ=%.0f"), It->RigMesh->GetBoneLocation(FName(TEXT("head")), EBoneSpaces::WorldSpace).Z, It->RigMesh->GetBoneLocation(FName(TEXT("torso")), EBoneSpaces::WorldSpace).Z);
+		}
+	}
 	CamRot.Yaw = GetActorRotation().Yaw + TorsoYawRel;
 	CamRot.Pitch = FMath::FInterpTo(CamRot.Pitch, AimPitch, Dt, 14.f);
 	CamRot.Roll = 0.25f * PelvisPivot->GetRelativeRotation().Roll;
@@ -653,7 +665,7 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 	{
 		UGameViewportClient* VPC = GetWorld() ? GetWorld()->GetGameViewport() : nullptr;
 		const bool bSplit = VPC && VPC->GetCurrentSplitscreenConfiguration() != ESplitScreenType::None;
-		Camera->SetFieldOfView((bSplit ? 70.f : 92.f) - 7.f * Rage);
+		Camera->SetFieldOfView((bSplit ? 76.f : 98.f) - 7.f * Rage);
 	}
 
 	if (Mode == 0)

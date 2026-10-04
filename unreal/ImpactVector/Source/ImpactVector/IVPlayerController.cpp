@@ -402,7 +402,7 @@ void AIVPlayerController::PlayerTick(float Dt)
 			for (TActorIterator<AIVMechPawn> It(GetWorld()); It; ++It)
 			{
 				if (*It == M) continue;
-				const FVector To = (It->GetActorLocation() + FVector(0, 0, 3800.f)) - M->GetEyeLocation();
+				const FVector To = (It->GetZoneWorldLocation(iv::Zone::Head) - FVector(0, 0, 750.f)) - M->GetEyeLocation();
 				const FRotator R = To.Rotation();
 				M->SetAim(R.Yaw + LockOffYaw, R.Pitch + LockOffPitch);
 				break;

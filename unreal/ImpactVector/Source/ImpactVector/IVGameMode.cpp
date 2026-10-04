@@ -185,6 +185,16 @@ void AIVGameMode::StartPlay()
 	{ int32 N = 1; FParse::Value(FCommandLine::Get(), TEXT("-IVBlastN="), N); BlastsLeft = (BlastAt >= 0.f) ? N : 0; }
 	FParse::Value(FCommandLine::Get(), TEXT("-IVCollapse="), CollapseAt);
 	FParse::Value(FCommandLine::Get(), TEXT("-IVChunkTest="), ChunkTestAt);
+	FParse::Value(FCommandLine::Get(), TEXT("-IVProfileAt="), ProfileAt);
+	{	// -IVExecAt="12:r.Foo 1|22:r.Bar 2" : console commands at given game times (A/B perf tests in one run)
+		FString X;
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVExecAt="), X, false))
+		{
+			TArray<FString> Items;
+			X.ParseIntoArray(Items, TEXT("|"));
+			for (const FString& It : Items) { FString T, C; if (It.Split(TEXT(":"), &T, &C)) ExecAt.Add(TPair<float, FString>(FCString::Atof(*T), C)); }
+		}
+	}
 	{
 		FString A;
 		if (FParse::Value(FCommandLine::Get(), TEXT("-IVAction="), A, false))
@@ -201,6 +211,7 @@ void AIVGameMode::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	Elapsed += Dt;
+	if (!bGfxReapplied && Elapsed > 1.0f) { bGfxReapplied = true; IVGraphics::ApplyAtStart(GetWorld()); }   // the viewport has its real size by now
 	{	// frame-rate log every 10 s (find it with "IV perf" in the log)
 		PerfAcc += Dt; ++PerfFrames; PerfMin = FMath::Min(PerfMin, 1.f / FMath::Max(Dt, 1e-4f));
 		if (PerfAcc >= 10.f)
@@ -239,6 +250,18 @@ void AIVGameMode::Tick(float Dt)
 				const int32 N = Env->CollapseNearestAhead(P->GetActorLocation(), FRotator(0.f, YawOff, 0.f).RotateVector(P->GetActorForwardVector()));
 				UE_LOG(LogTemp, Display, TEXT("IV: collapse test destroyed %d cells"), N);
 			}
+	}
+	for (TPair<float, FString>& E : ExecAt)
+		if (E.Key >= 0.f && Elapsed >= E.Key)
+		{
+			E.Key = -1.f;
+			GEngine->Exec(GetWorld(), *E.Value);
+			UE_LOG(LogTemp, Display, TEXT("IV exec: %s"), *E.Value);
+		}
+	if (ProfileAt >= 0.f && Elapsed >= ProfileAt)
+	{
+		ProfileAt = -1.f;
+		GEngine->Exec(GetWorld(), TEXT("ProfileGPU"));
 	}
 	if (ChunkTestAt >= 0.f && Elapsed >= ChunkTestAt)
 	{

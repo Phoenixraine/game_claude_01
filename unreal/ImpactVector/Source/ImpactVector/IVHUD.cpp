@@ -1,4 +1,5 @@
 #include "IVHUD.h"
+#include "GameFramework/WorldSettings.h"
 #include "IVHelicopter.h"
 #include "EngineUtils.h"
 #include "IVMechPawn.h"
@@ -90,6 +91,20 @@ void AIVHUD::DrawHUD()
 {
 	Super::DrawHUD();
 	if (!Canvas) return;
+	{	// unobtrusive frame-rate readout in the bottom-left corner of the glass (F3 toggles)
+		static float Fps = 60.f, Shown = 60.f, Acc = 0.f;
+		static bool bShow = true;
+		const float Dt = GetWorld()->GetDeltaSeconds() / FMath::Max(GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation(), 0.01f);
+		if (Dt > 0.f) Fps = FMath::Lerp(Fps, 1.f / Dt, 0.05f);
+		Acc += Dt;
+		if (Acc > 0.5f) { Acc = 0.f; Shown = Fps; }
+		if (APlayerController* Pc0 = GetOwningPlayerController()) if (Pc0->WasInputKeyJustPressed(EKeys::F3)) bShow = !bShow;
+		if (bShow)
+		{
+			const float Sx0 = FMath::Clamp(Canvas->ClipX / 1600.f, 0.6f, 1.6f);
+			Text(FString::Printf(TEXT("%d FPS"), FMath::RoundToInt(Shown)), 8.f, Canvas->ClipY - 18.f * Sx0, A(Shown >= 58.f ? kGreen : (Shown >= 40.f ? kYellow : kRed), 0.32f), 0.55f * Sx0, 0, 0);
+		}
+	}
 	AIVGameFlow* Flow = nullptr;
 	for (TActorIterator<AIVGameFlow> It(GetWorld()); It; ++It) { Flow = *It; break; }
 	if (Flow && Flow->GetState() == EIVFlowState::Menu) { DrawMenu(Flow); return; }

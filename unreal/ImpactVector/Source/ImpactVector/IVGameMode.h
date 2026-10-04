@@ -31,6 +31,9 @@ private:
 	float NextBlast = 0.f;
 	float CollapseAt = -1.f;
 	float ChunkTestAt = -1.f;
+	float ProfileAt = -1.f;
+	bool bGfxReapplied = false;
+	TArray<TPair<float, FString>> ExecAt;
 	float ActionAt = -1.f;
 	FName ActionName;
 	float Elapsed = 0.f;
