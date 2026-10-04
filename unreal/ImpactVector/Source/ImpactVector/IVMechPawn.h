@@ -195,6 +195,7 @@ protected:
 	bool bFreeLook = false, bDebugLook = false, bDebugFailDone = false;
 	float LookYaw = 0.f, LookPitch = 0.f, LookYawT = 0.f, LookPitchT = 0.f;
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> GlassMID;
+	float GlassCrack = 0.f;
 
 	void UpdateLocomotion(float Dt);
 	void UpdateRig(float Dt);

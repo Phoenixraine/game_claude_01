@@ -540,15 +540,29 @@ float3 nrm = float3(-bo * (1.0 - cap) * 1.4 * inside, 1.0);
 float sx = frac(sin(floor(g.x * 55.0) * 91.7) * 437.5);
 float sy = frac(g.y * 3.0 + sx * 7.0 - T * (0.02 + 0.05 * sx));
 float run = step(0.82, sx) * smoothstep(0.0, 0.2, sy) * smoothstep(0.6, 0.2, sy) * Rain;
+float2 cq = g / 0.42; float2 cid0 = floor(cq), cf = frac(cq);
+float d1 = 9.0, d2 = 9.0, cellh = 0.0;
+for (int cj = -1; cj <= 1; cj++)
+for (int ci = -1; ci <= 1; ci++)
+{
+    float2 cc = cid0 + float2(ci, cj);
+    float2 cp = float2(ci, cj) + 0.15 + 0.7 * float2(frac(sin(dot(cc, float2(12.9, 78.2))) * 43758.5), frac(sin(dot(cc, float2(39.3, 11.1))) * 43758.5));
+    float dd = length(cp - cf);
+    float hh = frac(sin(dot(cc, float2(93.9, 67.3))) * 43758.5);
+    if (dd < d1) { d2 = d1; d1 = dd; cellh = hh; } else if (dd < d2) { d2 = dd; }
+}
+float web = (1.0 - smoothstep(0.0, 0.075, d2 - d1)) * step(cellh, Crack * 1.2);
 """
     t = unreal.CustomMaterialOutputType
     nrmn = custom(m, common + "return normalize(float3(nrm.xy + float2(0, 0.35) * run, nrm.z));", t.CMOT_FLOAT3, names, -900, 0, "glass_normal")
     wire_custom(nrmn, srcs)
     MEL.connect_material_property(nrmn, "", unreal.MaterialProperty.MP_NORMAL)
-    op = custom(m, common + "return saturate(0.025 + inside * (0.10 + 0.35 * (1.0 - cap)) + run * 0.12 + Crack);", t.CMOT_FLOAT1, names, -900, 300, "glass_opacity")
+    op = custom(m, common + "return saturate(0.025 + inside * (0.10 + 0.35 * (1.0 - cap)) + run * 0.12 + web * 0.9);", t.CMOT_FLOAT1, names, -900, 300, "glass_opacity")
     wire_custom(op, srcs)
     MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
-    bc = vector(m, "Tint", (0.01, 0.02, 0.03, 1), -900, 500)
+    tint = vector(m, "Tint", (0.01, 0.02, 0.03, 1), -1500, 560)
+    bc = custom(m, common + "return Tint + web * float3(1.4, 1.6, 1.8);", t.CMOT_FLOAT3, names + ["Tint"], -900, 500, "glass_base")
+    wire_custom(bc, srcs + [(tint, "")])
     MEL.connect_material_property(bc, "", unreal.MaterialProperty.MP_BASE_COLOR)
     rough = scalar(m, "Roughness", 0.04, -900, 600)
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)

@@ -1025,6 +1025,12 @@ void AIVMechPawn::OnCombatHit(iv::Zone Z, float Strength01, bool bBlocked, bool 
 			FX->SpawnChunks(Loc, Out, 1 + int32(5.f * Strength01), EIVChunk::Armor, 2.4f + 1.6f * Strength01, 2600.f + 3600.f * Strength01, 0.5f + 0.5f * Strength01);
 		}
 	}
+	if (IsLocallyControlled() && !bBlocked && Strength01 > 0.3f && GlassMID)
+	{
+		GlassCrack = FMath::Min(GlassCrack + 0.06f + 0.14f * Strength01, 0.95f);
+		GlassMID->SetScalarParameterValue(TEXT("Crack"), GlassCrack);
+		IVAudio::Play2D(GetWorld(), TEXT("cockpit_panel_burst"), 0.5f, 1.6f);
+	}
 	const float Side = ZoneSide(Z);
 	const float S = Strength01 * (bBlocked ? 0.55f : 1.f);
 	HitKick += FVector(-7.f * S, 4.f * S * Side, 6.f * S * Side);
@@ -1125,6 +1131,8 @@ void AIVMechPawn::ResetMotion()
 
 void AIVMechPawn::ResetForNewMatch()
 {
+	GlassCrack = 0.f;
+	if (GlassMID) GlassMID->SetScalarParameterValue(TEXT("Crack"), 0.f);
 	ClearDetached();
 	Ult = FUltScript();
 	SetBodyOffset(FVector::ZeroVector);
