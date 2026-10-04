@@ -76,7 +76,11 @@ float h = hRaw / Spacing;
 float v = WP.z / Spacing;
 float2 f = frac(float2(h, v));
 float roof = step(0.7, abs(n.z));
-float win = step(0.14, f.x) * step(f.x, 0.86) * step(0.2, f.y) * step(f.y, 0.78) * (1.0 - roof);
+float fw = max(fwidth(h), fwidth(v));
+float aaK = saturate(fw * 1.6);                      // far away the window grid melts into its average (no moire)
+float e0 = max(fw, 0.02);
+float win = smoothstep(0.14 - e0, 0.14 + e0, f.x) * smoothstep(0.86 + e0, 0.86 - e0, f.x) * smoothstep(0.2 - e0, 0.2 + e0, f.y) * smoothstep(0.78 + e0, 0.78 - e0, f.y) * (1.0 - roof);
+win = lerp(win, 0.42 * (1.0 - roof), aaK);
 float2 id = floor(float2(h, v));
 float hash = frac(sin(dot(id + Rnd * 37.0, float2(12.9898, 78.233))) * 43758.5453);
 """
@@ -97,7 +101,7 @@ return lerp(0.82, 0.08 + 0.2 * hash, win * Gls);
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
 
     emis = custom(m, common + """
-float on = step(0.6, hash) * win * Lit;
+float on = lerp(step(0.6, hash) * win, 0.4 * win, aaK) * Lit;
 float3 warm = lerp(float3(1.0, 0.82, 0.55), float3(0.7, 0.85, 1.0), frac(hash * 13.0));
 // neon signs: whole bands of a facade glow in saturated colours (Tokyo at night)
 float2 bid = floor(float2(h / 5.0, v / 7.0));
