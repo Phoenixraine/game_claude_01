@@ -37,14 +37,14 @@ void AIVPilotFigure::BuildModel()
 	if (Armor)
 	{
 		SuitMat = UMaterialInstanceDynamic::Create(Armor, this);
-		SuitMat->SetVectorParameterValue(TEXT("Tint"), FLinearColor(0.2f, 0.23f, 0.3f));
+		SuitMat->SetVectorParameterValue(TEXT("Tint"), FLinearColor(0.55f, 0.6f, 0.7f));
 		SuitMat->SetScalarParameterValue(TEXT("Metallic"), 0.5f);
 	}
 	if (Emi)
 	{
 		GlowMat = UMaterialInstanceDynamic::Create(Emi, this);
 		GlowMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.1f, 0.8f, 1.f));
-		GlowMat->SetScalarParameterValue(TEXT("Intensity"), 8.f);
+		GlowMat->SetScalarParameterValue(TEXT("Intensity"), 14.f);
 		CableMat = UMaterialInstanceDynamic::Create(Emi, this);
 		CableMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.2f, 0.9f, 1.f));
 		CableMat->SetScalarParameterValue(TEXT("Intensity"), 5.f);
@@ -80,7 +80,7 @@ void AIVPilotFigure::BuildModel()
 	Add(Sph, FVector(0, 0, 395.f), FVector(80, 76, 80), SuitMat);                     // helmet
 	Add(Cube, FVector(32, 0, 398.f), FVector(10, 56, 22), GlowMat);                   // visor
 	Grenade = Add(Sph, FVector::ZeroVector, FVector(46, 46, 46), GlowMat);
-	Grenade->SetupAttachment(nullptr);
+	Grenade->SetAbsolute(true, true, true);
 	Grenade->SetVisibility(false);
 
 	Cable = NewObject<UProceduralMeshComponent>(this);
@@ -98,12 +98,12 @@ void AIVPilotFigure::BuildModel()
 	SuitLight->SetupAttachment(Body);
 	SuitLight->SetRelativeLocation(FVector(120, 0, 330));
 	SuitLight->SetIntensityUnits(ELightUnits::Candelas);
-	SuitLight->SetIntensity(3.0e5f);
+	SuitLight->SetIntensity(1.5e4f);
 	SuitLight->SetLightColor(FLinearColor(0.4f, 0.9f, 1.f));
 	SuitLight->SetAttenuationRadius(4000.f);
 	SuitLight->SetCastShadows(false);
 	SuitLight->RegisterComponent();
-	SetActorScale3D(FVector(1.4f));
+	SetActorScale3D(FVector(3.2f));
 }
 
 void AIVPilotFigure::Hide()
@@ -127,7 +127,7 @@ void AIVPilotFigure::SetCable(const FVector& A, const FVector& B, float Sag, boo
 	const FVector Dir = (B - A).GetSafeNormal();
 	const FVector S1 = FVector::CrossProduct(Dir, FVector::UpVector).GetSafeNormal();
 	const FVector S2 = FVector::CrossProduct(Dir, S1).GetSafeNormal();
-	const float W = 26.f;
+	const float W = 45.f;
 	TArray<FVector> V, Nn;
 	TArray<int32> Tri;
 	TArray<FVector2D> UV;
@@ -235,7 +235,7 @@ void AIVPilotFigure::Present(const FIVBoardView& V, float Dt)
 	if (Dir.SizeSquared() > 1.f) Facing = FMath::VInterpTo(Facing, Dir.GetSafeNormal(), Dt, 8.f);
 	const FRotator Rot(bFly ? -22.f : 0.f, Facing.Rotation().Yaw, 0.f);
 	SetActorLocationAndRotation(Pos, Rot);
-	SetActorScale3D(FVector(1.4f, 1.4f, 1.4f * (1.f - 0.3f * Kneel)));
+	SetActorScale3D(FVector(3.2f, 3.2f, 3.2f * (1.f - 0.3f * Kneel)));
 	if (bCable)
 	{
 		const FVector End = (V.Phase == P::HookFlight || V.Phase == P::ReturnHook) ? V.EnemyHatch : CableB;

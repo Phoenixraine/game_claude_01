@@ -205,6 +205,7 @@ void AIVPlayerController::RunScript(float Dt)
 		else if (C.Name == TEXT("move")) { FString A, B; if (C.Arg.Split(TEXT(","), &A, &B)) MoveValue = FVector2D(FCString::Atof(*A), FCString::Atof(*B)); }
 		else if (In && C.Name == TEXT("dodge")) { In->bDodge = true; In->DodgeDir = FCString::Atoi(*C.Arg) < 0 ? -1 : 1; }
 		else if (In && C.Name == TEXT("scoop")) In->bScoop = true;
+		else if (In && C.Name == TEXT("board")) In->bBoard = true;
 		else if (In && C.Name == TEXT("ult")) In->bUltimate = true;
 		else if (In && C.Name == TEXT("cancel")) In->bCancel = true;
 		else if (C.Name == TEXT("lunge")) bScriptLunge = C.Arg == TEXT("1");
@@ -311,6 +312,28 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 		if (Dir->GetDuel() && Dir->GetDuel()->berserk().active) In.Side = BerserkAim.Size() > 0.22f ? SideFromStick(BerserkAim) : iv::SwingSide::Right;
 	}
 	if (WasInputKeyJustPressed(EKeys::N) || (WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top) && bPadLT)) In.bBerserk = true;
+	// boarding: J (pad LT + X) leaves the cockpit; Q / E / LB / RB leap to the other shoulder; the hatch hack uses arrows / WASD, Enter / Space / A, H / B, Backspace / X
+	if (WasInputKeyJustPressed(EKeys::J) || (WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left) && bPadLT)) In.bBoard = true;
+	if (Dir->GetBoarding().Active())
+	{
+		if (WasInputKeyJustPressed(EKeys::Q) || WasInputKeyJustPressed(EKeys::E) || WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) In.bBoardSwing = true;
+		if (Dir->GetBoarding().phase() == iv::BoardPhase::Hacking)
+		{
+			if (WasInputKeyJustPressed(EKeys::Left) || WasInputKeyJustPressed(EKeys::A) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) In.HackDx = -1;
+			if (WasInputKeyJustPressed(EKeys::Right) || WasInputKeyJustPressed(EKeys::D) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) In.HackDx = 1;
+			if (WasInputKeyJustPressed(EKeys::Up) || WasInputKeyJustPressed(EKeys::W) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) In.HackDy = -1;
+			if (WasInputKeyJustPressed(EKeys::Down) || WasInputKeyJustPressed(EKeys::S) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Down)) In.HackDy = 1;
+			if (WasInputKeyJustPressed(EKeys::Enter) || WasInputKeyJustPressed(EKeys::SpaceBar) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom)) In.bHackConfirm = true;
+			if (WasInputKeyJustPressed(EKeys::H) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) In.bHackBack = true;
+			if (WasInputKeyJustPressed(EKeys::BackSpace) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left)) In.bHackAux = true;
+			static const bool bBot = FParse::Param(FCommandLine::Get(), TEXT("IVHackBot"));
+			if (bBot)
+			{
+				const iv::HackInput Pi = Dir->GetBoarding().hack().PerfectInput();
+				In.HackDx = Pi.dx; In.HackDy = Pi.dy; In.bHackConfirm = Pi.confirm;
+			}
+		}
+	}
 	if (!LookStick.IsNearlyZero(0.25f)) BerserkAim = LookStick;
 	BerserkAim = FMath::Vector2DInterpTo(BerserkAim, FVector2D::ZeroVector, Dt, 1.6f);
 	bPadStrikePrev = bPadStrike;

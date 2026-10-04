@@ -2,6 +2,7 @@
 #include "IVMechPawn.h"
 #include "IVFXManager.h"
 #include "IVHelicopter.h"
+#include "IVBoarding.h"
 #include "EngineUtils.h"
 #include "IVAudio.h"
 #include "IVEnvironment.h"
@@ -69,6 +70,18 @@ void AIVCombatDirector::Restart()
 	bEndHandled = false;
 	PlayerIn = FIVCombatInput();
 	PlayerIn2 = FIVCombatInput();
+	{
+		iv::BoardingConfig Bc;
+		Bc.owner = iv::Side::A;
+		Bc.enemyArchetype = BotStyle;
+		Bc.enemyDifficulty = BotLevel;
+		Bc.seed = BotSeed + 3;
+		Board = iv::Boarding(Bc);
+		BoardIn = iv::BoardingInput();
+		if (AIVPilotFigure* PF = Pilot.Get()) PF->Hide();
+		if (Player.IsValid()) Player->SetBoardCam(false, FVector::ZeroVector, FVector::ZeroVector, 60.f);
+		bBoardCamOn = false;
+	}
 	UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
 	ScoopCooldown[0] = ScoopCooldown[1] = 0.f;
 	HitStop = 0.f;
@@ -156,6 +169,7 @@ void AIVCombatDirector::Tick(float Dt)
 	}
 
 	Anim[0] = iv::MakeAnimState(Duel->fighter(iv::Side::A));
+	UpdateBoardingPresentation(Dt);
 	Anim[1] = iv::MakeAnimState(Duel->fighter(iv::Side::B));
 	P->SetCombatAnim(Anim[0]);
 	E->SetCombatAnim(Anim[1]);
@@ -246,13 +260,23 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 	}
 	if (PlayerIn.bScoop) { TryScoop(iv::Side::A); PlayerIn.bScoop = false; }
 	iv::Input A = BuildInput(PlayerIn, bFirstOfFrame);
+	if (PlayerIn.bBoard) BoardIn.start = true;
+	if (PlayerIn.bBoardSwing) BoardIn.swing = true;
+	if (PlayerIn.HackDx) BoardIn.hack.dx = PlayerIn.HackDx;
+	if (PlayerIn.HackDy) BoardIn.hack.dy = PlayerIn.HackDy;
+	if (PlayerIn.bHackConfirm) BoardIn.hack.confirm = true;
+	if (PlayerIn.bHackBack) BoardIn.hack.back = true;
+	if (PlayerIn.bHackAux) BoardIn.hack.aux = true;
 	if (PlayerBot.IsValid()) { A = PlayerBot->Decide(iv::MakeObservation(*Duel, iv::Side::A)); P->SetMoveIntent(FVector2D(0.f, float(A.move))); }
+	A = Board.Filter(*Duel, A);
 	const iv::Input B = bHumanB ? BuildInput(PlayerIn2, bFirstOfFrame) : Bot->Decide(iv::MakeObservation(*Duel, iv::Side::B));
 	iv::World W;
 	W.proximity[0] = ProximityBehind(P, E);
 	W.proximity[1] = ProximityBehind(E, P);
 	W.coolingMult[0] = W.coolingMult[1] = 1.35f;      // rain
 	Duel->Step(A, B, W);
+	Board.Step(*Duel, BoardIn);
+	BoardIn = iv::BoardingInput();
 	AiScoopTimer -= 1.f / float(iv::kTickHz);
 	if (AiScoopTimer <= 0.f)
 	{
@@ -272,6 +296,8 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 		PlayerIn.bJump = PlayerIn.bChop = PlayerIn.bSlide = PlayerIn.bMash = PlayerIn.bBerserk = PlayerIn.bQte = false;
 		PlayerIn2.bQuick = PlayerIn2.bCancel = PlayerIn2.bGrab = PlayerIn2.bSwitchArm = PlayerIn2.bReverse = PlayerIn2.bDodge = PlayerIn2.bUltimate = PlayerIn2.bSetPriority = false;
 		PlayerIn2.bJump = PlayerIn2.bChop = PlayerIn2.bSlide = PlayerIn2.bMash = PlayerIn2.bBerserk = PlayerIn2.bQte = false;
+		PlayerIn.bBoard = PlayerIn.bBoardSwing = PlayerIn.bHackConfirm = PlayerIn.bHackBack = PlayerIn.bHackAux = false;
+		PlayerIn.HackDx = PlayerIn.HackDy = 0;
 	}
 
 	// the enemy walks as its AI wants (the core's own distance integration is overridden every tick)
@@ -428,6 +454,7 @@ void AIVCombatDirector::BladeImpact(AIVMechPawn* A, AIVMechPawn* B, float Scale,
 
 void AIVCombatDirector::Dispatch(const iv::Event& Ev)
 {
+	HandleBoardingEvent(Ev);
 	using iv::EventType;
 	AIVMechPawn* Actor = PawnOf(Ev.actor);
 	AIVMechPawn* Other = PawnOf(iv::Other(Ev.actor));
@@ -712,4 +739,157 @@ void AIVCombatDirector::OnMechCrash(AIVMechPawn* Pawn, float Strength)
 	if (!Duel.IsValid() || Duel->result().over || Duel->cinematic().active) return;
 	const iv::Side S = (Pawn == Player.Get()) ? iv::Side::A : iv::Side::B;
 	Duel->ExternalHit(S, (FMath::RandBool() ? iv::Zone::LegL : iv::Zone::LegR), 3.5f * Strength, 9.f * Strength, 1);
+}
+
+
+// ---------------------------------------------------------------------------------------------------------- boarding
+void AIVCombatDirector::HandleBoardingEvent(const iv::Event& Ev)
+{
+	using iv::EventType;
+	AIVMechPawn* P = Player.Get();
+	AIVMechPawn* E = Enemy.Get();
+	UWorld* W = GetWorld();
+	if (!P || !E) return;
+	switch (Ev.type)
+	{
+	case EventType::BoardingStarted:
+		IVAudio::Play2D(W, TEXT("cockpit_alarm_warning"), 0.8f);
+		IVAudio::Play3D(W, TEXT("mech_hydraulic_release"), P->GetActorLocation() + FVector(0, 0, 4000.f), 1.f, 0.8f);
+		break;
+	case EventType::HookFired:
+		IVAudio::Play3D(W, TEXT("env_missile_incoming"), P->GetZoneWorldLocation(iv::Zone::ArmR), 1.f, 1.5f);
+		break;
+	case EventType::HookLanded:
+		IVAudio::Play3D(W, TEXT("block_impact"), E->GetZoneWorldLocation(Ev.a ? iv::Zone::ShoulderR : iv::Zone::ShoulderL), 1.f);
+		if (AIVFXManager* FX = AIVFXManager::Get(W)) FX->SpawnSparks(E->GetZoneWorldLocation(Ev.a ? iv::Zone::ShoulderR : iv::Zone::ShoulderL), FVector::UpVector, 60, 5000.f);
+		break;
+	case EventType::GrenadeThrown:
+		IVAudio::Play2D(W, TEXT("cockpit_hud_lock"), 0.8f);
+		break;
+	case EventType::BoardingBlast:
+	{
+		const FVector At = E->GetZoneWorldLocation(Ev.zone);
+		if (AIVFXManager* FX = AIVFXManager::Get(W))
+		{
+			FX->SpawnExplosion(At, 2.4f);
+			FX->SpawnChunks(At, FVector(0, 0, 1), 12, EIVChunk::Armor, 4.f, 5500.f, 1.f, 1.3f);
+			FX->SpawnChunks(At, FVector(0, 0, 1), 6, EIVChunk::Steel, 3.f, 5000.f, 0.9f, 1.3f);
+		}
+		IVAudio::Play3D(W, TEXT("env_distant_boom_01"), At, 1.f);
+		IVAudio::Play3D(W, TEXT("env_missile_explosion"), At, 1.f);
+		E->AddCockpitImpulse(0.f, 0.f, 1.2f);
+		BoardBlastFlash = 1.f;
+		break;
+	}
+	case EventType::BoardingSwatTelegraph:
+		IVAudio::Play2D(W, TEXT("cockpit_alarm_critical"), 1.f);
+		break;
+	case EventType::BoardingSwatImpact:
+		IVAudio::Play3D(W, TEXT("hit_lowfreq_thump_heavy"), P->GetActorLocation(), 1.f);
+		break;
+	case EventType::BoardingSwingOk:
+		IVAudio::Play3D(W, TEXT("mech_hydraulic_release"), P->GetActorLocation(), 0.8f, 1.4f);
+		break;
+	case EventType::BoardingShock:
+		if (AIVFXManager* FX = AIVFXManager::Get(W)) FX->SpawnSparks(P->GetActorLocation() + FVector(0, 0, 5000.f), FVector::UpVector, 30, 4000.f);
+		break;
+	case EventType::BoardingEnded:
+		IVAudio::Play2D(W, Ev.a == int32(iv::BoardingOutcome::Success) ? TEXT("cockpit_hud_unlock") : TEXT("cockpit_alarm_warning"), 1.f);
+		break;
+	default: break;
+	}
+}
+
+void AIVCombatDirector::UpdateBoardingPresentation(float Dt)
+{
+	AIVMechPawn* P = Player.Get();
+	AIVMechPawn* E = Enemy.Get();
+	if (!P || !E) return;
+	BoardBlastFlash = FMath::Max(0.f, BoardBlastFlash - Dt * 1.5f);
+	const iv::BoardPhase Ph = Board.phase();
+	const bool bShow = Board.Active();
+	if (!bShow)
+	{
+		if (bBoardCamOn)
+		{
+			bBoardCamOn = false;
+			P->SetBoardCam(false, FVector::ZeroVector, FVector::ZeroVector, 60.f);
+			if (AIVPilotFigure* PF = Pilot.Get()) PF->Hide();
+		}
+		return;
+	}
+	if (!Pilot.IsValid())
+	{
+		FActorSpawnParameters Sp;
+		Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		Pilot = GetWorld()->SpawnActor<AIVPilotFigure>(P->GetActorLocation(), FRotator::ZeroRotator, Sp);
+	}
+	AIVPilotFigure* PF = Pilot.Get();
+	if (!PF) return;
+	const iv::Arm Sh = Board.shoulder();
+	const iv::Zone OwnZ = Sh == iv::Arm::R ? iv::Zone::ShoulderR : iv::Zone::ShoulderL;
+	const iv::Zone OwnArm = Sh == iv::Arm::R ? iv::Zone::ArmR : iv::Zone::ArmL;
+	const iv::Zone OtherZ = Sh == iv::Arm::R ? iv::Zone::ShoulderL : iv::Zone::ShoulderR;
+	FIVBoardView V;
+	V.Phase = Ph;
+	V.U = Board.phaseLength() > 0 ? FMath::Clamp(float(Board.phaseTicks()) / float(Board.phaseLength()), 0.f, 1.f) : 0.f;
+	V.Cockpit = P->GetZoneWorldLocation(iv::Zone::Head) - FVector(0, 0, 300.f);
+	V.OwnShoulder = P->GetZoneWorldLocation(OwnZ) + FVector(0, 0, 300.f);
+	V.OwnWrist = P->GetZoneWorldLocation(OwnArm);
+	V.EnemyUp = FVector::UpVector;
+	V.EnemyShoulder = E->GetZoneWorldLocation(OwnZ);
+	V.EnemyHatch = V.EnemyShoulder + FVector(0, 0, 420.f);
+	V.EnemyOtherShoulder = E->GetZoneWorldLocation(OtherZ) + FVector(0, 0, 420.f);
+	V.Away = (P->GetActorLocation() - E->GetActorLocation()).GetSafeNormal2D();
+	PF->Present(V, Dt);
+
+	// camera
+	const FVector Focus = PF->GetPilotLocation();
+	const FVector Side = FVector::CrossProduct(V.Away, FVector::UpVector).GetSafeNormal();
+	const FVector Up(0, 0, 1);
+	const FVector ToHatch = (V.EnemyHatch - Focus).GetSafeNormal();
+	FVector From = Focus, At = Focus;
+	float Fov = 55.f;
+	using BP = iv::BoardPhase;
+	switch (Ph)
+	{
+	case BP::ClimbOut: case BP::OnShoulder: case BP::ClimbIn:
+		From = V.Cockpit - P->GetActorForwardVector() * 9500.f + P->GetActorRightVector() * 5000.f + Up * 2500.f;
+		At = (Focus + V.OwnShoulder) * 0.5f;
+		break;
+	case BP::HookLaunch:
+		From = V.OwnShoulder + Side * 10000.f + Up * 1500.f;
+		At = (V.OwnShoulder + V.EnemyHatch) * 0.5f;
+		Fov = 62.f;
+		break;
+	case BP::HookFlight: case BP::ReturnHook: case BP::HookSwing:
+		From = Focus - ToHatch * 6500.f + Side * 2500.f + Up * 1500.f;
+		At = Focus + ToHatch * 3000.f;
+		Fov = 60.f;
+		break;
+	case BP::Landing: case BP::Hacking: case BP::GrenadeThrow:
+		From = Focus + V.Away * 4200.f + Side * 1400.f + Up * 1500.f;
+		At = V.EnemyHatch + Up * 100.f;
+		Fov = 50.f;
+		break;
+	case BP::Escape: case BP::WatchBlast:
+		From = Focus + V.Away * 6500.f + Side * 2200.f + Up * 400.f;
+		At = (V.EnemyHatch * 0.7f + Focus * 0.3f);
+		Fov = 58.f;
+		break;
+	default: break;
+	}
+	if (Board.swatActive())
+	{
+		const iv::Zone HandZ = Board.swatShoulder() == iv::Arm::R ? iv::Zone::ArmR : iv::Zone::ArmL;
+		const FVector Hand = E->GetZoneWorldLocation(HandZ);
+		From = Focus + V.Away * 4000.f + Side * 1000.f + Up * 1200.f;
+		At = Hand * 0.6f + Focus * 0.4f;
+		Fov = 70.f;
+	}
+	if (!bBoardCamOn) { BoardCamFrom = From; BoardCamAt = At; }
+	BoardCamFrom = FMath::VInterpTo(BoardCamFrom, From, Dt, 5.f);
+	BoardCamAt = FMath::VInterpTo(BoardCamAt, At, Dt, 7.f);
+	bBoardCamOn = true;
+	P->SetBoardCam(true, BoardCamFrom, BoardCamAt, Fov);
 }

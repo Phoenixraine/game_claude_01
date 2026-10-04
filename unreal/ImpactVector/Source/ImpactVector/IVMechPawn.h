@@ -131,6 +131,8 @@ public:
 	void StartCinematic(AIVMechPawn* Subject, float Seconds, int32 Kind);
 	void StopCinematic();
 	bool IsInCinematic() const { return bCine; }
+	/** Outside camera while the pilot is on the grapple (boarding). */
+	void SetBoardCam(bool bOn, const FVector& From, const FVector& At, float Fov) { bBoardCam = bOn; BoardFrom = From; BoardAt = At; BoardFov = Fov; }
 	FVector GetZoneWorldLocation(iv::Zone Z) const;
 	iv::ZoneState GetZoneState(iv::Zone Z) const { return ZoneStates[iv::Index(Z)]; }
 	const iv::AnimState& GetCombatAnim() const { return CombatAnim; }
@@ -220,6 +222,9 @@ protected:
 	FVector HitKick = FVector::ZeroVector;      // decaying torso kick (rx, ry, rz degrees)
 	TWeakObjectPtr<AIVMechPawn> CineSubject;
 	bool bCine = false;
+	bool bBoardCam = false;
+	FVector BoardFrom = FVector::ZeroVector, BoardAt = FVector::ZeroVector;
+	float BoardFov = 60.f;
 	float CineT = 0.f, CineDur = 0.f;
 	int32 CineKind = 0;
 	void BuildCombatPose(FIVPoseAngles& InOut, float Dt);

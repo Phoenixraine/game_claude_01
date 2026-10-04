@@ -617,6 +617,13 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 	CamRot.Pitch = FMath::FInterpTo(CamRot.Pitch, AimPitch, Dt, 14.f);
 	CamRot.Roll = 0.25f * PelvisPivot->GetRelativeRotation().Roll;
 
+	if (bBoardCam && !bCine)
+	{
+		SetFirstPersonView(false);
+		Camera->SetFieldOfView(BoardFov);
+		Camera->SetWorldLocationAndRotation(BoardFrom, (BoardAt - BoardFrom).Rotation());
+		return;
+	}
 	if (bCine)
 	{
 		SetFirstPersonView(false);

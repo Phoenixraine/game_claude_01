@@ -7,9 +7,11 @@
 #include "GameFramework/Actor.h"
 #include "iv/Ai.h"
 #include "iv/Anim.h"
+#include "iv/Boarding.h"
 #include "IVCombat.generated.h"
 
 class AIVMechPawn;
+class AIVPilotFigure;
 
 /** Continuous state + one-shot edges of the player's combat controls (filled by the player controller). */
 struct FIVCombatInput
@@ -33,6 +35,10 @@ struct FIVCombatInput
 	// v5
 	bool bLungeHeld = false;
 	bool bJump = false, bChop = false, bSlide = false, bMash = false, bBerserk = false, bQte = false;
+	// boarding: start / leap to the other shoulder / hatch-hack directions and buttons (edges)
+	bool bBoard = false, bBoardSwing = false;
+	int8 HackDx = 0, HackDy = 0;
+	bool bHackConfirm = false, bHackBack = false, bHackAux = false;
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FIVCombatEventSignature, const iv::Event&);
@@ -78,6 +84,9 @@ public:
 	void RepairBreakdown(iv::Side S, int32 Levels);
 	float GetLungeCharge01(iv::Side S) const { return Anim[iv::Index(S)].lungeCharge01; }
 	FIVCombatEventSignature OnEvent;
+	const iv::Boarding& GetBoarding() const { return Board; }
+	bool IsBoardingActive() const { return Board.Active(); }
+	float GetBoardingCooldown01() const { return Board.cooldownLeft() > 0 ? 1.f - FMath::Clamp(float(Board.cooldownLeft()) / float(iv::tune::kBoardCooldownTicks), 0.f, 1.f) : 1.f; }
 
 	const iv::Duel* GetDuel() const { return Duel.Get(); }
 	const iv::AnimState& GetAnim(iv::Side S) const { return Anim[iv::Index(S)]; }
@@ -108,6 +117,14 @@ private:
 	float HitStop = 0.f;
 	float LockSparkAcc = 0.f;
 	void ApplyHitStop(float Seconds, float Dilation);
+	iv::Boarding Board;
+	iv::BoardingInput BoardIn;
+	TWeakObjectPtr<AIVPilotFigure> Pilot;
+	bool bBoardCamOn = false;
+	FVector BoardCamFrom = FVector::ZeroVector, BoardCamAt = FVector::ZeroVector;
+	float BoardBlastFlash = 0.f;
+	void UpdateBoardingPresentation(float Dt);
+	void HandleBoardingEvent(const iv::Event& Ev);
 	void BladeImpact(AIVMechPawn* A, AIVMechPawn* B, float Scale, bool bStop);
 
 	void StepOnce(bool bFirstOfFrame);
