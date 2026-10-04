@@ -77,6 +77,7 @@ void AIVGameMode::StartPlay()
 			EnemyMech->LampColor = FLinearColor(1.f, 0.28f, 0.12f);
 			EnemyMech->LampPower = 0.12f;
 			EnemyMech->bLampsDown = true;
+			EnemyMech->bInfected = !FParse::Param(FCommandLine::Get(), TEXT("IVNoInfect"));
 		}
 		EnemyMech->FinishSpawning(FTransform(FRotator(0.f, EnemyYaw, 0.f), EnemyLoc));
 		EnemyMech->bAIControlled = true;

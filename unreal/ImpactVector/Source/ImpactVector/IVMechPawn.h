@@ -66,6 +66,8 @@ public:
 	/** Skeletal mesh asset of this mech (set before BeginPlay); generated hulls get the M_MechHull material. */
 	FString RigAssetPath = TEXT("/Game/Mechs/Player/PLAYER_01.PLAYER_01");
 	bool bUseHullMaterial = true;
+	/** Infected variant: mutations burst out of the armour (spikes, glowing tumours); they swell as the zone underneath is damaged. */
+	bool bInfected = false;
 	FLinearColor HullTint = FLinearColor(0.045f, 0.065f, 0.105f);
 	FLinearColor HullAccent = FLinearColor(0.85f, 0.26f, 0.025f);
 	FLinearColor HullGlow = FLinearColor(0.5f, 2.4f, 7.0f);
@@ -240,6 +242,12 @@ protected:
 	// ---- rigged mesh driven by the anim library
 	UPROPERTY() TObjectPtr<USkeletalMeshComponent> RigMesh;
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> HullMID;
+	struct FIVGrowth { TObjectPtr<UStaticMeshComponent> C; iv::Zone Z = iv::Zone::Torso; FVector Full = FVector::OneVector; float Phase = 0.f, Cur = 0.f; bool bTumor = false; };
+	TArray<FIVGrowth> Growths;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> GrowthMID;
+	UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> GrowthComps;
+	void BuildGrowths();
+	void UpdateGrowths(float Dt);
 
 	// ---- head lamps (motivated key light on the opponent, volumetric beams in the fog)
 	UPROPERTY() TObjectPtr<class USpotLightComponent> HeadLamp[2];

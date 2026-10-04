@@ -1124,8 +1124,53 @@ def build_emissive():
     return m
 
 
+def build_growth():
+    """Infection growths: dark wet flesh/chitin with pulsing glowing veins. Params: Pulse (0..1+), Hue (violet/red mix), Boil."""
+    m = make_material("M_Growth")
+    pos = expr(m, unreal.MaterialExpressionWorldPosition, -1200, 0)
+    tm = expr(m, unreal.MaterialExpressionTime, -1200, 120)
+    pulse = scalar(m, "Pulse", 0.6, -1200, 240)
+    hue = scalar(m, "Hue", 0.35, -1200, 340)
+    names = ["WP", "T", "Pulse", "Hue"]
+    srcs = [(pos, ""), (tm, ""), (pulse, ""), (hue, "")]
+    common = """
+float n = 0.0, a = 0.5; float3 p = WP * 0.006;
+for (int i = 0; i < 3; i++)
+{
+    float3 ip = floor(p), fp = frac(p);
+    float3 u = fp * fp * (3.0 - 2.0 * fp);
+    float3 k = float3(127.1, 311.7, 74.7);
+    float c000 = frac(sin(dot(ip, k)) * 43758.5453);
+    float c100 = frac(sin(dot(ip + float3(1,0,0), k)) * 43758.5453);
+    float c010 = frac(sin(dot(ip + float3(0,1,0), k)) * 43758.5453);
+    float c110 = frac(sin(dot(ip + float3(1,1,0), k)) * 43758.5453);
+    float c001 = frac(sin(dot(ip + float3(0,0,1), k)) * 43758.5453);
+    float c101 = frac(sin(dot(ip + float3(1,0,1), k)) * 43758.5453);
+    float c011 = frac(sin(dot(ip + float3(0,1,1), k)) * 43758.5453);
+    float c111 = frac(sin(dot(ip + float3(1,1,1), k)) * 43758.5453);
+    n += a * lerp(lerp(lerp(c000, c100, u.x), lerp(c010, c110, u.x), u.y), lerp(lerp(c001, c101, u.x), lerp(c011, c111, u.x), u.y), u.z);
+    p *= 2.2; a *= 0.5;
+}
+float vein = 1.0 - smoothstep(0.0, 0.09, abs(n - 0.5));
+float beat = 0.55 + 0.45 * sin(T * (2.0 + 2.5 * Pulse) + n * 9.0);
+"""
+    t = unreal.CustomMaterialOutputType
+    base = custom(m, common + "return lerp(float3(0.035, 0.012, 0.02), float3(0.1, 0.03, 0.05), n) * (1.0 - vein * 0.6);", t.CMOT_FLOAT3, names, -700, 0, "growth_base")
+    wire_custom(base, srcs)
+    MEL.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = custom(m, common + "return lerp(0.22, 0.55, n);", t.CMOT_FLOAT1, names, -700, 250, "growth_rough")
+    wire_custom(rough, srcs)
+    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    emi = custom(m, common + "float3 c = lerp(float3(3.4, 0.35, 0.1), float3(2.2, 0.25, 3.0), Hue); return c * vein * beat * (0.5 + 1.4 * Pulse) + c * 0.08 * Pulse;", t.CMOT_FLOAT3, names, -700, 500, "growth_emissive")
+    wire_custom(emi, srcs)
+    MEL.connect_material_property(emi, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 ALL = [build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor,
-       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive]
+       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive, build_growth]
 import os
 _only = [x for x in os.environ.get("IV_ONLY", "").split(",") if x]
 for fn in ALL:
