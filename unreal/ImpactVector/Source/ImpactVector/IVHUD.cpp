@@ -872,7 +872,7 @@ void AIVHUD::DrawParryWindow(AIVCombatDirector* Dir, iv::Side MySide, float Sx)
 	if (!Dir || !Dir->GetDuel() || Dir->IsMatchOver()) return;
 	const iv::AnimState& O = Dir->GetAnim(iv::Other(MySide));
 	if ((O.phase != iv::Phase::Windup && O.phase != iv::Phase::Strike) || O.contactTicks < 0) return;
-	if (O.kind != iv::StrikeKind::Heavy && O.kind != iv::StrikeKind::Quick) return;
+	const bool bSpecial = O.kind == iv::StrikeKind::Lunge || O.kind == iv::StrikeKind::AirChop || O.kind == iv::StrikeKind::Grab;
 	const float CX = Canvas->ClipX * 0.5f, CY = Canvas->ClipY * 0.5f;
 	const int32 Win = iv::tune::kParryWindowTicks;
 	const int32 Ct = O.contactTicks;
@@ -887,6 +887,14 @@ void AIVHUD::DrawParryWindow(AIVCombatDirector* Dir, iv::Side MySide, float Sx)
 		const float a0 = 6.2831853f * k / 48.f, a1 = 6.2831853f * (k + 1) / 48.f;
 		DrawLine(CX + FMath::Cos(a0) * R0, CY + FMath::Sin(a0) * R0, CX + FMath::Cos(a1) * R0, CY + FMath::Sin(a1) * R0, A(kGreen, 0.55f), 3.f);
 		DrawLine(CX + FMath::Cos(a0) * R, CY + FMath::Sin(a0) * R, CX + FMath::Cos(a1) * R, CY + FMath::Sin(a1) * R, A(C, bIn ? 0.95f : 0.7f), bIn ? 6.f : 3.f);
+	}
+	if (bSpecial)
+	{
+		// the special attacks have their own answers: the rush is jumped over or locked with a side guard, the aerial chop is slid under, a grab is parried
+		const TCHAR* Hint = O.kind == iv::StrikeKind::Lunge ? TEXT("РЫВОК! ПРЫЖОК (Пробел) или БЛОК ВБОК — СЦЕПКА") : (O.kind == iv::StrikeKind::AirChop ? TEXT("УДАР СВЕРХУ С ПРЫЖКА! ПОДКАТ (X)") : TEXT("ЗАХВАТ! ПКМ В ОКНЕ — ПАРИРОВАТЬ"));
+		Text(Hint, CX, CY + R1 + 22.f * Sx, A(C, 0.95f), (bIn ? 1.15f : 0.85f) * Sx, 2, 1);
+		Text(FString::Printf(TEXT("%d мс"), int32(Ct * 1000 / iv::kTickHz)), CX, CY - 10.f, A(C, 0.9f), 0.9f * Sx, 1, 1);
+		return;
 	}
 	// where to draw the block: an arrow in the swing's direction
 	FVector2D D(0, 0);

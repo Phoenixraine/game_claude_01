@@ -1441,7 +1441,8 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 		if (FVector* T3 = Target.Joint.Find(FName(LeadFoot))) T3->X -= 10.f * Step;
 		if (FVector* T4 = Target.Joint.Find(FName(Trail))) { T4->X -= 10.f * W; T4->Y += Sg * 8.f * W; }
 		if (FVector* T5 = Target.Joint.Find(FName(TrailShin))) T5->X += 14.f * W;
-		if (FVector* T6 = Target.Joint.Find(FName(TEXT("pelvis")))) T6->Z += Sg * 0.f;
+		// the whole body turns on the spot to profile (like a fencer avoiding a thrust): a yaw of the pelvis carries the legs, torso and arms; nothing leans
+		if (FVector* T6 = Target.Joint.Find(FName(TEXT("pelvis")))) T6->Y += Sg * 72.f * W;
 	}
 	else if (S.posture == iv::Posture::Clinched)
 	{

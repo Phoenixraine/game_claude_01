@@ -66,7 +66,7 @@ AIVEnvironment::AIVEnvironment()
 
 	Fog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("Fog"));
 	Fog->SetupAttachment(Root);
-	Fog->SetFogDensity(0.07f);
+	Fog->SetFogDensity(0.105f);
 	Fog->SetFogHeightFalloff(0.012f);
 	Fog->SetVolumetricFog(true);
 	Fog->SetVolumetricFogDistance(30000.f);
@@ -77,9 +77,9 @@ AIVEnvironment::AIVEnvironment()
 	Fog->SkyAtmosphereAmbientContributionColorScale = FLinearColor(0.12f, 0.16f, 0.26f);
 	Fog->SetFogMaxOpacity(1.f);
 	// a second, low and dense layer: ground mist that lets the street surface read as soft shapes and catches the neon
-	Fog->SecondFogData.FogDensity = 0.12f;
+	Fog->SecondFogData.FogDensity = 0.24f;
 	Fog->SecondFogData.FogHeightFalloff = 0.035f;
-	Fog->SecondFogData.FogHeightOffset = 200.f;
+	Fog->SecondFogData.FogHeightOffset = 350.f;
 	Fog->SetStartDistance(0.f);
 
 	Clouds = CreateDefaultSubobject<UVolumetricCloudComponent>(TEXT("Clouds"));
@@ -137,8 +137,8 @@ void AIVEnvironment::ApplySettings(float FogMul, float EV, float Neon, float Blo
 {
 	if (Fog)
 	{
-		Fog->SetFogDensity(0.07f * FogMul);
-		Fog->SecondFogData.FogDensity = 0.12f * FogMul;
+		Fog->SetFogDensity(0.105f * FogMul);
+		Fog->SecondFogData.FogDensity = 0.24f * FogMul;
 		Fog->MarkRenderStateDirty();
 	}
 	if (PostProcess)
