@@ -42,6 +42,8 @@ void AIVGameMode::StartPlay()
 {
 	Super::StartPlay();
 
+	// the engine's own yellow on-screen warnings (Nanite / Lumen / shader notices) never belong on a player's screen
+	if (GEngine) GEngine->bEnableOnScreenDebugMessages = false;
 	UWorld* W = GetWorld();
 	IVGraphics::ApplyAtStart(W);
 	W->SpawnActor<AIVEnvironment>(FVector::ZeroVector, FRotator::ZeroRotator);

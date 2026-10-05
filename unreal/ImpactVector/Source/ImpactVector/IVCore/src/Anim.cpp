@@ -29,6 +29,9 @@ AnimState MakeAnimState(const Fighter& f) {
   a.stability01 = Unit(f.res.stability / tune::kStabilityMax);
   a.heat01 = Unit(f.res.heat / tune::kHeatMax);
   a.ultimate01 = Unit(f.ultimate / tune::kUltimateMax);
+  a.energyQuick01 = Unit(f.strikeEnergy[0] / tune::kStrikeEnergyMax);
+  a.energyLong01 = Unit(f.strikeEnergy[1] / tune::kStrikeEnergyMax);
+  a.energyRanged01 = Unit(f.strikeEnergy[2] / tune::kStrikeEnergyMax);
   a.ultWindTicks = f.ultWind;
   a.ultWindLen = f.ultWindLen;
   const tune::WeaponProfile& wp = f.WeaponProf();

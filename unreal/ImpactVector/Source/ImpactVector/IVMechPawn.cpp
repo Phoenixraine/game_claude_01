@@ -8,6 +8,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
 #include "UObject/ConstructorHelpers.h"
 #include "HAL/IConsoleManager.h"
 #include "EngineUtils.h"
@@ -467,7 +468,7 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 			const float Appr = FVector::DotProduct(Desired, ToOther);
 			if (Appr > 0.f)
 			{
-				const float F = FMath::Clamp((OtherDist - SetMinSep) / ((SetMinSep + 2000.f) - SetMinSep), 0.f, 1.f);
+				const float F = FMath::Clamp((OtherDist - SetMinSep) / ((SetMinSep + 6000.f) - SetMinSep), 0.f, 1.f);
 				const float Eff = F * F * (3.f - 2.f * F);                      // 0 at 50 m .. 1 at 70 m
 				Desired -= ToOther * Appr * (1.f - FMath::Lerp(0.f, 1.f, Eff) * FMath::Lerp(0.55f, 1.f, Eff));
 			}
@@ -478,12 +479,12 @@ void AIVMechPawn::UpdateLocomotion(float Dt)
 	const float Step = Rate * Dt;
 	Velocity += (Delta.Size2D() <= Step) ? Delta : Delta.GetSafeNormal2D() * Step;
 	Velocity.Z = 0;
-	if (OtherDist < (SetMinSep + 2000.f))
+	if (OtherDist < (SetMinSep + 6000.f))
 	{
 		const float Vt = FVector::DotProduct(Velocity, ToOther);
 		if (Vt > 0.f)
 		{
-			const float F = FMath::Clamp((OtherDist - SetMinSep) / ((SetMinSep + 2000.f) - SetMinSep), 0.f, 1.f);
+			const float F = FMath::Clamp((OtherDist - SetMinSep) / ((SetMinSep + 6000.f) - SetMinSep), 0.f, 1.f);
 			Velocity -= ToOther * Vt * (1.f - F);
 		}
 		if (OtherDist < SetMinSep) Velocity -= ToOther * FMath::Min(0.f, -FVector::DotProduct(Velocity, -ToOther)) ;
@@ -579,31 +580,27 @@ void AIVMechPawn::UpdateCockpitArms(float Dt)
 		FCockpitArm& A = CockpitArm[i];
 		const float Sd = (i == 0) ? -1.f : 1.f;           // UE: left = -Y
 		const FVector Anchor(-6.f, Sd * 25.f, -26.f);
-		const FVector Rest(58.f, Sd * 32.f, -44.f);
-		FVector Tgt = Rest;
-		FQuat GloveRot = FQuat::Identity;
-		if (bRigActive && RigMesh)
+		const FVector Rest(52.f, Sd * 40.f, -58.f);   // low and wide: the hands lie on the controls below the line of sight
+		// The pilot's hands rest low on the controls, forward and down. They are NOT copied from the mech's arm bones (that held them up in the
+		// guard stance all the time): they sway a little with walking and lift / push slightly with the swing, and stay inside a small box so
+		// they never reach through the dashboard or the frame.
+		const iv::AnimState& An = CombatAnim;
+		const float Tm = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+		const float Mv = FMath::Clamp(GetSpeedRatio(), 0.f, 1.f);
+		const bool bSwordHand = (i == 1);                         // the right hand carries the blade
+		const float Ph = An.phase == iv::Phase::Windup ? An.progress : (An.phase == iv::Phase::Strike ? 1.f - An.progress : 0.f);
+		float Lift = 1.6f * Mv * FMath::Sin(Tm * 5.5f + i * 3.14159f);
+		float Push = 0.f, Side = 0.f;
+		if (An.guardRaised) { Lift += 3.5f; Push += 2.f; }
+		if (An.phase != iv::Phase::Idle && (bSwordHand == (An.kind != iv::StrikeKind::Quick)))
 		{
-			const FName HandBone = (i == 0) ? FName(TEXT("hand_l")) : FName(TEXT("hand_r"));
-			const FVector HandW = RigMesh->GetBoneLocation(HandBone, EBoneSpaces::WorldSpace);
-			const FQuat HandQ = RigMesh->GetBoneQuaternion(HandBone, EBoneSpaces::WorldSpace);
-			const FVector Rel = CamT.InverseTransformPosition(HandW);
-			const FQuat RelQ = CamT.GetRotation().Inverse() * HandQ;
-			if (!A.bHaveNeutral)
-			{
-				A.NeutralRel = Rel; A.NeutralRot = RelQ; A.bHaveNeutral = true;
-				A.Smoothed = Rest; A.SmoothedRot = FQuat::Identity;
-			}
-			const float K = 0.0105f;
-			FVector D = (Rel - A.NeutralRel) * K;
-			D.X = FMath::Clamp(D.X, -40.f, 55.f);
-			D.Y = FMath::Clamp(D.Y * 0.8f, -35.f, 35.f);
-			D.Z = FMath::Clamp(D.Z, -28.f, 38.f);
-			Tgt = Rest + D;
-			FQuat Delta = RelQ * A.NeutralRot.Inverse();
-			Delta.Normalize();
-			GloveRot = FQuat::Slerp(FQuat::Identity, Delta, 0.55f);
+			Lift += 6.f * Ph;
+			Push += (An.phase == iv::Phase::Strike ? 7.f * (1.f - Ph) : -3.f * Ph);
+			Side += Sd * -4.f * Ph;
 		}
+		Lift += 6.f * FMath::Clamp(HitKick.X * -0.12f, 0.f, 1.f);       // a hit jolts the hands up a little
+		const FVector Tgt(FMath::Clamp(Rest.X + Push, 44.f, 62.f), FMath::Clamp(Rest.Y + Side, Sd * 30.f - 10.f, Sd * 50.f + 10.f), FMath::Clamp(Rest.Z + Lift, -66.f, -46.f));
+		FQuat GloveRot = FQuat(FVector(0, 1, 0), FMath::DegreesToRadians(-Lift * 1.2f));
 		const float Kf = 1.f - FMath::Exp(-Dt * 22.f);
 		A.Smoothed = FMath::Lerp(A.Smoothed, Tgt, Kf);
 		A.SmoothedRot = FQuat::Slerp(A.SmoothedRot, GloveRot, Kf);
@@ -684,7 +681,17 @@ void AIVMechPawn::UpdateCockpitCamera(float Dt)
 			for (TActorIterator<AIVMechPawn> It(GetWorld()); It; ++It) if (*It != this && It->RigMesh) UE_LOG(LogTemp, Display, TEXT("IV eye: enemy headZ=%.0f torsoZ=%.0f"), It->RigMesh->GetBoneLocation(FName(TEXT("head")), EBoneSpaces::WorldSpace).Z, It->RigMesh->GetBoneLocation(FName(TEXT("torso")), EBoneSpaces::WorldSpace).Z);
 		}
 	}
-	CamRot.Yaw = GetActorRotation().Yaw + TorsoYawRel;
+	{
+		// inside the mech we turn with it: during a dodge the body swings round and the pilot's head goes with it (the whole view turns)
+		float Want = 0.f;
+		if (CombatAnim.posture == iv::Posture::Dodging && bRigActive && RigMesh)
+		{
+			const FVector R = RigMesh->GetBoneLocation(FName(TEXT("shoulder_r")), EBoneSpaces::WorldSpace) - RigMesh->GetBoneLocation(FName(TEXT("shoulder_l")), EBoneSpaces::WorldSpace);
+			if (R.Size2D() > 1.f) Want = FMath::Clamp(FRotator::NormalizeAxis(R.Rotation().Yaw - (GetActorRotation().Yaw + 90.f)), -75.f, 75.f) * 0.9f;
+		}
+		DodgeCamYaw = FMath::FInterpTo(DodgeCamYaw, Want, Dt, FMath::Abs(Want) > FMath::Abs(DodgeCamYaw) ? 12.f : 5.f);
+	}
+	CamRot.Yaw = GetActorRotation().Yaw + TorsoYawRel + DodgeCamYaw;
 	CamRot.Pitch = FMath::FInterpTo(CamRot.Pitch, AimPitch, Dt, 14.f);
 	CamRot.Roll = 0.25f * PelvisPivot->GetRelativeRotation().Roll;
 
@@ -1352,7 +1359,13 @@ void AIVMechPawn::OnArmorPlateLost(iv::Zone Z, int32 Index, int32 Count)
 		FRandomStream R2(Index * 211 + int32(Z) * 29 + 3);
 		if (AIVFXManager* FX = AIVFXManager::Get(GetWorld()))
 		{
-			const FVector Out = (Xf.GetLocation() - GetActorLocation() + FVector(0, 0, 900.f)).GetSafeNormal();
+			FVector Out = (Xf.GetLocation() - GetActorLocation() + FVector(0, 0, 900.f)).GetSafeNormal();
+			if (APlayerCameraManager* Pcm = UGameplayStatics::GetPlayerCameraManager(this, 0))
+			{
+				// never throw a shell at the viewer
+				const FVector ToCam = (Pcm->GetCameraLocation() - Xf.GetLocation()).GetSafeNormal();
+				Out = (Out - ToCam * FMath::Max(0.f, FVector::DotProduct(Out, ToCam)) + FVector(0, 0, 0.35f)).GetSafeNormal();
+			}
 			FX->SpawnPiece(P.C->GetStaticMesh(), PlateMID, Xf, (Out + R2.VRand() * 0.35f) * R2.FRandRange(1600.f, 3200.f) + FVector(0, 0, 900.f), R2.VRand() * R2.FRandRange(1.f, 4.f), 0.9f);
 			FX->SpawnSparks(Xf.GetLocation(), FVector::UpVector, 50, 5500.f);
 		}
@@ -1403,6 +1416,10 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 
 	FIVPoseAngles Target = *Guard;
 	bool bLegs = false;
+	// getting up after a stagger / shutdown / knock-down is slow and heavy: no springing back into the stance (it read as the enemy hopping when hit)
+	if ((PrevPostureC == iv::Posture::Staggered || PrevPostureC == iv::Posture::ShutDown || PrevPostureC == iv::Posture::Overloaded || PrevPostureC == iv::Posture::KnockedDown) && S.posture == iv::Posture::Standing) GetUpT = 0.f;
+	PrevPostureC = S.posture;
+	if (GetUpT >= 0.f) { GetUpT += Dt; if (GetUpT > 1.3f) GetUpT = -1.f; }
 
 	if (bPoweredDown)
 	{
@@ -1571,7 +1588,8 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 				else if (N.Contains(TEXT("forearm"))) W0 = 12.5f;
 				else if (N.Contains(TEXT("hand"))) W0 = 15.f;
 				else if (N.Contains(TEXT("pelvis")) || N.Contains(TEXT("thigh")) || N.Contains(TEXT("shin")) || N.Contains(TEXT("foot"))) W0 = 9.f;
-				const float Wn = W0 * Phase;
+				float Wn = W0 * Phase;
+				if (GetUpT >= 0.f && (N.Contains(TEXT("thigh")) || N.Contains(TEXT("shin")) || N.Contains(TEXT("foot")) || N.Contains(TEXT("pelvis")))) Wn *= 0.32f;
 				FVector& Cur = CombatPose.Joint.FindOrAdd(Kv.Key, Kv.Value);
 				FVector& Vel = CombatVel.FindOrAdd(Kv.Key);
 				const FVector Acc = (Kv.Value - Cur) * (Wn * Wn) - Vel * (2.f * Zeta * Wn);
@@ -1579,7 +1597,7 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 				Cur += Vel * H;
 			}
 		}
-		CombatPose.RootPosM = FMath::Lerp(CombatPose.RootPosM, Target.RootPosM, K);
+		CombatPose.RootPosM = FMath::Lerp(CombatPose.RootPosM, Target.RootPosM, GetUpT >= 0.f ? 1.f - FMath::Exp(-3.5f * Dt) : K);
 		CombatPose.RootRotDeg = FMath::Lerp(CombatPose.RootRotDeg, Target.RootRotDeg, 1.f - FMath::Exp(-7.f * Dt));
 	}
 	// body english: a heavy swing drags the torso round and drops the pelvis; the dip is released as a footfall-like thump at contact
@@ -2488,4 +2506,9 @@ void AIVMechPawn::EmitContactSparks(const FVector& At, bool bBlade, float Streng
 		IVAudio::Play3D(W, bBlade ? TEXT("parry_clang") : TEXT("hit_metal_contact_light"), At, FMath::Clamp(0.5f + 0.4f * Strength, 0.4f, 1.f), FMath::RandRange(0.9f, 1.15f));
 		ContactSoundCool = 0.28f;
 	}
+}
+
+float AIVMechPawn::GetHeadWorldZ() const
+{
+	return RigMesh ? RigMesh->GetBoneLocation(FName(TEXT("head")), EBoneSpaces::WorldSpace).Z : GetActorLocation().Z;
 }

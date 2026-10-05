@@ -389,6 +389,7 @@ void Duel::ResolveWeapon(int ai, const World& w) {
   static const Zone kSpread[] = {Zone::Torso, Zone::ShoulderL, Zone::ShoulderR, Zone::ArmL, Zone::ArmR, Zone::LegL, Zone::LegR, Zone::Head};
   const float accuracy = Clamp(atk.body.modifiers().weaponAccuracy * wp.accuracy, 0.f, 1.f);
   int hits = 0;
+  const float energyMult = atk.SpendStrikeEnergy(2);   // v6: one shot spends the ranged pool once; the emptier it was, the weaker every hit
   for (int k = 0; k < wp.salvo; ++k) {
     bool hit = false;
     if (distance_ >= tune::kWeaponMinDistance) {
@@ -400,7 +401,7 @@ void Duel::ResolveWeapon(int ai, const World& w) {
     ++hits;
     Zone z = k == 0 ? atk.weaponTarget : kSpread[rng_.Below(static_cast<uint32_t>(sizeof(kSpread) / sizeof(kSpread[0])))];
     if (z == Zone::Reactor && std::fabs(def.flank) < tune::kRearAngleDeg) z = Zone::Torso;
-    float dmg = wp.damage;
+    float dmg = wp.damage * energyMult;
     if (def.GuardReady() && def.guard.age >= tune::kBlockRaiseTicks) dmg *= wp.blockMult;
     if (def.HardStanceActive()) dmg *= tune::kHardStanceDamageMult * 2.f;
     const float stab = dmg * tune::kHitStabilityFactor * wp.stabilityFactor / 0.6f;

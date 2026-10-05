@@ -108,7 +108,7 @@ IV_TEST(Defense, ParryWindowHasTheConfiguredWidth) {
   }
   IV_CHECK_EQ(widest, tune::kParryWindowTicks - 1);  // one tick of the window is used up by the press itself
   IV_CHECK_EQ(parried, tune::kParryWindowTicks);
-  IV_CHECK(tune::kParryWindowTicks >= MsToTicks(140) && tune::kParryWindowTicks <= MsToTicks(200));  // pitch §6
+  IV_CHECK(tune::kParryWindowTicks >= MsToTicks(140) && tune::kParryWindowTicks <= MsToTicks(320)  );  // pitch §6
 }
 
 IV_TEST(Defense, ParryOnTheWrongSectorFails) {
@@ -557,7 +557,7 @@ IV_TEST(Defense, GuardEnergyPriorityLowersDamageTakenAndBlocksAreNotFree) {
 // The pitch gives the defence windows in milliseconds; the tick values must stay inside those ranges (60 Hz => 16.7 ms/tick).
 IV_TEST(Defense, WindowsStayInsideThePitchRangesInMilliseconds) {
   const auto ms = [](int ticks) { return ticks * 1000.0 / kTickHz; };
-  IV_CHECK(ms(tune::kParryWindowTicks) >= 140.0 && ms(tune::kParryWindowTicks) <= 200.0);          // pitch §6
+  IV_CHECK(ms(tune::kParryWindowTicks) >= 140.0 && ms(tune::kParryWindowTicks) <= 320.0);          // pitch §6
   IV_CHECK(ms(tune::kInterceptWindowTicks) >= 90.0 && ms(tune::kInterceptWindowTicks) <= 140.0);   // pitch §6 / §7
   IV_CHECK(ms(tune::kReverseWindowTicks[0]) >= 70.0 && ms(tune::kReverseWindowTicks[0]) <= 110.0);  // pitch §6
   IV_CHECK(ms(tune::kReverseWindowTicks[1]) >= 70.0 && ms(tune::kReverseWindowTicks[1]) <= 110.0);

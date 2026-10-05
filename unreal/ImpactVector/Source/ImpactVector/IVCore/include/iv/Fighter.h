@@ -89,6 +89,7 @@ struct StrikeState {
   int strikeTick = 0;     // ticks spent in the Strike phase
   int strikeLen = 0;
   bool innerLine = false; // launched as a counter: ordinary blocks and parries fail (pitch §7)
+  float energyMult = 1.f; // v6: damage multiplier from the strike-energy pool at the moment it was thrown
 };
 
 struct GuardState {
@@ -140,6 +141,10 @@ class Fighter {
   int AmmoOf(WeaponKind k) const { return k == weapon ? weaponAmmo : savedAmmo[Index(k)]; }
   const tune::WeaponProfile& WeaponProf() const { return tune::kWeapons[Index(weapon)]; }
   void GainUltimate(float amount, const StepContext& ctx);
+  /** Spends pool `pool` (0 quick, 1 long, 2 ranged) and returns the damage multiplier its level gave (1.0 when full, kStrikeEnergyMinMult when empty). */
+  float SpendStrikeEnergy(int pool);
+  float StrikeEnergyMult(int pool) const;
+  static int EnergyPoolOf(StrikeKind k) { return k == StrikeKind::Quick ? 0 : 1; }
   bool UltimateReady() const { return ultimate >= tune::kUltimateMax - 0.0001f; }
   bool LegsLocked() const { return weaponCharging && WeaponProf().locksLegs; }
   void ForceStagger(const StepContext& ctx) { if (posture == Posture::Standing || posture == Posture::Dodging) EnterStagger(ctx); }
@@ -196,6 +201,8 @@ class Fighter {
   int8_t lastMove = 0;
   float proximity = 0.f;
   float moveDelta = 0.f;        // distance change requested this tick (negative closes the gap)
+  float strikeEnergy[3] = {100.f, 100.f, 100.f};   // v6: quick / long / ranged strike pools (0..kStrikeEnergyMax)
+  float strikeMove = 0.f;       // v6: the part of moveDelta that is a strike's own step (in / back / rush): the game layer moves THIS mech by it (plain walking is the pawn's own business)
   bool contactPending = false;
   bool contactResolved = false;  // Duel resolved the strike; phase stays Contact for one more tick
   bool firePending = false;

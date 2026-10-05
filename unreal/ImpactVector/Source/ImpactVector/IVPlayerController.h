@@ -112,6 +112,10 @@ private:
 	AIVCombatDirector* GetDirector();
 	void UpdateCombatInput(float Dt);
 	static iv::SwingSide SideFromStick(const FVector2D& S);
+	/** The stroke the player DREW (mouse / stick, +Y = up) -> the sector of the cut: a cut drawn downwards is an overhead chop (side Up), drawn to the right
+	 *  it comes from the left (side Left), and so on. The same mapping is used for the guard, so a block is drawn along the enemy's cut. */
+	static iv::SwingSide SideFromDrawn(const FVector2D& S);
+	void OnLookEnd(const FInputActionValue& V) { LookStick = FVector2D::ZeroVector; }
 	static iv::Zone ZoneFromStick(const FVector2D& S);
 
 	FVector2D MoveValue = FVector2D::ZeroVector;

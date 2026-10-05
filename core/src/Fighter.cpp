@@ -57,6 +57,7 @@ void Fighter::Reset() {
   lastMove = 0;
   proximity = 0.f;
   moveDelta = 0.f;
+  strikeMove = 0.f;
   contactPending = false;
   firePending = false;
   contactResolved = false;
@@ -72,6 +73,7 @@ void Fighter::Reset() {
   ultimate = 0.f;
   ultimatePending = false;
   ultWind = ultWindLen = 0;
+  for (float& e : strikeEnergy) e = tune::kStrikeEnergyMax;
   protectedTicks = 0;
   stunImmune = blindTicks = strikeLockTicks = burnTicks = 0;
   ultimateLocked = false;
@@ -157,17 +159,19 @@ float Fighter::StrikeDamage() const {
   d *= natural ? 1.f : tune::kUnnaturalTargetMult;
   d *= tune::kZoneDamageMult[Index(s.target)];
   if (s.innerLine) d *= tune::kInnerLineDamageMult;
-  return d;
+  return d * s.energyMult;
 }
 
 // ------------------------------------------------------------------------------------ stepping
 
 void Fighter::Step(const Input& in, const StepContext& ctx) {
+  for (int i = 0; i < 3; ++i) strikeEnergy[i] = std::min(tune::kStrikeEnergyMax, strikeEnergy[i] + tune::kStrikeEnergyRegenPerSec[i] / static_cast<float>(kTickHz));
   contactPending = false;
   firePending = false;
   ultimatePending = false;
   dodgeDirNow = 0;
   moveDelta = 0.f;
+  strikeMove = 0.f;
   proximity = ctx.proximity;
   lastMove = in.move;
   if (protectedTicks > 0) --protectedTicks;
@@ -293,7 +297,7 @@ void Fighter::Step(const Input& in, const StepContext& ctx) {
       if (in.move < 0) mult *= tune::kRetreatSpeedMult;  // pitch §11: stepping back is slower than stepping in
       moveDelta -= static_cast<float>(in.move) * MoveSpeed() * mult;
     }
-    if (strike.plant == FootPlant::Retreated && phase == Phase::Recovery && phaseTicks < 20) moveDelta += tune::kStepBackDistance / 20.f;
+    if (strike.plant == FootPlant::Retreated && phase == Phase::Recovery && phaseTicks < 20) { moveDelta += tune::kStepBackDistance / 20.f; strikeMove += tune::kStepBackDistance / 20.f; }
   } else if (posture != Posture::Clinched) {
     if (guard.hard) Emit(ctx, EventType::HardStanceOff);
     guard = GuardState();
@@ -539,6 +543,7 @@ void Fighter::HandleWindup(const Input& in, const StepContext& ctx) {
   }
   s.strikeLen = ScaledTicks(len, SwingSpeed(s.arm));
   s.strikeTick = 0;
+  s.energyMult = SpendStrikeEnergy(EnergyPoolOf(s.kind));   // v6: weaker when the pool is low
   phase = Phase::Strike;
   phaseTicks = 0;
   if (s.kind == StrikeKind::Heavy) res.AddHeat(tune::kHeavyReleaseHeat);
@@ -562,8 +567,8 @@ void Fighter::HandleStrike(const Input& in, const StepContext& ctx) {
     LoseStability(tune::kEmergencyBrakeStability, ctx);
     return;
   }
-  if (s.kind == StrikeKind::Lunge) moveDelta -= tune::kLungeRushDistance / static_cast<float>(std::max(1, s.strikeLen));
-  else if (s.plant == FootPlant::Stepped || s.plant == FootPlant::Overextended) moveDelta -= tune::kStepInDistance / static_cast<float>(std::max(1, s.strikeLen));
+  if (s.kind == StrikeKind::Lunge) { moveDelta -= tune::kLungeRushDistance / static_cast<float>(std::max(1, s.strikeLen)); strikeMove -= tune::kLungeRushDistance / static_cast<float>(std::max(1, s.strikeLen)); }
+  else if (s.plant == FootPlant::Stepped || s.plant == FootPlant::Overextended) { moveDelta -= tune::kStepInDistance / static_cast<float>(std::max(1, s.strikeLen)); strikeMove -= tune::kStepInDistance / static_cast<float>(std::max(1, s.strikeLen)); }
   ++phaseTicks;
   if (++s.strikeTick >= s.strikeLen) {
     phase = Phase::Contact;
@@ -670,6 +675,17 @@ bool Fighter::SelectWeapon(WeaponKind k) {
   weaponCooldown = savedCooldown[Index(k)];
   weaponAmmo = savedAmmo[Index(k)];
   return true;
+}
+
+float Fighter::StrikeEnergyMult(int pool) const {
+  const float u = std::max(0.f, std::min(1.f, strikeEnergy[pool] / tune::kStrikeEnergyMax));
+  return tune::kStrikeEnergyMinMult + (1.f - tune::kStrikeEnergyMinMult) * u;
+}
+
+float Fighter::SpendStrikeEnergy(int pool) {
+  const float m = StrikeEnergyMult(pool);
+  strikeEnergy[pool] = std::max(0.f, strikeEnergy[pool] - tune::kStrikeEnergyCost[pool]);
+  return m;
 }
 
 void Fighter::GainUltimate(float amount, const StepContext& ctx) {
@@ -880,6 +896,7 @@ void Fighter::StepAirSlide(const Input& in, const StepContext& ctx) {
     strike.strikeLen = ScaledTicks(tune::kAirChopStrikeTicks, SwingSpeed(Arm::R));
     strike.strikeTick = 0;
     strike.released = true;
+    strike.energyMult = SpendStrikeEnergy(1);
     phase = Phase::Strike;
     phaseTicks = 0;
     Emit(ctx, EventType::AirChopStarted);
@@ -887,7 +904,7 @@ void Fighter::StepAirSlide(const Input& in, const StepContext& ctx) {
   }
   if (phase == Phase::Strike) {
     ++phaseTicks;
-    moveDelta -= 14.f / static_cast<float>(std::max(1, strike.strikeLen));
+    { moveDelta -= 14.f / static_cast<float>(std::max(1, strike.strikeLen)); strikeMove -= 14.f / static_cast<float>(std::max(1, strike.strikeLen)); }
     if (++strike.strikeTick >= strike.strikeLen) {
       phase = Phase::Contact;
       phaseTicks = 0;

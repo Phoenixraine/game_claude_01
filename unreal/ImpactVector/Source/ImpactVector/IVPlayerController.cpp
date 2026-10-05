@@ -91,6 +91,7 @@ void AIVPlayerController::SetupInputComponent()
 		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnMove);
 		EIC->BindAction(MoveAction, ETriggerEvent::Completed, this, &AIVPlayerController::OnMoveEnd);
 		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIVPlayerController::OnLook);
+		EIC->BindAction(LookAction, ETriggerEvent::Completed, this, &AIVPlayerController::OnLookEnd);
 		EIC->BindAction(FireAction, ETriggerEvent::Started, this, &AIVPlayerController::OnFire);
 		// pose test keys on the numpad
 		InputComponent->BindKey(EKeys::NumPadOne, IE_Pressed, this, &AIVPlayerController::OnAct1);
@@ -113,6 +114,12 @@ iv::SwingSide AIVPlayerController::SideFromStick(const FVector2D& S)
 
 // Body sectors of the right stick (pitch 5.2 step 2): up = head, upper diagonals = shoulders, sides = arms,
 // centre = torso, lower diagonals = legs, down = reactor (only reachable when the enemy is flanked).
+iv::SwingSide AIVPlayerController::SideFromDrawn(const FVector2D& S)
+{
+	if (FMath::Abs(S.Y) >= FMath::Abs(S.X)) return S.Y >= 0.f ? iv::SwingSide::Down : iv::SwingSide::Up;      // drawn up = a rising cut, drawn down = an overhead chop
+	return S.X >= 0.f ? iv::SwingSide::Left : iv::SwingSide::Right;                                           // drawn right = the cut sweeps to the right (starts on the left)
+}
+
 iv::Zone AIVPlayerController::ZoneFromStick(const FVector2D& S)
 {
 	if (S.Size() < 0.45f) return iv::Zone::Torso;
@@ -137,7 +144,7 @@ void AIVPlayerController::OnLook(const FInputActionValue& V)
 	const FVector2D L = V.Get<FVector2D>();
 	AIVMechPawn* M = Mech();
 	if (!M) return;
-	const bool bMouse = FMath::Abs(L.X) > 1.001f || FMath::Abs(L.Y) > 1.001f;
+	const bool bMouse = FMath::Abs(GetInputAnalogKeyState(EKeys::Gamepad_RightX)) < 0.02f && FMath::Abs(GetInputAnalogKeyState(EKeys::Gamepad_RightY)) < 0.02f;   // no stick deflection = the mouse
 	if (WantsFreeLook())
 	{
 		if (bMouse) M->AddLook(L.X * LookSensitivity, L.Y * LookSensitivity); else LookStick = L;
@@ -269,16 +276,16 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 	{
 		StrikeHeldTime += Dt;
 		if (!bStrikeWasDown) { bSideLocked = false; CurSide = iv::SwingSide::Up; Stick = FVector2D::ZeroVector; }
-		if (!bSideLocked && Stick.Size() > 0.5f) { CurSide = SideFromStick(Stick); bSideLocked = true; }
+		if (!bSideLocked && Stick.Size() > 0.35f) { CurSide = SideFromDrawn(Stick); bSideLocked = true; }
 	}
 	const bool bJustReleased = bStrikeWasDown && !bStrikeDown;
-	if (bJustReleased && StrikeHeldTime <= 0.18f)
+	if (bJustReleased && StrikeHeldTime <= 0.22f)
 	{
 		In.bQuick = true;                 // short press = quick strike on the family chosen by the first flick
 		In.Side = bSideLocked ? CurSide : iv::SwingSide::Up;
 		In.Target = ZoneFromStick(Stick);
 	}
-	In.bStrikeHeld = bStrikeDown && StrikeHeldTime > 0.18f;
+	In.bStrikeHeld = bStrikeDown && StrikeHeldTime > 0.22f;
 	In.Side = In.bQuick ? In.Side : CurSide;
 	In.Target = In.bQuick ? In.Target : (bSideLocked ? ZoneFromStick(Stick) : iv::Zone::Torso);
 	if (!bStrikeDown) StrikeHeldTime = 0.f;
@@ -295,7 +302,7 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 
 	// ---- guard (LT / RMB)
 	In.bGuardHeld = bGuardDown;
-	if (bGuardDown && Stick.Size() > 0.4f) CurGuardSide = SideFromStick(Stick);
+	if (bGuardDown && Stick.Size() > 0.3f) CurGuardSide = SideFromDrawn(Stick);
 	In.GuardSide = CurGuardSide;
 	In.bHardStance = bGuardDown && (IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::Gamepad_DPad_Down));
 

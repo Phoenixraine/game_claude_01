@@ -325,3 +325,53 @@ IV_TEST(UltimateCounter, TheWindowIsMuchSmallerThanTheParryWindow) {
   IV_CHECK(tune::kUltCounterWindowTicks < tune::kParryWindowTicks);
   IV_CHECK(tune::kUltCounterWindowTicks >= 3);
 }
+
+// ---------------------------------------------------------------- v6: strike-energy pools (quick / long / ranged)
+IV_TEST(StrikeEnergy, AFullPoolHitsAtFullDamageAndSpamWeakensTheSameTypeOnly) {
+  Rig r(1, 12.f);
+  Fighter& a = r.A();
+  IV_CHECK_NEAR(a.StrikeEnergyMult(0), 1.f, 1e-4f);
+  const float first = a.SpendStrikeEnergy(0);
+  IV_CHECK_NEAR(first, 1.f, 1e-4f);
+  float last = first;
+  for (int i = 0; i < 6; ++i) {
+    const float m = a.SpendStrikeEnergy(0);
+    IV_CHECK(m < last + 1e-4f);
+    last = m;
+  }
+  IV_CHECK(last < 0.6f);                                      // six jabs in a row: far weaker
+  IV_CHECK_NEAR(a.StrikeEnergyMult(1), 1.f, 1e-4f);           // the long pool is untouched
+  IV_CHECK_NEAR(a.StrikeEnergyMult(2), 1.f, 1e-4f);
+  IV_CHECK(a.StrikeEnergyMult(0) >= tune::kStrikeEnergyMinMult - 1e-4f);
+}
+
+IV_TEST(StrikeEnergy, PoolsRegenerateOverTimeAndStayInRange) {
+  Rig r(1, 40.f);
+  for (int i = 0; i < 8; ++i) r.A().SpendStrikeEnergy(1);
+  IV_CHECK(r.A().strikeEnergy[1] < 1.f);
+  r.Step(60 * 15);
+  IV_CHECK_NEAR(r.A().strikeEnergy[1], tune::kStrikeEnergyMax, 1e-3f);
+  for (int i = 0; i < 3; ++i) IV_CHECK(r.A().strikeEnergy[i] <= tune::kStrikeEnergyMax + 1e-4f);
+}
+
+IV_TEST(StrikeEnergy, ALandedHeavyHitDoesLessDamageFromAnEmptyPool) {
+  float full = 0.f, empty = 0.f;
+  {
+    Rig r(1, 12.f);
+    const float before = TotalHp(r.B());
+    r.StartHeavyA(SwingSide::Up, Zone::Torso);
+    r.StepUntil([&] { return r.Count(EventType::StrikeContact) > 0; });
+    full = before - TotalHp(r.B());
+  }
+  {
+    Rig r(1, 12.f);
+    r.A().strikeEnergy[1] = 0.f;
+    const float before = TotalHp(r.B());
+    r.StartHeavyA(SwingSide::Up, Zone::Torso);
+    // the pool refills a little while winding up: that is the point of timing the strikes
+    r.StepUntil([&] { return r.Count(EventType::StrikeContact) > 0; });
+    empty = before - TotalHp(r.B());
+  }
+  IV_CHECK(full > 5.f);
+  IV_CHECK(empty < full * 0.85f);
+}

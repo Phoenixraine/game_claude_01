@@ -154,7 +154,7 @@ constexpr int kMaxFeintsBeforePenalty = 2;             // beyond this each feint
 
 // ---------------------------------------------------------------- defence (pitch §6, §7)
 constexpr int kBlockRaiseTicks = MsToTicks(400);       // pitch §6: "безопасный блок 350-450 мс"
-constexpr int kParryWindowTicks = MsToTicks(170);      // pitch §6: "парирование 140-200 мс"
+constexpr int kParryWindowTicks = MsToTicks(300);      // pitch §6: "140-200 мс" — widened (owner, 2026-10-05): a person must not have to hit a millisecond
 constexpr int kInterceptWindowTicks = MsToTicks(115);  // pitch §7 / §6: "перехват 90-140 мс"
 constexpr int kReverseWindowTicks[2] = {MsToTicks(100), MsToTicks(80)};  // pitch §6: "ответ на контратаку 70-110 мс" (6 and 5 ticks)
 constexpr int kMaxReverseReplies = 2;                  // pitch §7: "максимум 2 ответа", then clinch
@@ -264,11 +264,17 @@ constexpr float kUltGainTakenPerDamage = 0.f;            // receiving damage (v6
 constexpr float kUltGainTakenCap = 0.f;
 constexpr float kUltimateDamage = 42.f;                 // scripted unblockable strike on the chosen zone
 constexpr float kUltimateStabilityHit = 70.f;
+// v6 (owner, 2026-10-05): three strike-energy pools — quick strikes, long (sword) strikes, ranged (weapon) strikes. A strike spends its pool and is
+// weaker the emptier the pool was when it was thrown (full pool = full damage), so one strike cannot be spammed: mix the types.
+constexpr float kStrikeEnergyMax = 100.f;
+constexpr float kStrikeEnergyCost[3] = {16.f, 34.f, 55.f};       // quick, long, ranged
+constexpr float kStrikeEnergyRegenPerSec[3] = {13.f, 9.f, 6.f};
+constexpr float kStrikeEnergyMinMult = 0.3f;                      // damage multiplier of an empty pool
 // v6 (owner's rules, 2026-10-05): the ultimate starts with a punch under the chest that can be countered in a tiny window; a successful
 // counter cancels it. The gauge is charged by counters only (parry, intercept, a counter strike that lands, countering the ultimate itself),
 // multiplied by a comeback factor that grows as the fighter's hull integrity falls.
 constexpr int kUltWindupTicks = MsToTicks(800);        // the punch is coming: the defender may counter it near the end of this time
-constexpr int kUltCounterWindowTicks = 6;              // 100 ms: much tighter than kParryWindowTicks. The guard must be pressed afresh, low (SwingSide::Down)
+constexpr int kUltCounterWindowTicks = 9;              // 100 ms: much tighter than kParryWindowTicks. The guard must be pressed afresh, low (SwingSide::Down)
 constexpr float kUltGainCounterHit = 12.f;             // a counter strike (inner line after a parry / intercept) that lands
 constexpr float kUltGainUltCounter = 30.f;             // countering the ultimate itself
 constexpr float kUltComebackMax = 2.5f;                // gauge multiplier at zero integrity (1.0 at full integrity)

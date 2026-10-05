@@ -111,6 +111,7 @@ void AIVHUD::DrawHUD()
 	if (Flow && Flow->GetState() == EIVFlowState::Menu) { DrawMenu(Flow); return; }
 	if (Flow && Flow->GetState() == EIVFlowState::Join) { DrawJoin(Flow); return; }
 	if (Flow && Flow->GetState() == EIVFlowState::Settings) { DrawSettings(Flow); return; }
+	if (Flow && Flow->GetState() == EIVFlowState::Paused) { DrawPause(Flow); return; }
 
 	static IConsoleVariable* Cam = IConsoleManager::Get().FindConsoleVariable(TEXT("iv.Cam"));
 	if (Cam && Cam->GetInt() != 0) return;
@@ -930,14 +931,15 @@ void AIVHUD::DrawParryWindow(AIVCombatDirector* Dir, iv::Side MySide, float Sx)
 	}
 	// where to draw the block: an arrow in the swing's direction
 	FVector2D D(0, 0);
-	switch (O.side) { case iv::SwingSide::Up: D = FVector2D(0, -1); break; case iv::SwingSide::Down: D = FVector2D(0, 1); break; case iv::SwingSide::Left: D = FVector2D(-1, 0); break; default: D = FVector2D(1, 0); break; }
+	// the block is DRAWN along the enemy's cut: an overhead chop (side Up) is met by a stroke drawn downwards, and so on
+	switch (O.side) { case iv::SwingSide::Up: D = FVector2D(0, 1); break; case iv::SwingSide::Down: D = FVector2D(0, -1); break; case iv::SwingSide::Left: D = FVector2D(1, 0); break; default: D = FVector2D(-1, 0); break; }
 	const FVector2D Pt(CX + D.X * R0 * 1.0f, CY + D.Y * R0 * 1.0f), Tp(CX + D.X * (R0 + 56.f * Sx), CY + D.Y * (R0 + 56.f * Sx));
 	DrawLine(Pt.X, Pt.Y, Tp.X, Tp.Y, A(kGreen, 0.95f), 6.f);
 	const FVector2D Nn(-D.Y, D.X);
 	DrawLine(Tp.X, Tp.Y, Tp.X - D.X * 18.f + Nn.X * 12.f, Tp.Y - D.Y * 18.f + Nn.Y * 12.f, A(kGreen, 0.95f), 5.f);
 	DrawLine(Tp.X, Tp.Y, Tp.X - D.X * 18.f - Nn.X * 12.f, Tp.Y - D.Y * 18.f - Nn.Y * 12.f, A(kGreen, 0.95f), 5.f);
-	static const TCHAR* Names[4] = { TEXT("ВЕРХ"), TEXT("ВЛЕВО"), TEXT("ВПРАВО"), TEXT("НИЗ") };
-	const FString Msg = bIn ? TEXT("БЛОК СЕЙЧАС!") : FString::Printf(TEXT("УДАР %s — ПКМ + ЧЕРТИ %s"), Names[iv::Index(O.side)], Names[iv::Index(O.side)]);
+	static const TCHAR* Names[4] = { TEXT("ВНИЗ"), TEXT("ВПРАВО"), TEXT("ВЛЕВО"), TEXT("ВВЕРХ") };   // by side index: the direction to draw
+	const FString Msg = bIn ? TEXT("БЛОК СЕЙЧАС!") : FString::Printf(TEXT("РУБЯТ — ПКМ И ЧЕРТИ %s"), Names[iv::Index(O.side)]);
 	Text(Msg, CX, CY + R1 + 22.f * Sx, A(C, 0.95f), (bIn ? 1.3f : 0.85f) * Sx, 2, 1);
 	Text(FString::Printf(TEXT("%d мс"), int32(Ct * 1000 / iv::kTickHz)), CX, CY - 10.f, A(C, 0.9f), 0.9f * Sx, 1, 1);
 }
@@ -1217,18 +1219,46 @@ void AIVHUD::DrawUltGauge(AIVCombatDirector* Dir, iv::Side MySide, float Sx)
 	if (!Dir || !Dir->GetDuel()) return;
 	const iv::Fighter& F = Dir->GetDuel()->fighter(MySide);
 	const float W = Canvas->ClipX, H = Canvas->ClipY;
-	const float BW = 330.f * Sx, BH = 14.f * Sx, X = W * 0.5f - BW * 0.5f, Y = H - 58.f * Sx;
-	const float V = FMath::Clamp(F.ultimate / iv::tune::kUltimateMax, 0.f, 1.f);
-	const bool bReady = F.UltimateReady();
-	const float Mult = Dir->GetUltimateMultiplier(MySide);
-	const FLinearColor C = bReady ? kYellow : kOrange;
-	DrawRect(A(FLinearColor::Black, 0.55f), X - 3.f, Y - 3.f, BW + 6.f, BH + 6.f);
-	DrawRect(A(C, bReady ? 0.55f + 0.45f * Pulse(4.f) : 0.9f), X, Y, BW * V, BH);
-	for (int32 k = 1; k < 10; ++k) DrawRect(A(FLinearColor::Black, 0.7f), X + BW * k / 10.f - 1.f, Y, 2.f, BH);
-	Text(FString::Printf(TEXT("УЛЬТИМЕЙТ  %d%%"), int32(V * 100.f)), X, Y - 20.f * Sx, A(C, 0.95f), 0.75f * Sx, 0, 1);
-	Text(FString::Printf(TEXT("ЗАРЯД ×%.1f%s"), Mult, Mult > 1.45f ? TEXT("  (КАМБЭК)") : TEXT("")), X + BW, Y - 20.f * Sx, A(Mult > 1.45f ? kGreen : kWhite, 0.75f), 0.7f * Sx, 2, 1);
-	if (bReady) Text(TEXT("V — УЛЬТИМЕЙТ"), W * 0.5f, Y + BH + 8.f * Sx, A(kYellow, 0.7f + 0.3f * Pulse(3.f)), 0.8f * Sx, 1, 1);
-	else if (V < 0.02f) Text(TEXT("заряд — парирования и контратаки"), W * 0.5f, Y + BH + 6.f * Sx, A(kWhite, 0.3f), 0.55f * Sx, 1, 1);
+	const float BW = 560.f * Sx, CX = W * 0.5f, X = CX - BW * 0.5f;
+	// ---- hull (HP): big and always on screen
+	{
+		const float Hp = FMath::Clamp(F.body.Integrity(), 0.f, 1.f);
+		const FLinearColor C = Hp > 0.6f ? kGreen : (Hp > 0.3f ? kYellow : kRed);
+		const float Y = H - 150.f * Sx, BH = 24.f * Sx;
+		DrawRect(A(FLinearColor::Black, 0.7f), X - 4.f, Y - 4.f, BW + 8.f, BH + 8.f);
+		DrawRect(A(C, Hp < 0.3f ? 0.7f + 0.3f * Pulse(5.f) : 0.95f), X, Y, BW * Hp, BH);
+		for (int32 k = 1; k < 10; ++k) DrawRect(A(FLinearColor::Black, 0.55f), X + BW * k / 10.f - 1.f, Y, 2.f, BH);
+		Text(FString::Printf(TEXT("КОРПУС  %d%%"), int32(Hp * 100.f + 0.5f)), CX, Y + BH * 0.5f - 9.f * Sx, A(FLinearColor::White, 1.f), 1.0f * Sx, 2, 1);
+	}
+	// ---- ultimate gauge with the comeback multiplier
+	{
+		const float V = FMath::Clamp(F.ultimate / iv::tune::kUltimateMax, 0.f, 1.f);
+		const bool bReady = F.UltimateReady();
+		const float Mult = Dir->GetUltimateMultiplier(MySide);
+		const FLinearColor C = bReady ? kYellow : kOrange;
+		const float Y = H - 112.f * Sx, BH = 20.f * Sx;
+		DrawRect(A(FLinearColor::Black, 0.7f), X - 4.f, Y - 4.f, BW + 8.f, BH + 8.f);
+		DrawRect(A(C, bReady ? 0.6f + 0.4f * Pulse(4.f) : 0.95f), X, Y, BW * V, BH);
+		for (int32 k = 1; k < 10; ++k) DrawRect(A(FLinearColor::Black, 0.6f), X + BW * k / 10.f - 1.f, Y, 2.f, BH);
+		Text(bReady ? TEXT("УЛЬТИМЕЙТ ГОТОВ — V") : FString::Printf(TEXT("УЛЬТИМЕЙТ  %d%%"), int32(V * 100.f)), CX, Y + BH * 0.5f - 8.f * Sx, A(FLinearColor::White, 1.f), 0.9f * Sx, 2, 1);
+		Text(FString::Printf(TEXT("×%.1f%s"), Mult, Mult > 1.45f ? TEXT(" КАМБЭК") : TEXT("")), X + BW + 14.f * Sx, Y + BH * 0.5f - 8.f * Sx, A(Mult > 1.45f ? kGreen : kWhite, 0.9f), 0.85f * Sx, 0, 1);
+		if (V < 0.02f) Text(TEXT("заряд — парирования и контратаки"), CX, Y + BH + 8.f * Sx, A(kWhite, 0.4f), 0.55f * Sx, 1, 1);
+	}
+	// ---- strike energy: quick / long / ranged. A strike spends its own pool and hits the weaker, the emptier the pool was.
+	{
+		const iv::AnimState& An = Dir->GetAnim(MySide);
+		const float Vals[3] = { An.energyQuick01, An.energyLong01, An.energyRanged01 };
+		const TCHAR* Names[3] = { TEXT("БЫСТРЫЕ"), TEXT("ДЛИННЫЕ"), TEXT("ДАЛЬНИЕ") };
+		const FLinearColor Cols[3] = { kCyan, kOrange, FLinearColor(0.8f, 0.4f, 1.f) };
+		const float Gap = 14.f * Sx, SW = (BW - 2.f * Gap) / 3.f, Y = H - 74.f * Sx, BH = 14.f * Sx;
+		for (int32 i = 0; i < 3; ++i)
+		{
+			const float Sx0 = X + i * (SW + Gap), V = FMath::Clamp(Vals[i], 0.f, 1.f);
+			DrawRect(A(FLinearColor::Black, 0.7f), Sx0 - 3.f, Y - 3.f, SW + 6.f, BH + 6.f);
+			DrawRect(A(Cols[i], V < 0.3f ? 0.5f + 0.4f * Pulse(6.f) : 0.95f), Sx0, Y, SW * V, BH);
+			Text(FString::Printf(TEXT("%s %d%%"), Names[i], int32(V * 100.f + 0.5f)), Sx0 + SW * 0.5f, Y + BH * 0.5f - 7.f * Sx, A(FLinearColor::White, 1.f), 0.65f * Sx, 2, 1);
+		}
+	}
 }
 
 void AIVHUD::DrawBoarded(AIVCombatDirector* Dir, iv::Side MySide, AIVPlayerController* PC, float Sx)
@@ -1269,4 +1299,32 @@ void AIVHUD::DrawBoarded(AIVCombatDirector* Dir, iv::Side MySide, AIVPlayerContr
 		DrawRect(A(kRed, 0.95f), CX - 220.f * Sx, H * 0.07f + 56.f * Sx, 440.f * Sx * Pg, 8.f * Sx);
 		Text(FString::Printf(TEXT("ВЗЛОМ ВАШЕГО ЛЮКА  %d%%"), int32(Pg * 100.f)), CX, H * 0.07f + 36.f * Sx, A(kRed, 0.9f), 0.8f * Sx, 1, 1);
 	}
+}
+
+
+// ------------------------------------------------------------------------------------------------------- pause menu
+void AIVHUD::DrawPause(AIVGameFlow* Flow)
+{
+	const float W = Canvas->ClipX, H = Canvas->ClipY;
+	const float Sx = FMath::Clamp(W / 1600.f, 0.6f, 1.6f);
+	const double Tm = FPlatformTime::Seconds();
+	DrawRect(FLinearColor(0.f, 0.01f, 0.03f, 0.72f), 0, 0, W, H);
+	for (int32 i = 0; i < 12; ++i) DrawRect(FLinearColor(0.f, 0.f, 0.02f, 0.5f * FMath::Pow(1.f - float(i) / 12.f, 2.f)), 0, H * 0.15f * i / 12.f, W, H * 0.15f / 12.f);
+	const float CX = W * 0.5f;
+	Text(TEXT("ПАУЗА"), CX, H * 0.2f, kWhite, 4.0f * Sx, 2, 1);
+	DrawRect(A(kCyan, 0.8f), CX - 260.f * Sx, H * 0.2f + 74.f * Sx, 520.f * Sx, 2.f * Sx);
+	static const TCHAR* Items[4] = { TEXT("ПРОДОЛЖИТЬ"), TEXT("НАСТРОЙКИ"), TEXT("МЕНЮ"), TEXT("ВЫЙТИ") };
+	const int32 Sel = Flow->GetPauseIndex();
+	for (int32 i = 0; i < 4; ++i)
+	{
+		const float Y = H * 0.38f + i * 78.f * Sx;
+		const bool bSel = (i == Sel);
+		if (bSel)
+		{
+			DrawRect(A(kCyan, 0.18f + 0.06f * float(FMath::Sin(Tm * 5.0))), CX - 260.f * Sx, Y - 8.f * Sx, 520.f * Sx, 60.f * Sx);
+			DrawRect(A(kCyan, 0.95f), CX - 260.f * Sx, Y - 8.f * Sx, 6.f * Sx, 60.f * Sx);
+		}
+		Text(Items[i], CX, Y, bSel ? kWhite : A(kWhite, 0.6f), (bSel ? 1.9f : 1.6f) * Sx, 2, 1);
+	}
+	Text(TEXT("W / S — выбор   ·   Enter — подтвердить   ·   Esc — продолжить"), CX, H * 0.9f, A(kWhite, 0.55f), 0.9f * Sx, 1, 1);
 }

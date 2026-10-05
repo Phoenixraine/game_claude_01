@@ -190,6 +190,8 @@ void AIVFXManager::TickChunks(float Dt)
 		FIVChunk& C = Chunks[i];
 		C.Age += Dt;
 		if (C.Age >= C.Life) { Chunks.RemoveAtSwap(i); continue; }
+		// nothing may hang in front of the pilot's face: anything that gets within ~32 m of the camera is faded out almost at once
+		if (!CamPos.IsZero() && FVector::DistSquared(C.Pos, CamPos) < FMath::Square(3200.f)) C.Life = FMath::Min(C.Life, C.Age + 0.3f);
 		C.Heat = FMath::Max(0.f, C.Heat - Dt * (C.bRest ? 0.18f : 0.1f));
 		if (C.bRest) continue;
 		C.Vel.Z -= 1900.f * Dt;

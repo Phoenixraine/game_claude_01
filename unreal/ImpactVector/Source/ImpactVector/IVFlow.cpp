@@ -1,4 +1,5 @@
 #include "IVFlow.h"
+#include "Misc/App.h"
 #include "IVSettings.h"
 #include "IVMechPawn.h"
 #include "IVCombat.h"
@@ -58,10 +59,10 @@ void AIVGameFlow::BuildSteps()
 	Add(TEXT("ДОБРО ПОЖАЛОВАТЬ В КАБИНУ"), TEXT("Ты пилот боевого меха. Впереди тренировочный манекен. Начнём с движения."), TEXT(""), ETutGoal::Timer, 1, 5.f, DM::Passive);
 	Add(TEXT("ШАГ ВПЕРЁД"), TEXT("Подойди к манекену на дистанцию удара мечом."), TEXT("W A S D — ходьба   ·   Shift — бег   ·   геймпад: левый стик"), ETutGoal::Walk, 1, 0.f, DM::Passive);
 	Add(TEXT("ОБЗОР"), TEXT("Поверни корпус мышью. Tab — захват цели: камера будет следить за врагом."), TEXT("Мышь   ·   Tab — захват   ·   геймпад: правый стик, R3"), ETutGoal::Look, 1, 0.f, DM::Passive);
-	Add(TEXT("ТЯЖЁЛЫЙ УДАР МЕЧОМ"), TEXT("Удерживай левую кнопку мыши и веди мышь, рисуя траекторию клинка: куда повёл — оттуда замах, где закончил — туда придётся удар (голова, плечи, руки, ноги). Отпусти — удар. 3 попадания."),
+	Add(TEXT("ТЯЖЁЛЫЙ УДАР МЕЧОМ"), TEXT("Удерживай левую кнопку мыши и веди мышь, рисуя линию разреза: проведёшь вниз — робот рубит сверху вниз, вправо — горизонтальный разрез вправо, вверх — разрез снизу вверх. Где закончил линию — туда придётся удар (голова, плечи, руки, ноги). Отпусти — удар. 3 попадания."),
 		TEXT("ЛКМ (держать) + мышь, отпустить   ·   геймпад: RT + правый стик   ·   C — отмена замаха"), ETutGoal::HeavyHit, 3, 0.f, DM::Passive);
 	Add(TEXT("БЫСТРЫЙ УДАР КУЛАКОМ"), TEXT("Короткий клик ЛКМ — быстрый удар левой рукой. Слабый, но почти мгновенный: им сбивают чужой замах. 2 попадания."), TEXT("ЛКМ — короткий клик"), ETutGoal::QuickHit, 2, 0.f, DM::Passive);
-	Add(TEXT("БЛОК И ПАРИРОВАНИЕ"), TEXT("Манекен будет рубить с разных сторон. Зажми ПКМ и поверни мышь туда, откуда идёт клинок. Нажми блок в последний момент перед ударом — получится парирование. Отбей 2 удара."),
+	Add(TEXT("БЛОК И ПАРИРОВАНИЕ"), TEXT("Манекен будет рубить с разных сторон. Зажми ПКМ и проведи мышью линию вдоль разреза врага (подсказка на экране: куда вести). Нажми блок в последний момент перед ударом — получится парирование; окно парирования с небольшим допуском. Отбей 2 удара."),
 		TEXT("ПКМ + мышь   ·   Ctrl при блоке — жёсткая стойка   ·   геймпад: LT + правый стик"), ETutGoal::Defend, 2, 0.f, DM::Scripted, 1);
 	Add(TEXT("УКЛОНЕНИЕ"), TEXT("Q / E — шаг в сторону с поворотом корпуса. Уход спасает ТОЛЬКО от боковых ударов (слева и справа). От ударов сверху и снизу не уйти — их надо блокировать. Увернись 2 раза."),
 		TEXT("Q — влево   ·   E — вправо   ·   геймпад: LB / RB"), ETutGoal::Evade, 2, 0.f, DM::Scripted, 2);
@@ -209,6 +210,8 @@ void AIVGameFlow::UpdateMusic(float Dt)
 // ---------------------------------------------------------------------------------------------------- states
 void AIVGameFlow::EnterMenu()
 {
+	UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
+	bSettingsFromPause = false;
 	if (bVersus || Player2) LeaveVersus();
 	State = EIVFlowState::Menu;
 	GfxPreset = IVSettings::GetInt(TEXT("preset"));
@@ -380,7 +383,8 @@ void AIVGameFlow::BeginStep(int32 Index)
 	if (S.bFullUltimate) Dir->FillUltimate(iv::Side::A);
 	if (FParse::Param(FCommandLine::Get(), TEXT("IVHurtEnemy")) && Dir->GetMutableDuel())
 		for (int32 z = 0; z < iv::kZoneCount; ++z) Dir->GetMutableDuel()->fighter(iv::Side::B).body.ApplyDamage(static_cast<iv::Zone>(z), z == int32(iv::Zone::Reactor) ? 120.f : (z == int32(iv::Zone::Torso) ? 300.f : 125.f), iv::StrikeKind::Quick);
-	if (S.Goal != ETutGoal::Walk && Dir->GetDuel() && Dir->GetDuel()->distance() > 40.f) PlaceMechs(26.f);
+	if (S.Goal == ETutGoal::QuickHit && Dir->GetDuel() && Dir->GetDuel()->distance() > 18.f) PlaceMechs(13.f);
+	else if (S.Goal != ETutGoal::Walk && Dir->GetDuel() && Dir->GetDuel()->distance() > 40.f) PlaceMechs(26.f);
 }
 
 void AIVGameFlow::AdvanceStep()
@@ -515,6 +519,7 @@ void AIVGameFlow::MenuInput()
 
 void AIVGameFlow::EnterSettings()
 {
+	if (State == EIVFlowState::Paused) bSettingsFromPause = true;
 	State = EIVFlowState::Settings;
 	SetIdx = 0;
 	SetHold = 0.f;
@@ -543,7 +548,7 @@ void AIVGameFlow::SettingsInput()
 		// held key repeats
 		const bool bL = Down({ EKeys::Left, EKeys::A, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftStick_Left });
 		const bool bR = Down({ EKeys::Right, EKeys::D, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftStick_Right });
-		if (bL || bR) { SetHold += GetWorld()->GetDeltaSeconds(); if (SetHold > 0.06f) { SetHold = 0.f; Delta = bR ? 1 : -1; } }
+		if (bL || bR) { SetHold += FApp::GetDeltaTime(); if (SetHold > 0.06f) { SetHold = 0.f; Delta = bR ? 1 : -1; } }
 		else SetHold = 0.f;
 	}
 	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom }) && IVSettings::All()[Row].Kind != IVSettings::EKind::Slider) Delta = 1;
@@ -555,7 +560,7 @@ void AIVGameFlow::SettingsInput()
 		IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.5f);
 	}
 	if (Pressed({ EKeys::R, EKeys::Gamepad_FaceButton_Left })) { IVSettings::ResetAll(); IVSettings::Apply(GetWorld()); IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.8f); }
-	if (Pressed({ EKeys::Escape, EKeys::BackSpace, EKeys::Gamepad_FaceButton_Right })) { State = EIVFlowState::Menu; IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.6f); }
+	if (Pressed({ EKeys::Escape, EKeys::BackSpace, EKeys::Gamepad_FaceButton_Right })) { State = bSettingsFromPause ? EIVFlowState::Paused : EIVFlowState::Menu; bSettingsFromPause = false; IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.6f); }
 }
 
 void AIVGameFlow::Tick(float Dt)
@@ -568,7 +573,13 @@ void AIVGameFlow::Tick(float Dt)
 	if (!P || !Player || !Enemy || !Dir) return;
 
 	UpdateMusic(Dt);
-	if (State != EIVFlowState::Menu && State != EIVFlowState::Settings && P->WasInputKeyJustPressed(EKeys::Escape)) { EnterMenu(); return; }
+	{	// test hook: -IVPauseAt=seconds opens the pause menu once (no keyboard injection)
+		static float PauseAt = -2.f;
+		if (PauseAt < -1.5f) { PauseAt = -1.f; FParse::Value(FCommandLine::Get(), TEXT("-IVPauseAt="), PauseAt); if (PauseAt == -1.f) PauseAt = -3.f; }
+		if (PauseAt > 0.f && GetGameTimeSinceCreation() > PauseAt && (State == EIVFlowState::Duel || State == EIVFlowState::Tutorial)) { PauseAt = -3.f; EnterPause(); return; }
+	}
+	if ((State == EIVFlowState::Tutorial || State == EIVFlowState::Duel) && P->WasInputKeyJustPressed(EKeys::Escape) && !(PC() && PC()->IsRepairing())) { EnterPause(); return; }
+	if (State != EIVFlowState::Menu && State != EIVFlowState::Settings && State != EIVFlowState::Paused && State != EIVFlowState::Tutorial && State != EIVFlowState::Duel && P->WasInputKeyJustPressed(EKeys::Escape)) { EnterMenu(); return; }
 
 	if (PendingPick >= 0 && State == EIVFlowState::Menu && GetGameTimeSinceCreation() > 1.5f)
 	{
@@ -577,6 +588,9 @@ void AIVGameFlow::Tick(float Dt)
 	}
 	switch (State)
 	{
+	case EIVFlowState::Paused:
+		PauseInput();
+		return;                                    // the fight and its timers stand still
 	case EIVFlowState::Join:
 		JoinInput();
 		break;
@@ -641,5 +655,46 @@ void AIVGameFlow::Tick(float Dt)
 		ResultT += Dt;
 		if (ResultT > 0.6f && (P->WasInputKeyJustPressed(EKeys::Enter) || P->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom))) { if (bVersus) EnterVersus(); else EnterDuel(); }
 		break;
+	}
+}
+
+
+// ---------------------------------------------------------------------------------------------------- pause
+void AIVGameFlow::EnterPause()
+{
+	PauseReturn = State;
+	State = EIVFlowState::Paused;
+	PauseIdx = 0;
+	if (!FParse::Param(FCommandLine::Get(), TEXT("IVPauseNoFreeze"))) UGameplayStatics::SetGlobalTimeDilation(this, 0.0001f);   // everything in the world stops (the flag is for automated captures)
+	if (AIVPlayerController* P = PC()) P->SetCombatEnabled(false);
+	if (Player2) Player2->SetCombatEnabled(false);
+	IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.6f);
+}
+
+void AIVGameFlow::ExitPause()
+{
+	State = PauseReturn;
+	UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
+	if (AIVPlayerController* P = PC()) P->SetCombatEnabled(true);
+	if (Player2) Player2->SetCombatEnabled(true);
+	IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.6f);
+}
+
+void AIVGameFlow::PauseInput()
+{
+	APlayerController* P = UGameplayStatics::GetPlayerController(this, 0);
+	if (!P) return;
+	auto Pressed = [P](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (P->WasInputKeyJustPressed(K)) return true; return false; };
+	const int32 N = 4;
+	if (Pressed({ EKeys::Up, EKeys::W, EKeys::Gamepad_DPad_Up, EKeys::Gamepad_LeftStick_Up })) { PauseIdx = (PauseIdx + N - 1) % N; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.7f); }
+	if (Pressed({ EKeys::Down, EKeys::S, EKeys::Gamepad_DPad_Down, EKeys::Gamepad_LeftStick_Down })) { PauseIdx = (PauseIdx + 1) % N; IVAudio::Play2D(GetWorld(), TEXT("ui_move"), 0.7f); }
+	if (Pressed({ EKeys::Escape, EKeys::Gamepad_Special_Right, EKeys::Gamepad_FaceButton_Right })) { ExitPause(); return; }
+	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom, EKeys::LeftMouseButton }))
+	{
+		IVAudio::Play2D(GetWorld(), TEXT("ui_confirm"), 0.8f);
+		if (PauseIdx == 0) ExitPause();
+		else if (PauseIdx == 1) EnterSettings();
+		else if (PauseIdx == 2) EnterMenu();
+		else UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
 	}
 }

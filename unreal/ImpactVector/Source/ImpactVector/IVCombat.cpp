@@ -176,6 +176,19 @@ void AIVCombatDirector::Tick(float Dt)
 		Acc -= Step;
 	}
 
+	{	// -IVLogJump: report sudden vertical moves of either mech (hit-reaction hops)
+		static const bool bJ = FParse::Param(FCommandLine::Get(), TEXT("IVLogJump"));
+		static float PrevZ[2] = { 0.f, 0.f };
+		if (bJ)
+		{
+			const float Zs[2] = { P->GetHeadWorldZ(), E->GetHeadWorldZ() };
+			for (int32 s2 = 0; s2 < 2; ++s2)
+			{
+				if (FMath::Abs(Zs[s2] - PrevZ[s2]) > 25.f && PrevZ[s2] != 0.f) UE_LOG(LogTemp, Display, TEXT("IV jump: side %d dz=%.0f z=%.0f t=%.2f posture=%d phase=%d"), s2, Zs[s2] - PrevZ[s2], Zs[s2], GetWorld()->GetTimeSeconds(), int32(Anim[s2].posture), int32(Anim[s2].phase));
+				PrevZ[s2] = Zs[s2];
+			}
+		}
+	}
 	Anim[0] = iv::MakeAnimState(Duel->fighter(iv::Side::A));
 	for (int32 s = 0; s < 2; ++s) { UpdateBoardingPresentation(Dt, s == 0 ? iv::Side::A : iv::Side::B); UpdateVictimCam(Dt, s == 0 ? iv::Side::A : iv::Side::B); }
 	for (int32 s = 0; s < 2; ++s)
@@ -300,6 +313,7 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 	if (PlayerBot.IsValid()) { A = PlayerBot->Decide(iv::MakeObservation(*Duel, iv::Side::A)); P->SetMoveIntent(FVector2D(0.f, float(A.move))); }
 	A = Board[0].Filter(*Duel, A);
 	iv::Input B = bHumanB ? BuildInput(PlayerIn2, bFirstOfFrame) : Bot->Decide(iv::MakeObservation(*Duel, iv::Side::B));
+	if (!bHumanB && Duel->tick() < 5 * iv::kTickHz) B.move = 0;   // the enemy waits: we walk up to it ourselves
 	B = Board[1].Filter(*Duel, B);
 	iv::World W;
 	W.proximity[0] = ProximityBehind(P, E);
@@ -338,15 +352,14 @@ void AIVCombatDirector::StepOnce(bool bFirstOfFrame)
 	// the enemy walks as its AI wants (the core's own distance integration is overridden every tick)
 	if (!bHumanB) E->SetMoveIntent(FVector2D(0.f, float(B.move)));
 
-	// strikes with a step-in / step-back change the gap: move both mechs symmetrically along the line between them
-	const float Delta = Duel->distance() - Units;
-	if (FMath::Abs(Delta) > 0.002f && FMath::Abs(Delta) < 25.f && !Duel->cinematic().active)
+	// a strike's own step (in / back / rush) moves ONLY the mech that strikes (walking is each pawn's own business). Moving both mechs symmetrically
+	// used to drag the player along whenever the enemy stepped, so the giants seemed to be pulled together at the start of a fight.
+	if (!Duel->cinematic().active)
 	{
 		const FVector Dir = (En - Pl).GetSafeNormal2D();
-		const FVector Shift = Dir * (Delta * 100.f * 0.5f);
-		// tiny per-tick displacements: no sweep (the capsule bottoms touch the terrain and sweeps would stick); the pawns re-snap to the ground
-		P->AddActorWorldOffset(-Shift, false);
-		E->AddActorWorldOffset(Shift, false);
+		const float SA = Duel->fighter(iv::Side::A).strikeMove, SB = Duel->fighter(iv::Side::B).strikeMove;
+		if (FMath::Abs(SA) > 1e-4f) P->AddActorWorldOffset(Dir * (-SA * 100.f), false);
+		if (FMath::Abs(SB) > 1e-4f) E->AddActorWorldOffset(-Dir * (-SB * 100.f), false);
 	}
 
 	for (const iv::Event& Ev : Duel->log().events()) Dispatch(Ev);

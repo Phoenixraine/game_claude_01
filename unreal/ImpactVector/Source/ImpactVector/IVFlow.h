@@ -13,7 +13,7 @@ class AIVCombatDirector;
 class AIVPlayerController;
 class UAudioComponent;
 
-enum class EIVFlowState : uint8 { Menu, Tutorial, Duel, Result, Join, Settings };
+enum class EIVFlowState : uint8 { Menu, Tutorial, Duel, Result, Join, Settings, Paused };
 
 enum class ETutGoal : uint8 { Timer, Walk, Look, HeavyHit, QuickHit, Defend, Evade, Counter, Ability, Scoop, Ultimate };
 
@@ -47,6 +47,7 @@ public:
 	FString GetMenuValue(int32 I) const;
 	FString GetMenuHint(int32 I) const;
 	int32 GetMenuIndex() const { return MenuIndex; }
+	int32 GetPauseIndex() const { return PauseIdx; }
 	FString GetDifficultyName() const;
 	// ---- settings screen
 	int32 GetSettingsTab() const { return SetTab; }
@@ -77,6 +78,13 @@ private:
 
 	EIVFlowState State = EIVFlowState::Menu;
 	int32 MenuIndex = 0;
+	// pause (Esc in a fight or in the tutorial): the world freezes, a small menu offers continue / settings / menu / quit
+	int32 PauseIdx = 0;
+	EIVFlowState PauseReturn = EIVFlowState::Duel;
+	bool bSettingsFromPause = false;
+	void EnterPause();
+	void ExitPause();
+	void PauseInput();
 	int32 Difficulty = 1;
 	int32 NextStyle = 0;
 	FTransform PlayerHome, EnemyHome;

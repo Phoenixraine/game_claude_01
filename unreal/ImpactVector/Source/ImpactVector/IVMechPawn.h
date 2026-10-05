@@ -109,6 +109,7 @@ public:
 	/** The pilot is outside and lies stunned: the empty mech slumps (kneeling, lights low). */
 	void SetPoweredDown(bool b) { bPoweredDown = b; }
 	bool IsSlapRight() const { return bSlapRight; }
+	float GetHeadWorldZ() const;
 
 	// ---- combat presentation (driven by AIVCombatDirector) ----
 	void SetCombatAnim(const iv::AnimState& S) { CombatAnim = S; bCombat = true; }
@@ -220,6 +221,9 @@ protected:
 	float AimYaw = 0.f, AimPitch = 0.f;
 	float RocketArmT = 0.f;
 	float SlapU = 0.f, SlapSm = 0.f, SlapPrev = 0.f, SlapHoldT = 0.f;
+	iv::Posture PrevPostureC = iv::Posture::Standing;
+	float DodgeCamYaw = 0.f;   // the pilot's head turns with the body during a dodge
+	float GetUpT = -1.f;   // > 0 while the mech rises from a stagger / knock-down: slow, no hop
 	bool bSlapRight = true, bPoweredDown = false;
 	float SetFov = 98.f, SetShake = 1.f, SetMinSep = 5000.f;
 	float TorsoYawRel = 0.f;
