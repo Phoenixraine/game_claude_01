@@ -22,6 +22,8 @@ int ChargeAndFire(Rig& r, int extra = 0) {
 }
 
 void FillUltimate(Fighter& f) { f.ultimate = tune::kUltimateMax; }
+// v6: the button starts a windup punch; this runs it to the contact (nobody countered)
+void RunUltWind(Rig& r) { r.Step(tune::kUltWindupTicks); }
 
 const Event* Find(const Rig& r, EventType t, int from = 0) {
   const auto& ev = r.duel.log().events();
@@ -195,32 +197,33 @@ IV_TEST(Ultimate, GaugeStartsEmptyClampsAndAnnouncesReadinessOnce) {
   IV_CHECK_EQ(r.Count(EventType::UltimateReady), 1);
 }
 
-IV_TEST(Ultimate, GainsComeFromSkillMoreThanFromSuffering) {
-  IV_CHECK(tune::kUltGainParry > tune::kUltGainHit);
+IV_TEST(Ultimate, OnlyCountersChargeTheGaugeAndTheyChargeItMoreWhenHurt) {
   IV_CHECK(tune::kUltGainIntercept >= tune::kUltGainParry);
-  IV_CHECK(tune::kUltGainCriticalHit > tune::kUltGainHit);
-  IV_CHECK(tune::kUltGainTakenCap < tune::kUltGainParry * 0.5f);
-  // a landed heavy hit fills the attacker's gauge more than the victim's
+  IV_CHECK_EQ(tune::kUltGainHit, 0.f);                      // v6: plain hits do not charge it
+  IV_CHECK(tune::kUltGainUltCounter > tune::kUltGainParry);
+  // comeback: the same gain is bigger for a fighter with less hull integrity
   Rig r(1, 12.f);
-  r.StartHeavyA(SwingSide::Up, Zone::Torso);
-  r.StepUntil([&] { return r.Count(EventType::StrikeContact) > 0; });
-  IV_CHECK_EQ(r.LastOutcome(Side::A), static_cast<int>(Outcome::Hit));
-  IV_CHECK(r.A().ultimate >= tune::kUltGainHit - 1e-4f);
-  IV_CHECK(r.B().ultimate > 0.f && r.B().ultimate <= tune::kUltGainTakenCap + 1e-4f);
-  IV_CHECK(r.A().ultimate > r.B().ultimate);  // suffering fills the gauge less than landing hits
-}
-
-IV_TEST(Ultimate, HitsOnACriticalZoneChargeTheGaugeFaster) {
-  Rig r(1, 12.f);
-  // bring B's torso to Critical first
   StepContext ctx;
-  while (r.B().body.state(Zone::Torso) < ZoneState::Critical) r.B().TakeHit(Zone::Torso, 20.f, StrikeKind::Quick, 0.f, ctx);
-  r.B().ultimate = 0.f;
-  r.A().ultimate = 0.f;
-  r.StartHeavyA(SwingSide::Up, Zone::Torso);
-  r.StepUntil([&] { return r.Count(EventType::StrikeContact) > 0; });
-  IV_CHECK_EQ(r.LastOutcome(Side::A), static_cast<int>(Outcome::Hit));
-  IV_CHECK(r.A().ultimate >= tune::kUltGainHit + tune::kUltGainCriticalHit - 1e-3f);
+  ctx.log = &r.duel.log();
+  r.A().GainUltimate(10.f, ctx);
+  const float healthy = r.A().ultimate;
+  IV_CHECK_NEAR(healthy, 10.f, 1e-3f);
+  for (int i = 0; i < 60 && r.B().body.Integrity() > 0.4f; ++i) {
+    r.B().TakeHit(Zone::Torso, 30.f, StrikeKind::Heavy, 0.f, ctx);
+    r.B().TakeHit(Zone::ArmL, 30.f, StrikeKind::Heavy, 0.f, ctx);
+    r.B().TakeHit(Zone::LegR, 30.f, StrikeKind::Heavy, 0.f, ctx);
+  }
+  IV_CHECK(r.B().body.Integrity() < 0.95f);
+  r.B().GainUltimate(10.f, ctx);
+  IV_CHECK(r.B().ultimate > healthy * 1.3f);
+  IV_CHECK(r.B().ultimate <= 10.f * tune::kUltComebackMax + 1e-3f);
+  // a landed plain hit gives the attacker nothing
+  Rig q(1, 12.f);
+  q.StartHeavyA(SwingSide::Up, Zone::Torso);
+  q.StepUntil([&] { return q.Count(EventType::StrikeContact) > 0; });
+  IV_CHECK_EQ(q.LastOutcome(Side::A), static_cast<int>(Outcome::Hit));
+  IV_CHECK_EQ(q.A().ultimate, 0.f);
+  IV_CHECK_EQ(q.B().ultimate, 0.f);
 }
 
 IV_TEST(Ultimate, ButtonDoesNothingWithAnEmptyGauge) {
@@ -238,6 +241,10 @@ IV_TEST(Ultimate, FullGaugeTriggersTheCinematicAndConsumesTheGauge) {
   r.a.ultimate = true;
   r.a.target = Zone::Torso;
   r.Step();
+  IV_CHECK_EQ(r.Count(EventType::UltimateStarted), 1);   // v6: the punch comes first
+  IV_CHECK_EQ(r.A().ultimate, 0.f);
+  IV_CHECK(!r.duel.cinematic().active);
+  RunUltWind(r);
   IV_CHECK_EQ(r.Count(EventType::UltimateUsed), 1);
   IV_CHECK_EQ(r.A().ultimate, 0.f);
   IV_CHECK(r.duel.cinematic().active);
@@ -253,6 +260,7 @@ IV_TEST(Ultimate, FightIsFrozenDuringTheCutAndInputsAreIgnored) {
   FillUltimate(r.A());
   r.a.ultimate = true;
   r.Step();
+  RunUltWind(r);
   const Tick t0 = r.duel.tick();
   const float d0 = r.duel.distance();
   r.b.strikeHeld = true;
@@ -270,6 +278,7 @@ IV_TEST(Ultimate, CutEndsWithTheTargetStaggeredAndTheShooterProtected) {
   FillUltimate(r.A());
   r.a.ultimate = true;
   r.Step();
+  RunUltWind(r);
   r.Step(tune::kUltimateCinematicTicks + 2);
   IV_CHECK(!r.duel.cinematic().active);
   IV_CHECK_EQ(r.Count(EventType::CinematicEnd), 1);
@@ -292,8 +301,9 @@ IV_TEST(Ultimate, MatchEndWaitsForTheCutToFinish) {
   q.B().flank = 180.f;
   q.a.ultimate = true;
   q.a.target = Zone::Reactor;
-  for (int z = 0; z < 3; ++z) q.B().body.ApplyDamage(Zone::Reactor, 60.f, StrikeKind::Quick);
+  for (int z = 0; z < 2; ++z) q.B().body.ApplyDamage(Zone::Reactor, 60.f, StrikeKind::Quick);
   q.Step();
+  RunUltWind(q);
   const int endIdx = IndexOf(q, EventType::MatchEnd);
   if (endIdx >= 0) {
     IV_CHECK(IndexOf(q, EventType::CinematicEnd) >= 0);

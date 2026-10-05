@@ -27,7 +27,9 @@ private:
 	void DrawSpecials(AIVCombatDirector* Dir, iv::Side MySide, AIVPlayerController* PC, AIVMechPawn* Me, float Sx);
 	void DrawBreakdown(AIVCombatDirector* Dir, iv::Side MySide, AIVPlayerController* PC, float Sx);
 	void DrawRepair(AIVPlayerController* PC, const iv::Fighter& F, float Sx);
-	bool DrawBoarding(class AIVCombatDirector* Dir, float Sx);
+	bool DrawBoarding(class AIVCombatDirector* Dir, iv::Side MySide, float Sx);
+	void DrawBoarded(class AIVCombatDirector* Dir, iv::Side MySide, class AIVPlayerController* PC, float Sx);
+	void DrawUltGauge(class AIVCombatDirector* Dir, iv::Side MySide, float Sx);
 	void DrawHack(const iv::HackGame& G, float Sx);
 	void DrawMenu(AIVGameFlow* Flow);
 	void DrawJoin(AIVGameFlow* Flow);

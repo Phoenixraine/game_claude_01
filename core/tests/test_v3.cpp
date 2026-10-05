@@ -173,6 +173,7 @@ IV_TEST(Ultimate, WeakenedTargetIsCutInHalfHealthyOneLosesItsOffHandArm) {
     r.a.ultimate = true;
     r.a.target = Zone::Head;
     r.Step();
+    r.Step(tune::kUltWindupTicks);
     IV_CHECK(r.duel.cinematic().kind == CinematicKind::UltimateSever);
     IV_CHECK_EQ(r.Count(EventType::UltimateSever), 1);
     IV_CHECK(r.B().body.severed(Zone::ArmL));
@@ -186,12 +187,15 @@ IV_TEST(Ultimate, WeakenedTargetIsCutInHalfHealthyOneLosesItsOffHandArm) {
   }
   {   // weakened target
     Rig r(1, 20.f);
-    for (int z = 0; z < kZoneCount; ++z) r.B().body.ApplyDamage(static_cast<Zone>(z), 140.f, StrikeKind::Quick);
-    IV_CHECK(r.B().body.Integrity() < tune::kUltimateKillFraction);
+    for (int z = 0; z < kZoneCount; ++z)
+      if (static_cast<Zone>(z) != Zone::Reactor) r.B().body.ApplyDamage(static_cast<Zone>(z), 140.f, StrikeKind::Quick);   // v6: the windup takes time, so the target must be alive during it
+    r.B().body.ApplyDamage(Zone::Reactor, 60.f, StrikeKind::Quick);
+    IV_CHECK(r.B().body.Integrity() < tune::kUltimateKillFraction + 0.1f);
     r.A().ultimate = tune::kUltimateMax;
     r.a.ultimate = true;
     r.a.target = Zone::Head;
     r.Step();
+    r.Step(tune::kUltWindupTicks);
     IV_CHECK(r.duel.cinematic().kind == CinematicKind::UltimateBisect);
     IV_CHECK_EQ(r.Count(EventType::UltimateFinisher), 1);
     r.Step(tune::kUltimateCinematicTicks + 2);
@@ -263,4 +267,61 @@ IV_TEST(Weapons, SwitchingWeaponsKeepsEachCooldownRunning) {
   IV_CHECK(r.A().CooldownOf(WeaponKind::RailSpear) == railLeft - 120);
   IV_CHECK(r.duel.SelectWeapon(Side::A, WeaponKind::RailSpear));
   IV_CHECK(r.A().weaponCooldown == railLeft - 120);
+}
+
+
+// ---------------------------------------------------------------- v6: countering the ultimate
+namespace {
+// A starts the ultimate; returns once the windup is `leftTicks` away from contact.
+void StartUltAndWait(Rig& r, int leftTicks) {
+  r.A().ultimate = tune::kUltimateMax;
+  r.a.ultimate = true;
+  r.a.target = Zone::Torso;
+  r.Step();
+  r.Step(tune::kUltWindupTicks - leftTicks - 1);
+}
+}  // namespace
+
+IV_TEST(UltimateCounter, FreshLowGuardInTheTinyWindowCancelsTheUltimateAndChargesTheDefender) {
+  Rig r(1, 20.f);
+  StartUltAndWait(r, 3);
+  IV_CHECK_EQ(r.Count(EventType::UltimateStarted), 1);
+  IV_CHECK(r.A().ultWind > 0);
+  r.b.guardHeld = true;
+  r.b.guardSide = SwingSide::Down;
+  r.Step(4);
+  IV_CHECK_EQ(r.Count(EventType::UltimateCountered), 1);
+  IV_CHECK_EQ(r.Count(EventType::UltimateUsed), 0);
+  IV_CHECK(!r.duel.cinematic().active);
+  IV_CHECK(!r.B().body.severed(Zone::ArmL));
+  IV_CHECK(r.B().ultimate >= tune::kUltGainUltCounter - 1e-3f);
+  IV_CHECK_EQ(r.A().ultimate, 0.f);                       // the attacker lost the gauge
+  IV_CHECK(r.A().res.stability < 100.f);
+  IV_CHECK(r.B().counterTicks > 0 || r.A().phase == Phase::Recovery);
+}
+
+IV_TEST(UltimateCounter, WrongSideTooEarlyOrAlreadyHeldDoesNotCounter) {
+  {   // a high guard
+    Rig r(1, 20.f);
+    StartUltAndWait(r, 3);
+    r.b.guardHeld = true;
+    r.b.guardSide = SwingSide::Up;
+    r.Step(4);
+    IV_CHECK_EQ(r.Count(EventType::UltimateCountered), 0);
+    IV_CHECK_EQ(r.Count(EventType::UltimateUsed), 1);
+  }
+  {   // pressed too early (outside the tiny window)
+    Rig r(1, 20.f);
+    StartUltAndWait(r, tune::kUltWindupTicks / 2);
+    r.b.guardHeld = true;
+    r.b.guardSide = SwingSide::Down;
+    r.Step(tune::kUltWindupTicks);
+    IV_CHECK_EQ(r.Count(EventType::UltimateCountered), 0);
+    IV_CHECK_EQ(r.Count(EventType::UltimateUsed), 1);
+  }
+}
+
+IV_TEST(UltimateCounter, TheWindowIsMuchSmallerThanTheParryWindow) {
+  IV_CHECK(tune::kUltCounterWindowTicks < tune::kParryWindowTicks);
+  IV_CHECK(tune::kUltCounterWindowTicks >= 3);
 }

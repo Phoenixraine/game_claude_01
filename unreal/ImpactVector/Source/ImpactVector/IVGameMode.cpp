@@ -152,6 +152,7 @@ void AIVGameMode::StartPlay()
 					{
 						if (StartName.Equals(TEXT("tutorial"), ESearchCase::IgnoreCase)) Start = EIVFlowState::Tutorial;
 						else if (StartName.Equals(TEXT("duel"), ESearchCase::IgnoreCase)) Start = EIVFlowState::Duel;
+						else if (StartName.Equals(TEXT("versus"), ESearchCase::IgnoreCase)) Start = EIVFlowState::Join;
 					}
 					AIVGameFlow* Fl = W->SpawnActor<AIVGameFlow>(FVector::ZeroVector, FRotator::ZeroRotator);
 					if (Fl) Fl->Begin(Pl, EnemyMech, Dr, Start);

@@ -38,22 +38,6 @@ void AIVPlayerController::BeginPlay()
 	Super::BeginPlay();
 	ApplySettings();
 	bAuto = FParse::Param(FCommandLine::Get(), TEXT("IVAuto"));
-	{
-		FString S;
-		if (FParse::Value(FCommandLine::Get(), TEXT("-IVScript="), S, false))
-		{
-			TArray<FString> Items;
-			S.ParseIntoArray(Items, TEXT(";"));
-			for (const FString& It : Items)
-			{
-				FString L, R;
-				if (!It.Split(TEXT("@"), &L, &R)) continue;
-				FScriptCmd Cm; Cm.T = FCString::Atof(*R);
-				if (!L.Split(TEXT("="), &Cm.Name, &Cm.Arg)) Cm.Name = L;
-				ScriptCmd.Add(Cm);
-			}
-		}
-	}
 	SetInputMode(FInputModeGameOnly());
 	bShowMouseCursor = false;
 	if (AIVMechPawn* M = Mech())
@@ -187,6 +171,26 @@ void AIVPlayerController::OnLook(const FInputActionValue& V)
 
 void AIVPlayerController::RunScript(float Dt)
 {
+	if (!bScriptLoaded)
+	{
+		// each player has his own script: -IVScript= for side A, -IVScript2= for side B (the second pilot of a versus duel)
+		bScriptLoaded = true;
+		FString S;
+		if (FParse::Value(FCommandLine::Get(), MySide == iv::Side::B ? TEXT("-IVScript2=") : TEXT("-IVScript="), S, false))
+		{
+			TArray<FString> Items;
+			S.ParseIntoArray(Items, TEXT(";"));
+			for (const FString& It : Items)
+			{
+				FString L, R;
+				if (!It.Split(TEXT("@"), &L, &R)) continue;
+				FScriptCmd Cm; Cm.T = FCString::Atof(*R);
+				if (!L.Split(TEXT("="), &Cm.Name, &Cm.Arg)) Cm.Name = L;
+				ScriptCmd.Add(Cm);
+			}
+		}
+	}
+	if (AlertLeft > 0.f) AlertLeft -= Dt;
 	if (ScriptCmd.Num() == 0) return;
 	ScriptTime += Dt;
 	AIVCombatDirector* Dir = GetDirector();
@@ -194,7 +198,7 @@ void AIVPlayerController::RunScript(float Dt)
 	{
 		if (C.bDone || ScriptTime < C.T) continue;
 		C.bDone = true;
-		FIVCombatInput* In = Dir ? &Dir->PlayerIn : nullptr;
+		FIVCombatInput* In = Dir ? &Dir->InputOf(MySide) : nullptr;
 		if (C.Name == TEXT("strike")) bScriptStrike = C.Arg == TEXT("1");
 		else if (C.Name == TEXT("guard")) bScriptGuard = C.Arg == TEXT("1");
 		else if (C.Name == TEXT("stick"))
@@ -208,7 +212,11 @@ void AIVPlayerController::RunScript(float Dt)
 		else if (In && C.Name == TEXT("dodge")) { In->bDodge = true; In->DodgeDir = FCString::Atoi(*C.Arg) < 0 ? -1 : 1; }
 		else if (In && C.Name == TEXT("scoop")) In->bScoop = true;
 		else if (In && C.Name == TEXT("board")) In->bBoard = true;
+		else if (In && C.Name == TEXT("swat")) In->bBoardSwat = true;
+		else if (In && C.Name == TEXT("swing")) In->bBoardSwing = true;
 		else if (Dir && C.Name == TEXT("rocket")) Dir->FireParryRockets(MySide);
+		else if (Dir && C.Name == TEXT("fillult")) Dir->FillUltimate(MySide);
+		else if (C.Name == TEXT("ultcounter")) bScriptUltCounter = true;
 		else if (In && C.Name == TEXT("ult")) In->bUltimate = true;
 		else if (In && C.Name == TEXT("cancel")) In->bCancel = true;
 		else if (C.Name == TEXT("lunge")) bScriptLunge = C.Arg == TEXT("1");
@@ -238,8 +246,11 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 	const bool bPadStrike = GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.4f;
 	const bool bPadGuard = GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.4f;
 	const bool bStrikeDown = IsInputKeyDown(EKeys::LeftMouseButton) || bPadStrike || bScriptStrike;
-	const bool bGuardDown = IsInputKeyDown(EKeys::RightMouseButton) || bPadGuard || bScriptGuard;
+	bool bUltC = false;
+	if (bScriptUltCounter) { const int32 T = Dir->GetAnim(iv::Other(MySide)).ultWindTicks; bUltC = T > 0 && T <= 4; }
+	const bool bGuardDown = IsInputKeyDown(EKeys::RightMouseButton) || bPadGuard || bScriptGuard || bUltC;
 	if (bScriptStick) Stick = ScriptStickVal;
+	if (bUltC) Stick = FVector2D(0.f, 1.f);
 
 	// gamepad right stick drives the combat vector while a trigger is down
 	if (bPadStrike || bPadGuard)
@@ -317,10 +328,11 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 	if (WasInputKeyJustPressed(EKeys::N) || (WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top) && bPadLT)) In.bBerserk = true;
 	// boarding: J (pad LT + X) leaves the cockpit; Q / E / LB / RB leap to the other shoulder; the hatch hack uses arrows / WASD, Enter / Space / A, H / B, Backspace / X
 	if (WasInputKeyJustPressed(EKeys::J) || (WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left) && bPadLT)) In.bBoard = true;
-	if (Dir->GetBoarding().Active())
+	if (Dir->IsBoardedBy(MySide) && (WasInputKeyJustPressed(EKeys::T) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Down))) In.bBoardSwat = true;   // the defender slaps his own shoulder
+	if (Dir->GetBoarding(MySide).Active())
 	{
 		if (WasInputKeyJustPressed(EKeys::Q) || WasInputKeyJustPressed(EKeys::E) || WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) In.bBoardSwing = true;
-		if (Dir->GetBoarding().phase() == iv::BoardPhase::Hacking)
+		if (Dir->GetBoarding(MySide).phase() == iv::BoardPhase::Hacking)
 		{
 			if (WasInputKeyJustPressed(EKeys::Left) || WasInputKeyJustPressed(EKeys::A) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) In.HackDx = -1;
 			if (WasInputKeyJustPressed(EKeys::Right) || WasInputKeyJustPressed(EKeys::D) || WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) In.HackDx = 1;
@@ -332,7 +344,7 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 			static const bool bBot = FParse::Param(FCommandLine::Get(), TEXT("IVHackBot"));
 			if (bBot)
 			{
-				const iv::HackInput Pi = Dir->GetBoarding().hack().PerfectInput();
+				const iv::HackInput Pi = Dir->GetBoarding(MySide).hack().PerfectInput();
 				In.HackDx = Pi.dx; In.HackDy = Pi.dy; In.bHackConfirm = Pi.confirm;
 			}
 		}
@@ -340,6 +352,7 @@ void AIVPlayerController::UpdateCombatInput(float Dt)
 	if (!LookStick.IsNearlyZero(0.25f)) BerserkAim = LookStick;
 	BerserkAim = FMath::Vector2DInterpTo(BerserkAim, FVector2D::ZeroVector, Dt, 1.6f);
 	bPadStrikePrev = bPadStrike;
+	if (bUltC) { In.bGuardHeld = true; In.GuardSide = iv::SwingSide::Down; }   // test helper (script ultcounter)
 
 	// ---- long-cooldown abilities: press selects, hold charges, release fires
 	const bool bK1 = IsInputKeyDown(EKeys::One) || IsInputKeyDown(EKeys::Gamepad_DPad_Up);

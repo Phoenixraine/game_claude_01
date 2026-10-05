@@ -71,6 +71,7 @@ void Fighter::Reset() {
   }
   ultimate = 0.f;
   ultimatePending = false;
+  ultWind = ultWindLen = 0;
   protectedTicks = 0;
   stunImmune = blindTicks = strikeLockTicks = burnTicks = 0;
   ultimateLocked = false;
@@ -673,6 +674,8 @@ bool Fighter::SelectWeapon(WeaponKind k) {
 
 void Fighter::GainUltimate(float amount, const StepContext& ctx) {
   if (amount <= 0.f) return;
+  // comeback: the less hull integrity is left, the faster the gauge fills
+  amount *= 1.f + (tune::kUltComebackMax - 1.f) * (1.f - std::min(1.f, std::max(0.f, body.Integrity())));
   const bool was = UltimateReady();
   ultimate = std::min(tune::kUltimateMax, ultimate + amount);
   if (!was && UltimateReady()) Emit(ctx, EventType::UltimateReady);

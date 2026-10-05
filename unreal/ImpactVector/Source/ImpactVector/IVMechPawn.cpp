@@ -1404,7 +1404,12 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 	FIVPoseAngles Target = *Guard;
 	bool bLegs = false;
 
-	if (S.posture == iv::Posture::KnockedDown)
+	if (bPoweredDown)
+	{
+		bLegs = true;
+		if (const FIVPoseAngles* K = P(TEXT("kneel"))) Target = FIVPoseAngles::Lerp(*Guard, *K, 0.6f);
+	}
+	else if (S.posture == iv::Posture::KnockedDown)
 	{
 		bLegs = true;
 		const FIVPoseAngles* A = P(TEXT("knockdown_fall"));
@@ -1442,7 +1447,7 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 		if (FVector* T4 = Target.Joint.Find(FName(Trail))) { T4->X -= 10.f * W; T4->Y += Sg * 8.f * W; }
 		if (FVector* T5 = Target.Joint.Find(FName(TrailShin))) T5->X += 14.f * W;
 		// the whole body turns on the spot to profile (like a fencer avoiding a thrust): a yaw of the pelvis carries the legs, torso and arms; nothing leans
-		if (FVector* T6 = Target.Joint.Find(FName(TEXT("pelvis")))) T6->Y += Sg * 72.f * W;
+		if (FVector* T6 = Target.Joint.Find(FName(TEXT("pelvis")))) T6->Z += Sg * 72.f * W;   // joint angles are (pitch X, roll Y, yaw Z): Z is the turn about the vertical axis
 	}
 	else if (S.posture == iv::Posture::Clinched)
 	{
@@ -1454,6 +1459,16 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 		const FIVPoseAngles* H = P(TEXT("weapon_charge_hold"));
 		const FIVPoseAngles* K = P(TEXT("weapon_charge_peak"));
 		if (H && K) Target = FIVPoseAngles::Lerp(*H, *K, Ease(S.weaponChargeProgress));
+	}
+	else if (S.ultWindTicks > 0)
+	{
+		// the ultimate's windup: the off hand draws back and drives a punch under the chest (the last quarter is the strike)
+		const float Uw = 1.f - float(S.ultWindTicks) / float(FMath::Max(1, S.ultWindLen));
+		const FIVPoseAngles* W = P(TEXT("quick_palm_l_windup"));
+		const FIVPoseAngles* K = P(TEXT("quick_palm_l_strike"));
+		if (W && K) Target = Uw < 0.75f ? FIVPoseAngles::Lerp(*Guard, *W, Ease(Uw / 0.75f)) : FIVPoseAngles::Lerp(*W, *K, Ease((Uw - 0.75f) / 0.25f));
+		bLegs = true;
+		if (FVector* Th = Target.Joint.Find(FName(TEXT("pelvis")))) Th->X += 6.f * FMath::Sin(Uw * 3.14159f);
 	}
 	else if (S.phase != iv::Phase::Idle)
 	{
@@ -1573,7 +1588,7 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 		const float WantDip = (S.phase == iv::Phase::Windup) ? 0.4f : ((S.phase == iv::Phase::Strike || S.phase == iv::Phase::Contact) ? 1.f : 0.f);
 		SwingWeightYaw = FMath::FInterpTo(SwingWeightYaw, (S.kind == iv::StrikeKind::Heavy || S.kind == iv::StrikeKind::Lunge) ? WantYaw : 0.f, Dt, 5.f);
 		PelvisDip = FMath::FInterpTo(PelvisDip, (S.kind == iv::StrikeKind::Heavy || S.kind == iv::StrikeKind::Lunge) ? WantDip : 0.f, Dt, 6.f);
-		if (FVector* T = CombatPose.Joint.Find(FName(TEXT("torso")))) T->Y += SwingWeightYaw;
+		if (FVector* T = CombatPose.Joint.Find(FName(TEXT("torso")))) T->Z += SwingWeightYaw;   // a twist about the vertical axis (Y would be a sideways lean)
 		Pose.RootPosM.Z -= 0.35f * PelvisDip;
 	}
 	if (S.posture == iv::Posture::Airborne)
@@ -1624,6 +1639,37 @@ void AIVMechPawn::BuildCombatPose(FIVPoseAngles& Pose, float Dt)
 				if (Tg && Cur) *Cur = FMath::Lerp(*Cur, *Tg, Wt);
 			}
 		if (U >= 1.f) RocketArmT = 0.f;
+	}
+	// boarding defence: the hand opposite to the stranger's shoulder rises, then comes across and slaps it. Slow and readable.
+	{
+		float Tgt = SlapU;
+		if (SlapPrev > 0.9f && SlapU < 0.05f) SlapHoldT = 0.5f;          // the impact beat: the hand stays on the shoulder for a moment
+		SlapPrev = SlapU;
+		if (SlapHoldT > 0.f) { SlapHoldT -= Dt; Tgt = 1.f; }
+		SlapSm = FMath::FInterpTo(SlapSm, Tgt, Dt, Tgt > SlapSm ? 12.f : 5.f);
+		if (SlapSm > 0.01f)
+		{
+			const bool bR = bSlapRight;                              // the stranger sits on our right shoulder: the LEFT hand slaps it
+			const float Ww = Ease(FMath::Clamp(SlapSm / 0.72f, 0.f, 1.f));
+			const float Sw = Ease(FMath::Clamp((SlapSm - 0.72f) / 0.28f, 0.f, 1.f));
+			const float Wt = FMath::Clamp(SlapSm * 4.f, 0.f, 1.f);
+			auto Mir = [&](const FVector& V) { return bR ? V : FVector(V.X, -V.Y, -V.Z); };
+			const TCHAR* Ua = bR ? TEXT("upperarm_l") : TEXT("upperarm_r");
+			const TCHAR* Fa = bR ? TEXT("forearm_l") : TEXT("forearm_r");
+			const TCHAR* Ha = bR ? TEXT("hand_l") : TEXT("hand_r");
+			auto Drive = [&](const TCHAR* Name, const FVector& Wind, const FVector& Hit)
+			{
+				if (FVector* Cur = Pose.Joint.Find(FName(Name)))
+				{
+					const FVector T = FMath::Lerp(FMath::Lerp(*Cur, Mir(Wind), Ww), Mir(Hit), Sw);
+					*Cur = FMath::Lerp(*Cur, T, Wt);
+				}
+			};
+			Drive(Ua, FVector(-165.f, -5.f, 0.f), FVector(-84.f, -64.f, 18.f));
+			Drive(Fa, FVector(-12.f, 0.f, 0.f), FVector(-62.f, 0.f, 0.f));
+			Drive(Ha, FVector(-10.f, 0.f, 0.f), FVector(-20.f, 0.f, 0.f));
+			if (FVector* Tt = Pose.Joint.Find(FName(TEXT("torso")))) Tt->Y += (bR ? -1.f : 1.f) * 10.f * Sw * Wt;   // the body turns into the slap
+		}
 	}
 	// hit kick: torso recoil on top of everything, decays quickly
 	HitKick *= FMath::Exp(-7.f * Dt);

@@ -256,14 +256,24 @@ constexpr int kUltimateCinematicTicks = MsToTicks(3500);
 
 // Ultimate gauge (v2): fills from skill, much less from suffering.
 constexpr float kUltimateMax = 100.f;
-constexpr float kUltGainParry = 6.f;                   // successful parry (the parrying fighter)
-constexpr float kUltGainIntercept = 8.f;               // successful intercept (the interceptor)
-constexpr float kUltGainCriticalHit = 1.5f;              // landing a hit on a zone that is Critical or worse
-constexpr float kUltGainHit = 0.45f;                     // any landed hit
-constexpr float kUltGainTakenPerDamage = 0.02f;         // receiving damage (small, capped per hit)
-constexpr float kUltGainTakenCap = 0.3f;
+constexpr float kUltGainParry = 14.f;                  // successful parry (the parrying fighter)
+constexpr float kUltGainIntercept = 16.f;              // successful intercept (the interceptor)
+constexpr float kUltGainCriticalHit = 0.f;              // v6: plain hits no longer charge the gauge, only counters do
+constexpr float kUltGainHit = 0.f;                        // any landed hit (v6: 0)
+constexpr float kUltGainTakenPerDamage = 0.f;            // receiving damage (v6: 0)
+constexpr float kUltGainTakenCap = 0.f;
 constexpr float kUltimateDamage = 42.f;                 // scripted unblockable strike on the chosen zone
 constexpr float kUltimateStabilityHit = 70.f;
+// v6 (owner's rules, 2026-10-05): the ultimate starts with a punch under the chest that can be countered in a tiny window; a successful
+// counter cancels it. The gauge is charged by counters only (parry, intercept, a counter strike that lands, countering the ultimate itself),
+// multiplied by a comeback factor that grows as the fighter's hull integrity falls.
+constexpr int kUltWindupTicks = MsToTicks(800);        // the punch is coming: the defender may counter it near the end of this time
+constexpr int kUltCounterWindowTicks = 6;              // 100 ms: much tighter than kParryWindowTicks. The guard must be pressed afresh, low (SwingSide::Down)
+constexpr float kUltGainCounterHit = 12.f;             // a counter strike (inner line after a parry / intercept) that lands
+constexpr float kUltGainUltCounter = 30.f;             // countering the ultimate itself
+constexpr float kUltComebackMax = 2.5f;                // gauge multiplier at zero integrity (1.0 at full integrity)
+constexpr float kUltCounterStability = 30.f;           // the cancelled attacker loses its tempo
+constexpr float kAiUltCounterChance[kDifficultyCount] = {0.1f, 0.3f, 0.55f};
 
 // Armour plates per zone (ArmorPlateLost events fire as the Armor layer drains in equal steps).
 constexpr int kArmorPlates[kZoneCount] = {3, 8, 4, 5, 5, 6, 6, 6, 6};
@@ -274,7 +284,7 @@ constexpr int kClashWindowTicks = MsToTicks(110);
 constexpr int kClashRecoveryTicks = MsToTicks(800);
 constexpr float kClashStability = 14.f;
 constexpr float kClashHeat = 3.f;
-constexpr float kUltGainClash = 3.f;
+constexpr float kUltGainClash = 4.f;
 // No chained stun: after a stagger or a knockdown the mech shrugs off further stability loss for a while.
 constexpr int kStunImmuneTicks = MsToTicks(1600);
 constexpr int kStunImmuneAfterKnockdownTicks = MsToTicks(2600);
@@ -337,6 +347,11 @@ constexpr int kSwatGraceTicks = MsToTicks(1500);          // no swat in the firs
 constexpr int kSwatCheckTicks = MsToTicks(500);           // the enemy decides every half second
 constexpr int kSwatCooldownTicks = MsToTicks(3000);       // between two swats
 constexpr int kMaxSwatsPerBoarding = 2;
+// v6: a human defender slaps his own shoulder by hand. The slap is slow (a readable telegraph); a caught pilot lies stunned on the shoulder, his
+// empty mech is dead weight (no defence, no movement, takes extra damage), then he gets up and goes back to the cockpit.
+constexpr int kHumanSwatWindupTicks = MsToTicks(1100);
+constexpr int kHumanMaxSwats = 3;
+constexpr int kBoardStunTicks = MsToTicks(5000);
 constexpr int kMaxSwatAdjust = 1;                         // an early press makes the enemy re-aim once per swat
 constexpr float kSwatChance[kDifficultyCount] = {0.05f, 0.09f, 0.14f};   // per check, by enemy difficulty
 constexpr float kSwatArchetypeMult[kArchetypeCount] = {1.2f, 1.0f, 1.0f, 0.9f, 0.5f, 1.4f};  // Counterpuncher, Breaker, LimbHunter, Trickster, Gunner, Grappler

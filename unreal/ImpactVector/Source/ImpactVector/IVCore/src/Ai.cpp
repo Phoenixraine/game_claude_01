@@ -83,6 +83,7 @@ Observation MakeObservation(const Duel& duel, Side viewer) {
     v.side = op.strike.side;
     v.arm = op.strike.arm;
   }
+  v.ultTicksLeft = op.ultWind > 0 ? op.ultWind : -1;
   v.chargeSound = op.phase == Phase::Windup && op.strike.kind == StrikeKind::Heavy && op.strike.held >= tune::kChargeAudibleTicks;
   v.strikeTicksLeft = op.phase == Phase::Strike ? op.TicksToContact() : -1;
   v.stepping = op.phase == Phase::Strike && (op.strike.plant == FootPlant::Stepped || op.strike.plant == FootPlant::Overextended);
@@ -132,6 +133,7 @@ uint64_t HashObservation(const Observation& o) {
   for (int z = 0; z < kZoneCount; ++z) h = Mix(h, static_cast<uint64_t>(v.zones[z]));
   h = Mix(h, (v.guardUp ? 1u : 0u) | (v.hardStance ? 2u : 0u) | (v.weaponCharging ? 4u : 0u) | (v.unsteady ? 8u : 0u));
   h = Mix(h, static_cast<uint64_t>(v.guardSide));
+  h = Mix(h, static_cast<uint64_t>(v.ultTicksLeft + 1));
   h = Mix(h, static_cast<uint64_t>(static_cast<int>(v.move) + 1));
   h = Mix(h, Q(v.flank));
   return h;
@@ -297,6 +299,21 @@ void Ai::ChooseReaction(const OppView& seen, const SelfView& self) {
 
 bool Ai::Defend(const OppView& seen, const Observation& cur, Input* in) {
   const SelfView& self = cur.self;
+  // v6: the opponent's ultimate punch. Some pilots read it and answer with a fresh low guard right before it lands.
+  if (seen.ultTicksLeft >= 0) {
+    if (!ultReact_) {
+      ultReact_ = true;
+      ultCounter_ = Roll() < tune::kAiUltCounterChance[static_cast<int>(difficulty_)];
+    }
+    if (ultCounter_) {
+      const int eta = seen.ultTicksLeft - delay_;
+      in->guardSide = SwingSide::Down;
+      in->guardHeld = eta <= tune::kUltCounterWindowTicks / 2 + parryJitter_ / 2;   // released until then so the press is fresh
+      return true;
+    }
+  } else {
+    ultReact_ = false;
+  }
   const bool threat = (seen.phase == Phase::Windup || seen.phase == Phase::Strike) && (seen.posture == Posture::Standing || seen.posture == Posture::Airborne);
   if (!threat) {
     oppAttacking_ = false;

@@ -56,6 +56,8 @@ namespace IVSettings
 			GList.Add(Mk(TEXT("preset"), TEXT("ПРЕСЕТ ГРАФИКИ"), TEXT("Общий уровень качества. RTX — аппаратная трассировка лучей (нужна видеокарта RTX)."), 2, EKind::Choice, 0, 4, 1, -1));
 			GList.Last().Names = { TEXT("НИЗКАЯ"), TEXT("СРЕДНЯЯ"), TEXT("ВЫСОКАЯ"), TEXT("УЛЬТРА"), TEXT("RTX") };
 			GList.Add(Mk(TEXT("render_scale"), TEXT("МАСШТАБ РЕНДЕРА (АПСКЕЙЛ)"), TEXT("Игра рисуется в меньшем разрешении и растягивается встроенным апскейлером TSR. 0 — авто по пресету."), 2, EKind::Slider, 0.f, 1.f, 0.05f, 0.f, TEXT("%"), 100.f));
+			GList.Add(Mk(TEXT("fsr"), TEXT("AMD FSR (АПСКЕЙЛ)"), TEXT("Апскейлер AMD FSR вместо встроенного TSR: рисует в меньшем разрешении и восстанавливает чёткость (работает и на видеокартах NVIDIA). При включении заменяет «Масштаб рендера»."), 2, EKind::Choice, 0, 5, 1, 2));
+			GList.Last().Names = { TEXT("ВЫКЛ (TSR)"), TEXT("НАТИВ (AA)"), TEXT("КАЧЕСТВО"), TEXT("БАЛАНС"), TEXT("ПРОИЗВОДИТЕЛЬНОСТЬ"), TEXT("УЛЬТРА-ПРОИЗВОД.") };
 			GList.Add(Mk(TEXT("draw_dist"), TEXT("ДАЛЬНОСТЬ ПРОРИСОВКИ ГОРОДА"), TEXT("Дальше этого расстояния здания не рисуются (скрыты туманом). Меньше — быстрее."), 2, EKind::Slider, 300.f, 1500.f, 50.f, 700.f, TEXT(" м")));
 			GList.Add(Mk(TEXT("fps_cap"), TEXT("ОГРАНИЧЕНИЕ FPS"), TEXT("Верхний предел частоты кадров."), 2, EKind::Choice, 0, 5, 1, 0));
 			GList.Last().Names = { TEXT("НЕТ"), TEXT("60"), TEXT("75"), TEXT("90"), TEXT("120"), TEXT("144") };
@@ -165,8 +167,18 @@ namespace IVSettings
 		int32 Pre = GetInt(TEXT("preset"));
 		FParse::Value(FCommandLine::Get(), TEXT("-IVGfx="), Pre);
 		IVGraphics::Apply(World, Pre);
-		const float RS = Get(TEXT("render_scale"));
-		if (RS > 0.01f) CV(TEXT("r.ScreenPercentage"), RS * 100.f);
+		const int32 Fsr = GetInt(TEXT("fsr"));
+		if (Fsr > 0 && CM.FindConsoleVariable(TEXT("r.FidelityFX.FSR.Enabled")))
+		{
+			CV(TEXT("r.FidelityFX.FSR.QualityMode"), float(Fsr - 1));
+			CV(TEXT("r.FidelityFX.FSR.Enabled"), 1.f);
+		}
+		else
+		{
+			CV(TEXT("r.FidelityFX.FSR.Enabled"), 0.f);
+			const float RS = Get(TEXT("render_scale"));
+			if (RS > 0.01f) CV(TEXT("r.ScreenPercentage"), RS * 100.f);
+		}
 		CV(TEXT("t.MaxFPS"), 0.f);
 		static const float Caps[6] = { 0.f, 60.f, 75.f, 90.f, 120.f, 144.f };
 		CV(TEXT("t.MaxFPS"), Caps[FMath::Clamp(GetInt(TEXT("fps_cap")), 0, 5)]);

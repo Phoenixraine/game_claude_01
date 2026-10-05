@@ -100,6 +100,7 @@ void AIVGameFlow::Begin(AIVMechPawn* InPlayer, AIVMechPawn* InEnemy, AIVCombatDi
 	{
 	case EIVFlowState::Tutorial: EnterTutorial(); break;
 	case EIVFlowState::Duel: EnterDuel(); break;
+	case EIVFlowState::Join: EnterJoin(); break;
 	default: EnterMenu(); break;
 	}
 }
@@ -282,6 +283,8 @@ bool AIVGameFlow::SecondPadPresent() const { return true; }
 void AIVGameFlow::EnterJoin()
 {
 	State = EIVFlowState::Join;
+	// the FSR upscaler cannot handle two views (it crashes the GPU): split screen runs on the engine's own TSR
+	if (IConsoleVariable* Fsr = IConsoleManager::Get().FindConsoleVariable(TEXT("r.FidelityFX.FSR.Enabled"))) Fsr->Set(0, ECVF_SetByGameSetting);
 	bJoin1 = bJoin2 = false;
 	if (!Player2)
 	{
@@ -309,9 +312,11 @@ void AIVGameFlow::EnterVersus()
 	Player2->Possess(Enemy);
 	Enemy->bAIControlled = false;
 	Enemy->SetExternalControl(true);
-	Enemy->SetPlayerLamps(true);
+	Enemy->SetPlayerLamps(false);   // both pilots' lamps point down: nobody is blinded by the other's headlights
+	Player->SetPlayerLamps(false);
 	Enemy->SetFirstPersonView(true);
 	Player2->SetCombatEnabled(true);
+	UE_LOG(LogTemp, Display, TEXT("IV versus: enemy owner=%s controller=%s"), Enemy->GetOwner() ? *Enemy->GetOwner()->GetName() : TEXT("none"), Enemy->GetController() ? *Enemy->GetController()->GetName() : TEXT("none"));
 	Player2->SetLockOn(true);
 	if (AIVPlayerController* P = PC()) { P->SetCombatEnabled(true); P->SetLockOn(true); }
 	State = EIVFlowState::Duel;
@@ -334,6 +339,7 @@ void AIVGameFlow::EnterVersus()
 void AIVGameFlow::LeaveVersus()
 {
 	bVersus = false;
+	IVSettings::Apply(GetWorld());   // brings FSR back if the player chose it
 	if (Player2)
 	{
 		Player2->UnPossess();
@@ -341,6 +347,7 @@ void AIVGameFlow::LeaveVersus()
 		Player2 = nullptr;
 	}
 	if (Enemy) { Enemy->SetPlayerLamps(false); Enemy->SetExternalControl(true); }
+	if (Player) Player->SetPlayerLamps(true);
 	if (Dir) Dir->SetHumanB(false);
 	if (AIVPlayerController* P = PC()) P->SetLockOn(false);
 	if (UGameViewportClient* VC = GetWorld()->GetGameViewport()) VC->SetForceDisableSplitscreen(false);

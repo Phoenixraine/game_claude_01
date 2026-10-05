@@ -135,7 +135,9 @@ void Duel::Step(const Input& a, const Input& b, const World& world) {
     for (int i = 0; i < 2; ++i)
       if (f_[i].firePending) ResolveWeapon(i, world);
     for (int i = 0; i < 2; ++i)
-      if (f_[i].ultimatePending && !cinematic_.active) ResolveUltimate(i, world);
+      if (f_[i].ultimatePending && f_[i].ultWind == 0 && !cinematic_.active) StartUltimate(i, world);
+    for (int i = 0; i < 2; ++i)
+      if (f_[i].ultWind > 0 && !cinematic_.active) StepUltimateWind(i, world);
   }
 
   if (!cinematic_.active) CheckEnd();
@@ -294,6 +296,7 @@ void Duel::Apply(int ai, const Decision& d, const World& w) {
       EmitHit(def, as, d.zone, hr, stab, atk.strike.side, false, false);
       if (hr.dealt > 0.f) {
         GainUltimate(ai, tune::kUltGainHit + (hr.after >= ZoneState::Critical ? tune::kUltGainCriticalHit : 0.f), w);
+        if (atk.strike.innerLine) GainUltimate(ai, tune::kUltGainCounterHit, w);   // v6: a counter that lands charges the gauge
       }
       break;
     }
@@ -417,6 +420,48 @@ void Duel::ResolveWeapon(int ai, const World& w) {
   atk.FinishWeapon(actx);
   // v2: every heavy weapon cuts to an external camera; a hit target is left staggered afterwards.
   StartCinematic(CinematicOf(kind), atk.side(), wp.cinematicTicks, hits > 0);
+}
+
+// v6: the button starts a windup (a punch under the chest). The gauge is spent at once; the defender may counter near the end of it.
+void Duel::StartUltimate(int ai, const World& w) {
+  Fighter& atk = f_[ai];
+  (void)w;
+  Zone z = atk.ultimateTarget;
+  atk.ConsumeUltimate();
+  atk.ultWind = atk.ultWindLen = tune::kUltWindupTicks;
+  atk.phase = Phase::Recovery;   // locked while the punch comes (the attacker cannot start anything else)
+  atk.phaseTicks = 0;
+  atk.recoveryLen = tune::kUltWindupTicks + 2;
+  Emit(EventType::UltimateStarted, atk.side(), z, tune::kUltWindupTicks, tune::kUltCounterWindowTicks);
+}
+
+void Duel::StepUltimateWind(int ai, const World& w) {
+  Fighter& atk = f_[ai];
+  Fighter& def = f_[1 - ai];
+  if (atk.posture != Posture::Standing) {   // staggered / knocked down mid-punch: the ultimate is lost
+    atk.ultWind = 0;
+    Emit(EventType::UltimateCancelled, atk.side(), Zone::Torso);
+    return;
+  }
+  if (--atk.ultWind > 0) return;
+  // contact: a fresh low guard pressed inside the tiny window cancels it
+  const Modifiers& dm = def.body.modifiers();
+  const bool hasArm = dm.arm[0].blockStrength > 0.f || dm.arm[1].blockStrength > 0.f;
+  const bool counter = def.GuardReady() && !def.guard.hard && hasArm && def.guard.side == SwingSide::Down && tick_ - def.guard.pressTick < tune::kUltCounterWindowTicks;
+  if (counter) {
+    const StepContext actx = Ctx(ai, w);
+    Emit(EventType::UltimateCountered, def.side(), Zone::Torso, 1);
+    atk.LoseStability(tune::kUltCounterStability, actx);
+    atk.phase = Phase::Recovery;
+    atk.phaseTicks = 0;
+    atk.recoveryLen = tune::kHeavyRecoveryTicks;
+    def.res.Spend(tune::kParryEnergy);
+    GainUltimate(1 - ai, tune::kUltGainUltCounter, w);
+    def.counterTicks = tune::kCounterWindowTicks;
+    return;
+  }
+  atk.ultimatePending = true;   // not countered: the cinematic follows
+  ResolveUltimate(ai, w);
 }
 
 void Duel::ResolveUltimate(int ai, const World& w) {

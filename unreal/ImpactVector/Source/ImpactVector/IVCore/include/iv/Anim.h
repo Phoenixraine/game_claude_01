@@ -37,6 +37,8 @@ struct AnimState {
   float stability01 = 1.f;
   float heat01 = 0.f;
   float ultimate01 = 0.f;
+  int ultWindTicks = 0;                 // v6: ticks left of the ultimate's punch (0 = none)
+  int ultWindLen = 0;
   // v5
   float airProgress = 0.f;              // 0..1 of the jetpack jump
   float slideProgress = 0.f;

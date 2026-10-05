@@ -168,7 +168,7 @@ void AIVPilotFigure::Present(const FIVBoardView& V, float Dt)
 	float Sag = 160.f;
 	bool bFly = false, bGrenade = false;
 	FVector GrenadePos = FVector::ZeroVector;
-	float Kneel = 0.f;
+	float Kneel = 0.f, Lie = 0.f;
 	const FVector Up(0, 0, 1);
 	const FVector Side = FVector::CrossProduct(V.Away, Up).GetSafeNormal();
 	switch (V.Phase)
@@ -196,6 +196,11 @@ void AIVPilotFigure::Present(const FIVBoardView& V, float Dt)
 	case P::Hacking:
 		Pos = V.EnemyHatch + V.EnemyUp * 90.f;
 		Kneel = 1.f; bCable = true; Sag = 40.f;
+		break;
+	case P::Stunned:
+		// slapped off his feet: lies on the shoulder, dazed, the cable hanging slack
+		Pos = V.EnemyHatch + V.EnemyUp * 40.f + Up * 14.f * FMath::Sin(Tm * 2.2f);
+		Lie = 1.f; bCable = true; Sag = 140.f;
 		break;
 	case P::GrenadeThrow:
 		Pos = V.EnemyHatch + V.EnemyUp * 110.f;
@@ -233,7 +238,7 @@ void AIVPilotFigure::Present(const FIVBoardView& V, float Dt)
 	// face the look target on the horizontal plane
 	FVector Dir = (LookAt - Pos); Dir.Z = 0.f;
 	if (Dir.SizeSquared() > 1.f) Facing = FMath::VInterpTo(Facing, Dir.GetSafeNormal(), Dt, 8.f);
-	const FRotator Rot(bFly ? -22.f : 0.f, Facing.Rotation().Yaw, 0.f);
+	const FRotator Rot(bFly ? -22.f : (Lie > 0.5f ? 82.f : 0.f), Facing.Rotation().Yaw, Lie > 0.5f ? 6.f * FMath::Sin(Tm * 3.1f) : 0.f);
 	SetActorLocationAndRotation(Pos, Rot);
 	SetActorScale3D(FVector(3.2f, 3.2f, 3.2f * (1.f - 0.3f * Kneel)));
 	if (bCable)

@@ -104,6 +104,11 @@ public:
 	void ApplySettings();
 	/** The off hand raises and launches a rocket salvo (after a parry): drives the left-arm pose overlay. */
 	void StartRocketArm() { RocketArmT = 0.001f; }
+	/** Boarding defence: the free hand rises and comes down on the shoulder where the enemy pilot sits. U 0..1 follows the telegraph; 0 = none. */
+	void SetSlap(float U, bool bRightShoulderTarget) { SlapU = U; bSlapRight = bRightShoulderTarget; }
+	/** The pilot is outside and lies stunned: the empty mech slumps (kneeling, lights low). */
+	void SetPoweredDown(bool b) { bPoweredDown = b; }
+	bool IsSlapRight() const { return bSlapRight; }
 
 	// ---- combat presentation (driven by AIVCombatDirector) ----
 	void SetCombatAnim(const iv::AnimState& S) { CombatAnim = S; bCombat = true; }
@@ -214,6 +219,8 @@ protected:
 	FVector Velocity = FVector::ZeroVector;
 	float AimYaw = 0.f, AimPitch = 0.f;
 	float RocketArmT = 0.f;
+	float SlapU = 0.f, SlapSm = 0.f, SlapPrev = 0.f, SlapHoldT = 0.f;
+	bool bSlapRight = true, bPoweredDown = false;
 	float SetFov = 98.f, SetShake = 1.f, SetMinSep = 5000.f;
 	float TorsoYawRel = 0.f;
 	bool bSprint = false;

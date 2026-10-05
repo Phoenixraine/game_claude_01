@@ -91,6 +91,12 @@ public:
 	void SetLockOn(bool b) { bLockOn = b; LockOffYaw = LockOffPitch = 0.f; }
 	/** Gamepad vibration (large + small motor), Strength 0..1. */
 	void Rumble(float Strength, float Seconds);
+	/** A big banner on this player's HUD ("you are being boarded"). */
+	void ShowAlert(const FString& Text, float Seconds) { AlertText = Text; AlertLeft = Seconds; }
+	FString AlertText;
+	float AlertLeft = 0.f;
+	bool bScriptLoaded = false;
+	bool bScriptUltCounter = false;   // test helper: press a fresh low guard right before the opponent's ultimate punch lands
 	bool bRumbleEnabled = true;
 	void StartRepair();
 	void StopRepair(bool bSuccess);

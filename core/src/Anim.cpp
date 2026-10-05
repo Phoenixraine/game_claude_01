@@ -29,6 +29,8 @@ AnimState MakeAnimState(const Fighter& f) {
   a.stability01 = Unit(f.res.stability / tune::kStabilityMax);
   a.heat01 = Unit(f.res.heat / tune::kHeatMax);
   a.ultimate01 = Unit(f.ultimate / tune::kUltimateMax);
+  a.ultWindTicks = f.ultWind;
+  a.ultWindLen = f.ultWindLen;
   const tune::WeaponProfile& wp = f.WeaponProf();
   a.weaponChargeProgress = Unit(f.weaponCharge / static_cast<float>(wp.chargeTicks));
   a.weaponCooldown01 = wp.cooldownTicks > 0 ? Unit(static_cast<float>(f.weaponCooldown) / static_cast<float>(wp.cooldownTicks)) : 0.f;

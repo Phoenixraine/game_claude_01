@@ -19,15 +19,16 @@
 namespace iv {
 
 // Order of the values up to HookSwing is a contract with the animation layer; new values go at the end.
-enum class BoardPhase : uint8_t { Idle, ClimbOut, OnShoulder, HookLaunch, HookFlight, Landing, Hacking, GrenadeThrow, Escape, WatchBlast, ReturnHook, ClimbIn, Smashed, Done, HookSwing };
+enum class BoardPhase : uint8_t { Idle, ClimbOut, OnShoulder, HookLaunch, HookFlight, Landing, Hacking, GrenadeThrow, Escape, WatchBlast, ReturnHook, ClimbIn, Smashed, Done, HookSwing, Stunned };
 
 enum class BoardingDenied : uint8_t { None, AlreadyActive, MatchOver, Clinch, Busy, Stunned, Cinematic, Cooldown, NoEnergy, NoStability, NoTarget, AiDisabled };
 
-enum class BoardingOutcome : uint8_t { None, Success, HackFailed, HackTimeout, Smashed, Aborted };
+enum class BoardingOutcome : uint8_t { None, Success, HackFailed, HackTimeout, Smashed, Aborted, Slapped };
 
 struct BoardingInput {
   bool start = false;          // edge: the boarding button
   bool swing = false;          // edge: leap to the other shoulder (only works inside the window after a swat telegraph)
+  bool swat = false;           // v6 edge, from the DEFENDER (cfg.enemyIsHuman): slap the shoulder the pilot sits on
   Arm shoulder = Arm::R;       // preferred hatch side at the start (the other one is used if this shoulder is destroyed)
   HackInput hack;              // forwarded to the mini-game while Hacking
 };
@@ -38,6 +39,8 @@ struct BoardingConfig {
   Archetype enemyArchetype = Archetype::Counterpuncher; // sets the hack difficulty and how often the enemy hand swats
   Difficulty enemyDifficulty = Difficulty::Normal;      // also the length of the swat telegraph
   uint64_t seed = 1;
+  bool enemyIsHuman = false;                           // v6: the defender is a person: no random swats, he slaps by pressing `swat`
+  bool lethalSwat = false;                             // v4 behaviour: a caught pilot is crushed and the match ends (v6 default: stunned for 5 s)
   float swatChanceMult = 1.f;                           // scales the enemy hand's chance (0 = never swats): difficulty option and test hook
 };
 
@@ -64,6 +67,7 @@ class Boarding {
   const HackGame& hack() const { return hack_; }
   bool swatActive() const { return swat_.active; }
   int swatTicksToImpact() const { return swat_.ticksToImpact; }
+  int swatTotalTicks() const { return swat_.total; }
   Arm swatShoulder() const { return swat_.shoulder; }
   int swatsThisBoarding() const { return swatsDone_; }
   const BoardingConfig& config() const { return cfg_; }
@@ -91,6 +95,7 @@ class Boarding {
   void ForcedSwing(Duel& d);
   void AbortToReturn(Duel& d, HackState why);
   void Smash(Duel& d);
+  void Slap(Duel& d);
   void StepSwat(Duel& d, const BoardingInput& in);
   void DoSwing(Duel& d, bool early);
   void BeginHack(Duel& d);

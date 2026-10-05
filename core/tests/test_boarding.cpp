@@ -22,6 +22,7 @@ struct BRig {
   }
   static BoardingConfig MakeCfg(Side o, uint64_t seed, Difficulty d, float swat, Archetype arch) {
     BoardingConfig c;
+    c.lethalSwat = true;   // the v4 rules these tests describe
     c.owner = o;
     c.seed = seed;
     c.enemyDifficulty = d;
@@ -42,7 +43,7 @@ struct BRig {
     bd.Step(duel, bi);
     ClearEdges(a);
     ClearEdges(b);
-    bi.start = bi.swing = false;
+    bi.start = bi.swing = bi.swat = false;
     bi.hack = HackInput();
   }
   void Run(int n) {
@@ -161,6 +162,7 @@ IV_TEST(Boarding, DeniedAfterMatchEndAndForAiOwner) {
   r.Start();
   IV_CHECK(r.bd.lastDenied() == BoardingDenied::MatchOver);
   BoardingConfig c;
+    c.lethalSwat = true;   // the v4 rules these tests describe
   c.ownerIsAi = true;
   Boarding ai(c);
   Duel d(3, true);
@@ -680,4 +682,86 @@ IV_TEST(Boarding, FuzzRandomInputsNeverHangAndAlwaysSettle) {
   IV_CHECK(boardings > 500);   // the fuzz really boarded
   IV_CHECK(ticksRun > static_cast<long long>(kRuns) * 3 * 60 * kTickHz / 5);   // and really ran for minutes of game time (some duels end early)
   std::printf("    fuzz: %d runs, %lld ticks, %d boardings, %d successes, %d smashed; end reasons none/reactor/cockpit/immobile/power/arms/time/pilot: %d %d %d %d %d %d %d %d\n", kRuns, ticksRun, boardings, successes, smashed, reasons[0], reasons[1], reasons[2], reasons[3], reasons[4], reasons[5], reasons[6], reasons[7]);
+}
+
+
+// ---------------------------------------------------------------------------------------------- v6: the human defender slaps his own shoulder
+namespace {
+BoardingConfig HumanCfg(Side o, uint64_t seed) {
+  BoardingConfig c;
+  c.owner = o;
+  c.seed = seed;
+  c.enemyIsHuman = true;
+  c.swatChanceMult = 0.f;
+  return c;
+}
+void RunToHacking(BRig& r) {
+  r.Start();
+  IV_CHECK(r.Until([&] { return r.bd.phase() == BoardPhase::Hacking; }, 2000));
+  r.Run(tune::kSwatGraceTicks + 5);
+}
+}  // namespace
+
+IV_TEST(BoardingV6, ADefenderWhoDoesNotPressNeverSwats) {
+  BRig r(Side::A, 11);
+  r.bd = Boarding(HumanCfg(Side::A, 11));
+  RunToHacking(r);
+  r.Run(600);
+  IV_CHECK(!r.bd.swatActive());
+  IV_CHECK_EQ(r.Count(EventType::BoardingSwatTelegraph), 0);
+}
+
+IV_TEST(BoardingV6, ASlapStunsThePilotFor5SecondsTheEmptyMechIsHelplessThenHeReturns) {
+  BRig r(Side::A, 11);
+  r.bd = Boarding(HumanCfg(Side::A, 11));
+  RunToHacking(r);
+  r.bi.swat = true;
+  r.Tick();
+  IV_CHECK(r.bd.swatActive());
+  IV_CHECK_EQ(r.Count(EventType::BoardingSwatTelegraph), 1);
+  IV_CHECK(r.Until([&] { return r.bd.phase() == BoardPhase::Stunned; }, tune::kHumanSwatWindupTicks + 10));
+  IV_CHECK(r.bd.outcome() == BoardingOutcome::Slapped);
+  IV_CHECK_EQ(r.Count(EventType::BoardingSmashed), 1);
+  IV_CHECK(!r.duel.result().over);
+  // while he lies there the empty mech does nothing at all
+  const Input idle = r.bd.Filter(r.duel, r.MyIn());
+  IV_CHECK(!idle.guardHeld && !idle.dodge && idle.move == 0 && !idle.strikeHeld);
+  IV_CHECK(r.Me().autopilot);   // takes extra damage (kAutopilotDamageMult)
+  r.Run(tune::kBoardStunTicks / 2);
+  IV_CHECK(r.bd.phase() == BoardPhase::Stunned);
+  IV_CHECK(r.Until([&] { return r.bd.phase() == BoardPhase::ReturnHook; }, tune::kBoardStunTicks));
+  // exactly 5 s on the shoulder
+  int stunTick = -1, returnTick = -1;
+  for (const Event& e : r.duel.log().events()) {
+    if (e.type != EventType::BoardingPhase) continue;
+    if (e.a == static_cast<int>(BoardPhase::Stunned)) stunTick = e.tick;
+    if (e.a == static_cast<int>(BoardPhase::ReturnHook)) returnTick = e.tick;
+  }
+  IV_CHECK(stunTick >= 0 && returnTick > stunTick);
+  IV_CHECK_NEAR(static_cast<float>(returnTick - stunTick), static_cast<float>(tune::kBoardStunTicks), 3.f);
+  IV_CHECK(r.Until([&] { return !r.bd.Active(); }, tune::kBoardReturnHookTicks + tune::kBoardClimbInTicks + 20));
+  IV_CHECK(r.bd.phase() == BoardPhase::Done);
+  IV_CHECK(r.bd.outcome() == BoardingOutcome::Slapped);
+  IV_CHECK(!r.Me().autopilot);
+  IV_CHECK(!r.duel.result().over);
+  IV_CHECK(r.bd.cooldownLeft() > 0);
+}
+
+IV_TEST(BoardingV6, TheEmptyMechCanBeHitHardWhileThePilotLiesStunned) {
+  BRig r(Side::A, 11);
+  r.bd = Boarding(HumanCfg(Side::A, 11));
+  RunToHacking(r);
+  r.bi.swat = true;
+  r.Tick();
+  IV_CHECK(r.Until([&] { return r.bd.phase() == BoardPhase::Stunned; }, tune::kHumanSwatWindupTicks + 10));
+  const float hp0 = TotalHp(r.Me());
+  r.duel.set_distance(8.f);
+  r.b.strikeHeld = true;
+  r.b.side = SwingSide::Up;
+  r.b.target = Zone::Torso;
+  r.Run(tune::kWindupMinTicks);
+  r.b.strikeHeld = false;
+  r.Run(120);
+  IV_CHECK(TotalHp(r.Me()) < hp0 - 5.f);
+  IV_CHECK(r.bd.phase() == BoardPhase::Stunned || r.bd.phase() == BoardPhase::ReturnHook);
 }

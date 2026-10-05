@@ -58,6 +58,7 @@ struct OppView {
   StrikeKind kind = StrikeKind::Heavy;  // valid while winding up or striking
   SwingSide side = SwingSide::Up;       // the visible swing sector (pitch §8 "физические признаки")
   Arm arm = Arm::R;
+  int ultTicksLeft = -1;                // v6: ticks left of the opponent's ultimate punch (-1 = none)
   bool chargeSound = false;             // pitch §8 "звук набирающего давление привода"
   int strikeTicksLeft = -1;             // visible arm travel: only once the strike is committed
   bool stepping = false;                // committed with a step in
@@ -156,6 +157,8 @@ class Ai {
   bool parryPressed_ = false;
   bool grabAnswer_ = false;     // decided to hit a grabbing arm
   bool grabAnswered_ = false;
+  bool ultReact_ = false;
+  bool ultCounter_ = false;
   bool reacted_ = false;       // dodge / intercept already fired for this attack
   int priorityCooldown_ = 0;
 

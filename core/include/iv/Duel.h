@@ -127,6 +127,8 @@ class Duel {
   void StartCinematic(CinematicKind k, Side who, int length, bool stun);
   void StepCinematic();
   void ResolveUltimate(int ai, const World& w);
+  void StartUltimate(int ai, const World& w);
+  void StepUltimateWind(int ai, const World& w);
   // v5 (Special.cpp)
   void StartLock(int atk, int kind);
   void StepLock(const Input* const* in);

@@ -107,6 +107,10 @@ enum class EventType : uint8_t {
   BreakdownStarted,       // actor: the damaged side, a: level 1..3
   BreakdownTick,          // actor, value: damage dealt
   BreakdownRepaired,      // actor
+  // ---- v6: ultimate with a counter window, boarding defence. Appended. ----
+  UltimateStarted,        // actor: attacker, zone: target, a: windup ticks, b: counter window ticks - the punch under the chest begins
+  UltimateCountered,      // actor: the defender who countered, value: 1 - the ultimate is cancelled
+  UltimateCancelled,      // actor: attacker: the windup was broken (stagger / knock-down)
 };
 
 struct Event {

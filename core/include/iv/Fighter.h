@@ -209,6 +209,8 @@ class Fighter {
   int savedAmmo[kWeaponKindCount] = {-1, 3, -1};
   float ultimate = 0.f;         // v2 gauge 0..tune::kUltimateMax
   bool ultimatePending = false; // the ultimate button was accepted this tick; Duel resolves it
+  int ultWind = 0;              // v6: ticks left of the ultimate's windup punch (0 = none)
+  int ultWindLen = 0;
   Zone ultimateTarget = Zone::Torso;
   int protectedTicks = 0;       // v2: invulnerable after an external cut
   int stunImmune = 0;           // v3: ticks during which new stability loss cannot stagger again

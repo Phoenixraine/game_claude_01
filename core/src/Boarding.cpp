@@ -12,7 +12,7 @@ int ShoulderIdx(Arm a) { return Index(a); }
 
 const char* Name(BoardPhase p) {
   static const char* const kNames[] = {"Idle", "ClimbOut", "OnShoulder", "HookLaunch", "HookFlight", "Landing", "Hacking", "GrenadeThrow",
-                                       "Escape", "WatchBlast", "ReturnHook", "ClimbIn", "Smashed", "Done", "HookSwing"};
+                                       "Escape", "WatchBlast", "ReturnHook", "ClimbIn", "Smashed", "Done", "HookSwing", "Stunned"};
   return kNames[static_cast<int>(p)];
 }
 
@@ -79,6 +79,7 @@ Zone Boarding::BlastZone(const Duel& d, Side enemy, Arm shoulder) {
 
 Input Boarding::Filter(const Duel& duel, const Input& playerInput) {
   if (!Active()) return playerInput;
+  if (phase_ == BoardPhase::Stunned) return Input();   // v6: the pilot lies on the shoulder: the mech is dead weight
   Input in = auto_.Decide(MakeObservation(duel, cfg_.owner));
   in.strikeHeld = in.quick = in.toGrab = in.switchArm = in.reverse = false;   // the empty mech only defends
   in.weaponHeld = in.ultimate = false;
@@ -139,6 +140,16 @@ void Boarding::Finish(Duel& d, BoardingOutcome o) {
   phaseLen_ = 0;
 }
 
+// v6: the caught pilot lies stunned on the shoulder; the empty mech is helpless for kBoardStunTicks, then he returns along the hook.
+void Boarding::Slap(Duel& d) {
+  Emit(d, EventType::BoardingSmashed, ShoulderIdx(shoulder_), 1);   // b = 1: non-lethal
+  swat_ = Swat();
+  ghostTicks_ = -1;
+  hack_ = HackGame();
+  outcome_ = BoardingOutcome::Slapped;
+  Enter(d, BoardPhase::Stunned, tune::kBoardStunTicks);
+}
+
 void Boarding::Smash(Duel& d) {
   Emit(d, EventType::BoardingSmashed, ShoulderIdx(shoulder_));
   Finish(d, BoardingOutcome::Smashed);
@@ -197,6 +208,18 @@ void Boarding::StepSwat(Duel& d, const BoardingInput& in) {
   if (ghostTicks_ >= 0 && --ghostTicks_ < 0) Emit(d, EventType::BoardingSwatImpact, 0, ShoulderIdx(ghostShoulder_));
   if (swatCooldown_ > 0) --swatCooldown_;
 
+  if (!swat_.active && cfg_.enemyIsHuman) {
+    if (!in.swat || swatsDone_ >= tune::kHumanMaxSwats || swatCooldown_ > 0 || !SwatEligible()) return;
+    if (foe.posture != Posture::Standing || Gone(foe.body.state(ArmZone(Other(shoulder_))))) return;
+    swat_.active = true;
+    swat_.shoulder = shoulder_;
+    swat_.total = tune::kHumanSwatWindupTicks;
+    swat_.ticksToImpact = swat_.total;
+    swat_.adjusted = 0;
+    ++swatsDone_;
+    Emit(d, EventType::BoardingSwatTelegraph, ShoulderIdx(shoulder_), swat_.ticksToImpact, static_cast<float>(swatsDone_ - 1));
+    return;
+  }
   if (!swat_.active) {
     if (swatsDone_ >= tune::kMaxSwatsPerBoarding || swatCooldown_ > 0 || !SwatEligible()) return;
     if (++swatCheck_ < tune::kSwatCheckTicks) return;
@@ -249,7 +272,10 @@ void Boarding::StepSwat(Duel& d, const BoardingInput& in) {
   Emit(d, EventType::BoardingSwatImpact, onIt ? 1 : 0, ShoulderIdx(swat_.shoulder));
   swat_.active = false;
   swatCooldown_ = tune::kSwatCooldownTicks;
-  if (onIt) Smash(d);
+  if (onIt) {
+    if (cfg_.lethalSwat) Smash(d);
+    else Slap(d);
+  }
 }
 
 // ------------------------------------------------------------------------------------------------ hacking
@@ -314,7 +340,7 @@ void Boarding::CheckShoulder(Duel& d) {
         AbortToReturn(d, HackState::Fail);
       }
       break;
-    default: break;   // swinging, or the hatch is already open and the grenade is on its way: nothing to retarget
+    default: break;   // swinging, stunned, or the hatch is already open and the grenade is on its way: nothing to retarget
   }
 }
 
@@ -344,7 +370,7 @@ void Boarding::Step(Duel& d, const BoardingInput& in) {
   me.set_autopilot(true);
   if (me.lastHitTick != lastHit_) {   // the empty mech was hit: the pilot is shaken
     lastHit_ = me.lastHitTick;
-    if (shocks_ < tune::kBoardMaxShocks) {
+    if (shocks_ < tune::kBoardMaxShocks && phase_ != BoardPhase::Stunned) {
       ++shocks_;
       const int lost = static_cast<int>(tune::kBoardShockSeconds * static_cast<float>(kTickHz));
       if (phase_ == BoardPhase::Hacking) hack_.AddPenalty(lost);
@@ -416,6 +442,9 @@ void Boarding::Step(Duel& d, const BoardingInput& in) {
         Emit(d, EventType::BoardingBlast, 0, 0, hr.dealt, z);
       }
       if (done) Enter(d, BoardPhase::ClimbIn, tune::kBoardClimbInTicks);
+      break;
+    case BoardPhase::Stunned:
+      if (done) Enter(d, BoardPhase::ReturnHook, tune::kBoardReturnHookTicks);
       break;
     case BoardPhase::ReturnHook:
       if (done) Enter(d, BoardPhase::ClimbIn, tune::kBoardClimbInTicks);

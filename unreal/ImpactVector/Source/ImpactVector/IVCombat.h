@@ -37,6 +37,7 @@ struct FIVCombatInput
 	bool bJump = false, bChop = false, bSlide = false, bMash = false, bBerserk = false, bQte = false;
 	// boarding: start / leap to the other shoulder / hatch-hack directions and buttons (edges)
 	bool bBoard = false, bBoardSwing = false;
+	bool bBoardSwat = false;           // the DEFENDER's button: slap the shoulder the enemy pilot sits on (human defenders only)
 	int8 HackDx = 0, HackDy = 0;
 	bool bHackConfirm = false, bHackBack = false, bHackAux = false;
 };
@@ -86,9 +87,14 @@ public:
 	void RepairBreakdown(iv::Side S, int32 Levels);
 	float GetLungeCharge01(iv::Side S) const { return Anim[iv::Index(S)].lungeCharge01; }
 	FIVCombatEventSignature OnEvent;
-	const iv::Boarding& GetBoarding() const { return Board; }
-	bool IsBoardingActive() const { return Board.Active(); }
-	float GetBoardingCooldown01() const { return Board.cooldownLeft() > 0 ? 1.f - FMath::Clamp(float(Board.cooldownLeft()) / float(iv::tune::kBoardCooldownTicks), 0.f, 1.f) : 1.f; }
+	/** Boarding is symmetric: Board[s] is the boarding OWNED by side s (its pilot leaves s's cockpit and climbs onto the other mech). */
+	const iv::Boarding& GetBoarding(iv::Side S = iv::Side::A) const { return Board[iv::Index(S)]; }
+	bool IsBoardingActive(iv::Side S = iv::Side::A) const { return Board[iv::Index(S)].Active(); }
+	/** True while an enemy pilot sits on S's mech (S is the defender). */
+	bool IsBoardedBy(iv::Side Victim) const { return Board[iv::Index(iv::Other(Victim))].Active(); }
+	float GetBoardingCooldown01(iv::Side S = iv::Side::A) const { const iv::Boarding& B = Board[iv::Index(S)]; return B.cooldownLeft() > 0 ? 1.f - FMath::Clamp(float(B.cooldownLeft()) / float(iv::tune::kBoardCooldownTicks), 0.f, 1.f) : 1.f; }
+	/** Ultimate gauge multiplier of a fighter right now (comeback: grows as its hull integrity falls). */
+	float GetUltimateMultiplier(iv::Side S) const;
 
 	const iv::Duel* GetDuel() const { return Duel.Get(); }
 	const iv::AnimState& GetAnim(iv::Side S) const { return Anim[iv::Index(S)]; }
@@ -119,13 +125,18 @@ private:
 	float HitStop = 0.f;
 	float LockSparkAcc = 0.f;
 	void ApplyHitStop(float Seconds, float Dilation);
-	iv::Boarding Board;
-	iv::BoardingInput BoardIn;
-	TWeakObjectPtr<AIVPilotFigure> Pilot;
-	bool bBoardCamOn = false;
-	FVector BoardCamFrom = FVector::ZeroVector, BoardCamAt = FVector::ZeroVector;
+	iv::Boarding Board[2];
+	iv::BoardingInput BoardIn[2];
+	TWeakObjectPtr<AIVPilotFigure> Pilot[2];
+	bool bBoardCamOn[2] = { false, false };
+	FVector BoardCamFrom[2] = { FVector::ZeroVector, FVector::ZeroVector }, BoardCamAt[2] = { FVector::ZeroVector, FVector::ZeroVector };
+	bool bVictimCamOn[2] = { false, false };
+	FVector VictimCamFrom[2] = { FVector::ZeroVector, FVector::ZeroVector }, VictimCamAt[2] = { FVector::ZeroVector, FVector::ZeroVector };
 	float BoardBlastFlash = 0.f;
-	void UpdateBoardingPresentation(float Dt);
+	bool IsHuman(iv::Side S) const { return S == iv::Side::A ? !PlayerBot.IsValid() : bHumanB; }
+	void UpdateBoardingPresentation(float Dt, iv::Side OwnerSide);
+	void UpdateVictimCam(float Dt, iv::Side OwnerSide);
+	void HandleUltimateEvent(const iv::Event& Ev);
 	void HandleBoardingEvent(const iv::Event& Ev);
 	void BladeImpact(AIVMechPawn* A, AIVMechPawn* B, float Scale, bool bStop);
 
