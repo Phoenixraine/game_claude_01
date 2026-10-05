@@ -13,6 +13,13 @@
 #include "Misc/Paths.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "GenericPlatform/GenericApplication.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Widgets/SWindow.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
+#include "GameFramework/GameUserSettings.h"
+#include "Containers/Ticker.h"
 
 namespace IVSettings
 {
@@ -58,6 +65,18 @@ namespace IVSettings
 			GList.Add(Mk(TEXT("render_scale"), TEXT("МАСШТАБ РЕНДЕРА (АПСКЕЙЛ)"), TEXT("Игра рисуется в меньшем разрешении и растягивается встроенным апскейлером TSR. 0 — авто по пресету."), 2, EKind::Slider, 0.f, 1.f, 0.05f, 0.f, TEXT("%"), 100.f));
 			GList.Add(Mk(TEXT("fsr"), TEXT("AMD FSR (АПСКЕЙЛ)"), TEXT("Апскейлер AMD FSR вместо встроенного TSR: рисует в меньшем разрешении и восстанавливает чёткость (работает и на видеокартах NVIDIA). При включении заменяет «Масштаб рендера»."), 2, EKind::Choice, 0, 5, 1, 2));
 			GList.Last().Names = { TEXT("ВЫКЛ (TSR)"), TEXT("НАТИВ (AA)"), TEXT("КАЧЕСТВО"), TEXT("БАЛАНС"), TEXT("ПРОИЗВОДИТЕЛЬНОСТЬ"), TEXT("УЛЬТРА-ПРОИЗВОД.") };
+			{
+				FDisplayMetrics Dm;
+				FDisplayMetrics::RebuildDisplayMetrics(Dm);
+				const int32 N = FMath::Clamp(Dm.MonitorInfo.Num(), 1, 6);
+				GList.Add(Mk(TEXT("monitor"), TEXT("МОНИТОР"), TEXT("На каком мониторе показывать игру. «Текущий» — не трогать окно. Переключение мгновенное."), 2, EKind::Choice, 0, float(N), 1, 0));
+				GList.Last().Names.Add(TEXT("ТЕКУЩИЙ"));
+				for (int32 i = 0; i < N; ++i)
+				{
+					const FMonitorInfo* Mi = Dm.MonitorInfo.IsValidIndex(i) ? &Dm.MonitorInfo[i] : nullptr;
+					GList.Last().Names.Add(Mi ? FString::Printf(TEXT("МОНИТОР %d  %d×%d%s"), i + 1, Mi->NativeWidth, Mi->NativeHeight, Mi->bIsPrimary ? TEXT("  (ОСНОВНОЙ)") : TEXT("")) : FString::Printf(TEXT("МОНИТОР %d"), i + 1));
+				}
+			}
 			GList.Add(Mk(TEXT("draw_dist"), TEXT("ДАЛЬНОСТЬ ПРОРИСОВКИ ГОРОДА"), TEXT("Дальше этого расстояния здания не рисуются (скрыты туманом). Меньше — быстрее."), 2, EKind::Slider, 300.f, 1500.f, 50.f, 700.f, TEXT(" м")));
 			GList.Add(Mk(TEXT("fps_cap"), TEXT("ОГРАНИЧЕНИЕ FPS"), TEXT("Верхний предел частоты кадров."), 2, EKind::Choice, 0, 5, 1, 0));
 			GList.Last().Names = { TEXT("НЕТ"), TEXT("60"), TEXT("75"), TEXT("90"), TEXT("120"), TEXT("144") };
@@ -158,6 +177,47 @@ namespace IVSettings
 		for (const FSetting& S : GList) Set(S.Id, S.Def < -0.5f ? 2.f : S.Def);
 	}
 
+	// Moves the game window to the chosen monitor (1-based; 0 = leave it). Fullscreen is dropped to a window, moved, and restored a moment later
+	// (windowed fullscreen always fills the monitor the window currently sits on).
+	void ApplyMonitor(int32 Choice)
+	{
+		static int32 Last = 0;
+		int32 Cli = 0;
+		if (FParse::Value(FCommandLine::Get(), TEXT("-IVMonitor="), Cli)) Choice = Cli;
+		if (Choice <= 0 || Choice == Last || !GEngine || !GEngine->GameViewport) return;
+		TSharedPtr<SWindow> Win = GEngine->GameViewport->GetWindow();
+		if (!Win.IsValid()) return;
+		FDisplayMetrics Dm;
+		FDisplayMetrics::RebuildDisplayMetrics(Dm);
+		if (!Dm.MonitorInfo.IsValidIndex(Choice - 1)) return;
+		const FMonitorInfo& Mi = Dm.MonitorInfo[Choice - 1];
+		const FPlatformRect R = Mi.WorkArea;
+		const EWindowMode::Type Mode = Win->GetWindowMode();
+		const FVector2D Size = Win->GetSizeInScreen();
+		Last = Choice;
+		UE_LOG(LogTemp, Display, TEXT("IV monitor: -> %d (%s) work area %d,%d - %d,%d, window mode %d"), Choice, *Mi.Name, R.Left, R.Top, R.Right, R.Bottom, int32(Mode));
+		if (Mode == EWindowMode::Windowed)
+		{
+			Win->MoveWindowTo(FVector2D(R.Left + 40, R.Top + 40));
+			TWeakPtr<SWindow> Wk = Win;
+			FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([Wk](float) { if (TSharedPtr<SWindow> W3 = Wk.Pin()) UE_LOG(LogTemp, Display, TEXT("IV monitor: window now at %s size %s"), *W3->GetPositionInScreen().ToString(), *W3->GetSizeInScreen().ToString()); return false; }), 1.0f);
+			return;
+		}
+		// fullscreen: leave it, jump to the other monitor as a window, then go back to fullscreen there
+		Win->SetWindowMode(EWindowMode::Windowed);
+		Win->ReshapeWindow(FVector2D(R.Left + 60, R.Top + 60), FVector2D(FMath::Min<float>(Size.X, (R.Right - R.Left) - 120), FMath::Min<float>(Size.Y, (R.Bottom - R.Top) - 120)));
+		TWeakPtr<SWindow> WeakWin = Win;
+		FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([WeakWin, Mode](float)
+		{
+			if (TSharedPtr<SWindow> W2 = WeakWin.Pin())
+			{
+				W2->SetWindowMode(Mode);
+				UE_LOG(LogTemp, Display, TEXT("IV monitor: mode %d restored, window at %s size %s"), int32(Mode), *W2->GetPositionInScreen().ToString(), *W2->GetSizeInScreen().ToString());
+			}
+			return false;
+		}), 0.4f);
+	}
+
 	void Apply(UWorld* World)
 	{
 		if (!World) return;
@@ -167,6 +227,7 @@ namespace IVSettings
 		int32 Pre = GetInt(TEXT("preset"));
 		FParse::Value(FCommandLine::Get(), TEXT("-IVGfx="), Pre);
 		IVGraphics::Apply(World, Pre);
+		ApplyMonitor(GetInt(TEXT("monitor")));
 		const int32 Fsr = GetInt(TEXT("fsr"));
 		if (Fsr > 0 && CM.FindConsoleVariable(TEXT("r.FidelityFX.FSR.Enabled")))
 		{
