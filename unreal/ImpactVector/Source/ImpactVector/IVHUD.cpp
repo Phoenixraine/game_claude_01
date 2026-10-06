@@ -1228,7 +1228,7 @@ void AIVHUD::DrawUltGauge(AIVCombatDirector* Dir, iv::Side MySide, float Sx)
 		DrawRect(A(FLinearColor::Black, 0.7f), X - 4.f, Y - 4.f, BW + 8.f, BH + 8.f);
 		DrawRect(A(C, Hp < 0.3f ? 0.7f + 0.3f * Pulse(5.f) : 0.95f), X, Y, BW * Hp, BH);
 		for (int32 k = 1; k < 10; ++k) DrawRect(A(FLinearColor::Black, 0.55f), X + BW * k / 10.f - 1.f, Y, 2.f, BH);
-		Text(FString::Printf(TEXT("КОРПУС  %d%%"), int32(Hp * 100.f + 0.5f)), CX, Y + BH * 0.5f - 9.f * Sx, A(FLinearColor::White, 1.f), 1.0f * Sx, 2, 1);
+		Text(FString::Printf(TEXT("КОРПУС  %d%%"), int32(Hp * 100.f + 0.5f)), CX, Y + BH * 0.5f - 9.f * Sx, A(FLinearColor(0.01f, 0.02f, 0.02f), 1.f), 1.0f * Sx, 2, 1);
 	}
 	// ---- ultimate gauge with the comeback multiplier
 	{
@@ -1240,7 +1240,7 @@ void AIVHUD::DrawUltGauge(AIVCombatDirector* Dir, iv::Side MySide, float Sx)
 		DrawRect(A(FLinearColor::Black, 0.7f), X - 4.f, Y - 4.f, BW + 8.f, BH + 8.f);
 		DrawRect(A(C, bReady ? 0.6f + 0.4f * Pulse(4.f) : 0.95f), X, Y, BW * V, BH);
 		for (int32 k = 1; k < 10; ++k) DrawRect(A(FLinearColor::Black, 0.6f), X + BW * k / 10.f - 1.f, Y, 2.f, BH);
-		Text(bReady ? TEXT("УЛЬТИМЕЙТ ГОТОВ — V") : FString::Printf(TEXT("УЛЬТИМЕЙТ  %d%%"), int32(V * 100.f)), CX, Y + BH * 0.5f - 8.f * Sx, A(FLinearColor::White, 1.f), 0.9f * Sx, 2, 1);
+		Text(bReady ? TEXT("УЛЬТИМЕЙТ ГОТОВ — V") : FString::Printf(TEXT("УЛЬТИМЕЙТ  %d%%"), int32(V * 100.f)), CX, Y + BH * 0.5f - 8.f * Sx, A(V > 0.55f ? FLinearColor(0.01f, 0.02f, 0.02f) : FLinearColor::White, 1.f), 0.9f * Sx, 2, 1);
 		Text(FString::Printf(TEXT("×%.1f%s"), Mult, Mult > 1.45f ? TEXT(" КАМБЭК") : TEXT("")), X + BW + 14.f * Sx, Y + BH * 0.5f - 8.f * Sx, A(Mult > 1.45f ? kGreen : kWhite, 0.9f), 0.85f * Sx, 0, 1);
 		if (V < 0.02f) Text(TEXT("заряд — парирования и контратаки"), CX, Y + BH + 8.f * Sx, A(kWhite, 0.4f), 0.55f * Sx, 1, 1);
 	}
@@ -1256,7 +1256,7 @@ void AIVHUD::DrawUltGauge(AIVCombatDirector* Dir, iv::Side MySide, float Sx)
 			const float Sx0 = X + i * (SW + Gap), V = FMath::Clamp(Vals[i], 0.f, 1.f);
 			DrawRect(A(FLinearColor::Black, 0.7f), Sx0 - 3.f, Y - 3.f, SW + 6.f, BH + 6.f);
 			DrawRect(A(Cols[i], V < 0.3f ? 0.5f + 0.4f * Pulse(6.f) : 0.95f), Sx0, Y, SW * V, BH);
-			Text(FString::Printf(TEXT("%s %d%%"), Names[i], int32(V * 100.f + 0.5f)), Sx0 + SW * 0.5f, Y + BH * 0.5f - 7.f * Sx, A(FLinearColor::White, 1.f), 0.65f * Sx, 2, 1);
+			Text(FString::Printf(TEXT("%s %d%%"), Names[i], int32(V * 100.f + 0.5f)), Sx0 + SW * 0.5f, Y + BH * 0.5f - 7.f * Sx, A(FLinearColor(0.01f, 0.02f, 0.02f), 1.f), 0.65f * Sx, 2, 1);
 		}
 	}
 }

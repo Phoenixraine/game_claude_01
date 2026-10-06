@@ -77,6 +77,10 @@ namespace IVSettings
 					GList.Last().Names.Add(Mi ? FString::Printf(TEXT("МОНИТОР %d  %d×%d%s"), i + 1, Mi->NativeWidth, Mi->NativeHeight, Mi->bIsPrimary ? TEXT("  (ОСНОВНОЙ)") : TEXT("")) : FString::Printf(TEXT("МОНИТОР %d"), i + 1));
 				}
 			}
+			GList.Add(Mk(TEXT("ps2"), TEXT("СТИЛЬ PS2 (ПИКСЕЛИ)"), TEXT("Фильтр «графика PlayStation 2»: крупные пиксели, постеризация цвета, дизеринг. 0 — выключить, 100% — полный эффект."), 2, EKind::Slider, 0.f, 1.f, 0.05f, 0.85f, TEXT("%"), 100.f));
+			GList.Add(Mk(TEXT("ps2_pixel"), TEXT("РАЗМЕР ПИКСЕЛЯ"), TEXT("Сколько экранных пикселей в одном «большом» пикселе фильтра PS2. Больше — грубее и «ниже разрешение»."), 2, EKind::Slider, 1.f, 12.f, 0.5f, 4.5f, TEXT(" px")));
+			GList.Add(Mk(TEXT("ps2_levels"), TEXT("ЦВЕТОВ НА КАНАЛ"), TEXT("Число ступеней яркости на канал в фильтре PS2. Меньше — резче постеризация и «старее» картинка."), 2, EKind::Slider, 3.f, 64.f, 1.f, 12.f));
+			GList.Add(Mk(TEXT("ps2_dither"), TEXT("ДИЗЕРИНГ"), TEXT("Сила узорчатого шума между цветовыми ступенями."), 2, EKind::Slider, 0.f, 1.f, 0.05f, 0.8f, TEXT("%"), 100.f));
 			GList.Add(Mk(TEXT("draw_dist"), TEXT("ДАЛЬНОСТЬ ПРОРИСОВКИ ГОРОДА"), TEXT("Дальше этого расстояния здания не рисуются (скрыты туманом). Меньше — быстрее."), 2, EKind::Slider, 300.f, 1500.f, 50.f, 700.f, TEXT(" м")));
 			GList.Add(Mk(TEXT("fps_cap"), TEXT("ОГРАНИЧЕНИЕ FPS"), TEXT("Верхний предел частоты кадров."), 2, EKind::Choice, 0, 5, 1, 0));
 			GList.Last().Names = { TEXT("НЕТ"), TEXT("60"), TEXT("75"), TEXT("90"), TEXT("120"), TEXT("144") };
@@ -228,6 +232,7 @@ namespace IVSettings
 		FParse::Value(FCommandLine::Get(), TEXT("-IVGfx="), Pre);
 		IVGraphics::Apply(World, Pre);
 		ApplyMonitor(GetInt(TEXT("monitor")));
+		if (AIVEnvironment* EnvP = AIVEnvironment::Get(World)) EnvP->ApplyPs2(Get(TEXT("ps2")), Get(TEXT("ps2_pixel")), Get(TEXT("ps2_levels")), Get(TEXT("ps2_dither")));
 		const int32 Fsr = GetInt(TEXT("fsr"));
 		if (Fsr > 0 && CM.FindConsoleVariable(TEXT("r.FidelityFX.FSR.Enabled")))
 		{

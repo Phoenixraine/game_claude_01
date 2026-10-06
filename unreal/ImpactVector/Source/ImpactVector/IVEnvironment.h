@@ -41,6 +41,8 @@ public:
 
 	static AIVEnvironment* Get(UWorld* World);
 	/** Fog / exposure / neon / bloom / motion blur / rain amount / ground mist from the player's settings. */
+	/** PS2-style screen filter: strength 0..1 (0 = off), big-pixel size in screen pixels, colour steps per channel, dither 0..1. */
+	void ApplyPs2(float Strength, float PixelSize, float Levels, float Dither);
 	void ApplySettings(float FogMul, float EV, float Neon, float Bloom, float MotionBlur, float Rain, bool bMist);
 
 	/** Blast at a world point: opens up the buildings it touches and destroys cells. Returns cells destroyed. */
@@ -74,6 +76,7 @@ private:
 
 	void BuildCityBlockout();
 	UPROPERTY() TObjectPtr<AActor> RainActor;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> Ps2MID;
 	// storm: lightning pulses lift the moon and sky light for a moment; thunder and far-off blasts follow with a delay
 	float StormClock = 5.f, ExplClock = 11.f, BoltT = -1.f, BoltAmp = 1.f, BoltDelay = 0.f;
 	float MoonBase = 2.6f, SkyBase = 0.8f, EvBase = 0.f;

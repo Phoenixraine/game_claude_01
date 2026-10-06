@@ -1382,8 +1382,49 @@ return col;
     return m
 
 
+def build_ps2():
+    """PS2-era look as a screen filter: chunky pixels (nearest sampling on a coarse grid), ordered-dither posterisation, a little desaturation and contrast.
+    Runs after tonemapping so the colours are display-referred. Params: Strength (0..1), PixelSize (screen px per big pixel), Levels (colour steps per channel), Dither."""
+    m = make_material("M_PS2")
+    m.set_editor_property("material_domain", unreal.MaterialDomain.MD_POST_PROCESS)
+    m.set_editor_property("blendable_location", unreal.BlendableLocation.BL_SCENE_COLOR_AFTER_TONEMAPPING)
+    uv = expr(m, unreal.MaterialExpressionTextureCoordinate, -1400, 0)
+    vs = expr(m, unreal.MaterialExpressionViewProperty, -1400, 140)
+    vs.set_editor_property("property", unreal.MaterialExposedViewProperty.MEVP_VIEW_SIZE)
+    px = scalar(m, "PixelSize", 4.5, -1400, 280)
+    lv = scalar(m, "Levels", 12.0, -1400, 380)
+    di = scalar(m, "Dither", 0.9, -1400, 480)
+    st = scalar(m, "Strength", 1.0, -1400, 580)
+    t = unreal.CustomMaterialOutputType
+    quv = custom(m, "float2 r = max(floor(VS / max(Px * VS.y / 1080.0, 1.0)), float2(8.0, 8.0)); return (floor(UV * r) + 0.5) / r;", t.CMOT_FLOAT2, ["UV", "VS", "Px"], -1000, 0, "ps2_uv")
+    wire_custom(quv, [(uv, ""), (vs, ""), (px, "")])
+    sc_big = expr(m, unreal.MaterialExpressionSceneTexture, -700, 0)
+    sc_big.set_editor_property("scene_texture_id", unreal.SceneTextureId.PPI_POST_PROCESS_INPUT0)
+    MEL.connect_material_expressions(quv, "", sc_big, "Coordinates")
+    sc_orig = expr(m, unreal.MaterialExpressionSceneTexture, -700, 200)
+    sc_orig.set_editor_property("scene_texture_id", unreal.SceneTextureId.PPI_POST_PROCESS_INPUT0)
+    code = """
+float2 r = max(floor(VS / max(Px * VS.y / 1080.0, 1.0)), float2(8.0, 8.0));
+float2 cell = floor(UV * r);
+float ig = frac(52.9829189 * frac(dot(cell, float2(0.06711056, 0.00583715))));    // interleaved-gradient dither per big pixel
+float3 c = saturate(Big);
+float luma = dot(c, float3(0.299, 0.587, 0.114));
+c = lerp(float3(luma, luma, luma), c, 0.86);                                       // slightly washed colours
+c = saturate((c - 0.5) * 1.12 + 0.5);                                              // a little punchier
+float L = max(Lv, 2.0);
+float3 q = floor(c * L + (ig - 0.5) * Di + 0.5) / L;                              // ordered-dither posterise
+return lerp(saturate(Orig), q, saturate(St));
+"""
+    out = custom(m, code, t.CMOT_FLOAT3, ["Big", "Orig", "UV", "VS", "Px", "Lv", "Di", "St"], -300, 100, "ps2")
+    wire_custom(out, [(sc_big, ""), (sc_orig, ""), (uv, ""), (vs, ""), (px, ""), (lv, ""), (di, ""), (st, "")])
+    MEL.connect_material_property(out, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m)
+    return m
+
+
 ALL = [build_facade, build_ground, build_water, build_armor, build_mechhull, build_mechhull_clip, build_rain, build_cockpit, build_cockpit_glass, build_sword, build_trail, build_fire, build_puff, build_spark, build_propcolor,
-       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive, build_growth, build_rain_pp, build_propglow]
+       build_neon_sign, build_glass_tower, build_trim, build_monitor, build_chunk, build_emissive, build_growth, build_rain_pp, build_propglow, build_ps2]
 import os
 _only = [x for x in os.environ.get("IV_ONLY", "").split(",") if x]
 for fn in ALL:

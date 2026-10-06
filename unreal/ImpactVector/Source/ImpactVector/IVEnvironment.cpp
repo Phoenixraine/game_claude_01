@@ -161,6 +161,12 @@ void AIVEnvironment::BeginPlay()
 {
 	Super::BeginPlay();
 	bStorm = !FParse::Param(FCommandLine::Get(), TEXT("IVNoStorm"));
+	if (PostProcess)
+		if (UMaterialInterface* Pm = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_PS2.M_PS2")))
+		{
+			Ps2MID = UMaterialInstanceDynamic::Create(Pm, this);
+			PostProcess->Settings.AddBlendable(Ps2MID, 1.f);
+		}
 	if (FParse::Param(FCommandLine::Get(), TEXT("IVStormNow"))) { StormClock = 1.5f; ExplClock = 2.5f; }
 	{	// weather overrides for tuning: -IVFog= -IVFogFall= -IVSun= -IVSunPitch= -IVSky= ; -IVNoRain
 		float V = 0.f;
@@ -408,4 +414,16 @@ void AIVEnvironment::DistantExplosion()
 		FX->SpawnFlash(P, FLinearColor(1.f, 0.5f, 0.2f), 4.0e7f, 0.9f, 80000.f);
 	}
 	Delayed.Add({ Dist / 34000.f, 1, P });
+}
+
+
+void AIVEnvironment::ApplyPs2(float Strength, float PixelSize, float Levels, float Dither)
+{
+	if (!Ps2MID || !PostProcess) return;
+	float W = Strength > 0.01f ? 1.f : 0.f;                              // a zero weight turns the whole pass off
+	for (FWeightedBlendable& B : PostProcess->Settings.WeightedBlendables.Array) if (B.Object == Ps2MID) B.Weight = W;
+	Ps2MID->SetScalarParameterValue(TEXT("Strength"), Strength);
+	Ps2MID->SetScalarParameterValue(TEXT("PixelSize"), PixelSize);
+	Ps2MID->SetScalarParameterValue(TEXT("Levels"), Levels);
+	Ps2MID->SetScalarParameterValue(TEXT("Dither"), Dither);
 }
